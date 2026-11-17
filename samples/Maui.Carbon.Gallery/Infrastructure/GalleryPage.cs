@@ -31,7 +31,10 @@ public class GalleryPage : ContentPage
         };
         column.Add(header);
         column.Add(_body);
-        Content = new ScrollView { Content = column };
+        // Painted explicitly as well as on the page: snapshot captures do not include the page view's own fill.
+        var scroll = new ScrollView { Content = column };
+        scroll.SetDynamicResource(BackgroundColorProperty, CdsColorKeys.Background);
+        Content = scroll;
     }
 
     /// <summary>The page content.</summary>

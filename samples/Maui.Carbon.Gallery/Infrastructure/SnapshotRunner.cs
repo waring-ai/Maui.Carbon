@@ -18,6 +18,9 @@ public static class SnapshotRunner
 
         var dir = Arg("--snapshot", "CARBON_SNAPSHOT_DIR");
         if (string.IsNullOrEmpty(dir)) return;
+        Directory.CreateDirectory(dir);
+        void Trace(string m) => File.AppendAllText(Path.Combine(dir, "trace.txt"), $"{DateTime.Now:HH:mm:ss.fff} {m}\n");
+        Trace("attach");
         var pages = Arg("--pages", "CARBON_SNAPSHOT_PAGES")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var themes = (Arg("--themes", "CARBON_SNAPSHOT_THEMES") ?? "white,g10,g90,g100")
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -33,8 +36,13 @@ public static class SnapshotRunner
             await RunAsync(dir, pages, themes);
         }
         // Launched from a shell the app may never become active, so start from the first layout pass.
-        window.Created += (_, _) => window.Dispatcher.DispatchDelayed(TimeSpan.FromSeconds(2), Start);
-        window.Activated += (_, _) => Start();
+        window.Created += (_, _) =>
+        {
+            Trace("created");
+            window.Dispatcher.DispatchDelayed(TimeSpan.FromSeconds(2), Start);
+        };
+        window.Activated += (_, _) => { Trace("activated"); Start(); };
+        Application.Current?.Dispatcher.DispatchDelayed(TimeSpan.FromSeconds(4), () => { Trace("fallback timer"); Start(); });
     }
 
     static async Task RunAsync(string dir, string[]? pages, CdsThemeName[] themes)
@@ -67,7 +75,7 @@ public static class SnapshotRunner
                     await using var src = await shot.OpenReadAsync(ScreenshotFormat.Png);
                     await using var dst = File.Create(path);
                     await src.CopyToAsync(dst);
-                    log.Add($"{entry.Info.Route} {theme}: ok");
+                    log.Add($"{entry.Info.Route} {theme}: ok bg={page.BackgroundColor?.ToArgbHex()} template={(page as ContentPage)?.ControlTemplate is not null} host={(page is ContentPage cp ? CdsOverlayHost.Find(cp) is not null : false)} style={page.Style is not null}");
                     Console.WriteLine($"snapshot: {entry.Info.Route} {theme}");
                 }
                 catch (Exception ex)

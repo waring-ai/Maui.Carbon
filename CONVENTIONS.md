@@ -195,6 +195,10 @@ tools/verify.sh --gallery       # + the gallery for Mac Catalyst
 Zero warnings (warnings are errors), zero test failures. If you started in a git worktree, first run
 `git merge --ff-only main` (worktrees can start from an old commit).
 
+You cannot launch the gallery app from an agent session (no window server access). Verify by building; the
+orchestrator reviews screenshots of your pages after merging. Make every page render meaningfully without
+interaction (open states shown via properties, not clicks) so screenshots show the component.
+
 ## 13. Definition of done and report
 
 - Builds clean on every target with `tools/verify.sh --gallery`; tests green.
