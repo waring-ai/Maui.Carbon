@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.TogglePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A 48x24 pill track with an 18px knob: toggle-off when off, support-success when on. The state text beside the switch, not the track color, tells the state.">
+            <HorizontalStackLayout Spacing="64">
+                <cds:CdsToggle LabelText="Auto-scaling" />
+                <cds:CdsToggle LabelText="Public endpoint" IsToggled="True" />
+                <cds:CdsToggle LabelText="Email alerts" LabelA="Muted" LabelB="Enabled" IsToggled="True" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Small" Description="32x16 with a 10px knob and a check mark in the on state. The label sits 8px above the switch.">
+            <HorizontalStackLayout Spacing="64">
+                <cds:CdsToggle LabelText="Auto-scaling" Size="Sm" />
+                <cds:CdsToggle LabelText="Public endpoint" Size="Sm" IsToggled="True" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Hidden label" Description="HideLabel keeps the label as the accessible name and shows it beside the switch instead of the state text.">
+            <HorizontalStackLayout Spacing="64">
+                <cds:CdsToggle LabelText="Dark mode" HideLabel="True" IsToggled="True" />
+                <cds:CdsToggle LabelText="Compact rows" HideLabel="True" Size="Sm" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Disabled uses button-disabled and text-on-color-disabled. Read-only is focusable and announced, but does not switch: an outlined track with a text-primary knob and no check mark.">
+            <HorizontalStackLayout Spacing="64">
+                <cds:CdsToggle LabelText="Disabled" IsEnabled="False" />
+                <cds:CdsToggle LabelText="Disabled and on" IsEnabled="False" IsToggled="True" />
+                <cds:CdsToggle LabelText="Read-only" IsReadOnly="True" />
+                <cds:CdsToggle LabelText="Read-only and on" IsReadOnly="True" IsToggled="True" />
+                <cds:CdsToggle LabelText="Disabled small" Size="Sm" IsEnabled="False" IsToggled="True" />
+                <cds:CdsToggle LabelText="Read-only small" Size="Sm" IsReadOnly="True" IsToggled="True" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click the switch, its label or its state text, or focus it with Tab and press Enter or Space. The knob slides over duration-fast-01 and jumps when reduced motion is on.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <cds:CdsToggle LabelText="Auto-scaling" LabelA="Disabled" LabelB="Enabled" Toggled="OnToggled" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Auto-scaling is off" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same toggles in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsToggle LabelText="Auto-scaling" />
+                            <cds:CdsToggle LabelText="Public endpoint" IsToggled="True" />
+                            <cds:CdsToggle LabelText="Small" Size="Sm" IsToggled="True" />
+                            <cds:CdsToggle LabelText="Disabled" IsEnabled="False" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

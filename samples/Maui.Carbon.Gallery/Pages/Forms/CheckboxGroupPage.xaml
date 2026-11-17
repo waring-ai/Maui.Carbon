@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.CheckboxGroupPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A legend, boxes 8px apart, and a group helper text. Write the legend as the question.">
+            <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="You can change this later in your profile" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                <cds:CdsCheckbox Label="Slack" />
+                <cds:CdsCheckbox Label="Text message" />
+            </cds:CdsCheckboxGroup>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal" Description="Boxes sit in a wrapping row, 16px apart. Prefer vertical.">
+            <cds:CdsCheckboxGroup Legend="Alert types" Orientation="Horizontal" HorizontalOptions="Start" WidthRequest="520">
+                <cds:CdsCheckbox Label="Errors" IsChecked="True" />
+                <cds:CdsCheckbox Label="Warnings" IsChecked="True" />
+                <cds:CdsCheckbox Label="Deployments" />
+                <cds:CdsCheckbox Label="Billing" />
+            </cds:CdsCheckboxGroup>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid turns every box border support-error and replaces the helper text with the message. Warning adds a triangle. Read-only boxes are outlined and cannot be toggled. Disabled dims the legend and every box.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="Pick at least one" IsInvalid="True" InvalidText="Select at least one channel" WidthRequest="260">
+                    <cds:CdsCheckbox Label="Email" />
+                    <cds:CdsCheckbox Label="Slack" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Add-ons" IsWarning="True" WarnText="Log retention adds cost" WidthRequest="260">
+                    <cds:CdsCheckbox Label="Log retention" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Backups" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Read-only" IsReadOnly="True" HelperText="Managed by your admin" WidthRequest="260">
+                    <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Slack" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Disabled" IsEnabled="False" HelperText="Not available on this plan" WidthRequest="260">
+                    <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Slack" />
+                </cds:CdsCheckboxGroup>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Uncheck every box to see the group's invalid message.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsCheckboxGroup x:Name="Channels" Legend="Notify me by" InvalidText="Select at least one channel">
+                    <cds:CdsCheckbox x:Name="EmailBox" Label="Email" IsChecked="True" CheckedChanged="OnChannelChanged" />
+                    <cds:CdsCheckbox x:Name="SlackBox" Label="Slack" CheckedChanged="OnChannelChanged" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Email" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same group in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="Change this later">
+                            <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                            <cds:CdsCheckbox Label="Slack" />
+                        </cds:CdsCheckboxGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
