@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.ContentSwitcherPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Sizes" Description="32 (sm), 40 (md, default) and 48 (lg). Segments share the width equally; the selected one inverts in every theme.">
+            <VerticalStackLayout Spacing="24" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsContentSwitcher Size="Sm" Label="Time range">
+                    <cds:CdsSwitch Text="Last hour" Name="1h" />
+                    <cds:CdsSwitch Text="24 hours" Name="24h" />
+                    <cds:CdsSwitch Text="7 days" Name="7d" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher Label="Time range" SelectedIndex="1">
+                    <cds:CdsSwitch Text="Last hour" Name="1h" />
+                    <cds:CdsSwitch Text="24 hours" Name="24h" />
+                    <cds:CdsSwitch Text="7 days" Name="7d" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher Size="Lg" Label="Time range" SelectedIndex="2">
+                    <cds:CdsSwitch Text="Last hour" Name="1h" />
+                    <cds:CdsSwitch Text="24 hours" Name="24h" />
+                    <cds:CdsSwitch Text="7 days" Name="7d" />
+                </cds:CdsContentSwitcher>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Two to five segments" Description="Labels are two or three word nouns, not verbs. Long labels truncate and keep the full text as a tooltip.">
+            <VerticalStackLayout Spacing="24" MaximumWidthRequest="640" HorizontalOptions="Start">
+                <cds:CdsContentSwitcher Label="Filter">
+                    <cds:CdsSwitch Text="All" />
+                    <cds:CdsSwitch Text="Unread" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher Label="Range">
+                    <cds:CdsSwitch Text="Hour" />
+                    <cds:CdsSwitch Text="Day" />
+                    <cds:CdsSwitch Text="Week" />
+                    <cds:CdsSwitch Text="Month" />
+                    <cds:CdsSwitch Text="Year" />
+                </cds:CdsContentSwitcher>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icon only" Description="Squares of the control height; Text is the accessible name and tooltip.">
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsContentSwitcher IsIconOnly="True" Label="Layout">
+                    <cds:CdsSwitch Text="List" Icon="Menu" />
+                    <cds:CdsSwitch Text="Grid" Icon="Dashboard" />
+                    <cds:CdsSwitch Text="Table" Icon="Catalog" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher IsIconOnly="True" Size="Sm" Label="Layout" SelectedIndex="1">
+                    <cds:CdsSwitch Text="List" Icon="Menu" />
+                    <cds:CdsSwitch Text="Grid" Icon="Dashboard" />
+                </cds:CdsContentSwitcher>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Low contrast" Description="No outline: a layer-01 track and the selected segment on the next layer. Use it in cards, dialogs and next to primary or secondary buttons.">
+            <cds:CdsLayer WithBackground="True">
+                <VerticalStackLayout Padding="24" Spacing="24" MaximumWidthRequest="480" HorizontalOptions="Start">
+                    <cds:CdsContentSwitcher IsLowContrast="True" Label="Time range">
+                        <cds:CdsSwitch Text="Last hour" />
+                        <cds:CdsSwitch Text="24 hours" />
+                        <cds:CdsSwitch Text="7 days" />
+                    </cds:CdsContentSwitcher>
+                    <cds:CdsContentSwitcher IsLowContrast="True" IsIconOnly="True" Label="Layout" SelectedIndex="1">
+                        <cds:CdsSwitch Text="List" Icon="Menu" />
+                        <cds:CdsSwitch Text="Grid" Icon="Dashboard" />
+                    </cds:CdsContentSwitcher>
+                </VerticalStackLayout>
+            </cds:CdsLayer>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="A disabled segment is text-disabled; any disabled segment turns the outline border-disabled, and a selected disabled segment fills with button-disabled.">
+            <VerticalStackLayout Spacing="24" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsContentSwitcher Label="Time range">
+                    <cds:CdsSwitch Text="Last hour" />
+                    <cds:CdsSwitch Text="24 hours" IsEnabled="False" />
+                    <cds:CdsSwitch Text="7 days" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher x:Name="DisabledSelected" Label="Time range">
+                    <cds:CdsSwitch Text="Last hour" />
+                    <cds:CdsSwitch Text="24 hours" />
+                </cds:CdsContentSwitcher>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click a segment, or Tab in and use Left and Right (they skip disabled segments and wrap). In manual mode arrows only move focus and Enter or Space select.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsContentSwitcher Label="Chart type" SelectionChanged="OnSelectionChanged">
+                    <cds:CdsSwitch Text="Chart" Name="chart" />
+                    <cds:CdsSwitch Text="Table" Name="table" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsContentSwitcher Label="Range" Activation="Manual" SelectionChanged="OnSelectionChanged">
+                    <cds:CdsSwitch Text="Last hour" Name="1h" />
+                    <cds:CdsSwitch Text="24 hours" Name="24h" />
+                    <cds:CdsSwitch Text="7 days" Name="7d" />
+                </cds:CdsContentSwitcher>
+                <cds:CdsText x:Name="Status" Text="Nothing selected yet" TypeStyle="Label01" Tone="Secondary" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="High and low contrast in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsContentSwitcher Size="Sm" SelectedIndex="1">
+                                <cds:CdsSwitch Text="One" />
+                                <cds:CdsSwitch Text="Two" />
+                                <cds:CdsSwitch Text="Three" />
+                            </cds:CdsContentSwitcher>
+                            <cds:CdsContentSwitcher Size="Sm" IsLowContrast="True" SelectedIndex="1">
+                                <cds:CdsSwitch Text="One" />
+                                <cds:CdsSwitch Text="Two" />
+                                <cds:CdsSwitch Text="Three" />
+                            </cds:CdsContentSwitcher>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Low contrast on layer-01 surfaces.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsContentSwitcher Size="Sm" IsLowContrast="True" SelectedIndex="1">
+                            <cds:CdsSwitch Text="One" />
+                            <cds:CdsSwitch Text="Two" />
+                            <cds:CdsSwitch Text="Three" />
+                        </cds:CdsContentSwitcher>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

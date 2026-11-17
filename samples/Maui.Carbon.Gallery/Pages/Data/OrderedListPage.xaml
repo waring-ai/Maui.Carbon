@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.OrderedListPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Ordered list" Description="Steps or ranked items where order matters. Numbers sit 24 before the text; nested lists indent 32 and use lowercase letters. Go no deeper than two levels.">
+            <cds:CdsOrderedList MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsListItem Text="Install the CLI and log in" />
+                <cds:CdsListItem Text="Target your cluster">
+                    <cds:CdsListItem.NestedList>
+                        <cds:CdsOrderedList>
+                            <cds:CdsListItem Text="List clusters" />
+                            <cds:CdsListItem Text="Download the kubeconfig" />
+                            <cds:CdsListItem Text="Export the KUBECONFIG variable so that every later command in this shell session talks to the new cluster, even when the terminal wraps this long item" />
+                        </cds:CdsOrderedList>
+                    </cds:CdsListItem.NestedList>
+                </cds:CdsListItem>
+                <cds:CdsListItem Text="Apply the deployment file" />
+            </cds:CdsOrderedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Unordered list" Description="A short set of related items of equal weight. Top-level items use an en dash 16 before the text; nested lists use a small square.">
+            <cds:CdsUnorderedList MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsListItem Text="A cluster with at least three worker nodes" />
+                <cds:CdsListItem Text="Network access to the registry">
+                    <cds:CdsListItem.NestedList>
+                        <cds:CdsUnorderedList>
+                            <cds:CdsListItem Text="Outbound HTTPS from every node" />
+                            <cds:CdsListItem Text="A pull secret in each namespace" />
+                        </cds:CdsUnorderedList>
+                    </cds:CdsListItem.NestedList>
+                </cds:CdsListItem>
+                <cds:CdsListItem Text="An API key with the Editor role" />
+            </cds:CdsUnorderedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Mixed nesting" Description="An unordered list can nest an ordered one and the other way round.">
+            <cds:CdsUnorderedList MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsListItem Text="Before you start">
+                    <cds:CdsListItem.NestedList>
+                        <cds:CdsOrderedList>
+                            <cds:CdsListItem Text="Back up your data" />
+                            <cds:CdsListItem Text="Pause the pipelines" />
+                        </cds:CdsOrderedList>
+                    </cds:CdsListItem.NestedList>
+                </cds:CdsListItem>
+                <cds:CdsListItem Text="After the migration" />
+            </cds:CdsUnorderedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Expressive" Description="IsExpressive uses body-02 (16/24) instead of body-01 (14/20); nested lists follow their parent.">
+            <HorizontalStackLayout Spacing="64">
+                <cds:CdsOrderedList IsExpressive="True" WidthRequest="280">
+                    <cds:CdsListItem Text="Choose a plan" />
+                    <cds:CdsListItem Text="Create your account">
+                        <cds:CdsListItem.NestedList>
+                            <cds:CdsOrderedList>
+                                <cds:CdsListItem Text="Verify your email" />
+                                <cds:CdsListItem Text="Set up two-factor authentication" />
+                            </cds:CdsOrderedList>
+                        </cds:CdsListItem.NestedList>
+                    </cds:CdsListItem>
+                    <cds:CdsListItem Text="Deploy your first app" />
+                </cds:CdsOrderedList>
+                <cds:CdsUnorderedList IsExpressive="True" WidthRequest="280">
+                    <cds:CdsListItem Text="Dedicated hardware" />
+                    <cds:CdsListItem Text="24/7 support" />
+                    <cds:CdsListItem Text="99.99% uptime SLA" />
+                </cds:CdsUnorderedList>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Lists use text-primary in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsOrderedList>
+                                <cds:CdsListItem Text="Install the CLI" />
+                                <cds:CdsListItem Text="Target your cluster">
+                                    <cds:CdsListItem.NestedList>
+                                        <cds:CdsOrderedList>
+                                            <cds:CdsListItem Text="List clusters" />
+                                        </cds:CdsOrderedList>
+                                    </cds:CdsListItem.NestedList>
+                                </cds:CdsListItem>
+                            </cds:CdsOrderedList>
+                            <cds:CdsUnorderedList>
+                                <cds:CdsListItem Text="Dedicated hardware" />
+                                <cds:CdsListItem Text="24/7 support" />
+                            </cds:CdsUnorderedList>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
