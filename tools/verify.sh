@@ -35,6 +35,12 @@ if [[ $FAST == 0 ]]; then
   step "library net10.0-ios"
   dotnet build src/Maui.Carbon -f net10.0-ios "${FLAGS[@]}"
 
+  step "Apple platform code is compiled in"
+  for tf in net10.0-maccatalyst net10.0-ios; do
+    strings "src/Maui.Carbon/bin/Debug/$tf/Maui.Carbon.dll" | grep -c CdsAppleHitTargetView >/dev/null \
+      || { echo "src/Maui.Carbon/Apple/ is missing from the $tf build"; exit 1; }
+  done
+
   STUB_SDK="$PWD/out/stub-android-sdk"
   mkdir -p "$STUB_SDK/platform-tools" && touch "$STUB_SDK/platform-tools/adb" && chmod +x "$STUB_SDK/platform-tools/adb"
   step "library net10.0-android (compile only)"

@@ -18,7 +18,7 @@
     <Version Condition="'$(Version)' == ''">0.1.0-dev</Version>
 
     <!-- MAUI -->
-    <MauiVersion>10.0.130</MauiVersion>
+    <MauiVersion>10.0.20</MauiVersion>
     <CarbonNetVersion>net10.0</CarbonNetVersion>
     <!-- The .NET 10 Apple packs pin an older Xcode than the one installed on dev machines/CI images. -->
     <ValidateXcodeVersion Condition="'$(ValidateXcodeVersion)' == ''">false</ValidateXcodeVersion>

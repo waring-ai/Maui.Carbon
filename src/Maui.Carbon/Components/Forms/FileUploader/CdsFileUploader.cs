@@ -71,7 +71,7 @@ public partial class CdsFileUploader : CdsControl
             var picked = new List<FileResult>();
             if (Multiple)
             {
-                if (await FilePicker.Default.PickMultipleAsync(options) is { } many) picked.AddRange(many);
+                if (await FilePicker.Default.PickMultipleAsync(options) is { } many) picked.AddRange(many.OfType<FileResult>());
             }
             else if (await FilePicker.Default.PickAsync(options) is { } one)
             {

@@ -43,10 +43,11 @@
     <EmbeddedResource Include="Resources\Fonts\*.ttf" LogicalName="Maui.Carbon.Fonts.%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- Shared Apple code lives in Platforms/Apple and compiles for iOS + Mac Catalyst only
-       (MAUI's single-project rules otherwise strip every non-current Platforms/* folder). -->
-  <ItemGroup>
-    <MauiPlatformSpecificFolder Include="Platforms\Apple\" TargetPlatformIdentifiers="ios;maccatalyst" />
+  <!-- Shared iOS + Mac Catalyst code lives in Apple/ (outside Platforms/, which MAUI's single-project rules strip
+       per platform and, before MAUI 10.0.130, cannot share between two platforms). -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">
+    <Compile Remove="Apple\**\*.cs" />
+    <None Include="Apple\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
