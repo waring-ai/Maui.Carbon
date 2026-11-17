@@ -23,7 +23,7 @@ trap 'dotnet build-server shutdown >/dev/null 2>&1 || true' EXIT
 step() { printf '\n== %s\n' "$*"; }
 
 step "generator drift check"
-dotnet run --project tools/Maui.Carbon.Generator "${FLAGS[@]}" -- --check
+dotnet run --project tools/Maui.Carbon.Generator -p:UseSharedCompilation=false -- --check
 
 step "library net10.0"
 dotnet build src/Maui.Carbon -f net10.0 "${FLAGS[@]}"

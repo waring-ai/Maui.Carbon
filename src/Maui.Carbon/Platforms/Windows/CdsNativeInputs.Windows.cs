@@ -26,11 +26,11 @@ internal static class CdsWindowsChrome
     {
         var clear = new WBrush(Microsoft.UI.Colors.Transparent);
         foreach (var key in keys) control.Resources[key] = clear;
-        control.Resources["TextControlBorderThemeThickness"] = new Thickness(0);
-        control.Resources["TextControlBorderThemeThicknessFocused"] = new Thickness(0);
+        control.Resources["TextControlBorderThemeThickness"] = new Microsoft.UI.Xaml.Thickness(0);
+        control.Resources["TextControlBorderThemeThicknessFocused"] = new Microsoft.UI.Xaml.Thickness(0);
         control.Background = clear;
-        control.BorderThickness = new Thickness(0);
-        control.Padding = new Thickness(0);
+        control.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+        control.Padding = new Microsoft.UI.Xaml.Thickness(0);
         control.MinHeight = 0;
         control.UseSystemFocusVisuals = false;
     }
