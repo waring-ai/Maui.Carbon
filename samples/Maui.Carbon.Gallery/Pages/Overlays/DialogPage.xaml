@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.DialogPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Modal dialog" Description="The page is blocked behind an overlay scrim; a tap on the scrim, Escape and the close button ask to close. Danger puts the focus on Cancel.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="DeleteButton" Text="Delete bucket" Kind="Danger" Clicked="OnDeleteClicked" />
+                    <cds:CdsButton Text="Rename cluster" Kind="Tertiary" Clicked="OnRenameClicked" />
+                    <cds:CdsButton Text="Acknowledgment" Kind="Tertiary" Clicked="OnAckClicked" />
+                    <cds:CdsButton Text="Passive" Kind="Ghost" Clicked="OnPassiveClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Non-modal dialog" Description="A panel docked at the top end that leaves the page usable (find and replace, contextual help). It stays open until you close it.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Find and replace" Kind="Tertiary" Clicked="OnFindClicked" />
+                    <cds:CdsButton Text="Help panel" Kind="Ghost" Clicked="OnHelpClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Sizes" Description="xs, sm, md (default) and lg on the same scale as the modal.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="xs" Kind="Tertiary" Size="Md" Clicked="OnXsClicked" />
+                    <cds:CdsButton Text="sm" Kind="Tertiary" Size="Md" Clicked="OnSmClicked" />
+                    <cds:CdsButton Text="md" Kind="Tertiary" Size="Md" Clicked="OnMdClicked" />
+                    <cds:CdsButton Text="lg" Kind="Tertiary" Size="Md" Clicked="OnLgClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+        </VerticalStackLayout>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsDialog x:Name="DeleteDialog" IsOpen="True" IsModal="True" Size="Xs" IsDanger="True"
+                       Subtitle="logs-archive-prod" Title="Delete bucket?"
+                       PrimaryButtonText="Delete" SecondaryButtonText="Cancel"
+                       RequestSubmit="OnDeleteSubmit" LauncherElement="{x:Reference DeleteButton}">
+            <cds:CdsText Text="All 1,204 objects in the bucket are deleted. This cannot be undone." TypeStyle="Body01" />
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="RenameDialog" IsModal="True" Size="Sm" Title="Rename cluster"
+                       PrimaryButtonText="Rename" SecondaryButtonText="Cancel" RequestSubmit="OnRenameSubmit">
+            <cds:CdsTextInput Label="Cluster name" Text="prod-us-east-1" />
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="AckDialog" IsModal="True" Size="Sm" Title="Your session expired"
+                       PrimaryButtonText="Sign in again" SecondaryButtonText="" RequestSubmit="OnAckSubmit">
+            <cds:CdsText Text="Sign in again to keep working. Unsaved changes in open forms are kept." TypeStyle="Body01" />
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="PassiveDialog" IsModal="True" Size="Sm" IsPassive="True" Title="Scheduled maintenance">
+            <cds:CdsText Text="Control plane patches start on April 12 at 02:00 UTC. Workloads keep running." TypeStyle="Body01" />
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="FindDialog" Size="Xs" Title="Find and replace" PrimaryButtonText="Replace all" SecondaryButtonText="Close">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTextInput Label="Find" Placeholder="checkout-api" />
+                <cds:CdsTextInput Label="Replace with" Placeholder="payments-api" />
+            </VerticalStackLayout>
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="HelpDialog" Size="Xs" Subtitle="Help" Title="Worker pools" IsPassive="True">
+            <cds:CdsText Text="A worker pool groups nodes of the same flavor in one zone. Resize a pool to add or remove nodes." TypeStyle="Body01" />
+        </cds:CdsDialog>
+
+        <cds:CdsDialog x:Name="XsDialog" IsModal="True" Size="Xs" Title="Extra small" PrimaryButtonText="Save"><cds:CdsText Text="Short confirmations." TypeStyle="Body01" /></cds:CdsDialog>
+        <cds:CdsDialog x:Name="SmDialog" IsModal="True" Size="Sm" Title="Small" PrimaryButtonText="Save"><cds:CdsText Text="Short messages." TypeStyle="Body01" /></cds:CdsDialog>
+        <cds:CdsDialog x:Name="MdDialog" IsModal="True" Size="Md" Title="Medium" PrimaryButtonText="Save"><cds:CdsText Text="Forms and data." TypeStyle="Body01" /></cds:CdsDialog>
+        <cds:CdsDialog x:Name="LgDialog" IsModal="True" Size="Lg" Title="Large" PrimaryButtonText="Save"><cds:CdsText Text="Complex content." TypeStyle="Body01" /></cds:CdsDialog>
+    </Grid>
+</g:GalleryPage>

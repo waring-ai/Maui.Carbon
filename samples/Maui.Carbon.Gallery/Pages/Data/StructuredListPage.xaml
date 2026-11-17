@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.StructuredListPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Read-only rows: 1px rules between rows, semibold headers, secondary body text.">
+            <cds:CdsStructuredList Label="Worker node flavors" MaximumWidthRequest="720" HorizontalOptions="Start">
+                <cds:CdsStructuredList.Columns>
+                    <cds:CdsStructuredListColumn Header="Flavor" Width="130" />
+                    <cds:CdsStructuredListColumn Header="vCPU / memory" Width="150" />
+                    <cds:CdsStructuredListColumn Header="Best for" />
+                </cds:CdsStructuredList.Columns>
+                <cds:CdsStructuredListRow>
+                    <x:String>bx2.4x16</x:String>
+                    <x:String>4 vCPU / 16 GB</x:String>
+                    <x:String>General web apps and APIs with steady traffic.</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>cx2.8x16</x:String>
+                    <x:String>8 vCPU / 16 GB</x:String>
+                    <x:String>CPU-bound jobs such as builds, encoding and batch analytics.</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>mx2.8x64</x:String>
+                    <x:String>8 vCPU / 64 GB</x:String>
+                    <x:String>In-memory caches and databases that need a large heap.</x:String>
+                </cds:CdsStructuredListRow>
+            </cds:CdsStructuredList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Selection" Description="One row at a time: hover is layer-hover-01, selected is layer-selected-01 with a checked radio. Up and Down move the selection; mx2.8x64 is disabled.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="720" HorizontalOptions="Start">
+                <cds:CdsStructuredList x:Name="FlavorList" IsSelectable="True" SelectedIndex="1" Label="Choose a worker node flavor" SelectionChanged="OnFlavorChanged">
+                    <cds:CdsStructuredList.Columns>
+                        <cds:CdsStructuredListColumn Header="Flavor" Width="130" />
+                        <cds:CdsStructuredListColumn Header="vCPU / memory" Width="150" />
+                        <cds:CdsStructuredListColumn Header="Best for" />
+                    </cds:CdsStructuredList.Columns>
+                    <cds:CdsStructuredListRow Label="bx2.4x16 flavor">
+                        <x:String>bx2.4x16</x:String>
+                        <x:String>4 vCPU / 16 GB</x:String>
+                        <x:String>General web apps and APIs with steady traffic.</x:String>
+                    </cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow Label="cx2.8x16 flavor">
+                        <x:String>cx2.8x16</x:String>
+                        <x:String>8 vCPU / 16 GB</x:String>
+                        <x:String>CPU-bound jobs such as builds, encoding and batch analytics.</x:String>
+                    </cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow Label="mx2.8x64 flavor" IsEnabled="False">
+                        <x:String>mx2.8x64</x:String>
+                        <x:String>8 vCPU / 64 GB</x:String>
+                        <x:String>Not available in jp-tok. Pick another zone to use it.</x:String>
+                    </cds:CdsStructuredListRow>
+                </cds:CdsStructuredList>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Selected: cx2.8x16" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Condensed and flush" Description="Condensed uses 8px cell padding; flush removes the start padding so text lines up with content above (not for selectable lists).">
+            <HorizontalStackLayout Spacing="32">
+                <cds:CdsStructuredList x:Name="CondensedList" IsCondensed="True" Label="Cluster details, condensed" WidthRequest="340" />
+                <cds:CdsStructuredList x:Name="FlushList" IsFlush="True" Label="Cluster details, flush" WidthRequest="340" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Plan picker" Description="In context: a selectable list inside a create-cluster flow.">
+            <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" MaximumWidthRequest="720" HorizontalOptions="Start">
+                <VerticalStackLayout BackgroundColor="{DynamicResource CdsBackground}" Padding="16,16,16,24" Spacing="4">
+                    <cds:CdsText Text="Choose a plan" TypeStyle="Heading03" />
+                    <cds:CdsText x:Name="PlanStatus" Text="You can change the plan later from Billing. Selected: Standard." TypeStyle="Body01" Tone="Secondary" />
+                    <cds:CdsStructuredList x:Name="PlanList" IsSelectable="True" SelectedIndex="1" Label="Cluster plans" Margin="0,12,0,0" SelectionChanged="OnPlanChanged">
+                        <cds:CdsStructuredList.Columns>
+                            <cds:CdsStructuredListColumn Header="Plan" Width="110" IsNoWrap="True" />
+                            <cds:CdsStructuredListColumn Header="Price" Width="160" IsNoWrap="True" />
+                            <cds:CdsStructuredListColumn Header="Includes" />
+                        </cds:CdsStructuredList.Columns>
+                        <cds:CdsStructuredListRow Label="Lite plan">
+                            <x:String>Lite</x:String>
+                            <x:String>$0 / month</x:String>
+                            <x:String>1 cluster, 2 nodes, community support. Clusters are deleted after 30 days.</x:String>
+                        </cds:CdsStructuredListRow>
+                        <cds:CdsStructuredListRow Label="Standard plan">
+                            <x:String>Standard</x:String>
+                            <x:String>$0.11 / node hour</x:String>
+                            <x:String>Unlimited clusters, autoscaling worker pools and a 99.9% availability SLA.</x:String>
+                        </cds:CdsStructuredListRow>
+                        <cds:CdsStructuredListRow Label="Enterprise plan">
+                            <x:String>Enterprise</x:String>
+                            <x:String>Contact sales</x:String>
+                            <x:String>Dedicated hosts, private endpoints and 24/7 support with a 15-minute response.</x:String>
+                        </cds:CdsStructuredListRow>
+                    </cds:CdsStructuredList>
+                </VerticalStackLayout>
+            </ContentView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same selectable list in every theme zone.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsStructuredList IsSelectable="True" SelectedIndex="0" Label="Flavors" IsCondensed="True">
+                            <cds:CdsStructuredList.Columns>
+                                <cds:CdsStructuredListColumn Header="Flavor" />
+                                <cds:CdsStructuredListColumn Header="Memory" />
+                            </cds:CdsStructuredList.Columns>
+                            <cds:CdsStructuredListRow Label="bx2.4x16"><x:String>bx2.4x16</x:String><x:String>16 GB</x:String></cds:CdsStructuredListRow>
+                            <cds:CdsStructuredListRow Label="cx2.8x16"><x:String>cx2.8x16</x:String><x:String>16 GB</x:String></cds:CdsStructuredListRow>
+                            <cds:CdsStructuredListRow Label="mx2.8x64" IsEnabled="False"><x:String>mx2.8x64</x:String><x:String>64 GB</x:String></cds:CdsStructuredListRow>
+                        </cds:CdsStructuredList>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
