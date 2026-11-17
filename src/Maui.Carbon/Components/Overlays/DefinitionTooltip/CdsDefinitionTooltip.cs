@@ -13,40 +13,6 @@ public static class CdsDefinitionTooltipTokens
     public static string Text => CdsColorKeys.TextPrimary;
 }
 
-/// <summary>A 1px dotted line drawn along the bottom edge of its box.</summary>
-internal sealed class CdsDottedLine : GraphicsView, IDrawable
-{
-    public static readonly BindableProperty ColorProperty = BindableProperty.Create(
-        nameof(Color), typeof(Color), typeof(CdsDottedLine), null,
-        propertyChanged: static (b, _, _) => ((CdsDottedLine)b).Invalidate());
-
-    public CdsDottedLine()
-    {
-        Drawable = this;
-        InputTransparent = true;
-        HeightRequest = 1;
-        BackgroundColor = Colors.Transparent;
-        AutomationProperties.SetIsInAccessibleTree(this, false);
-    }
-
-    public Color? Color
-    {
-        get => (Color?)GetValue(ColorProperty);
-        set => SetValue(ColorProperty, value);
-    }
-
-    void IDrawable.Draw(ICanvas canvas, RectF dirtyRect)
-    {
-        if (Color is not { } color) return;
-        canvas.StrokeColor = color;
-        canvas.StrokeSize = 1;
-        canvas.StrokeDashPattern = [1, 1];
-        canvas.StrokeLineCap = LineCap.Butt;
-        var y = dirtyRect.Height / 2;
-        canvas.DrawLine(0, y, (float)Width, y);
-    }
-}
-
 /// <summary>
 /// A term in running text with a dotted underline that shows a short definition in a high-contrast tooltip when focused,
 /// tapped or clicked (a second tap closes it) and, with <see cref="OpenOnHover"/>, when hovered. Escape, blur and a tap
@@ -90,8 +56,18 @@ public class CdsDefinitionTooltip : CdsControl
         propertyChanged: static (b, _, n) => ((CdsDefinitionTooltip)b)._term.TypeStyle = (CdsTypeStyle)n);
 
     readonly Grid _root = new();
+    readonly Grid _text = new() { VerticalOptions = LayoutOptions.Center, InputTransparent = true };
     readonly CdsText _term = new() { TypeStyle = CdsTypeStyle.Body01, LineBreakMode = LineBreakMode.NoWrap, InputTransparent = true };
-    readonly CdsDottedLine _line = new() { VerticalOptions = LayoutOptions.End };
+    readonly Microsoft.Maui.Controls.Shapes.Line _line = new()
+    {
+        X1 = 0, Y1 = 0, X2 = 1, Y2 = 0,
+        Aspect = Stretch.Fill,
+        StrokeThickness = 1,
+        StrokeDashArray = [1, 1],
+        HeightRequest = 1,
+        VerticalOptions = LayoutOptions.End,
+        InputTransparent = true,
+    };
     readonly CdsFocusRing _ring = new(CdsFocusRingStyle.Inset);
     readonly CdsHitTarget _hit;
     readonly CdsTooltipTimer _timer = new();
@@ -105,8 +81,10 @@ public class CdsDefinitionTooltip : CdsControl
         VerticalOptions = LayoutOptions.Center;
         _hit = CreateHitTarget(CdsAccessibilityRole.Button);
         AutomationProperties.SetExcludedWithChildren(_term, true);
-        _root.Add(_term);
-        _root.Add(_line);
+        AutomationProperties.SetIsInAccessibleTree(_line, false);
+        _text.Add(_term);
+        _text.Add(_line);
+        _root.Add(_text);
         _root.Add(_ring);
         _root.Add(_hit);
         SetChrome(_root);
@@ -178,7 +156,7 @@ public class CdsDefinitionTooltip : CdsControl
     protected override void ApplyVisuals()
     {
         SetColor(_term, Label.TextColorProperty, CdsDefinitionTooltipTokens.Text);
-        SetColor(_line, CdsDottedLine.ColorProperty, CdsDefinitionTooltipTokens.Underline(State));
+        SetBrush(_line, Microsoft.Maui.Controls.Shapes.Shape.StrokeProperty, CdsDefinitionTooltipTokens.Underline(State));
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
     }
 

@@ -119,6 +119,9 @@ internal static class FileUploaderModel
         return result;
     }
 
+    /// <summary>Maximum width of a file row: 20rem.</summary>
+    public const double MaxRowWidth = 320;
+
     /// <summary>The height of a file row: sm 32, md 40, lg 48 (larger sizes use 48).</summary>
     public static double RowHeight(CdsSize size) => size switch
     {

@@ -23,7 +23,7 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Inline" Description="Inline links are underlined so they are distinguishable without color. CdsLinkSpan lives inside formatted text and takes the paragraph's size; it cannot take keyboard focus, so keep an alternative route to the destination.">
-            <VerticalStackLayout Spacing="16" MaximumWidthRequest="560" HorizontalOptions="Start">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="720" HorizontalOptions="Start">
                 <cds:CdsText TypeStyle="Body01">
                     <cds:CdsText.FormattedText>
                         <FormattedString>

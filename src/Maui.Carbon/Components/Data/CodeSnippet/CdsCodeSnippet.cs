@@ -70,6 +70,7 @@ public partial class CdsCodeSnippet : CdsControl
         _tip.Hide();
         _code.Text = Code;
         _code.LineBreakMode = LineBreakMode.NoWrap;
+        _code.MaxLines = 1;
         _copy = null;
         _expand = null;
         _inlineHit = null;
@@ -123,7 +124,7 @@ public partial class CdsCodeSnippet : CdsControl
         _scroller.Margin = new Thickness(CdsSpacing.Spacing05, 0, 0, 0);
         _scroller.Content = _code;
 
-        var root = new Grid { HeightRequest = CdsSizing.Medium, MaximumWidthRequest = 768 };
+        var root = new Grid { HeightRequest = CdsSizing.Medium };
         root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         CdsTokens.SetColor(root, BackgroundColorProperty, CdsColorKeys.Layer01);
         var codeArea = new Grid();
@@ -141,7 +142,7 @@ public partial class CdsCodeSnippet : CdsControl
         {
             _code.Padding = 0;
         }
-        return root;
+        return new CdsMaxWidthBox(root, 768);
     }
 
     View BuildMulti()
@@ -151,6 +152,8 @@ public partial class CdsCodeSnippet : CdsControl
         _inlineBox.Content = null;
         _code.Margin = 0;
         _code.LineBreakMode = IsWrapText ? LineBreakMode.WordWrap : LineBreakMode.NoWrap;
+        // Native labels draw a single line for non-wrapping modes unless the line count is explicit.
+        _code.MaxLines = IsWrapText ? -1 : Math.Max(1, CdsCodeSnippetModel.LineCount(Code));
         _code.Padding = new Thickness(0, 0, HideCopyButton ? 0 : CdsSpacing.Spacing06, CdsCodeSnippetModel.CodeBottomPadding);
         _scroller.Orientation = IsWrapText ? ScrollOrientation.Vertical : ScrollOrientation.Both;
         _scroller.VerticalOptions = LayoutOptions.Start;
@@ -158,7 +161,7 @@ public partial class CdsCodeSnippet : CdsControl
         _scroller.Content = _code;
         _fade.Margin = new Thickness(0, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05);
 
-        var root = new Grid { MaximumWidthRequest = 768 };
+        var root = new Grid();
         CdsTokens.SetColor(root, BackgroundColorProperty, CdsColorKeys.Layer01);
         root.Add(_scroller);
         root.Add(_fade);
@@ -179,7 +182,7 @@ public partial class CdsCodeSnippet : CdsControl
         _expand.IsExpanded = IsExpanded;
         _expand.Clicked += (_, _) => IsExpanded = !IsExpanded;
         root.Add(_expand);
-        return root;
+        return new CdsMaxWidthBox(root, 768);
     }
 
     static void Detach(View view)

@@ -44,12 +44,14 @@ public abstract class CdsNotificationBase : CdsControl
     };
     readonly List<Label> _texts = [];
     readonly List<View> _topLayer = [];
+    readonly CdsMaxWidthBox _box;
     bool _built;
 
     /// <summary>Creates the shared chrome. The derived constructor builds its layout and calls <see cref="SetBody"/>.</summary>
     protected CdsNotificationBase()
     {
         Surface = new Grid { BackgroundColor = Colors.Transparent };
+        _box = new CdsMaxWidthBox(Surface, double.PositiveInfinity);
         StatusIcon = new CdsIcon(CdsIconName.InformationFilled, 20)
         {
             HorizontalOptions = LayoutOptions.Start,
@@ -133,6 +135,14 @@ public abstract class CdsNotificationBase : CdsControl
     /// <summary>Adds a view above the content (the close button) in the frame.</summary>
     protected void AddTopLayer(View view) => _topLayer.Add(view);
 
+    /// <summary>
+    /// Limits the width of the notification: it fills the available width up to <paramref name="width"/> and stays at the
+    /// start beyond it (a <c>MaximumWidthRequest</c> on a filling view would center it instead).
+    /// </summary>
+    protected void SetMaxContentWidth(double width) => _box.MaxContentWidth = width;
+
+    internal double MaxContentWidth => _box.MaxContentWidth;
+
     /// <summary>Completes the chrome with the derived layout.</summary>
     protected void SetBody(View content)
     {
@@ -140,7 +150,7 @@ public abstract class CdsNotificationBase : CdsControl
         Surface.Add(_edge);
         Surface.Add(content);
         foreach (var v in _topLayer) Surface.Add(v);
-        SetChrome(Surface);
+        SetChrome(_box);
         _built = true;
         Refresh();
     }

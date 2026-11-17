@@ -32,7 +32,7 @@ public class CdsInlineNotification : CdsDismissibleNotification
 
         Surface.MinimumHeightRequest = CdsSizing.Large;
         MinimumWidthRequest = MinWidth;
-        MaximumWidthRequest = MaxWidth;
+        SetMaxContentWidth(MaxWidth);
         HorizontalOptions = LayoutOptions.Fill;
         SetBody(_content);
     }

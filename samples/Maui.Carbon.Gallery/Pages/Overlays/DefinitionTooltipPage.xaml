@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="In running text" Description="Tab to the term, tap or click it for the definition; with openOnHover it also opens on hover. Escape, blur and a tap outside close it.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center" Direction="Row" MaximumWidthRequest="640">
+            <FlexLayout Wrap="Wrap" AlignItems="Center" Direction="Row" MaximumWidthRequest="640" HorizontalOptions="Start">
                 <cds:CdsText Text="Billing is based on " TypeStyle="Body01" />
                 <cds:CdsDefinitionTooltip Text="GB-hours" Definition="Memory allocated multiplied by hours running." OpenOnHover="True" />
                 <cds:CdsText Text=" and on " TypeStyle="Body01" />

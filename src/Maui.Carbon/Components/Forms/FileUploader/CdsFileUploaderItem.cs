@@ -10,8 +10,8 @@ namespace Maui.Carbon;
 /// </summary>
 public partial class CdsFileUploaderItem : CdsControl
 {
-    readonly Grid _root = new() { RowSpacing = 0, ColumnSpacing = 0, MaximumWidthRequest = 320, HorizontalOptions = LayoutOptions.Start };
-    readonly CdsText _name = new() { LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, 0, 0) };
+    readonly Grid _root = new() { RowSpacing = 0, ColumnSpacing = 0 };
+    readonly CdsText _name = new() { LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing03, 0) };
     readonly HorizontalStackLayout _state = new() { Spacing = 0, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(0, 0, CdsSpacing.Spacing04, 0) };
     readonly CdsIcon _errorIcon = new(CdsIconName.ErrorFilled, 16) { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing02, 0) };
     readonly CdsFileSpinner _spinner = new() { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing02, 0) };
@@ -28,7 +28,7 @@ public partial class CdsFileUploaderItem : CdsControl
     {
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-        _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _root.RowDefinitions.Add(new RowDefinition(GridLength.Star));
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _outline.SetColorKey(CdsColorKeys.SupportError);
         AutomationProperties.SetIsInAccessibleTree(_outline, false);
@@ -53,8 +53,8 @@ public partial class CdsFileUploaderItem : CdsControl
             Deleted?.Invoke(this, new CdsFileRemovedEventArgs(null));
             if (DeleteCommand?.CanExecute(CommandParameter) == true) DeleteCommand.Execute(CommandParameter);
         };
-        HorizontalOptions = LayoutOptions.Start;
-        SetChrome(_root);
+        HorizontalOptions = LayoutOptions.Fill;
+        SetChrome(new CdsMaxWidthBox(_root, FileUploaderModel.MaxRowWidth));
         UpdateRow();
     }
 

@@ -182,7 +182,8 @@ public class CdsActionableNotification : CdsDismissibleNotification
         if (inline)
         {
             WidthRequest = -1;
-            MaximumWidthRequest = MaxInlineWidth;
+            MaximumWidthRequest = double.PositiveInfinity;
+            SetMaxContentWidth(MaxInlineWidth);
             HorizontalOptions = LayoutOptions.Fill;
             StatusIcon.Margin = new Thickness(0, 14, 0, 0);
             _texts.Padding = new Thickness(0, 15);
@@ -213,6 +214,7 @@ public class CdsActionableNotification : CdsDismissibleNotification
         {
             WidthRequest = CdsToastNotification.ToastWidth;
             MaximumWidthRequest = CdsToastNotification.ToastWidth;
+            SetMaxContentWidth(double.PositiveInfinity);
             HorizontalOptions = LayoutOptions.Start;
             StatusIcon.Margin = new Thickness(0, CdsSpacing.Spacing05, 0, 0);
             _texts.Padding = new Thickness(0, 15, 0, hasAction ? CdsSpacing.Spacing03 : CdsSpacing.Spacing05);

@@ -25,9 +25,12 @@ public partial class CdsExpandableTile : CdsTileBase
     /// <summary>Creates a collapsed tile.</summary>
     public CdsExpandableTile()
     {
+        // Collapsed height is the above-the-fold content plus padding: never stretch to a taller neighbour.
+        VerticalOptions = LayoutOptions.Start;
         Surface.MinimumHeightRequest = 0;
         Stack.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        Stack.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        // The second row takes any extra height, so the chevron box (spanning both rows) stays at the bottom end.
+        Stack.RowDefinitions.Add(new RowDefinition(GridLength.Star));
         Grid.SetRow(_expandedHost, 1);
         Stack.Insert(1, _expandedHost);
         Grid.SetRowSpan(Ring, 2);
@@ -127,6 +130,8 @@ public partial class CdsExpandableTile : CdsTileBase
         _chevronText.IsVisible = !string.IsNullOrEmpty(text);
         _chevronRow.Padding = _chevronText.IsVisible ? new Thickness(CdsSpacing.Spacing05, 0) : new Thickness(0);
         _chevronBox.WidthRequest = _chevronText.IsVisible ? -1 : 48;
+        // A labelled chevron is wide: reserve its 48px row under the expanded content so the label never covers text.
+        _expandedHost.Padding = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, ExpandableTileModel.ExpandedBottomPadding(_chevronText.IsVisible));
         RefreshVisuals();
     }
 

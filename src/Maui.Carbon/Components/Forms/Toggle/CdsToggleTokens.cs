@@ -103,22 +103,38 @@ internal sealed class CdsToggleGlyph : CdsGlyphView
         if (Visible(KnobColor))
         {
             canvas.FillColor = KnobColor!;
-            canvas.FillCircle(x + knob / 2, y + knob / 2, knob / 2);
+            if (_small && _progress >= 1 && Visible(CheckColor))
+            {
+                // The check (6x5, centered on the knob) is cut out of the knob so the track shows through. The CSS fills
+                // it with the track's color (support-success, or button-disabled): the same picture in opaque themes, and
+                // still visible where the disabled tokens are translucent (g90, g100), where a drawn check blends into the knob.
+                var cx = x + knob / 2;
+                var cy = y + knob / 2 + 0.25f;
+                var path = new PathF();
+                path.AppendEllipse(x, y, knob, knob);
+                AddSegment(path, cx - 3, cy, cx - 1, cy + 2.25f);
+                AddSegment(path, cx - 1, cy + 2.25f, cx + 3, cy - 2.25f);
+                canvas.FillPath(path, WindingMode.EvenOdd);
+            }
+            else
+            {
+                canvas.FillCircle(x + knob / 2, y + knob / 2, knob / 2);
+            }
         }
-        if (_small && _progress >= 1 && Visible(CheckColor))
-        {
-            // 6x5 check centered on the knob.
-            var cx = x + knob / 2;
-            var cy = y + knob / 2 + 0.25f;
-            var path = new PathF();
-            path.MoveTo(cx - 3, cy);
-            path.LineTo(cx - 1, cy + 2.25f);
-            path.LineTo(cx + 3, cy - 2.25f);
-            canvas.StrokeColor = CheckColor!;
-            canvas.StrokeSize = 1.2f;
-            canvas.StrokeLineCap = LineCap.Round;
-            canvas.StrokeLineJoin = LineJoin.Round;
-            canvas.DrawPath(path);
-        }
+    }
+
+    // A closed 1.2px wide quad along a line segment (one subpath, so the even-odd fill cuts it out of the knob).
+    static void AddSegment(PathF path, float x1, float y1, float x2, float y2)
+    {
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var length = MathF.Sqrt(dx * dx + dy * dy);
+        var nx = -dy / length * 0.6f;
+        var ny = dx / length * 0.6f;
+        path.MoveTo(x1 + nx, y1 + ny);
+        path.LineTo(x2 + nx, y2 + ny);
+        path.LineTo(x2 - nx, y2 - ny);
+        path.LineTo(x1 - nx, y1 - ny);
+        path.Close();
     }
 }

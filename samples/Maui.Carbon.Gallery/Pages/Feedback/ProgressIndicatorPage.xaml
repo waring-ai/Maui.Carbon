@@ -15,7 +15,7 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Space equally" Description="Steps share the width, at least 128 each.">
-            <cds:CdsProgressIndicator CurrentIndex="2" SpaceEqually="True" MaximumWidthRequest="720" HorizontalOptions="Start">
+            <cds:CdsProgressIndicator CurrentIndex="2" SpaceEqually="True" WidthRequest="720" HorizontalOptions="Start">
                 <cds:CdsProgressStep Label="Choose plan" />
                 <cds:CdsProgressStep Label="Configure nodes" />
                 <cds:CdsProgressStep Label="Networking" />

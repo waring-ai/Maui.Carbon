@@ -24,10 +24,16 @@ public class CdsButtonSet : CdsControl
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsButtonSet), null,
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription(((CdsButtonSet)b)._grid, (string?)n));
+        propertyChanged: static (b, _, n) =>
+        {
+            var set = (CdsButtonSet)b;
+            SemanticProperties.SetDescription(set._grid, (string?)n);
+            SemanticProperties.SetDescription(set._row, (string?)n);
+        });
 
     readonly ObservableCollection<CdsButton> _items = [];
     readonly Grid _grid = new() { ColumnSpacing = 0, RowSpacing = 0 };
+    readonly CdsEqualWidthRow _row = new();
     readonly List<(BoxView Line, int Index)> _separators = [];
     bool _fluidStacked;
 
@@ -106,6 +112,7 @@ public class CdsButtonSet : CdsControl
 
     void Rebuild()
     {
+        _row.Clear();
         _grid.Children.Clear();
         _grid.ColumnDefinitions.Clear();
         _grid.RowDefinitions.Clear();
@@ -115,6 +122,13 @@ public class CdsButtonSet : CdsControl
         var stacked = Stacked;
         var expressive = buttons.Any(b => b.IsExpressive);
 
+        if (!IsFluid && !stacked)
+        {
+            BuildRow(buttons, expressive);
+            return;
+        }
+
+        if (Content != _grid) SetChrome(_grid);
         if (IsFluid)
         {
             HorizontalOptions = LayoutOptions.Fill;
@@ -178,6 +192,29 @@ public class CdsButtonSet : CdsControl
     }
 
     List<CdsButton> _orderedForSeparators = [];
+
+    /// <summary>A plain horizontal set: equal cells as wide as the widest label needs, each at most the Carbon maximum.</summary>
+    void BuildRow(List<CdsButton> buttons, bool expressive)
+    {
+        if (Content != _row) SetChrome(_row);
+        HorizontalOptions = LayoutOptions.Start;
+        _row.MaxCellWidth = expressive ? ButtonSetModel.MaxExpressiveButtonWidth : ButtonSetModel.MaxButtonWidth;
+        for (var i = 0; i < buttons.Count; i++)
+        {
+            buttons[i].HorizontalOptions = LayoutOptions.Fill;
+            _row.Add(buttons[i]);
+        }
+        for (var i = 1; i < buttons.Count; i++)
+        {
+            var line = new BoxView { InputTransparent = true };
+            AutomationProperties.SetIsInAccessibleTree(line, false);
+            CdsEqualWidthRow.SetSeparatorFor(line, i);
+            _row.Add(line);
+            _separators.Add((line, i));
+        }
+        _orderedForSeparators = buttons;
+        UpdateSeparators();
+    }
 
     void ApplyFluidWidths()
     {

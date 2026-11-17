@@ -49,7 +49,7 @@ public class CdsContentSwitcher : CdsControl
     readonly ObservableCollection<CdsSwitch> _items = [];
     readonly List<CdsSwitchView> _views = [];
     readonly Border _frame = new() { StrokeThickness = 1, StrokeShape = new RoundRectangle { CornerRadius = 4 }, Padding = 0 };
-    readonly Grid _grid = new() { ColumnSpacing = 0 };
+    readonly CdsEqualWidthRow _grid = new();
     bool _rebuilding;
     int _applied = -2;
     int _focusIndex = -1;
@@ -187,8 +187,7 @@ public class CdsContentSwitcher : CdsControl
         _rebuilding = true;
         try
         {
-            _grid.Children.Clear();
-            _grid.ColumnDefinitions.Clear();
+            _grid.Clear();
             _views.Clear();
             var height = CdsContentSwitcherTokens.Height(Size);
             for (var i = 0; i < _items.Count; i++)
@@ -196,9 +195,9 @@ public class CdsContentSwitcher : CdsControl
                 var view = new CdsSwitchView(this, i);
                 view.StateChanged += OnSegmentStateChanged;
                 _views.Add(view);
-                _grid.ColumnDefinitions.Add(new ColumnDefinition(IsIconOnly ? new GridLength(height) : GridLength.Star));
-                _grid.Add(view, i);
+                _grid.Add(view);
             }
+            _grid.FixedCellWidth = IsIconOnly ? height : -1;
             HorizontalOptions = IsIconOnly ? LayoutOptions.Start : LayoutOptions.Fill;
             _frame.HeightRequest = height;
             SemanticProperties.SetDescription(_frame, Label);

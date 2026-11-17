@@ -11,7 +11,7 @@ internal sealed class CdsFileDropContainer : CdsControl
 {
     readonly Grid _root = new() { HeightRequest = 96 };
     readonly Border _box = new() { StrokeThickness = 1, StrokeShape = new Rectangle(), StrokeDashArray = [3, 3], Padding = new Thickness(CdsSpacing.Spacing05), InputTransparent = true };
-    readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap, VerticalOptions = LayoutOptions.Start };
+    readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap, VerticalOptions = LayoutOptions.Center, HorizontalTextAlignment = TextAlignment.Center };
     readonly CdsFocusRing _ring = new(CdsFocusRingStyle.Inset);
     readonly CdsHitTarget _hit;
     bool _dragOver;
