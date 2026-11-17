@@ -118,6 +118,9 @@ public partial class CdsTag : CdsControl
         _icon.Icon = Icon;
         _icon.IsVisible = hasIcon;
         _label.Text = Text;
+        // The row measures its children unconstrained, so cap the label for the ellipsis to appear inside 208.
+        var trailing = HasTrailingContent ? height : 0;
+        _label.MaximumWidthRequest = Math.Max(0, Pill.MaximumWidthRequest - start - end - (hasIcon ? 16 + CdsSpacing.Spacing02 : 0) - trailing);
         if (!string.IsNullOrEmpty(Text)) ToolTipProperties.SetText(Pill, Text);
         RefreshVisuals();
     }
