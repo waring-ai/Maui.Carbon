@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.ContainedListPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="On page" Description="For persistent areas such as cards and sidebars: a semibold header on the page background with a rule. Items can carry an icon and an action; lists span the full width of their container.">
+            <VerticalStackLayout Spacing="16" WidthRequest="420" HorizontalOptions="Start">
+                <cds:CdsContainedList Label="API keys">
+                    <cds:CdsContainedList.Action>
+                        <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Add" IconDescription="Create API key" Size="Lg" />
+                    </cds:CdsContainedList.Action>
+                    <cds:CdsContainedListItem Text="ci-deploy" Icon="Document">
+                        <cds:CdsContainedListItem.Action>
+                            <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Close" IconDescription="Revoke ci-deploy" Size="Lg" />
+                        </cds:CdsContainedListItem.Action>
+                    </cds:CdsContainedListItem>
+                    <cds:CdsContainedListItem Text="ops-readonly" Icon="Document">
+                        <cds:CdsContainedListItem.Action>
+                            <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Close" IconDescription="Revoke ops-readonly" Size="Lg" />
+                        </cds:CdsContainedListItem.Action>
+                    </cds:CdsContainedListItem>
+                    <cds:CdsContainedListItem Text="billing-export" Icon="Document" IsEnabled="False" IsClickable="True" />
+                </cds:CdsContainedList>
+                <cds:CdsContainedList Label="Members">
+                    <cds:CdsContainedListItem Text="Priya Raman" />
+                    <cds:CdsContainedListItem Text="Tomasz Nowak" />
+                </cds:CdsContainedList>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disclosed" Description="For popovers and other elevated layers: a 32px header on layer-01 with a small secondary label and no rule.">
+            <cds:CdsContainedList Kind="Disclosed" Label="Recent deployments" WidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsContainedListItem x:Name="DeployOne" Text="checkout-api 2.14.0" IsClickable="True" Clicked="OnItemClicked" />
+                <cds:CdsContainedListItem Text="checkout-api 2.13.2" IsClickable="True" Clicked="OnItemClicked" />
+                <cds:CdsContainedListItem Text="payments-worker 1.8.0" IsClickable="True" Clicked="OnItemClicked" />
+            </cds:CdsContainedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes and inset dividers" Description="Header and one-line item height: sm 32, md 40, lg 48, xl 64. IsInset indents the dividers by the padding.">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsContainedList Label="sm" Size="Sm" WidthRequest="200">
+                    <cds:CdsContainedListItem Text="Item one" />
+                    <cds:CdsContainedListItem Text="Item two" />
+                </cds:CdsContainedList>
+                <cds:CdsContainedList Label="md" Size="Md" WidthRequest="200">
+                    <cds:CdsContainedListItem Text="Item one" />
+                    <cds:CdsContainedListItem Text="Item two" />
+                </cds:CdsContainedList>
+                <cds:CdsContainedList Label="lg" Size="Lg" WidthRequest="200">
+                    <cds:CdsContainedListItem Text="Item one" />
+                    <cds:CdsContainedListItem Text="Item two" />
+                </cds:CdsContainedList>
+                <cds:CdsContainedList Label="xl" Size="Xl" WidthRequest="200">
+                    <cds:CdsContainedListItem Text="Item one" />
+                    <cds:CdsContainedListItem Text="Item two" />
+                </cds:CdsContainedList>
+                <cds:CdsContainedList Label="inset" IsInset="True" WidthRequest="200">
+                    <cds:CdsContainedListItem Text="Item one" />
+                    <cds:CdsContainedListItem Text="Item two" />
+                    <cds:CdsContainedListItem Text="Item three" />
+                </cds:CdsContainedList>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With a search slot" Description="Any view passed as Search is pinned under the header with a rule below it.">
+            <cds:CdsContainedList Label="Clusters" WidthRequest="420" HorizontalOptions="Start">
+                <cds:CdsContainedList.Search>
+                    <Entry Placeholder="Filter clusters" HeightRequest="48" />
+                </cds:CdsContainedList.Search>
+                <cds:CdsContainedListItem Text="prod-us-east-1" Icon="Document" />
+                <cds:CdsContainedListItem Text="prod-eu-de-1" Icon="Document" />
+                <cds:CdsContainedListItem Text="dev-jp-tok" Icon="Document" />
+            </cds:CdsContainedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Clickable items hover to layer-hover-01, press to layer-active-01 and show a 2px inset focus ring.">
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No item clicked yet" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same disclosed list in every theme zone.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsContainedList Kind="Disclosed" Label="Recent deployments" Size="Md">
+                            <cds:CdsContainedListItem Text="checkout-api 2.14.0" IsClickable="True" />
+                            <cds:CdsContainedListItem Text="checkout-api 2.13.2" IsClickable="True" />
+                            <cds:CdsContainedListItem Text="payments-worker 1.8.0" IsEnabled="False" IsClickable="True" />
+                        </cds:CdsContainedList>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

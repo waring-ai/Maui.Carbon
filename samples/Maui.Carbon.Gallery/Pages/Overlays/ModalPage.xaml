@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.ModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Transactional modal" Description="A scrim blocks the page. Secondary on the left, primary on the right; the modal stays open after Create key so you can validate first. Close, Escape and Cancel ask to close.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="CreateButton" Text="Create API key" Icon="Add" Clicked="OnCreateClicked" />
+                    <cds:CdsButton Text="Three buttons" Kind="Tertiary" Clicked="OnThreeClicked" />
+                    <cds:CdsButton Text="Scrolling content" Kind="Tertiary" Clicked="OnScrollingClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Danger and passive" Description="Danger puts the focus on Cancel so Enter cannot delete by accident. A passive modal has no footer and closes when you tap the scrim.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Delete bucket" Kind="Danger" Clicked="OnDangerClicked" />
+                    <cds:CdsButton Text="Maintenance notice" Kind="Secondary" Clicked="OnPassiveClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Sizes" Description="xs and sm for short messages, md for most dialogs, lg for complex content such as a table. Widths are a share of the window that shrinks as it grows.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="xs" Kind="Tertiary" Size="Md" Clicked="OnXsClicked" />
+                    <cds:CdsButton Text="sm" Kind="Tertiary" Size="Md" Clicked="OnSmClicked" />
+                    <cds:CdsButton Text="md" Kind="Tertiary" Size="Md" Clicked="OnMdClicked" />
+                    <cds:CdsButton Text="lg" Kind="Tertiary" Size="Md" Clicked="OnLgClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Composed modal" Description="ModalHeader, ModalBody and ModalFooter composed by hand: a two-step flow whose footer holds your own buttons.">
+                <cds:CdsButton Text="Move cluster" Kind="Tertiary" Clicked="OnComposedClicked" />
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Parts, inline" Description="The same parts laid out in the page flow (the web preview's inline aid), in every theme. A real modal is shown by the page host over the whole window.">
+                <g:ThemeStrip>
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="280">
+                                <VerticalStackLayout BackgroundColor="{DynamicResource CdsLayer01}">
+                                    <cds:CdsModalHeader Label="Access" Title="Create API key" />
+                                    <cds:CdsModalBody HasForm="True">
+                                        <cds:CdsText Text="Name the key after where it is used." TypeStyle="Body01" />
+                                    </cds:CdsModalBody>
+                                    <cds:CdsModalFooter PrimaryButtonText="Create key" SecondaryButtonText="Cancel" />
+                                </VerticalStackLayout>
+                            </ContentView>
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+        </VerticalStackLayout>
+
+        <!-- Declared modals: they draw nothing here and show in the page host while IsOpen is true. -->
+        <cds:CdsModal x:Name="OpenOnLoadModal" IsOpen="True" Size="Sm" Label="Access" Heading="Create API key"
+                      PrimaryButtonText="Create key" SecondaryButtonText="Cancel" HasForm="True"
+                      RequestSubmit="OnOpenOnLoadSubmit" LauncherElement="{x:Reference CreateButton}">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsText Text="Keys let scripts and pipelines call the API. Say where the key is used, for example ci-deploy." TypeStyle="Body01" />
+                <cds:CdsTextInput x:Name="KeyNameInput" Label="Key name" Placeholder="ci-deploy" HelperText="Lowercase letters, numbers and dashes" />
+            </VerticalStackLayout>
+        </cds:CdsModal>
+
+        <cds:CdsModal x:Name="ThreeButtonModal" Size="Md" Heading="Save changes to the policy?"
+                      PrimaryButtonText="Publish" SecondaryButtonText="Discard" TertiaryButtonText="Save draft"
+                      SecondarySubmit="OnDiscard" TertiarySubmit="OnSaveDraft">
+            <cds:CdsText Text="Only the rightmost button is primary in a three-button footer." TypeStyle="Body01" />
+        </cds:CdsModal>
+
+        <cds:CdsModal x:Name="ScrollingModal" Size="Sm" Label="Terms" Heading="Service agreement"
+                      PrimaryButtonText="Accept" SecondaryButtonText="Decline" HasScrollingContent="True">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsText Text="Only the body scrolls; the header and footer stay fixed and the body fades out at the bottom." TypeStyle="Body01" />
+                <cds:CdsText Text="Worker nodes are billed per hour from the moment they are provisioned until they are deleted. Stopped clusters still bill for attached storage." TypeStyle="Body01" />
+                <cds:CdsText Text="Lite clusters are deleted after 30 days. Upgrade to Standard before then to keep them, or export your workloads and recreate them elsewhere." TypeStyle="Body01" />
+                <cds:CdsText Text="Control plane and node upgrades start only inside the maintenance window you choose. Patches that fix security issues can run outside it." TypeStyle="Body01" />
+                <cds:CdsText Text="Data in transit is encrypted with TLS 1.2 or later. Data at rest is encrypted with keys you manage in Key Protect." TypeStyle="Body01" />
+                <cds:CdsText Text="Support responds within one business day on Standard and within 15 minutes on Enterprise, around the clock." TypeStyle="Body01" />
+                <cds:CdsText Text="You can cancel at any time. Charges stop when the last worker node is deleted." TypeStyle="Body01" />
+            </VerticalStackLayout>
+        </cds:CdsModal>
+
+        <cds:CdsModal x:Name="DangerModal" Size="Xs" IsDanger="True" Label="logs-archive-prod" Heading="Delete bucket?"
+                      PrimaryButtonText="Delete bucket" SecondaryButtonText="Cancel" RequestSubmit="OnDeleteBucket">
+            <cds:CdsText Text="All 1,204 objects in the bucket are deleted. This cannot be undone." TypeStyle="Body01" />
+        </cds:CdsModal>
+
+        <cds:CdsModal x:Name="PassiveModal" Size="Sm" IsPassive="True" Heading="Scheduled maintenance">
+            <cds:CdsText Text="Control plane patches for prod-us-east-1 start on April 12 at 02:00 UTC. Workloads keep running; kubectl may be unavailable for up to five minutes." TypeStyle="Body01" />
+        </cds:CdsModal>
+
+        <cds:CdsModal x:Name="XsModal" Size="Xs" Heading="Session expiring" PrimaryButtonText="Stay signed in" SecondaryButtonText="Sign out">
+            <cds:CdsText Text="You will be signed out in two minutes." TypeStyle="Body01" />
+        </cds:CdsModal>
+        <cds:CdsModal x:Name="SmModal" Size="Sm" Heading="Rename cluster" PrimaryButtonText="Rename" SecondaryButtonText="Cancel" HasForm="True">
+            <cds:CdsTextInput Label="Cluster name" Text="prod-us-east-1" />
+        </cds:CdsModal>
+        <cds:CdsModal x:Name="MdModal" Size="Md" Heading="Add worker pool" PrimaryButtonText="Add pool" SecondaryButtonText="Cancel">
+            <cds:CdsText Text="A worker pool groups nodes of the same flavor in one zone." TypeStyle="Body01" />
+        </cds:CdsModal>
+        <cds:CdsModal x:Name="LgModal" Size="Lg" Heading="Node inventory" PrimaryButtonText="Export CSV" SecondaryButtonText="Close" IsFullWidth="False">
+            <cds:CdsText Text="Large modals hold complex content such as a table. When the body scrolls a lot, move up a size or use a page." TypeStyle="Body01" />
+        </cds:CdsModal>
+
+        <cds:CdsComposedModal x:Name="ComposedModal" Size="Sm" RequestClose="OnComposedRequestClose">
+            <cds:CdsModalHeader Label="Cluster" Title="Move to another region" />
+            <cds:CdsModalBody HasForm="True">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="Clusters cannot change region. Create one in the new region, then delete the old one." TypeStyle="Body01" />
+                    <cds:CdsTextInput Label="New cluster name" Placeholder="prod-eu-de-1" />
+                </VerticalStackLayout>
+            </cds:CdsModalBody>
+            <cds:CdsModalFooter PrimaryButtonText="Create cluster" SecondaryButtonText="Not now" RequestSubmit="OnComposedSubmit" />
+        </cds:CdsComposedModal>
+    </Grid>
+</g:GalleryPage>

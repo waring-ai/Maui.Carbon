@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.AccordionPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Chevron at the end" Description="The default: titles line up with the rest of the page, the first item is open and several can be open at once.">
+            <cds:CdsAccordion MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAccordionItem Title="How is node usage billed?" IsOpen="True">
+                    <cds:CdsText Text="Worker nodes are billed per hour from the moment they are provisioned until they are deleted. Stopped clusters still bill for attached storage." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+                <cds:CdsAccordionItem Title="Can I change a cluster's region?">
+                    <cds:CdsText Text="No. Create a cluster in the new region, move your workloads, then delete the old cluster." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+                <cds:CdsAccordionItem Title="What happens when my free trial ends?">
+                    <cds:CdsText Text="Lite clusters are deleted after 30 days. Upgrade to Standard before then to keep them." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+            </cds:CdsAccordion>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Chevron at the start" Description="For tree-like content. Use one alignment per page.">
+            <cds:CdsAccordion Align="Start" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAccordionItem Title="How is node usage billed?" IsOpen="True">
+                    <cds:CdsText Text="Worker nodes are billed per hour from the moment they are provisioned until they are deleted." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+                <cds:CdsAccordionItem Title="Can I change a cluster's region?">
+                    <cds:CdsText Text="No. Create a cluster in the new region and move your workloads." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+            </cds:CdsAccordion>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Flush" Description="Text and dividers are inset 16 on both sides to line up with neighbouring components. Use it in narrow spaces.">
+            <cds:CdsAccordion IsFlush="True" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAccordionItem Title="Access policies" IsOpen="True">
+                    <cds:CdsText Text="Who can view and edit this bucket." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+                <cds:CdsAccordionItem Title="Lifecycle rules">
+                    <cds:CdsText Text="Archive or delete objects after a set time." TypeStyle="Body01" />
+                </cds:CdsAccordionItem>
+            </cds:CdsAccordion>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Heading height: sm 32, md 40 (default), lg 48.">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsAccordion Size="Sm" WidthRequest="240">
+                    <cds:CdsAccordionItem Title="sm: Access policies"><cds:CdsText Text="Who can view and edit." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Lifecycle rules"><cds:CdsText Text="Archive or delete." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+                <cds:CdsAccordion Size="Md" WidthRequest="240">
+                    <cds:CdsAccordionItem Title="md: Access policies"><cds:CdsText Text="Who can view and edit." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Lifecycle rules"><cds:CdsText Text="Archive or delete." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+                <cds:CdsAccordion Size="Lg" WidthRequest="240">
+                    <cds:CdsAccordionItem Title="lg: Access policies"><cds:CdsText Text="Who can view and edit." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Lifecycle rules"><cds:CdsText Text="Archive or delete." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="One disabled item, then a whole disabled accordion. Disabled headings use text-disabled, have no hover and leave the tab order.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAccordion>
+                    <cds:CdsAccordionItem Title="Billing contacts"><cds:CdsText Text="Who receives invoices." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Payment method (managed by your organization)" IsEnabled="False"><cds:CdsText Text="Card on file." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+                <cds:CdsAccordion IsEnabled="False">
+                    <cds:CdsAccordionItem Title="Spending limits"><cds:CdsText Text="Monthly cap." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Tax exemption"><cds:CdsText Text="Certificate." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Toggle a heading with a click, Enter or Space; Escape closes the focused open item.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAccordion>
+                    <cds:CdsAccordionItem Title="General" IsOpen="True" HeadingClicked="OnHeadingClicked">
+                        <cds:CdsText Text="Cluster name, labels and delete protection." TypeStyle="Body01" />
+                    </cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Networking" HeadingClicked="OnHeadingClicked">
+                        <cds:CdsText Text="Private and public service endpoints, VLANs and ingress subdomain." TypeStyle="Body01" />
+                    </cds:CdsAccordionItem>
+                    <cds:CdsAccordionItem Title="Autoscaling" HeadingClicked="OnHeadingClicked">
+                        <cds:CdsText Text="Scale worker pools automatically." TypeStyle="Body01" />
+                    </cds:CdsAccordionItem>
+                </cds:CdsAccordion>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same accordion in every theme zone.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsAccordion>
+                            <cds:CdsAccordionItem Title="Access policies" IsOpen="True"><cds:CdsText Text="Who can view and edit." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                            <cds:CdsAccordionItem Title="Lifecycle rules"><cds:CdsText Text="Archive or delete." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                            <cds:CdsAccordionItem Title="Encryption" IsEnabled="False"><cds:CdsText Text="Keys." TypeStyle="Body01" /></cds:CdsAccordionItem>
+                        </cds:CdsAccordion>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.ToggletipPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Text only" Description="Click the information button. Click outside or press Escape to close; focus returns to the button.">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <cds:CdsText Text="Upgrade window" TypeStyle="Body01" Tone="Secondary" VerticalOptions="Center" />
+                <cds:CdsToggletip x:Name="WindowTip" Label="Show information about the upgrade window" Placement="BottomStart"
+                                  Text="Control plane and node upgrades start only inside this window." />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With actions" Description="A link on the start and at most one small button on the end. Content is interactive, so Tab moves from the button into the bubble.">
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <cds:CdsText Text="Maintenance window" TypeStyle="Body01" Tone="Secondary" VerticalOptions="Center" />
+                <cds:CdsToggletip x:Name="ActionsTip" IsOpen="True" Label="Show information about the maintenance window" Placement="BottomStart"
+                                  Text="Control plane and node upgrades start only inside this window.">
+                    <cds:CdsToggletipActions>
+                        <cds:CdsText Text="Learn more" TypeStyle="BodyCompact01" TextColor="{DynamicResource CdsLinkInverse}" />
+                        <cds:CdsButton Text="Edit window" Size="Sm" Clicked="OnEditClicked" />
+                    </cds:CdsToggletipActions>
+                </cds:CdsToggletip>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Placement" Description="Align keeps the bubble on screen; it flips when the preferred side does not fit.">
+            <HorizontalStackLayout Spacing="48" Padding="0,0,0,96">
+                <cds:CdsToggletip Label="Show information, top" Placement="Top" Text="Placed above the button." />
+                <cds:CdsToggletip Label="Show information, right" Placement="Right" Text="Placed to the right of the button." />
+                <cds:CdsToggletip Label="Show information, bottom end" Placement="BottomEnd" Text="Placed below, end edges aligned." />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The button icon in every theme zone; the bubble is high contrast.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsText Text="Retention" TypeStyle="Body01" Tone="Secondary" />
+                            <cds:CdsToggletip Label="Show information about retention" Text="Logs are kept for 30 days." />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+    </VerticalStackLayout>
+</g:GalleryPage>

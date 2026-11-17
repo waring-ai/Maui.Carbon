@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.DefinitionTooltipPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="In running text" Description="Tab to the term, tap or click it for the definition; with openOnHover it also opens on hover. Escape, blur and a tap outside close it.">
+            <FlexLayout Wrap="Wrap" AlignItems="Center" Direction="Row" MaximumWidthRequest="640">
+                <cds:CdsText Text="Billing is based on " TypeStyle="Body01" />
+                <cds:CdsDefinitionTooltip Text="GB-hours" Definition="Memory allocated multiplied by hours running." OpenOnHover="True" />
+                <cds:CdsText Text=" and on " TypeStyle="Body01" />
+                <cds:CdsDefinitionTooltip Text="egress" Definition="Data that leaves the cloud network." />
+                <cds:CdsText Text=". Charges stop when a cluster is deleted." TypeStyle="Body01" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Open" Description="The definition is high contrast, 176 wide at most, with a caret.">
+            <FlexLayout Wrap="Wrap" AlignItems="Center" Padding="0,0,0,64">
+                <cds:CdsText Text="Each node reports its " TypeStyle="Body01" />
+                <cds:CdsDefinitionTooltip Text="p95 latency" IsOpen="True" Definition="The time within which 95 percent of requests complete." />
+                <cds:CdsText Text=" every minute." TypeStyle="Body01" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Placement" Description="bottom (default), top, left and right.">
+            <HorizontalStackLayout Spacing="48" Padding="0,64,0,64">
+                <cds:CdsDefinitionTooltip Text="Top" Placement="Top" Definition="Shown above the term." />
+                <cds:CdsDefinitionTooltip Text="Right" Placement="Right" Definition="Shown to the right." />
+                <cds:CdsDefinitionTooltip Text="Left" Placement="Left" Definition="Shown to the left." />
+                <cds:CdsDefinitionTooltip Text="Bottom" Placement="Bottom" Definition="Shown below the term." />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The dotted underline is border-strong-01 and border-interactive on hover and focus.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="4">
+                            <cds:CdsText Text="Cost per" TypeStyle="Body01" />
+                            <cds:CdsDefinitionTooltip Text="GB-hour" Definition="Memory allocated multiplied by hours running." />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
