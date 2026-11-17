@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.CalloutPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Kinds" Description="Low contrast by default; info and warning are the recommended kinds. No close button, no live-region role.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsCallout Kind="Info" Title="Backups are billed separately" Subtitle="Snapshots older than 30 days cost 0.02 USD per GB." />
+                <cds:CdsCallout Kind="Warning" Title="3 persistent volumes are deleted too" Subtitle="Snapshot the volumes you want to keep before you delete the cluster." />
+                <cds:CdsCallout Kind="InfoSquare" Subtitle="A subtitle alone works when a title would only repeat it." />
+                <cds:CdsCallout Kind="WarningAlt" Title="Read replicas lag" Subtitle="Reads may be up to 5 seconds behind the primary." />
+                <cds:CdsCallout Kind="Success" Title="Encryption is on" Subtitle="Data at rest is encrypted with your key." />
+                <cds:CdsCallout Kind="Error" Title="Key rotation failed" Subtitle="The previous key stays active." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="High contrast and action" Description="IsLowContrast=False gives the inverse style. An optional ghost action sits at the end; use it sparingly.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsCallout Kind="Info" IsLowContrast="False" Title="Plan change takes effect tomorrow" Subtitle="You keep your current limits until then." />
+                <cds:CdsCallout Kind="Warning" IsLowContrast="False" Title="API key shown once" Subtitle="Copy it now; you cannot view it again." ActionButtonLabel="Copy key" />
+                <cds:CdsCallout Kind="Info" Title="Using a custom domain?" Subtitle="Add the CNAME record before you switch traffic." ActionButtonLabel="View steps" ActionClicked="OnAction" />
+                <cds:CdsText x:Name="Status" Text="Action not used" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsCallout Kind="Info" Title="Backups are billed separately" Subtitle="Snapshots older than 30 days cost extra." />
+                            <cds:CdsCallout Kind="Warning" Title="Volumes are deleted too" Subtitle="Snapshot the ones you keep." />
+                            <cds:CdsCallout Kind="Info" IsLowContrast="False" Title="Plan change" Subtitle="Takes effect tomorrow." />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

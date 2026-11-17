@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.BadgeIndicatorPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Dot and counts" Description="Overlay the badge on an icon button in the same grid cell. A dot sits 8 from the corner, a count 4; counts above 999 show 999+.">
+            <HorizontalStackLayout Spacing="32">
+                <Grid>
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications" />
+                    <cds:CdsBadgeIndicator />
+                </Grid>
+                <Grid>
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications, 3 new" />
+                    <cds:CdsBadgeIndicator Count="3" />
+                </Grid>
+                <Grid>
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications, 42 new" />
+                    <cds:CdsBadgeIndicator Count="42" />
+                </Grid>
+                <Grid>
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications, many new" />
+                    <cds:CdsBadgeIndicator Count="1250" />
+                </Grid>
+                <Grid>
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications" Size="Sm" />
+                    <cds:CdsBadgeIndicator IsCompactHost="True" />
+                </Grid>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Count follows your clicks. MaxCount can lower the cap (here 9).">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="32">
+                    <Grid>
+                        <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications" Clicked="OnReadClicked" />
+                        <cds:CdsBadgeIndicator x:Name="Badge" Count="3" MaxCount="9" />
+                    </Grid>
+                    <cds:CdsButton Text="New alert" Kind="Tertiary" Size="Md" Clicked="OnNewClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="3 unread" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="24">
+                            <Grid>
+                                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Notifications" Size="Md" />
+                                <cds:CdsBadgeIndicator Count="3" />
+                            </Grid>
+                            <Grid>
+                                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Activity" Size="Md" />
+                                <cds:CdsBadgeIndicator />
+                            </Grid>
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

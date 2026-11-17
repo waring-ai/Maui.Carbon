@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.ProgressBarPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Determinate" Description="Label, value, helper text. Track is layer-01, the fill is interactive and grows from the start over 110ms.">
+            <VerticalStackLayout Spacing="32" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsProgressBar Label="Uploading usage-march.csv" Value="42" HelperText="42 of 100 MB" />
+                <cds:CdsProgressBar Label="Provisioning nodes" Value="3" Max="5" HelperText="3 of 5 nodes ready" Size="Small" />
+                <cds:CdsProgressBar Label="Exporting logs" Value="0" HelperText="Starting..." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Indeterminate" Description="No value: the bar sweeps and shows no numbers. Reduced motion shows a static block.">
+            <VerticalStackLayout Spacing="32" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsProgressBar Label="Scanning registry" HelperText="This can take a few minutes" />
+                <cds:CdsProgressBar Label="Scanning registry" Size="Small" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Status" Description="Finished forces a full support-success bar with a check; error a full support-error bar, an error icon and text-error helper text.">
+            <VerticalStackLayout Spacing="32" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsProgressBar Label="Uploading usage-march.csv" Value="100" Status="Finished" HelperText="100 of 100 MB" />
+                <cds:CdsProgressBar Label="Uploading usage-april.csv" Value="63" Status="Error" HelperText="Connection lost. Check your network and try again." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Types and hidden label" Description="Inline puts the label beside the track (helper text is not shown; finished and error hide the track). Indented pads label and helper text by 16. HideLabel keeps the label as the accessible name.">
+            <VerticalStackLayout Spacing="32" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsProgressBar Type="Inline" Label="Copying" Value="64" HelperText="64%" />
+                <cds:CdsProgressBar Type="Inline" Label="Copied" Value="100" Status="Finished" />
+                <cds:CdsProgressBar Type="Inline" Label="Copy failed" Value="20" Status="Error" />
+                <cds:CdsProgressBar Type="Indented" Label="Indexing" Value="30" Size="Small" HelperText="30 of 100 documents" />
+                <cds:CdsProgressBar Label="Hidden label (named 'Syncing')" HideLabel="True" Value="55" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="A bar that only moves forward; Run again restarts the demo.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsProgressBar x:Name="Demo" Label="Exporting report" Value="0" HelperText="0 of 100 rows" />
+                <cds:CdsButton Text="Run again" Kind="Tertiary" Size="Md" Clicked="OnRun" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The track follows the layer, so it stays visible on cards.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="24">
+                            <cds:CdsProgressBar Label="Uploading" Value="42" HelperText="42 of 100 MB" />
+                            <cds:CdsProgressBar Label="Uploaded" Value="100" Status="Finished" HelperText="Done" />
+                            <cds:CdsProgressBar Label="Upload failed" Value="30" Status="Error" HelperText="Try again" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

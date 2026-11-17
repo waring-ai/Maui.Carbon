@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.IconIndicatorPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Kinds at 16" Description="Each kind has its own shape and symbol as well as a status-* color; the label is the accessible text.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsIconIndicator Kind="Failed" Label="Failed" Size="16" />
+                <cds:CdsIconIndicator Kind="CautionMajor" Label="Degraded: 2 of 4 pods ready" Size="16" />
+                <cds:CdsIconIndicator Kind="CautionMinor" Label="Cert expires in 9 days" Size="16" />
+                <cds:CdsIconIndicator Kind="Undefined" Label="Outlier" Size="16" />
+                <cds:CdsIconIndicator Kind="Succeeded" Label="Succeeded" Size="16" />
+                <cds:CdsIconIndicator Kind="Normal" Label="Healthy" Size="16" />
+                <cds:CdsIconIndicator Kind="InProgress" Label="Deploying (3 of 5 pods)" Size="16" />
+                <cds:CdsIconIndicator Kind="Incomplete" Label="Partially configured" Size="16" />
+                <cds:CdsIconIndicator Kind="NotStarted" Label="Not started" Size="16" />
+                <cds:CdsIconIndicator Kind="Pending" Label="Pending approval" Size="16" />
+                <cds:CdsIconIndicator Kind="Unknown" Label="Unknown" Size="16" />
+                <cds:CdsIconIndicator Kind="Informative" Label="Informative" Size="16" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Kinds at 20" Description="The 20 glyph pairs with body-compact-02.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsIconIndicator Kind="Failed" Label="Failed" Size="20" />
+                <cds:CdsIconIndicator Kind="CautionMajor" Label="Degraded: 2 of 4 pods ready" Size="20" />
+                <cds:CdsIconIndicator Kind="CautionMinor" Label="Cert expires in 9 days" Size="20" />
+                <cds:CdsIconIndicator Kind="Undefined" Label="Outlier" Size="20" />
+                <cds:CdsIconIndicator Kind="Succeeded" Label="Succeeded" Size="20" />
+                <cds:CdsIconIndicator Kind="Normal" Label="Healthy" Size="20" />
+                <cds:CdsIconIndicator Kind="InProgress" Label="Deploying (3 of 5 pods)" Size="20" />
+                <cds:CdsIconIndicator Kind="Incomplete" Label="Partially configured" Size="20" />
+                <cds:CdsIconIndicator Kind="NotStarted" Label="Not started" Size="20" />
+                <cds:CdsIconIndicator Kind="Pending" Label="Pending approval" Size="20" />
+                <cds:CdsIconIndicator Kind="Unknown" Label="Unknown" Size="20" />
+                <cds:CdsIconIndicator Kind="Informative" Label="Informative" Size="20" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In context" Description="A status column: place the indicator in the same row as the object it describes.">
+            <Grid ColumnDefinitions="180,260" RowDefinitions="Auto,Auto,Auto" RowSpacing="12" HorizontalOptions="Start">
+                <cds:CdsText Text="checkout-api" />
+                <cds:CdsIconIndicator Grid.Column="1" Kind="Succeeded" Label="Running" />
+                <cds:CdsText Grid.Row="1" Text="orders-db" />
+                <cds:CdsIconIndicator Grid.Row="1" Grid.Column="1" Kind="CautionMajor" Label="Degraded: 2 of 4 pods ready" />
+                <cds:CdsText Grid.Row="2" Text="search-indexer" />
+                <cds:CdsIconIndicator Grid.Row="2" Grid.Column="1" Kind="Failed" Label="Failed: image pull error" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsIconIndicator Kind="Failed" Label="Failed" />
+                            <cds:CdsIconIndicator Kind="CautionMajor" Label="Degraded" />
+                            <cds:CdsIconIndicator Kind="CautionMinor" Label="Expiring" />
+                            <cds:CdsIconIndicator Kind="Undefined" Label="Outlier" />
+                            <cds:CdsIconIndicator Kind="Succeeded" Label="Succeeded" />
+                            <cds:CdsIconIndicator Kind="Normal" Label="Healthy" />
+                            <cds:CdsIconIndicator Kind="InProgress" Label="Deploying" />
+                            <cds:CdsIconIndicator Kind="NotStarted" Label="Not started" />
+                            <cds:CdsIconIndicator Kind="Pending" Label="Pending" />
+                            <cds:CdsIconIndicator Kind="Unknown" Label="Unknown" />
+                            <cds:CdsIconIndicator Kind="Informative" Label="Informative" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

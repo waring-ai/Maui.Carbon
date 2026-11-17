@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.InlineNotificationPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Low contrast" Description="Low contrast is the safer default: notification-background fills, text-primary and support-* accents with a 1px outline in the kind color.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsInlineNotification Kind="Error" Title="Deployment failed" Subtitle="Image checkout-api:2.4 was not found. Check the tag and try again." IsLowContrast="True" />
+                <cds:CdsInlineNotification Kind="Success" Title="Cluster created" Subtitle="prod-eu-de-1 is ready to accept workloads." IsLowContrast="True" />
+                <cds:CdsInlineNotification Kind="Warning" Title="Quota nearly reached" Subtitle="You have used 92 of 100 vCPUs in this region." IsLowContrast="True" />
+                <cds:CdsInlineNotification Kind="WarningAlt" Title="Certificate expires soon" Subtitle="Renew the ingress certificate before 30 Nov 2026." IsLowContrast="True" />
+                <cds:CdsInlineNotification Kind="Info" Title="Maintenance window scheduled" Subtitle="Nodes restart on Sunday between 02:00 and 04:00 UTC." IsLowContrast="True" />
+                <cds:CdsInlineNotification Kind="InfoSquare" Title="New region available" Subtitle="Frankfurt (eu-de) now supports GPU worker pools." IsLowContrast="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="High contrast" Description="The inverse style: background-inverse with text-inverse and support-*-inverse accents. Do not mix both styles on one surface.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsInlineNotification Kind="Error" Title="Deployment failed" Subtitle="Image checkout-api:2.4 was not found. Check the tag and try again." />
+                <cds:CdsInlineNotification Kind="Success" Title="Cluster created" Subtitle="prod-eu-de-1 is ready to accept workloads." />
+                <cds:CdsInlineNotification Kind="Warning" Title="Quota nearly reached" Subtitle="You have used 92 of 100 vCPUs in this region." />
+                <cds:CdsInlineNotification Kind="WarningAlt" Title="Certificate expires soon" Subtitle="Renew the ingress certificate before 30 Nov 2026." />
+                <cds:CdsInlineNotification Kind="Info" Title="Maintenance window scheduled" Subtitle="Nodes restart on Sunday between 02:00 and 04:00 UTC." />
+                <cds:CdsInlineNotification Kind="InfoSquare" Title="New region available" Subtitle="Frankfurt (eu-de) now supports GPU worker pools." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Without a close button" Description="HideCloseButton for messages the person must read or act on. Inline notifications never dismiss themselves.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsInlineNotification Kind="Error" IsLowContrast="True" HideCloseButton="True" Title="Payment declined" Subtitle="Update the billing method to keep your clusters running." />
+                <cds:CdsInlineNotification Kind="Warning" HideCloseButton="True" Title="Read-only mode" Subtitle="Writes are paused while the database is restored." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Close the notification with its button or press Escape while focus is inside. CloseRequested can cancel; Closed fires afterwards.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsInlineNotification x:Name="Demo" Kind="Success" IsLowContrast="True" Title="Snapshot created" Subtitle="volume-snapshot-0412 is available for restores." CloseRequested="OnCloseRequested" Closed="OnClosed" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Show again" Kind="Tertiary" Size="Md" Clicked="OnShowAgain" />
+                    <cds:CdsText x:Name="Status" Text="Open" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsInlineNotification Kind="Error" IsLowContrast="True" Title="Deployment failed" Subtitle="Image not found." />
+                            <cds:CdsInlineNotification Kind="Success" Title="Cluster created" Subtitle="prod-eu-de-1 is ready." />
+                            <cds:CdsInlineNotification Kind="Warning" IsLowContrast="True" Title="Quota nearly reached" Subtitle="92 of 100 vCPUs." HideCloseButton="True" />
+                            <cds:CdsInlineNotification Kind="Info" Title="Maintenance scheduled" Subtitle="Sunday 02:00 UTC." HideCloseButton="True" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

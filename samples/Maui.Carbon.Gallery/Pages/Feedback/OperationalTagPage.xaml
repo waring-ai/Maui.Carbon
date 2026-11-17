@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.OperationalTagPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Types" Description="A 1px tag-border-* outline on the tag-background-* fill; hover switches the fill to tag-hover-*. There is no high-contrast or outline type.">
+            <FlexLayout Wrap="Wrap">
+                <cds:CdsOperationalTag Text="Red" Type="Red" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Magenta" Type="Magenta" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Purple" Type="Purple" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Blue" Type="Blue" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Cyan" Type="Cyan" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Teal" Type="Teal" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Green" Type="Green" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Gray" Type="Gray" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="CoolGray" Type="CoolGray" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="WarmGray" Type="WarmGray" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes, icon and disabled" Description="sm 18, md 24, lg 32 (16px side padding). Disabled has a border-disabled outline and no hover.">
+            <FlexLayout Wrap="Wrap" AlignItems="Center">
+                <cds:CdsOperationalTag Text="+3" Type="Blue" Size="Sm" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="+3" Type="Blue" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="+3" Type="Blue" Size="Lg" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Add label" Type="Teal" Icon="Add" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
+                <cds:CdsOperationalTag Text="A very long operational tag label that is truncated" Type="Purple" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Opens a popover with the rest of the labels. IsExpanded is announced; keyboard: Tab to focus, Enter or Space to activate.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsTag Text="prod" Type="Green" />
+                    <cds:CdsTag Text="eu-de" Type="Blue" />
+                    <cds:CdsPopover x:Name="More" Placement="BottomStart">
+                        <cds:CdsOperationalTag x:Name="MoreTag" Text="+3" Type="Gray" Clicked="OnMoreClicked" />
+                        <cds:CdsPopover.PopoverContent>
+                            <VerticalStackLayout Spacing="8" Padding="16">
+                                <cds:CdsTag Text="team-platform" Type="Purple" />
+                                <cds:CdsTag Text="cost-center-42" Type="Teal" />
+                                <cds:CdsTag Text="pci" Type="Red" />
+                            </VerticalStackLayout>
+                        </cds:CdsPopover.PopoverContent>
+                    </cds:CdsPopover>
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Closed" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <FlexLayout Wrap="Wrap">
+                            <cds:CdsOperationalTag Text="+3" Type="Blue" Margin="0,0,8,8" />
+                            <cds:CdsOperationalTag Text="Red" Type="Red" Margin="0,0,8,8" />
+                            <cds:CdsOperationalTag Text="Green" Type="Green" Margin="0,0,8,8" />
+                            <cds:CdsOperationalTag Text="Gray" Margin="0,0,8,8" />
+                            <cds:CdsOperationalTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
+                        </FlexLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

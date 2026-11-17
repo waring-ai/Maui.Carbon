@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.SkeletonIconPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Sizes" Description="16 by default; set Size to 20, 24 or 32 to match the icon it stands for.">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsSkeletonIcon />
+                <cds:CdsSkeletonIcon Size="20" />
+                <cds:CdsSkeletonIcon Size="24" />
+                <cds:CdsSkeletonIcon Size="32" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With text" Description="An icon placeholder next to a SkeletonText label in a loading list.">
+            <VerticalStackLayout Spacing="12" WidthRequest="320" HorizontalOptions="Start">
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsSkeletonIcon />
+                    <cds:CdsSkeletonText WidthRequest="200" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsSkeletonIcon />
+                    <cds:CdsSkeletonText WidthRequest="150" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsSkeletonIcon />
+                    <cds:CdsSkeletonText WidthRequest="180" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsSkeletonIcon />
+                            <cds:CdsSkeletonText WidthRequest="100" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>
