@@ -1,0 +1,39 @@
+<!-- @dsCard group="Status" height=554 subtitle="Active, inactive, finished, error; spinner only; replacing a button in a form footer" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .stack{display:flex;flex-direction:column;gap:32px} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.form{border:1px solid var(--border-subtle-01);background:var(--layer-01)} .form-body{padding:16px;display:flex;flex-direction:column;gap:16px} .form-body h3{margin:0;font:400 20px/28px var(--font-sans);color:var(--text-primary)}
+.foot{display:grid;grid-template-columns:1fr 1fr;height:64px} .foot>.cds--btn{max-width:none;width:100%;height:64px;align-items:flex-start;padding-top:14px} .foot .cds--inline-loading{height:64px;padding-inline:16px;box-sizing:border-box;align-items:center} .foot .err{display:flex;align-items:center;gap:8px;padding-inline-end:8px} .foot .err .cds--inline-loading{flex:1;min-width:0} .field{display:flex;align-items:flex-end;gap:8px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState,useRef,useEffect}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+// Carbon pattern: the primary button is replaced by InlineLoading while the request runs.
+function Footer(props){
+ const [st,setSt]=useState(props.start||'idle');
+ const timer=useRef();
+ useEffect(()=>()=>clearTimeout(timer.current),[]);
+ function save(){setSt('active');timer.current=setTimeout(()=>setSt(props.fail?'error':'finished'),1600)}
+ const text={active:'Saving...',finished:'Saved',error:'Could not save'}[st];
+ return h('div',{className:'form'},
+  h('div',{className:'form-body'},h('h3',null,props.title),h(C.TextInput,{id:props.id,labelText:'Display name',defaultValue:props.value,disabled:st==='active'})),
+  h('div',{className:'foot'},
+   h(C.Button,{kind:'secondary',disabled:st==='active'},'Cancel'),
+   st==='idle'?h(C.Button,{kind:'primary',onClick:save},'Save changes'):
+   st==='error'?h('div',{className:'err'},h(C.InlineLoading,{status:'error',description:text}),h(C.Button,{kind:'ghost',size:'sm',onClick:save},'Retry')):
+   h(C.InlineLoading,{status:st,description:text,onSuccess:()=>setSt('idle')})));
+}
+function App(){
+ return h('div',{className:'stack'},
+  h('div',{className:'grid'},
+   B('status="active"',h(C.InlineLoading,{status:'active',description:'Restarting cluster...'})),
+   B('status="finished" (calls onSuccess after 1.5s)',h(C.InlineLoading,{status:'finished',description:'Cluster restarted'})),
+   B('status="error": say that it failed',h(C.InlineLoading,{status:'error',description:'Restart failed'})),
+   B('status="inactive": spinner winds down to nothing; text stays',h(C.InlineLoading,{status:'inactive',description:'Restart cancelled'}))),
+  h('div',{className:'grid'},
+   B('Spinner only, where the context is clear',h('div',{className:'field'},h(C.TextInput,{id:'il-sub',labelText:'Subdomain',defaultValue:'acme-prod',helperText:'Checking availability'}),h('div',{style:{marginBottom:20}},h(C.InlineLoading,{status:'active',iconDescription:'Checking availability'}))))),
+  h('div',{className:'grid2'},
+   B('In context: Save changes is replaced while saving, then resets (click it)',h(Footer,{id:'il-a',title:'API key ci-deploy',value:'CI deploy key'})),
+   B('In context: the request fails; the label says so and offers a retry (click Save)',h(Footer,{id:'il-b',title:'Bucket logs-archive',value:'Logs archive',fail:true}))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

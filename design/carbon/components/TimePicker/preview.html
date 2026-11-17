@@ -1,0 +1,50 @@
+<!-- @dsCard group="Forms" height=792 subtitle="sm / md / lg; AM/PM and time zone selects, 24-hour, invalid, warning, read-only, disabled; maintenance window" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:24px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+const opt=v=>h(C.SelectItem,{key:v,value:v,text:v});
+const AP=(id,v)=>h(C.TimePickerSelect,{id:id+'-ap',labelText:'AM or PM',defaultValue:v||'AM'},opt('AM'),opt('PM'));
+const TZ=(id,v)=>h(C.TimePickerSelect,{id:id+'-tz',labelText:'Time zone',defaultValue:v||'UTC'},opt('UTC'),opt('CST'),opt('CET'),opt('JST'));
+const valid=t=>/^(1[012]|0?[1-9]):[0-5][0-9]$/.test(t);
+function App(){
+ const [t,setT]=React.useState('2:30');
+ const [ap,setAp]=React.useState('AM');
+ const bad=!valid(t);
+ const hr=+t.split(':')[0], peak=!bad&&ap==='PM'&&(hr===12||hr<6);
+ return h('div',null,
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.TimePicker,{id:'tp-sm',size:'sm',labelText:'Start time',defaultValue:'09:00'},AP('tp-sm')),
+   h(C.TimePicker,{id:'tp-md',labelText:'Start time',defaultValue:'09:00'},AP('tp-md')),
+   h(C.TimePicker,{id:'tp-lg',size:'lg',labelText:'Start time',defaultValue:'09:00'},AP('tp-lg'))),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('AM/PM and time zone',h(C.TimePicker,{id:'tp-tz',labelText:'Backup time',placeholder:'hh:mm'},AP('tp-tz'),TZ('tp-tz'))),
+   Cell('24-hour, no selects',h(C.TimePicker,{id:'tp-24',labelText:'Report time (UTC)',defaultValue:'18:45',pattern:'([01][0-9]|2[0-3]):[0-5][0-9]'})),
+   Cell('Invalid',h(C.TimePicker,{id:'tp-inv',labelText:'Snapshot time',defaultValue:'13:30',invalid:true,invalidText:'Enter a time from 1:00 to 12:59, then choose AM or PM'},AP('tp-inv','PM'))),
+   Cell('Warning',h(C.TimePicker,{id:'tp-warn',labelText:'Restart time',defaultValue:'11:00',warning:true,warningText:'Traffic peaks at this time. Restarts may slow checkout.'},AP('tp-warn'),TZ('tp-warn','CST'))),
+   Cell('Read only',h(C.TimePicker,{id:'tp-ro',labelText:'Billing cutoff',defaultValue:'11:59',readOnly:true},AP('tp-ro','PM'),TZ('tp-ro'))),
+   Cell('Disabled',h(C.TimePicker,{id:'tp-dis',labelText:'Log rotation',defaultValue:'12:00',disabled:true},AP('tp-dis'),TZ('tp-dis')))),
+  Cap('In context: maintenance window'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Maintenance window'),
+   h('p',{className:'sub'},'Patches for checkout-prod are applied once a week in this window.'),
+   h('div',{className:'row'},
+    h(C.Select,{id:'mw-day',labelText:'Day',defaultValue:'sun',},h(C.SelectItem,{value:'sat',text:'Saturday'}),h(C.SelectItem,{value:'sun',text:'Sunday'})),
+    h(C.TimePicker,{id:'mw-time',labelText:'Start time',value:t,onChange:e=>setT(e.target.value),invalid:bad,invalidText:'Use the format hh:mm, for example 2:30',warning:peak,warningText:'This overlaps peak traffic (12:00 PM to 6:00 PM). Choose an earlier or later time.'},
+     h(C.TimePickerSelect,{id:'mw-ap',labelText:'AM or PM',value:ap,onChange:e=>setAp(e.target.value)},opt('AM'),opt('PM')),TZ('mw','CST'))),
+   h('div',{className:'actions'},h(C.Button,{kind:'primary',disabled:bad},'Save window'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

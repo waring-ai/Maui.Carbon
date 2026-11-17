@@ -1,0 +1,44 @@
+<!-- @dsCard group="AI" height=556 subtitle="AI-tinted text, placeholder and icon skeletons; an AI summary while it generates" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary);font-family:var(--font-sans)}
+.row{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;margin-bottom:24px}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.col{flex:1 1 0;min-width:0}
+.ctx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.ctx .cds--tile{min-block-size:180px}
+.th{display:flex;align-items:center;gap:8px;margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px}
+.ts{margin:0 0 16px;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.media{display:flex;gap:16px;align-items:flex-start}
+.done p{margin:0 0 8px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.ai p{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const AI=()=>h(C.AILabel,{size:'mini','aria-label':'About this summary'},h(C.AILabelContent,null,h('div',{className:'ai'},h('p',null,'Generated from the last 7 days of node events.'))));
+function Summary(props){
+ return h(C.Tile,{className:'cds--tile--decorator','aria-busy':props.loading?'true':undefined},
+  h('p',{className:'th'},'Health summary: prod-eu-1'),
+  h('p',{className:'ts'},props.loading?'Generating, about 10 seconds':'Generated 2 minutes ago'),
+  props.loading
+   ? h('div',{className:'media'},h(C.AISkeletonIcon,{style:{width:24,height:24}}),h('div',{style:{flex:1}},h(C.AISkeletonText,{heading:true,width:'60%'}),h(C.AISkeletonText,{paragraph:true,lineCount:3})))
+   : h('div',{className:'done'},h('p',null,'Two nodes restarted after memory pressure on Tuesday. Both recovered within 4 minutes.'),h('p',null,'No action needed. Consider a memory-optimized pool if restarts continue.')),
+  h(AI));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'row'},
+   h('div',{className:'col'},Cap('AISkeletonText: single line, heading, width 60%'),
+    h(C.AISkeletonText,null),h(C.AISkeletonText,{heading:true}),h(C.AISkeletonText,{width:'60%'})),
+   h('div',{className:'col'},Cap('paragraph with lineCount 4 (widths vary)'),h(C.AISkeletonText,{paragraph:true,lineCount:4})),
+   h('div',{className:'col'},Cap('Plain SkeletonText, for comparison'),h(C.SkeletonText,{paragraph:true,lineCount:3}))),
+  h('div',{className:'row'},
+   h('div',null,Cap('AISkeletonPlaceholder, 100 x 100 default'),h(C.AISkeletonPlaceholder)),
+   h('div',null,Cap('Sized with style: a 16x9 chart area'),h(C.AISkeletonPlaceholder,{style:{width:178,height:100}})),
+   h('div',null,Cap('AISkeletonIcon 16 (default), 24, 32'),h('div',{style:{display:'flex',gap:16,alignItems:'center'}},
+    h(C.AISkeletonIcon),h(C.AISkeletonIcon,{style:{width:24,height:24}}),h(C.AISkeletonIcon,{style:{width:32,height:32}})))),
+  Cap('In context: an AI-decorated tile while the summary generates (aria-busy on the tile), and once it has loaded'),
+  h('div',{className:'ctx'},h(Summary,{loading:true}),h(Summary,{loading:false})));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

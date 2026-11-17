@@ -1,0 +1,23 @@
+<!-- @dsCard group="Data" height=1190 subtitle="Loading placeholder for a data table: title, toolbar, rows, zebra, real headers in a page" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .mb{margin-bottom:24px}
+.page{border:1px solid var(--border-subtle-01);padding:24px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.page .crumb{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}.page h3{font:400 28px/36px var(--font-sans);margin:0 0 4px}.page p{margin:0 0 24px;color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function App(){
+ return h('div',null,
+  Cap('Default: title and description bars, toolbar with a button bar, header bars; columnCount 5, rowCount 3'),
+  h('div',{className:'mb'},h(C.DataTableSkeleton,{rowCount:3,columnCount:5})),
+  Cap('showHeader={false}, showToolbar={false}, zebra; columnCount 4, rowCount 4'),
+  h('div',{className:'mb'},h(C.DataTableSkeleton,{showHeader:false,showToolbar:false,zebra:true,rowCount:4,columnCount:4})),
+  Cap('In context: the clusters page while the list loads. The page title is real; headers match the table that replaces the skeleton'),
+  h('div',{className:'page'},
+   h('p',{className:'crumb'},'Kubernetes / Clusters'),
+   h('h3',null,'Clusters'),
+   h('p',null,'Clusters in all regions of this account.'),
+   h(C.DataTableSkeleton,{showHeader:false,rowCount:4,columnCount:5,headers:[{key:'name',header:'Name'},{key:'status',header:'Status'},{key:'region',header:'Region'},{key:'nodes',header:'Nodes'},{key:'created',header:'Created'}],'aria-label':'Clusters (loading)'})));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

@@ -1,0 +1,68 @@
+<!-- @dsCard group="Patterns" height=1278 subtitle="First use, no search results, error loading, no permission" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+/* the empty-state layout: icon, heading-03 title, body-01 text, actions; left-aligned, 48px padding */
+.es{display:flex;flex-direction:column;align-items:flex-start;padding:48px;text-align:start}
+.es__icon{color:var(--icon-secondary);margin-bottom:24px}
+.es__icon .cds--icon{fill:currentColor;display:block}
+.es__title{margin:0 0 8px;color:var(--text-primary);max-width:40ch}
+.es__body{margin:0;color:var(--text-secondary);max-width:48ch}
+.es__actions{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;margin-top:24px}
+/* inside a table area the block replaces the rows; override the centered table empty block */
+.es-table .cds--data-table-empty{display:block;padding:0;text-align:start}
+/* Carbon: the empty state replaces the table structure, so the column headers are hidden and screen readers don't read an empty grid */
+.es-table thead{display:none}
+.tile-head{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0}
+.tile-head h3{margin:0;color:var(--text-primary)}
+.grid > div{display:flex;flex-direction:column}
+.es-tile{padding:0;flex:1}
+/* workaround: header labels are forced to text-align:start, so align:'right' does not reach the header text */
+.cds--data-table th[align='right'] .cds--table-header-label{text-align:end}
+.es-tile .es{padding:32px 16px 48px}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function EmptyState(p){
+ return h('div',{className:'es',role:p.role},
+  h('div',{className:'es__icon'},h(C.Icon,{name:p.icon,size:32})),
+  h('h3',{className:'es__title cds--type-heading-03'},p.title),
+  h('p',{className:'es__body cds--type-body-01'},p.body),
+  p.actions?h('div',{className:'es__actions'},p.actions):null);
+}
+const bucketHeaders=[{key:'name',header:'Name'},{key:'location',header:'Location'},{key:'class',header:'Storage class'},{key:'size',header:'Size',align:'right'}];
+const clusterHeaders=[{key:'name',header:'Name'},{key:'status',header:'Status'},{key:'region',header:'Region'},{key:'nodes',header:'Worker nodes',align:'right'}];
+function App(){
+ return h('div',null,
+  h('div',{className:'sec es-table'},Cap('No data yet: first use, in the table area, with the primary action'),
+   h(C.DataTable,{title:'Buckets',description:'Object storage buckets in this account.',headers:bucketHeaders,rows:[],size:'md',
+    emptyState:h(EmptyState,{icon:'folder',title:'Create your first bucket',
+     body:'Buckets hold objects such as backups, logs and media files. You choose the location and storage class when you create one.',
+     actions:[h(C.Button,{key:'c',kind:'primary',renderIcon:'add'},'Create bucket'),h(C.Link,{key:'l',href:'#'},'Learn about buckets')]})})),
+  h('div',{className:'sec es-table'},Cap('No search results: the toolbar stays so people can change the query; offer a way back to all results'),
+   h(C.DataTable,{'aria-label':'Clusters',headers:clusterHeaders,size:'md',search:true,persistentSearch:true,defaultSearchValue:'staging-ap',searchPlaceholder:'Search clusters',
+    rows:[{id:'a',name:'prod-eu-01',status:'Running',region:'Frankfurt',nodes:12},{id:'b',name:'prod-us-02',status:'Running',region:'Dallas',nodes:18}],
+    toolbarContent:h(C.Button,{kind:'primary',renderIcon:'add'},'Create cluster'),
+    emptyState:h(EmptyState,{icon:'search',title:'No clusters match “staging-ap”',
+     body:'Check the spelling or search by region or version instead. Clear the search to see all 23 clusters.',
+     actions:h(C.Button,{kind:'tertiary'},'Clear search')})})),
+  h('div',{className:'grid'},
+   h('div',null,Cap('Error loading: say what failed and offer a retry'),
+    h(C.Tile,{className:'es-tile'},
+     h('div',{className:'tile-head'},h('h3',{className:'cds--type-heading-compact-02'},'Usage this month')),
+     h(EmptyState,{icon:'warning--alt',role:'alert',title:'Usage data didn’t load',
+      body:'The billing service didn’t respond. Try again in a moment. If it keeps failing, check the service status page.',
+      actions:[h(C.Button,{key:'r',kind:'tertiary',size:'md',renderIcon:'restart'},'Try again'),h(C.Link,{key:'l',href:'#',renderIcon:'launch'},'Service status')]}))),
+   h('div',null,Cap('No permission: name the missing access and who can grant it'),
+    h(C.Tile,{className:'es-tile'},
+     h('div',{className:'tile-head'},h('h3',{className:'cds--type-heading-compact-02'},'API keys')),
+     h(EmptyState,{icon:'view--off',title:'You don’t have access to API keys',
+      body:'Viewing API keys needs the Key manager role. Ask an account administrator to add you to the Key managers access group.',
+      actions:[h(C.Button,{key:'r',kind:'secondary',size:'md'},'Request access'),h(C.Link,{key:'l',href:'#'},'About access groups')]})))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

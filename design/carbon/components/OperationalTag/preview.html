@@ -1,0 +1,42 @@
+<!-- @dsCard group="Status" height=533 subtitle="Clickable tag in ten colors: sizes, icon, disabled, truncation, a +3 tag that opens a popover" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.ctx{border:1px solid var(--border-subtle-01);padding:16px 16px 88px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.tr{display:grid;grid-template-columns:200px 140px 1fr;align-items:center;column-gap:16px;block-size:48px;padding-inline:16px;border-block-end:1px solid var(--border-subtle-01)}
+.tr.hd{background:var(--layer-accent-01);font-weight:600}.tr.bd{background:var(--layer-01)}.tags{display:flex;align-items:center;gap:4px}
+.more{display:flex;flex-wrap:wrap;gap:4px;padding:16px;inline-size:240px;box-sizing:border-box}.more h4{inline-size:100%;margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const COLORS=[['gray','Compute'],['red','Security'],['magenta','Billing'],['purple','Identity'],['blue','Networking'],['cyan','Storage'],['teal','Databases'],['green','Monitoring'],['cool-gray','Containers'],['warm-gray','Logging']];
+function Row({name,region,shown,extra,open}){
+ const [o,setO]=React.useState(open);
+ return h('div',{className:'tr bd'},h('span',null,name),h('span',null,region),
+  h('div',{className:'tags'},shown.map(t=>h(C.Tag,{key:t[0],type:t[1],size:'md'},t[0])),
+   h(C.Popover,{open:o,align:'bottom-start',onRequestClose:()=>setO(false)},
+    h(C.OperationalTag,{text:'+'+extra.length,type:'gray','aria-expanded':o,onClick:()=>setO(!o)}),
+    h(C.PopoverContent,null,h('div',{className:'more'},h('h4',null,'All labels'),shown.concat(extra).map(t=>h(C.Tag,{key:t[0],type:t[1],size:'md'},t[0])))))));
+}
+function App(){
+ const [n,setN]=React.useState(0);
+ return h('div',null,
+  Cap('type: gray (default), red, magenta, purple, blue, cyan, teal, green, cool-gray, warm-gray (no high-contrast or outline). Clicked '+n+' times'),
+  h('div',{className:'row'},COLORS.map(c=>h(C.OperationalTag,{key:c[0],text:c[1],type:c[0],onClick:()=>setN(n+1)}))),
+  Cap('Sizes sm, md (default), lg; renderIcon (not at sm); disabled at md and lg; a truncated label shows its full text in a tooltip'),
+  h('div',{className:'row'},
+   h(C.OperationalTag,{text:'+4 regions',size:'sm',type:'blue'}),
+   h(C.OperationalTag,{text:'+4 regions',size:'md',type:'blue'}),
+   h(C.OperationalTag,{text:'+4 regions',size:'lg',type:'blue'}),
+   h(C.OperationalTag,{text:'3 owners',renderIcon:'user',type:'purple'}),
+   h(C.OperationalTag,{text:'3 owners',renderIcon:'user',size:'lg',type:'purple'}),
+   h(C.OperationalTag,{text:'+2 policies',disabled:true}),
+   h(C.OperationalTag,{text:'+2 policies',disabled:true,size:'lg'}),
+   h(C.OperationalTag,{text:'Compliance: SOC 2 Type II, ISO 27001',type:'teal'})),
+  Cap('In context: a clusters table shows two labels and a "+3" operational tag that opens a popover with all of them'),
+  h('div',{className:'ctx'},
+   h('div',{className:'tr hd'},h('span',null,'Cluster'),h('span',null,'Region'),h('span',null,'Labels')),
+   h(Row,{name:'prod-us-east',region:'us-east-1',open:true,shown:[['production','red'],['payments','magenta']],extra:[['pci','purple'],['team-checkout','blue'],['tier-1','teal']]}),
+   h(Row,{name:'staging-eu',region:'eu-west-2',open:false,shown:[['staging','cyan'],['payments','magenta']],extra:[['team-checkout','blue'],['autoscale','green'],['spot','warm-gray']]})));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

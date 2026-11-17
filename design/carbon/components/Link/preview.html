@@ -1,0 +1,28 @@
+<!-- @dsCard group="Navigation" height=488 subtitle="Standalone sizes, inline, icons, visited, disabled, on inverse" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px;margin-bottom:32px} .col{display:flex;flex-direction:column;gap:12px;align-items:flex-start} .para{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-primary);margin:0} .item{display:flex;gap:12px;align-items:baseline} .item small{font:400 12px/16px var(--font-mono,monospace);color:var(--text-helper);min-width:20px}
+.help{background:var(--layer-01);padding:16px;max-width:560px} .help h4{margin:0 0 8px;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .help ul{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,...kids){return h('div',null,Cap(cap),h('div',{className:'col'},...kids))}
+function It(t,n){return h('div',{className:'item'},h('small',null,t),n)}
+const here=location.href;
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   B('Standalone sizes: sm 12/16, md 14/18, lg 16/22',It('sm',h(C.Link,{href:'#',size:'sm'},'View all buckets')),It('md',h(C.Link,{href:'#'},'View all buckets')),It('lg',h(C.Link,{href:'#',size:'lg'},'View all buckets'))),
+   B('renderIcon: arrow--right (internal), launch',h(C.Link,{href:'#nodes',renderIcon:'arrow--right'},'Go to node pools'),h(C.Link,{href:'#status',target:'_blank',renderIcon:'launch'},'Service status page'),h(C.Link,{href:'#docs',size:'lg',renderIcon:'launch'},'API documentation')),
+   B('visited (opt-in: link-visited once opened) and disabled',h(C.Link,{href:here,visited:true},'Billing overview'),h(C.Link,{disabled:true},'Download invoice'))),
+  h('div',{className:'grid',style:{gridTemplateColumns:'3fr 2fr'}},
+   h('div',null,Cap('inline: underlined inside running text, takes the paragraph size, no icon'),
+    h('p',{className:'para'},'Deleting a cluster removes its worker nodes and load balancers. Volumes are kept for 7 days, see ',h(C.Link,{href:'#',inline:true},'volume retention'),' to change this. Read the ',h(C.Link,{href:'#',inline:true},'migration guide for clusters created before version 1.28'),' before you start.')),
+   B('On high-contrast surfaces: link-inverse',h(C.InlineNotification,{kind:'info',hideCloseButton:true,title:'Quota raised',subtitle:h('span',null,h(C.Link,{href:'#',inline:true},'Review new limits'))}))),
+  Cap('In context: help links at the end of a panel'),
+  h('div',{className:'help'},
+   h('h4',null,'Need help connecting to your cluster?'),
+   h('p',{className:'para'},'Download the kubeconfig file, then run ',h('code',null,'kubectl get nodes'),' to check access.'),
+   h('ul',null,h('li',null,h(C.Link,{href:'#',renderIcon:'arrow--right'},'Download kubeconfig')),h('li',null,h(C.Link,{href:'#',renderIcon:'launch',target:'_blank'},'Kubernetes CLI reference')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

@@ -1,0 +1,98 @@
+<!-- @dsCard group="Patterns" height=1521 subtitle="Account settings: tabs, save-on-submit form, instant toggles, read-only IDs, danger zone" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.head{margin:16px 0 24px}
+.head h1{margin:0 0 8px;color:var(--text-primary)}
+.head p{margin:0;max-width:640px;color:var(--text-secondary)}
+.panel{padding-top:32px;max-width:640px}
+.sec{padding-bottom:32px;margin-bottom:32px;border-bottom:1px solid var(--border-subtle-01)}
+.sec:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.sec h2{margin:0 0 4px;color:var(--text-primary)}
+.sec > p{margin:0 0 24px;color:var(--text-secondary)}
+.idrow{display:flex;align-items:flex-end}
+.idrow .cds--form-item{flex:1}
+.actions{display:flex;align-items:center;gap:16px;margin-top:32px}
+.pref{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:16px 0;border-top:1px solid var(--border-subtle-01)}
+/* the Toggle's own label names the switch (aria-labelledby); it is visually hidden because the row title shows the same text */
+.ps-toggle .cds--toggle__label-text{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* workaround: the base TextInput sets the native readonly attribute but not cds--text-input-wrapper--readonly, so Carbon's read-only look is applied here */
+.cds--text-input[readonly]{background:transparent;border-block-end-color:var(--border-subtle-01)}
+.pref .t{display:block;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary);margin-bottom:4px}
+.pref .d{display:block;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-helper);max-width:44ch}
+.pref .ctl{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:160px}
+.pref .cds--inline-loading{min-height:16px;justify-content:flex-end}
+.danger{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:16px;background:var(--layer-01)}
+.danger .t{display:block;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary);margin-bottom:4px}
+.danger .d{display:block;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);max-width:44ch}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState,useRef,useEffect}=React;
+const saved={name:'Northwind production',region:'eu-de',contact:'platform-team@northwind.dev'};
+function Details(){
+ const [v,setV]=useState({...saved,name:'Northwind prod (EU)'});
+ const [state,setState]=useState('idle');
+ const dirty=v.name!==saved.name||v.region!==saved.region||v.contact!==saved.contact;
+ const set=k=>e=>{setV({...v,[k]:e.target.value});setState('idle')};
+ return h('section',{className:'sec','aria-labelledby':'ps-details'},
+  h('h2',{id:'ps-details',className:'cds--type-heading-03'},'Account details'),
+  h('p',{className:'cds--type-body-01'},'Changes here apply after you save them.'),
+  h(C.Form,{'aria-labelledby':'ps-details',onSubmit:e=>{e.preventDefault();setState('saving');setTimeout(()=>setState('saved'),900)}},
+   h(C.Stack,{gap:6},
+    h(C.TextInput,{id:'ps-name',labelText:'Account name',value:v.name,onChange:set('name'),helperText:'Shown in the header and on invoices.'}),
+    h(C.Select,{id:'ps-region',labelText:'Default region',value:v.region,onChange:set('region'),helperText:'New clusters and buckets start in this region.'},
+     h(C.SelectItem,{value:'us-south',text:'Dallas (us-south)'}),h(C.SelectItem,{value:'eu-de',text:'Frankfurt (eu-de)'}),
+     h(C.SelectItem,{value:'eu-gb',text:'London (eu-gb)'}),h(C.SelectItem,{value:'jp-tok',text:'Tokyo (jp-tok)'})),
+    h(C.TextInput,{id:'ps-contact',type:'email',labelText:'Technical contact',value:v.contact,onChange:set('contact'),helperText:'Receives maintenance and security notices.'}),
+    h('div',{className:'idrow'},
+     h(C.TextInput,{id:'ps-id',labelText:'Account ID',value:'a7f3c9e2b41d4e8f9a06c5d2e1b7f480',readOnly:true,helperText:'Read-only. Quote it when you contact support.'}))),
+   h('div',{className:'actions'},
+    state==='saving'?h('div',{style:{width:160}},h(C.InlineLoading,{status:'active',description:'Saving...'})):
+     h(C.Button,{kind:'primary',type:'submit',disabled:!dirty||state==='saved'},'Save changes'),
+    h(C.Button,{kind:'secondary',disabled:!dirty||state!=='idle',onClick:()=>setV({...saved})},'Cancel'),
+    state==='saved'?h(C.InlineLoading,{status:'finished',description:'Changes saved'}):null)));
+}
+function Pref(p){
+ const [on,setOn]=useState(p.on);
+ const [st,setSt]=useState(p.status||null);
+ const t=useRef();useEffect(()=>()=>clearTimeout(t.current),[]);
+ return h('div',{className:'pref'},
+  h('div',null,h('span',{className:'t','aria-hidden':'true'},p.title),h('span',{className:'d'},p.desc)),
+  h('div',{className:'ctl'},
+   h(C.Toggle,{id:p.id,size:'sm',labelText:p.title,labelA:'Off',labelB:'On',toggled:on,className:'ps-toggle',
+    onToggle:n=>{setOn(n);setSt('active');clearTimeout(t.current);t.current=setTimeout(()=>{setSt('finished');t.current=setTimeout(()=>setSt(null),1500)},700)}}),
+   st?h(C.InlineLoading,{status:st,description:st==='active'?'Saving...':'Saved'}):h('span',{style:{height:16}})));
+}
+function Prefs(){
+ return h('section',{className:'sec','aria-labelledby':'ps-prefs'},
+  h('h2',{id:'ps-prefs',className:'cds--type-heading-03'},'Security'),
+  h('p',{className:'cds--type-body-01'},'Toggles take effect as soon as you change them.'),
+  h(Pref,{id:'ps-mfa',title:'Require multifactor authentication',desc:'Everyone in the account must set up a second factor at their next login.',on:true,status:'finished'}),
+  h(Pref,{id:'ps-ip',title:'Restrict console access by IP address',desc:'Only the address ranges in Access > Network rules can open the console.',on:false}),
+  h(Pref,{id:'ps-keys',title:'Allow users to create API keys',desc:'When off, only administrators can create keys. Existing keys keep working.',on:true}));
+}
+function Danger(){
+ return h('section',{className:'sec','aria-labelledby':'ps-danger'},
+  h('h2',{id:'ps-danger',className:'cds--type-heading-03'},'Close account'),
+  h('p',{className:'cds--type-body-01'},'Closing is permanent and needs the account owner.'),
+  h('div',{className:'danger'},
+   h('div',null,h('span',{className:'t'},'Close Northwind production'),
+    h('span',{className:'d'},'Deletes 23 clusters, 14 buckets and all API keys after a 30-day grace period. The final invoice is sent to the billing contact.')),
+   h(C.Button,{kind:'danger--tertiary',size:'md'},'Close account')));
+}
+function App(){
+ const general=h('div',{className:'panel'},h(Details),h(Prefs),h(Danger));
+ return h('div',null,
+  h(C.Breadcrumb,{noTrailingSlash:true},h(C.BreadcrumbItem,{href:'#'},'Manage'),h(C.BreadcrumbItem,{isCurrentPage:true},'Account settings')),
+  h('div',{className:'head'},
+   h(C.Heading,{className:'cds--type-heading-05'},'Account settings'),
+   h('p',{className:'cds--type-body-01'},'Settings for everyone in the Northwind production account. You need the Administrator role to change them.')),
+  h(C.Tabs,{ariaLabel:'Account settings',items:[
+   {label:'General',content:general},
+   {label:'Notifications',content:h('div',{className:'panel'},'Email and webhook notifications.')},
+   {label:'Access',content:h('div',{className:'panel'},'Access groups and IAM policies.')},
+   {label:'Billing',content:h('div',{className:'panel'},'Payment methods and invoices.')}]}));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

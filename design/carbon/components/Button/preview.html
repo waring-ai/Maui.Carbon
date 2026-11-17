@@ -1,0 +1,61 @@
+<!-- @dsCard group="Actions" height=916 subtitle="Eight kinds, seven sizes incl. expressive, icon-only and selected, disabled, as link" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .item{display:flex;flex-direction:column;gap:8px;align-items:flex-start} .item small{font:400 12px/16px var(--font-mono,monospace);color:var(--text-helper)} .two{display:grid;grid-template-columns:1fr 1fr;gap:32px} .ctx{background:var(--layer-01);padding:16px 0 0 16px} .ctx h4{margin:0 0 4px;font:600 16px/22px var(--font-sans);color:var(--text-primary)} .ctx p{margin:0 16px 16px 0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .ctx .acts{display:flex;justify-content:flex-end} .ctx .acts .cds--btn{inline-size:50%;max-inline-size:none} .tb{display:flex;align-items:center;gap:0;background:var(--layer-01);margin-bottom:24px;inline-size:max-content}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function It(tag,node){return h('div',{className:'item'},node,h('small',null,tag))}
+
+function Toolbar(){
+ const [fav,setFav]=useState(true),[watch,setWatch]=useState(false);
+ return h('div',{className:'tb',role:'toolbar','aria-label':'Cluster actions'},
+  h(C.Button,{kind:'ghost',hasIconOnly:true,renderIcon:'star',iconDescription:'Favorite',size:'md',isSelected:fav,onClick:()=>setFav(!fav)}),
+  h(C.Button,{kind:'ghost',hasIconOnly:true,renderIcon:'notification',iconDescription:'Watch for alerts',size:'md',isSelected:watch,onClick:()=>setWatch(!watch)}),
+  h(C.Button,{kind:'ghost',hasIconOnly:true,renderIcon:'filter',iconDescription:'Filter nodes',size:'md'}),
+  h(C.Button,{kind:'ghost',hasIconOnly:true,renderIcon:'settings',iconDescription:'Cluster settings',size:'md'}));
+}
+function App(){
+ return h('div',null,
+  Cap('Kinds (lg, 48px)'),
+  h('div',{className:'row'},
+   It('primary',h(C.Button,{renderIcon:'add'},'Create cluster')),
+   It('secondary',h(C.Button,{kind:'secondary'},'Cancel')),
+   It('tertiary',h(C.Button,{kind:'tertiary',renderIcon:'download'},'Export logs')),
+   It('ghost',h(C.Button,{kind:'ghost',renderIcon:'arrow--right'},'View nodes')),
+   It('danger',h(C.Button,{kind:'danger'},'Delete cluster')),
+   It('danger--tertiary',h(C.Button,{kind:'danger--tertiary'},'Remove node')),
+   It('danger--ghost',h(C.Button,{kind:'danger--ghost'},'Revoke key'))),
+  Cap('Sizes: xs 24, sm 32, md 40, lg 48 (productive and expressive), xl 64, 2xl 80'),
+  h('div',{className:'row'},
+   It('xs',h(C.Button,{size:'xs',renderIcon:'add'},'Add tag')),
+   It('sm',h(C.Button,{size:'sm',renderIcon:'add'},'Add node')),
+   It('md',h(C.Button,{size:'md',renderIcon:'add'},'Add node')),
+   It('lg',h(C.Button,{renderIcon:'add'},'Add node')),
+   It('lg isExpressive',h(C.Button,{isExpressive:true,renderIcon:'arrow--right'},'Start free trial')),
+   It('xl',h(C.Button,{size:'xl',renderIcon:'add'},'Add node')),
+   It('2xl',h(C.Button,{size:'2xl',renderIcon:'add'},'Add node'))),
+  h('div',{className:'two'},
+   h('div',null,
+    Cap('Icon-only (iconDescription is the name and tooltip): sm, md, lg'),
+    h('div',{className:'row'},
+     h(C.Button,{hasIconOnly:true,renderIcon:'add',iconDescription:'Add node',size:'sm'}),
+     h(C.Button,{hasIconOnly:true,kind:'secondary',renderIcon:'download',iconDescription:'Download report',size:'md'}),
+     h(C.Button,{hasIconOnly:true,kind:'tertiary',renderIcon:'copy',iconDescription:'Copy API key'}),
+     h(C.Button,{hasIconOnly:true,kind:'ghost',renderIcon:'overflow-menu--vertical',iconDescription:'More actions'})),
+    Cap('Ghost icon-only with isSelected (aria-pressed): Favorite is selected'),
+    h(Toolbar)),
+   h('div',null,
+    Cap('Disabled'),
+    h('div',{className:'row'},
+     h(C.Button,{disabled:true},'Deploy'),h(C.Button,{kind:'secondary',disabled:true},'Cancel'),h(C.Button,{kind:'tertiary',disabled:true},'Export'),
+     h(C.Button,{kind:'ghost',disabled:true,renderIcon:'restart'},'Restart'),h(C.Button,{kind:'danger',disabled:true},'Delete')),
+    Cap('href renders a link styled as a button'),
+    h('div',{className:'row'},h(C.Button,{kind:'tertiary',href:'#billing',renderIcon:'launch',size:'md'},'Open billing portal')))),
+  Cap('In context: confirm step at the end of a side panel (secondary + danger, full width, lg)'),
+  h('div',{className:'ctx',style:{maxWidth:560}},
+   h('h4',null,'Delete cluster prod-eu-de-1?'),
+   h('p',null,'All 9 nodes and their attached volumes are removed. Snapshots are kept for 30 days.'),
+   h('div',{className:'acts'},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'danger'},'Delete cluster'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

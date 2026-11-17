@@ -1,0 +1,53 @@
+<!-- @dsCard group="Data" height=1463 subtitle="On-page and disclosed, header and item actions, search, clickable items, four sizes, in a side panel" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .stack{display:flex;flex-direction:column;gap:32px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px 24px} .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.lay{padding:16px} .row2{display:flex;justify-content:space-between;align-items:center;gap:16px} .meta{color:var(--text-secondary);white-space:nowrap} .two p{margin:0} .two p+p{color:var(--text-secondary);font-size:12px;line-height:16px;letter-spacing:.32px}
+.side{display:grid;grid-template-columns:1fr 320px;border:1px solid var(--border-subtle-01)} .main{padding:16px;font:400 14px/20px var(--font-sans);color:var(--text-secondary)} .main h3{margin:0 0 8px;font:400 20px/28px var(--font-sans);color:var(--text-primary)} .aside{border-inline-start:1px solid var(--border-subtle-01);padding:16px 0}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const keys=['ci-deploy','terraform-prod','grafana-readonly'];
+const add=(label,size)=>h(C.Button,{hasIconOnly:true,kind:'ghost',renderIcon:'add',iconDescription:label,size:size||'lg'});
+const buckets=['logs-archive','ml-training-data','static-assets-prod','db-backups-eu','invoices-2026'];
+function Filtered(){
+ const [q,setQ]=useState('');
+ const shown=buckets.filter(b=>b.indexOf(q.trim().toLowerCase())!==-1);
+ return h(C.ContainedList,{label:'Buckets',size:'md'},
+  h(C.Search,{key:'s',labelText:'Filter buckets',placeholder:'Filter buckets',size:'md',value:q,onChange:e=>setQ(e.target.value),onClear:()=>setQ(''),closeButtonLabelText:'Clear filter'}),
+  shown.length?shown.slice(0,4).map(b=>h(C.ContainedListItem,{key:b,renderIcon:'folder'},b)):h(C.ContainedListItem,{key:'none'},'No buckets match "'+q+'"'));
+}
+const members=[['Ana Ruiz','Administrator'],['Wei Chen','Operator'],['Sam Patel','Viewer'],['Lena Vogel','Billing']];
+function Members(){
+ const [q,setQ]=useState('');
+ const shown=members.filter(m=>m[0].toLowerCase().indexOf(q.trim().toLowerCase())!==-1);
+ return h(C.ContainedList,{label:'Members',size:'md',action:h(C.ExpandableSearch,{labelText:'Search members',placeholder:'Search members',size:'md',value:q,onChange:e=>setQ(e.target.value),onClear:()=>setQ(''),closeButtonLabelText:'Clear search'})},
+  shown.map(m=>h(C.ContainedListItem,{key:m[0],renderIcon:'user'},h('div',{className:'row2'},h('span',null,m[0]),h('span',{className:'meta'},m[1])))));
+}
+function Deploys(){
+ const [items,setItems]=useState([
+  {id:1,name:'checkout-api v2.14.0',when:'12 min ago',st:'Succeeded',t:'green'},
+  {id:2,name:'search-indexer v0.9.3',when:'38 min ago',st:'Failed',t:'red'},
+  {id:3,name:'web-frontend v5.2.1',when:'1 h ago',st:'Succeeded',t:'green'},
+  {id:4,name:'billing-worker v1.7.0',when:'Running',st:'In progress',t:'blue'}]);
+ return h('div',{className:'side'},
+  h('div',{className:'main'},h('h3',null,'prod-us-east-1'),h('p',{style:{margin:0}},'12 worker nodes in us-east. The panel on the right lists the latest deployments to this cluster; dismiss one to hide it from the list.')),
+  h('div',{className:'aside'},
+   h(C.ContainedList,{label:'Recent deployments',size:'lg',action:add('Start deployment')},
+    items.map(d=>h(C.ContainedListItem,{key:d.id,action:h(C.Button,{hasIconOnly:true,kind:'ghost',size:'lg',renderIcon:'close',iconDescription:'Dismiss '+d.name,onClick:()=>setItems(items.filter(x=>x.id!==d.id))})},
+     h('div',{className:'two'},h('p',null,d.name),h('p',null,h(C.Tag,{type:d.t,size:'sm'},d.st),' ',d.when)))))));
+}
+function App(){
+ return h('div',{className:'stack'},
+  h('div',{className:'grid'},
+   B('kind="on-page" (default) with a header action',h(C.ContainedList,{label:'API keys',action:add('Create API key')},keys.map(k=>h(C.ContainedListItem,{key:k},k)))),
+   B('kind="disclosed" on a Layer: 32px header on the layer, 12px label',h(C.Layer,{withBackground:true,className:'lay'},h(C.ContainedList,{label:'Recently viewed',kind:'disclosed',action:add('Pin a resource','sm')},['prod-us-east-1','logs-archive','ci-deploy'].map(k=>h(C.ContainedListItem,{key:k},k))))),
+   B('Clickable items (buttons); the last one is disabled',h(C.ContainedList,{label:'Switch account'},[h(C.ContainedListItem,{key:1,onClick(){}},'Acme production'),h(C.ContainedListItem,{key:2,onClick(){}},'Acme staging'),h(C.ContainedListItem,{key:3,onClick(){},disabled:true},'Acme sandbox (suspended)')])),
+   B('Icons, item actions and isInset dividers',h(C.ContainedList,{label:'Exports',isInset:true},['usage-march.csv','usage-february.csv','invoice-2026-02.pdf'].map(f=>h(C.ContainedListItem,{key:f,renderIcon:'document',action:h(C.Button,{hasIconOnly:true,kind:'ghost',renderIcon:'download',iconDescription:'Download '+f,size:'lg'})},f)))),
+   B('Persistent search under the header (type to filter)',h(Filtered)),
+   B('ExpandableSearch as the header action; items with a right-aligned detail',h(Members))),
+  h('div',{className:'grid4'},['sm','md','lg','xl'].map(s=>B('size="'+s+'"'+(s==='lg'?' (default)':''),h(C.ContainedList,{label:'Regions',size:s,action:add('Add region',s==='xl'?'lg':s)},['us-east','eu-de'].map(i=>h(C.ContainedListItem,{key:i},i))),{key:s}))),
+  B('In context: a cluster side panel with dismissible deployment items',h(Deploys)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

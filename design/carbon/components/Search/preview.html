@@ -1,0 +1,55 @@
+<!-- @dsCard group="Forms" height=610 subtitle="sm / md / lg; with a value and clear button, disabled, skeleton, ExpandableSearch collapsed and expanded, on a layer; cluster list toolbar" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.lay{padding:16px}
+.ctx{max-width:752px}
+.tb{display:flex;align-items:stretch;background:var(--layer-01)}
+.tb .cds--search{flex:1}
+.tb .cds--btn{flex:none}
+.tbl{width:100%;border-collapse:collapse;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.tbl th{font-weight:600;text-align:left;color:var(--text-primary);background:var(--layer-accent-01);height:48px;padding:0 16px}
+.tbl td{height:48px;padding:0 16px;border-top:1px solid var(--border-subtle-01);background:var(--layer-01)}
+.tbl td:first-child{color:var(--text-primary)}
+.empty{padding:16px;background:var(--layer-01);border-top:1px solid var(--border-subtle-01);font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+const clusters=[
+ ['checkout-prod','Dallas (us-south)','Running','green',12],
+ ['checkout-staging','Dallas (us-south)','Running','green',3],
+ ['analytics-eu','Frankfurt (eu-de)','Updating','blue',8],
+ ['ml-training','Tokyo (jp-tok)','Stopped','gray',0]];
+function App(){
+ const [q,setQ]=React.useState('checkout');
+ const rows=clusters.filter(r=>(r[0]+' '+r[1]).toLowerCase().includes(q.trim().toLowerCase()));
+ return h('div',null,
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.Search,{size:'sm',labelText:'Search clusters',placeholder:'Search clusters'}),
+   h(C.Search,{size:'md',labelText:'Search clusters',placeholder:'Search clusters'}),
+   h(C.Search,{size:'lg',labelText:'Search clusters',placeholder:'Search clusters'})),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('With a value (clear button; Esc also clears)',h(C.Search,{labelText:'Search buckets',placeholder:'Search buckets',defaultValue:'backups-2026'})),
+   Cell('Disabled',h(C.Search,{labelText:'Search audit events',placeholder:'Search audit events',disabled:true})),
+   Cell('Skeleton',h(C.SearchSkeleton)),
+   Cell('ExpandableSearch, collapsed',h(C.ExpandableSearch,{labelText:'Search API keys',placeholder:'Search API keys'})),
+   Cell('ExpandableSearch, expanded',h(C.ExpandableSearch,{labelText:'Search API keys',placeholder:'Search API keys',defaultExpanded:true,defaultValue:'ci-deploy'})),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.Search,{labelText:'Search users',placeholder:'Search users'})))),
+  Cap('In context: cluster list toolbar (type to filter)'),
+  h('div',{className:'ctx'},
+   h('div',{className:'tb'},
+    h(C.Search,{size:'lg',labelText:'Search clusters',placeholder:'Search by name or region',value:q,onChange:e=>setQ(e.target.value)}),
+    h(C.Button,{kind:'primary',renderIcon:'add'},'Create cluster')),
+   h('table',{className:'tbl'},
+    h('thead',null,h('tr',null,['Name','Location','Status','Worker nodes'].map(t=>h('th',{key:t},t)))),
+    h('tbody',null,rows.map(r=>h('tr',{key:r[0]},
+     h('td',null,r[0]),h('td',null,r[1]),h('td',null,h(C.Tag,{type:r[3],size:'sm'},r[2])),h('td',null,r[4]))))),
+   rows.length?null:h('div',{className:'empty'},'No clusters match "'+q+'". Check the spelling or clear the search.')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

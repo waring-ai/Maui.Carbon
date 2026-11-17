@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(CarbonNetVersion)</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Maui.Carbon.Generator</RootNamespace>
+  </PropertyGroup>
+
+</Project>

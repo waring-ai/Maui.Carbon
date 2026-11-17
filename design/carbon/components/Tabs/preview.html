@@ -1,0 +1,50 @@
+<!-- @dsCard group="Navigation" height=886 subtitle="Line and contained, full width, icons, secondary labels, icon-only, dismissible, controlled" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .blk{margin-bottom:24px} .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;margin-bottom:24px} .panel{background:var(--layer-01)} .panel .cds--tab-content{background:var(--layer-01)} .muted{color:var(--text-secondary)}
+.page{border:1px solid var(--border-subtle-00)} .page-h{padding:16px 16px 0} .page-h h3{margin:0 0 4px;font:400 20px/28px var(--font-sans);color:var(--text-primary)} .page-h p{margin:0 0 16px;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:16px} .kv span{display:block;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)} .kv b{font:400 14px/18px var(--font-sans);color:var(--text-primary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,cls){return h('div',{className:cls||'blk'},Cap(cap),node)}
+const base=[{label:'Overview',content:'Health, version and recent activity for prod-eu-de-1.'},{label:'Nodes',content:'9 nodes across 3 zones, all ready.'},{label:'Networking',content:'Ingress, load balancers and private endpoints.'},{label:'Access',content:'Who can view and change this cluster.'},{label:'Billing',disabled:true,content:''}];
+
+function Dismissable(){
+ const [tabs,setTabs]=useState([{label:'deploy.yaml',content:'apiVersion: apps/v1, kind: Deployment, 3 replicas.'},{label:'service.yaml',content:'ClusterIP service on port 8080.'},{label:'ingress.yaml',content:'Routes api.northwind.dev to the service.'}]);
+ const [sel,setSel]=useState(0);
+ return tabs.length?h(C.Tabs,{items:tabs,dismissable:true,selectedIndex:sel,onChange:({selectedIndex})=>setSel(selectedIndex),ariaLabel:'Open files',
+   onTabCloseRequest:i=>{const next=tabs.filter((_,j)=>j!==i);setTabs(next);setSel(Math.max(0,Math.min(sel>i?sel-1:sel,next.length-1)))}})
+  :h(C.Button,{kind:'ghost',size:'sm',onClick:()=>location.reload()},'Reopen files');
+}
+function Controlled(){
+ const [sel,setSel]=useState(1);
+ return h('div',null,
+  h(C.Tabs,{contained:true,fullWidth:true,selectedIndex:sel,onChange:({selectedIndex})=>setSel(selectedIndex),ariaLabel:'Plan',
+   items:[{label:'Lite',secondaryLabel:'Free, 1 cluster',content:'Single-zone clusters with up to 2 nodes.'},{label:'Standard',secondaryLabel:'$0.11 per node hour',content:'Multi-zone clusters with an uptime SLA.'},{label:'Enterprise',secondaryLabel:'Contact sales',content:'Dedicated control plane and premium support.'},{label:'Government',secondaryLabel:'Not in your region',disabled:true}]}),
+  h('p',{className:'cap',style:{marginTop:8}},'selectedIndex is '+sel+'; onChange({ selectedIndex }) updates it'));
+}
+function Page(){
+ return h('div',{className:'page'},
+  h('div',{className:'page-h'},h('h3',null,'prod-eu-de-1'),h('p',null,'Kubernetes 1.30 · eu-de · 9 nodes')),
+  h(C.Tabs,{ariaLabel:'Cluster sections',items:[
+   {label:'Overview',content:h('div',{className:'kv'},h('div',null,h('span',null,'Status'),h('b',null,'Normal')),h('div',null,h('span',null,'Version'),h('b',null,'1.30.4')),h('div',null,h('span',null,'Zones'),h('b',null,'3')),h('div',null,h('span',null,'Created'),h('b',null,'12 Mar 2026')))},
+   {label:'Worker pools',content:'2 pools: default (6 nodes), gpu (3 nodes).'},{label:'Add-ons',content:'Ingress, metrics server, autoscaler.'},{label:'Events',content:'No events in the last 24 hours.'}]}));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'two'},
+   B('Line (default, 40px), last tab disabled',h(C.Tabs,{items:base,ariaLabel:'Cluster'}),'x'),
+   B('Contained (48px)',h(C.Tabs,{items:base.filter(x=>x.label!=='Networking'),contained:true,ariaLabel:'Cluster, contained'}),'x')),
+  h('div',{className:'two'},
+   B('Icons pinned after the label (renderIcon)',h(C.Tabs,{ariaLabel:'Storage',items:[{label:'Buckets',renderIcon:'folder',content:'48 buckets.'},{label:'Activity',renderIcon:'activity',content:'1.2 k requests in the last hour.'},{label:'Settings',renderIcon:'settings',content:'Lifecycle rules and encryption.'}]}),'x'),
+   B('iconOnly: label becomes the name and tooltip',h('div',{style:{display:'flex',gap:32}},
+    h(C.Tabs,{iconOnly:true,ariaLabel:'View',items:[{label:'Dashboard',renderIcon:'home',content:''},{label:'Analytics',renderIcon:'analytics',content:''},{label:'Reports',renderIcon:'report',content:''},{label:'Settings',renderIcon:'settings',disabled:true,content:''}]}),
+    h(C.Tabs,{iconOnly:true,iconSize:'lg',contained:true,ariaLabel:'View, large',items:[{label:'Dashboard',renderIcon:'home',content:''},{label:'Analytics',renderIcon:'analytics',content:''},{label:'Reports',renderIcon:'report',content:''}]})),'x')),
+  B('Contained fullWidth with secondaryLabel (tall, 64px), controlled with selectedIndex + onChange',h(Controlled)),
+  h('div',{className:'two'},
+   B('dismissable: close icon or Delete key calls onTabCloseRequest',h(Dismissable),'x'),
+   B('activation="manual": arrows move focus, Enter / Space select',h(C.Tabs,{activation:'manual',ariaLabel:'Logs',items:[{label:'Last hour',content:'Streaming 1,204 log lines.'},{label:'Last 24 hours',content:'Querying 28,410 log lines.'},{label:'Last 7 days',content:'Querying 190,233 log lines.'}]}),'x')),
+  Cap('In context: sections of a cluster details page'),
+  h(Page));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

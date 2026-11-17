@@ -1,0 +1,63 @@
+<!-- @dsCard group="Containers" height=706 subtitle="States, on a Layer, AI decorator, controlled; a multi-select add-on picker" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px;align-items:stretch}
+.tiles>.cds--tile,.pick .cds--tile{min-block-size:96px}
+.tt{margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px}
+.ts{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.tp{margin:12px 0 0;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+.on-layer{background:var(--layer-01);padding:16px}
+.panel{background:var(--layer-01);padding:24px}
+.ph{margin:0;font:400 20px/28px var(--font-sans)}
+.psub{margin:4px 0 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.pick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.pick>div{display:flex} .pick .cds--tile{flex:1}
+.foot .cds--btn-set{flex:0 0 392px}
+.foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px}
+.sum{font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.sum b{font-weight:600}
+.ai p{margin:0 0 8px;font:400 14px/20px var(--font-sans);letter-spacing:.16px} .ai .s{color:var(--text-secondary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const T=(t,s)=>[h('p',{key:1,className:'tt'},t),h('p',{key:2,className:'ts'},s)];
+const AI=()=>h(C.AILabel,{size:'mini','aria-label':'Why this add-on is recommended'},h(C.AILabelContent,null,h('div',{className:'ai'},h('p',{className:'s'},'AI explained'),h('p',null,'Recommended because prod-eu-1 had 3 restarts last week that left no logs.'))));
+function Controlled(){
+ const [on,setOn]=React.useState(false);
+ return h(C.SelectableTile,{id:'st-ctl',selected:on,onChange:(e,v)=>setOn(v)},T('Controlled',on?'selected = true':'selected = false'));
+}
+const ADDONS=[['logs','Log analysis','Search and retain logs for 30 days',18],['mon','Monitoring','Metrics, dashboards and alerts',27],['bk','Daily backups','Snapshots kept for 14 days',12],['scan','Image scanning','Scan images for CVEs on push',0]];
+function Picker(){
+ const [sel,setSel]=React.useState({logs:true,mon:true});
+ const chosen=ADDONS.filter(a=>sel[a[0]]);
+ const cost=chosen.reduce((n,a)=>n+a[3],0);
+ return h('div',{className:'panel'},
+  h('p',{className:'ph'},'Add-ons for prod-eu-1'),
+  h('p',{className:'psub'},'Select any number. You can remove add-ons later from the cluster settings.'),
+  h('div',{className:'pick',role:'group','aria-label':'Add-ons'},
+   ADDONS.map(a=>h(C.Layer,{key:a[0]},h(C.SelectableTile,{id:'st-'+a[0],selected:!!sel[a[0]],onChange:(e,v)=>setSel(Object.assign({},sel,{[a[0]]:v})),decorator:a[0]==='bk'?h(AI):undefined},
+    T(a[1],a[2]),h('p',{className:'tp'},a[3]?'$'+a[3]+' / month':'Included'))))),
+  h('div',{className:'foot'},
+   h('span',{className:'sum'},h('b',null,chosen.length+' add-on'+(chosen.length===1?'':'s')+' selected'),' · $'+cost+' / month'),
+   h(C.ButtonSet,null,h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{disabled:!chosen.length},'Add to cluster'))));
+}
+function App(){
+ return h('div',null,
+  Cap('Unselected, selected, disabled, disabled and selected'),
+  h('div',{className:'tiles'},
+   h(C.SelectableTile,{id:'st-a'},T('Standard support','Business hours, 1 day response')),
+   h(C.SelectableTile,{id:'st-b',selected:true},T('Premium support','24/7, 1 hour response')),
+   h(C.SelectableTile,{id:'st-c',disabled:true},T('Enterprise support','Requires an annual contract')),
+   h(C.SelectableTile,{id:'st-d',disabled:true,selected:true},T('Basic support','Included with every account'))),
+  Cap('On a layer-01 panel (wrapped in Layer, uses layer-02), with an AI label decorator (AI gradient), and controlled with onChange'),
+  h('div',{className:'tiles',style:{gridTemplateColumns:'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)'}},
+   h('div',{className:'on-layer'},h(C.Layer,null,h(C.SelectableTile,{id:'st-e'},T('In a Layer','Fill steps up to layer-02')))),
+   h(C.SelectableTile,{id:'st-f',selected:true,decorator:h(AI)},T('Suggested: autoscaling','Add up to 6 nodes when CPU is over 80%')),
+   h(Controlled)),
+  Cap('In context: a multi-select add-on picker; each tile is its own tab stop, Space or Enter toggles it'),
+  h(Picker));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

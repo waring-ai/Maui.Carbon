@@ -1,0 +1,55 @@
+<!-- @dsCard group="Layout" height=1080 subtitle="Two and three buttons, danger, disabled, icons, sizes, stacked, fluid; a modal footer and a side panel" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 32px;margin-bottom:24px}
+.stackrow{display:flex;gap:32px;align-items:flex-start}
+.ctx{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start}
+.modal{background:var(--layer-01);box-shadow:0 2px 6px var(--shadow);display:flex;flex-direction:column}
+.mh{padding:16px 16px 0 16px} .ml{margin:0 0 4px;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.mt{margin:0;font:400 20px/28px var(--font-sans)}
+.mb{padding:16px 16px 48px 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.mb p{margin:0 0 16px}
+.panel{background:var(--layer-01);border-inline-start:1px solid var(--border-subtle-01);display:flex;flex-direction:column;block-size:360px}
+.pb{flex:1;padding:16px;display:flex;flex-direction:column;gap:16px}
+.pt{margin:0;font:400 20px/28px var(--font-sans)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   h('div',{style:{display:'grid',gap:24,alignContent:'start'}},
+    h('div',null,Cap('Two buttons: secondary, then primary on the right (each at most 196px)'),
+     h(C.ButtonSet,null,h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,null,'Deploy'))),
+    h('div',null,Cap('Danger action set'),
+     h(C.ButtonSet,null,h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'danger'},'Delete bucket'))),
+    h('div',null,Cap('Disabled buttons keep their separator'),
+     h(C.ButtonSet,null,h(C.Button,{kind:'secondary',disabled:true},'Cancel'),h(C.Button,{disabled:true},'Deploy'))),
+    h('div',null,Cap('Icons on every button in the set, or on none'),
+     h(C.ButtonSet,null,h(C.Button,{kind:'secondary',renderIcon:'download'},'Download config'),h(C.Button,{renderIcon:'arrow--right'},'Continue')))),
+   h('div',{style:{display:'grid',gap:24,alignContent:'start'}},
+    h('div',null,Cap('Sizes follow Button: sm 32, md 40, lg 48 (default), xl 64'),
+     h('div',{style:{display:'grid',gap:8}},['sm','md','xl'].map(s=>h(C.ButtonSet,{key:s},h(C.Button,{kind:'secondary',size:s},'Cancel'),h(C.Button,{size:s},'Deploy ('+s+')'))))),
+    h('div',null,Cap('stacked: a column, primary first'),
+     h('div',{style:{inlineSize:196}},h(C.ButtonSet,{stacked:true},h(C.Button,null,'Upgrade cluster'),h(C.Button,{kind:'secondary'},'Schedule later'),h(C.Button,{kind:'ghost'},'Dismiss'))))),
+   h('div',{style:{gridColumn:'span 2'}},Cap('Three buttons: ghost, secondary, primary'),
+    h(C.ButtonSet,null,h(C.Button,{kind:'ghost'},'Save draft'),h(C.Button,{kind:'secondary'},'Back'),h(C.Button,null,'Next')))),
+  Cap('fluid: fills and right-aligns, orders by kind (ghost, secondary, primary last) whatever the child order, stacks when the container is narrow. Children here are written Save, Cancel, Skip.'),
+  h('div',{style:{display:'grid',gridTemplateColumns:'560px 280px',gap:32,alignItems:'start',marginBottom:24}},
+   h(C.ButtonSet,{fluid:true},h(C.Button,null,'Save'),h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'ghost'},'Skip')),
+   h(C.ButtonSet,{fluid:true},h(C.Button,null,'Save'),h(C.Button,{kind:'secondary'},'Cancel'))),
+  Cap('In context: a modal footer (fluid, two 50% buttons) and a 320px side panel (fluid set stacks itself, primary on top)'),
+  h('div',{className:'ctx'},
+   h('div',{className:'modal',role:'group','aria-label':'Delete API key'},
+    h('div',{className:'mh'},h('p',{className:'ml'},'API keys'),h('p',{className:'mt'},'Delete ci-deploy?')),
+    h('div',{className:'mb'},h('p',null,'Pipelines that use this key will fail to authenticate within 5 minutes. This cannot be undone.')),
+    h(C.ButtonSet,{fluid:true},h(C.Button,{kind:'secondary',size:'xl'},'Cancel'),h(C.Button,{kind:'danger',size:'xl'},'Delete key'))),
+   h('aside',{className:'panel','aria-label':'Edit node pool'},
+    h('div',{className:'pb'},h('p',{className:'pt'},'Edit node pool'),
+     h(C.Layer,null,h(C.TextInput,{id:'bs-nodes',labelText:'Nodes per zone',defaultValue:'4'}))),
+    h(C.ButtonSet,{fluid:true},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,null,'Apply changes')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

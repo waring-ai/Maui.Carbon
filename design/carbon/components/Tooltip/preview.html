@@ -1,0 +1,46 @@
+<!-- @dsCard group="Overlays" height=684 subtitle="Hover or focus label: alignments, label vs description, wrapping, light surface" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);column-gap:24px;margin-bottom:24px}.cell{display:flex;align-items:center;justify-content:center;height:104px}
+.top{align-items:flex-end}.bot{align-items:flex-start}
+.t{font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary);border-bottom:1px dotted var(--border-strong-01);cursor:default;display:inline-block}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:center;margin-bottom:24px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.tbl{border:1px solid var(--border-subtle-01);padding:16px 16px 88px}
+.tr{display:grid;grid-template-columns:2fr 1fr 1fr auto;align-items:center;column-gap:16px;block-size:48px;padding-inline-start:16px;border-block-end:1px solid var(--border-subtle-01);font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.tr.hd{background:var(--layer-accent-01);font-weight:600}.tr.bd{background:var(--layer-01)}.act{display:flex}
+.trunc{display:block;max-inline-size:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trunc:focus{outline:2px solid var(--focus);outline-offset:1px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Ico(name,lbl){return h('button',{type:'button',className:'cds--btn cds--btn--ghost cds--btn--md cds--btn--icon-only'},h(C.Icon,{name,size:16,className:'cds--btn__icon'}))}
+function Btn(t){return h('button',{type:'button',className:'cds--btn cds--btn--tertiary cds--btn--sm',style:{paddingInlineEnd:15}},t)}
+const T=(p,child)=>h(C.Tooltip,p,child);
+function App(){
+ return h('div',null,
+  Cap('label names an icon-only trigger: align top (default), bottom, left, right (shown with defaultOpen)'),
+  h('div',{className:'grid'},
+   h('div',{className:'cell top'},T({label:'Restart node',defaultOpen:true},Ico('restart'))),
+   h('div',{className:'cell bot'},T({label:'Download logs',align:'bottom',defaultOpen:true},Ico('download'))),
+   h('div',{className:'cell',style:{justifyContent:'flex-end',paddingInlineEnd:8}},T({label:'Edit labels',align:'left',defaultOpen:true},Ico('edit'))),
+   h('div',{className:'cell',style:{justifyContent:'flex-start',paddingInlineStart:8}},T({label:'Settings',align:'right',defaultOpen:true},Ico('settings')))),
+  Cap('description adds context to a labelled trigger: start and end alignments, wrapping at 288px, highContrast={false} with dropShadow'),
+  h('div',{className:'grid'},
+   h('div',{className:'cell top',style:{height:120,justifyContent:'flex-start'}},T({description:'Keeps 2 to 10 nodes',align:'top-start',defaultOpen:true},Btn('Autoscaling'))),
+   h('div',{className:'cell bot',style:{height:120}},T({description:'Billed hourly.',align:'bottom-end',defaultOpen:true},Btn('Add node'))),
+   h('div',{className:'cell top',style:{height:120}},T({description:'Requests over this limit get a 429 response. The limit resets every minute for each API key.',defaultOpen:true},h('span',{className:'t',tabIndex:0},'Rate limit'))),
+   h('div',{className:'cell bot',style:{height:120}},T({description:'Last synced 2 minutes ago',align:'bottom',highContrast:false,dropShadow:true,defaultOpen:true},Btn('Sync status')))),
+  Cap('Closed (the resting state): hover (100ms in, 300ms out) or Tab to the trigger; Escape dismisses'),
+  h('div',{className:'row'},
+   T({label:'Upload object'},Ico('upload')),
+   T({label:'Share bucket'},Ico('share')),
+   T({description:'Requests in the last 24 hours',align:'bottom'},h('span',{className:'t',tabIndex:0},'Requests: 18,240'))),
+  Cap('In context: a node table with icon actions and a truncated name; the full name shows on hover or focus'),
+  h('div',{className:'tbl'},
+   h('div',{className:'tr hd'},h('span',null,'Node'),h('span',null,'Zone'),h('span',null,'Status'),h('span',{style:{inlineSize:120}})),
+   h('div',{className:'tr bd'},
+    T({description:'worker-pool-a-us-east-1-node-7f3c9',align:'bottom-start'},h('span',{className:'trunc',tabIndex:0},'worker-pool-a-us-east-1-node-7f3c9')),
+    h('span',null,'us-east-1'),h('span',null,'Ready'),
+    h('div',{className:'act'},T({label:'Restart node',align:'bottom',defaultOpen:true},Ico('restart')),T({label:'View metrics',align:'bottom'},Ico('view')),T({label:'Download logs',align:'bottom'},Ico('download'))))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+</script>

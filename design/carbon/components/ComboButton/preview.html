@@ -1,0 +1,35 @@
+<!-- @dsCard group="Actions" height=535 subtitle="Sizes, disabled, menu alignment, deployment header" -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:24px;align-items:flex-end}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.open{display:flex;gap:24px;align-items:flex-start;height:272px;margin-bottom:16px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;background:var(--layer-01);border-bottom:1px solid var(--border-subtle-01)}
+.head h2{margin:0;font:400 20px/28px var(--font-sans);color:var(--text-primary)}
+.head p{margin:2px 0 0;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.head__actions{display:flex;gap:16px;align-items:center}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const I=(label,p)=>h(C.MenuItem,Object.assign({key:label,label:label},p));
+const items=()=>[I('Deploy to staging'),I('Schedule deployment'),I('Deploy without cache'),h(C.MenuItemDivider,{key:'d'}),I('Roll back to v2.13.0',{kind:'danger'})];
+const CB=(p)=>h(C.ComboButton,Object.assign({label:'Deploy',onClick:()=>{}},p),items());
+function App(){
+ return h('div',null,
+  Cap('Sizes sm 32px, md 40px, lg 48px (default); disabled'),
+  h('div',{className:'row'},CB({size:'sm'}),CB({size:'md'}),CB({size:'lg'}),CB({disabled:true})),
+  h('div',{className:'open'},
+   h('div',{style:{width:232}},Cap('Open, lg, bottom (default)'),CB({defaultOpen:true})),
+   h('div',{style:{width:232}},Cap('Open, md, bottom-start'),CB({size:'md',menuAlignment:'bottom-start',defaultOpen:true})),
+   h('div',{style:{width:232,display:'flex',flexDirection:'column',alignItems:'flex-end'}},Cap('Open, sm, bottom-end'),CB({size:'sm',menuAlignment:'bottom-end',defaultOpen:true}))),
+  Cap('In context: deployment header; the most common action is the primary half'),
+  h('div',{className:'head'},
+   h('div',null,h('h2',null,'checkout-api'),h('p',null,'Last deployed v2.14.1 · 2 hours ago by CI pipeline')),
+   h('div',{className:'head__actions'},
+    h(C.Button,{kind:'ghost',size:'md'},'View logs'),
+    CB({size:'md'}))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

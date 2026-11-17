@@ -1,0 +1,49 @@
+<!-- @dsCard group="Forms" height=624 subtitle="Unchecked, checked, indeterminate; disabled, read-only, invalid, warning, helper; select all" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 32px;margin-bottom:32px} .col{display:flex;flex-direction:column;gap:8px} .ctx{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start} .panel{background:var(--layer-01);padding:16px 16px 24px} .panel h4{margin:0 0 16px;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .kids{padding-inline-start:24px;display:flex;flex-direction:column;gap:8px} .out{margin-top:16px;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-helper)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,...kids){return h('div',null,Cap(cap),h('div',{className:'col'},...kids))}
+
+const EVENTS=['Deployment finished','Deployment failed','Node pool scaled'];
+function Notify(){
+ const [on,setOn]=useState({'Deployment finished':true,'Deployment failed':true,'Node pool scaled':false});
+ const n=EVENTS.filter(e=>on[e]).length;
+ const all=n===EVENTS.length, some=n>0&&!all;
+ return h('div',{className:'panel'},
+  h('h4',null,'Email me when'),
+  h(C.Checkbox,{id:'cb-all',labelText:'Any deployment event',checked:all,indeterminate:some,onChange:(e,{checked})=>setOn(Object.fromEntries(EVENTS.map(x=>[x,checked])))}),
+  h('div',{className:'kids',style:{marginTop:8}},EVENTS.map((ev,i)=>h(C.Checkbox,{key:ev,id:'cb-ev'+i,labelText:ev,checked:on[ev],onChange:(e,{checked})=>setOn({...on,[ev]:checked})}))),
+  h('p',{className:'out'},n+' of '+EVENTS.length+' events selected'));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   B('Selection states',
+    h(C.Checkbox,{id:'s1',labelText:'Back up nightly'}),
+    h(C.Checkbox,{id:'s2',labelText:'Encrypt volumes',defaultChecked:true}),
+    h(C.Checkbox,{id:'s3',labelText:'All regions',indeterminate:true})),
+   B('disabled',
+    h(C.Checkbox,{id:'d1',labelText:'Public endpoint',disabled:true}),
+    h(C.Checkbox,{id:'d2',labelText:'Private endpoint',disabled:true,defaultChecked:true}),
+    h(C.Checkbox,{id:'d3',labelText:'All zones',disabled:true,indeterminate:true})),
+   B('readOnly: focusable, cannot change',
+    h(C.Checkbox,{id:'r1',labelText:'Audit logging',readOnly:true}),
+    h(C.Checkbox,{id:'r2',labelText:'Managed by policy',readOnly:true,defaultChecked:true}),
+    h(C.Checkbox,{id:'r3',labelText:'Some regions',readOnly:true,indeterminate:true})),
+   B('Long label wraps under itself',
+    h(C.Checkbox,{id:'l1',labelText:'Delete snapshots older than 30 days when the retention policy changes',defaultChecked:true}))),
+  h('div',{className:'grid'},
+   B('helperText',h(C.Checkbox,{id:'h1',labelText:'Autoscale node pool',helperText:'Adds nodes when CPU stays above 80% for 5 minutes.'})),
+   B('invalid + invalidText',h(C.Checkbox,{id:'i1',labelText:'I accept the service terms',invalid:true,invalidText:'Accept the terms to create the cluster.'})),
+   B('warn + warnText',h(C.Checkbox,{id:'w1',labelText:'Delete attached volumes',defaultChecked:true,warn:true,warnText:'Volume data cannot be recovered.'})),
+   B('hideLabel (e.g. a table row): label is the accessible name',h('div',{style:{display:'flex',gap:16,alignItems:'center',color:'var(--text-primary)',font:'400 14px/18px var(--font-sans)'}},h(C.Checkbox,{id:'hl',labelText:'Select row prod-eu-de-1',hideLabel:true,defaultChecked:true}),'prod-eu-de-1'))),
+  h('div',{className:'ctx'},
+   h('div',null,Cap('In context: a "select all" parent driving three children (controlled, onChange(event, { checked, id }))'),h(Notify)),
+   h('div',null,Cap('In context: a CheckboxGroup with a legend'),
+    h(C.CheckboxGroup,{legendText:'Regions to replicate to',helperText:'Replication adds storage cost in each region.'},
+     h(C.Checkbox,{id:'g1',labelText:'us-south',defaultChecked:true}),h(C.Checkbox,{id:'g2',labelText:'eu-de',defaultChecked:true}),h(C.Checkbox,{id:'g3',labelText:'jp-tok'})))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

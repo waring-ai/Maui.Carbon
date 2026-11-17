@@ -1,0 +1,45 @@
+<!-- @dsCard group="Forms" height=1031 subtitle="Single and range (two handles), decimal step, formatted labels, no text input; invalid, warning, read-only, disabled, skeleton; volume resize" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 48px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.est{display:flex;justify-content:space-between;margin-top:24px;padding-top:16px;border-top:1px solid var(--border-subtle-01);font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.est b{font-weight:600;color:var(--text-primary)}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+function App(){
+ const [gb,setGb]=React.useState(250);
+ const shrink=gb<200;
+ return h('div',null,
+  Cap('Variants'),
+  h('div',{className:'g2 sec'},
+   Cell('Single, with text input',h(C.Slider,{id:'sl-one',labelText:'Worker nodes',min:1,max:20,defaultValue:6})),
+   Cell('Range (twoHandles)',h(C.Slider,{id:'sl-two',labelText:'Autoscaling range (nodes)',twoHandles:true,min:0,max:50,defaultValue:3,defaultValueUpper:24,ariaLabelInput:'Minimum nodes',ariaLabelInputUpper:'Maximum nodes'})),
+   Cell('Decimal step, formatLabel',h(C.Slider,{id:'sl-dec',labelText:'CPU request',min:0.25,max:4,step:0.25,defaultValue:1.5,formatLabel:v=>v+' vCPU'})),
+   Cell('Without text input (hideTextInput)',h(C.Slider,{id:'sl-hide',labelText:'Log sampling rate',min:0,max:100,step:5,defaultValue:25,hideTextInput:true,formatLabel:v=>v+'%'}))),
+  Cap('States'),
+  h('div',{className:'g2 sec'},
+   Cell('Invalid',h(C.Slider,{id:'sl-inv',labelText:'Disk size (GB)',min:20,max:2000,defaultValue:20,invalid:true,invalidText:'The volume already holds 64 GB. Choose 64 GB or more.'})),
+   Cell('Warning',h(C.Slider,{id:'sl-warn',labelText:'Memory limit (GB)',min:1,max:64,defaultValue:60,warn:true,warnText:'Limits over 48 GB leave little room for system pods'})),
+   Cell('Read only',h(C.Slider,{id:'sl-ro',labelText:'Retention (days)',min:1,max:365,defaultValue:90,readOnly:true})),
+   Cell('Disabled',h(C.Slider,{id:'sl-dis',labelText:'Request rate limit (per second)',min:0,max:1000,step:10,defaultValue:400,disabled:true})),
+   Cell('Skeleton',h(C.SliderSkeleton)),
+   Cell('Skeleton, two handles',h(C.SliderSkeleton,{twoHandles:true}))),
+  Cap('In context: resize a block storage volume'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Resize volume'),
+   h('p',{className:'sub'},'pvc-checkout-db is attached to checkout-prod. Resizing takes a few minutes.'),
+   h(C.Slider,{id:'sl-ctx',labelText:'Size (GB)',min:20,max:2000,step:10,stepMultiplier:10,value:gb,onChange:s=>setGb(s.value),
+    warn:shrink,warnText:'Volumes can only grow. 200 GB is the current size.'}),
+   h('div',{className:'est'},h('span',null,'Estimated monthly cost'),h('b',null,'$'+(gb*0.1).toFixed(2))),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'primary',disabled:shrink},'Resize volume'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

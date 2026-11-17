@@ -1,0 +1,34 @@
+<!-- @dsCard group="Foundations" height=1052 subtitle="All 71 glyph names at 16px, four sizes, color tokens, in context" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 8px;margin-bottom:32px} .cell{display:flex;align-items:center;gap:8px;min-height:28px;color:var(--icon-primary)} .cell span{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:32px;margin-bottom:32px} .sizes{display:flex;gap:24px;align-items:flex-end;color:var(--icon-primary)} .sz{display:flex;flex-direction:column;align-items:center;gap:8px} .sz span,.sw span{font:400 12px/16px var(--font-mono,monospace);color:var(--text-helper)} .swatches{display:flex;flex-wrap:wrap;gap:16px} .sw{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:76px} .chip{display:flex;align-items:center;justify-content:center;inline-size:40px;block-size:40px}
+.list{background:var(--layer-01);max-width:640px} .li{display:flex;align-items:center;gap:16px;padding:0 16px;min-height:48px;border-bottom:1px solid var(--border-subtle-01);font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .li:last-child{border-bottom:0} .li .n{flex:1} .st{display:flex;align-items:center;gap:8px;min-width:150px} .act{display:flex}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const NAMES=["activity","add","ai-generate","analytics","arrow--right","arrow--up","arrows--vertical","bee","calendar","caret--down","caret--left","caret--right","catalog","checkmark","checkmark--filled","checkmark--outline","chevron--down","chevron--left","chevron--right","chevron--up","circle-dash","close","close--filled","cloud-foundry--1","copy","dashboard","document","download","edit","error--filled","export","filter","folder","folder--open","folders","help","home","in-progress","incomplete","information","information--filled","information--square--filled","launch","menu","notification","overflow-menu--horizontal","overflow-menu--vertical","pending--filled","play","radio-button","radio-button--checked","report","restart","save","search","settings","settings--adjust","share","star","stop","switcher","undo","upload","user","view","view--off","virtual-machine","warning","warning--alt","warning--alt--filled","warning--filled"];
+const COLORS=[['icon-primary','var(--icon-primary)'],['icon-secondary','var(--icon-secondary)'],['icon-interactive','var(--icon-interactive)'],['icon-disabled','var(--icon-disabled)'],['support-error','var(--support-error)'],['support-success','var(--support-success)'],['support-warning','var(--support-warning)'],['support-info','var(--support-info)']];
+function Row(name,icon,color,status,act){
+ return h('div',{className:'li'},h(C.Icon,{name:'virtual-machine',size:20,style:{color:'var(--icon-secondary)'}}),h('span',{className:'n'},name),
+  h('span',{className:'st'},h(C.Icon,{name:icon,size:16,style:{color}}),status),
+  h('div',{className:'act'},h(C.Button,{kind:'ghost',size:'sm',hasIconOnly:true,renderIcon:act[0],iconDescription:act[1]}),h(C.Button,{kind:'ghost',size:'sm',hasIconOnly:true,renderIcon:'overflow-menu--vertical',iconDescription:'More actions for '+name})));
+}
+function App(){
+ return h('div',null,
+  Cap('Every glyph in this release at 16px (78 files, 71 names; the closest source size is scaled)'),
+  h('div',{className:'grid'},NAMES.map(n=>h('div',{className:'cell',key:n,title:n},h(C.Icon,{name:n,size:16}),h('span',null,n)))),
+  h('div',{className:'two'},
+   h('div',null,Cap('Sizes: 16 (default), 20, 24, 32'),h('div',{className:'sizes'},[16,20,24,32].map(s=>h('div',{className:'sz',key:s},h(C.Icon,{name:'settings',size:s}),h('span',null,s))))),
+   h('div',null,Cap('Color: icons fill with currentColor; set a token on the icon or its parent'),
+    h('div',{className:'swatches'},
+     COLORS.map(c=>h('div',{className:'sw',key:c[0]},h('div',{className:'chip',style:{color:c[1]}},h(C.Icon,{name:c[0].startsWith('support')?{'support-error':'error--filled','support-success':'checkmark--filled','support-warning':'warning--filled','support-info':'information--filled'}[c[0]]:'notification',size:20})),h('span',null,c[0]))),
+     h('div',{className:'sw'},h('div',{className:'chip',style:{background:'var(--background-inverse)',color:'var(--icon-inverse)'}},h(C.Icon,{name:'notification',size:20})),h('span',null,'icon-inverse')),
+     h('div',{className:'sw'},h('div',{className:'chip',style:{background:'var(--button-primary)',color:'var(--icon-on-color)'}},h(C.Icon,{name:'notification',size:20})),h('span',null,'icon-on-color'))))),
+  Cap('In context: status icons paired with text, and icon-only actions with accessible names'),
+  h('div',{className:'list'},
+   Row('prod-eu-de-1','checkmark--filled','var(--support-success)','Running',['restart','Restart prod-eu-de-1']),
+   Row('staging-us-1','in-progress','var(--support-info)','Updating',['stop','Stop staging-us-1']),
+   Row('batch-gpu-2','error--filled','var(--support-error)','Failed',['play','Start batch-gpu-2'])));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

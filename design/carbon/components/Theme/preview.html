@@ -1,0 +1,62 @@
+<!-- @dsCard group="Layout" height=847 subtitle="Zones white, g10, g90, g100; useTheme; a zone resets Layer; a console page with a g100 header and a g90 panel" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.zones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:24px}
+.zone{padding:16px;display:flex;flex-direction:column;gap:16px;outline:1px solid var(--border-subtle-01);outline-offset:-1px}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.title{margin:0;font:600 14px/18px var(--font-sans);letter-spacing:.16px}
+.meta{margin:4px 0 0;font:400 12px/16px var(--font-mono);letter-spacing:.32px;color:var(--text-helper)}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.reset{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px}
+.lv{background:var(--layer-01);padding:16px;display:flex;flex-direction:column;gap:12px}
+.lv2{padding:16px;display:flex;flex-direction:column;gap:12px;outline:1px solid var(--border-subtle-01);outline-offset:-1px}
+.frame{outline:1px solid var(--border-subtle-01);outline-offset:-1px}
+.hdr{display:flex;align-items:center;gap:24px;padding:0 16px;block-size:48px;border-block-end:1px solid var(--border-subtle-01)}
+.brand{font:400 14px/18px var(--font-sans);letter-spacing:.16px}.brand b{font-weight:600}
+.nav{display:flex;gap:16px;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.nav .on{color:var(--text-primary)}
+.body{display:grid;grid-template-columns:minmax(0,1fr) 280px}
+.main{padding:24px;display:flex;flex-direction:column;gap:16px}
+.ph{margin:0;font:400 28px/36px var(--font-sans)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kpi{background:var(--layer-01);padding:16px}.kpi b{display:block;font:400 28px/36px var(--font-sans)}
+.kpi span{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.side{padding:24px 16px;display:flex;flex-direction:column;gap:16px}
+.side p{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.side .s{color:var(--text-secondary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+// Reads the nearest Theme through useTheme().
+function Card(props){
+ const t=C.useTheme();
+ return h(React.Fragment,null,
+  h('div',null,h('p',{className:'title'},'theme="'+t.theme+'"'),h('p',{className:'meta'},'useTheme().isDark: '+String(!!t.isDark))),
+  h(C.TextInput,{id:'tz-'+props.id,labelText:'Cluster name',placeholder:'e.g. prod-eu-1',size:'md'}),
+  h('div',{className:'tags'},h(C.Tag,{type:'green'},'Healthy'),h(C.Tag,{type:'gray'},'eu-de')),
+  h('div',null,h(C.Button,{size:'md',renderIcon:'add'},'Create cluster')));
+}
+function Level(){const l=C.useLayer?C.useLayer().level:'';return h('p',{className:'meta',style:{margin:0}},'useLayer().level: '+l)}
+function App(){
+ return h(C.GlobalTheme,{theme:'white'},h('div',null,
+  Cap('Four zones: each <Theme theme=...> re-binds every color token and paints background and text-primary'),
+  h('div',{className:'zones'},['white','g10','g90','g100'].map(t=>h(C.Theme,{key:t,theme:t,className:'zone'},h(Card,{id:t})))),
+  Cap('A zone resets layering to level one: the same field on a layer-01 panel, inside a Layer, and in a g10 zone inside that Layer'),
+  h('div',{className:'reset'},
+   h('div',{className:'lv'},h(Level),h(C.TextInput,{id:'tz-l1',labelText:'API key name',placeholder:'field-01 on layer-01'})),
+   h(C.Layer,{withBackground:true,className:'lv'},h(Level),h(C.TextInput,{id:'tz-l2',labelText:'API key name',placeholder:'Layer: field-02'})),
+   h('div',{className:'lv'},h(C.Layer,null,h(C.Theme,{theme:'g10',className:'lv2'},h(Level),h(C.TextInput,{id:'tz-l3',labelText:'API key name',placeholder:'g10 zone: field-01 again'}))))),
+  Cap('In context: a console page: a g100 header band, the body in the page theme, and a g90 incident panel'),
+  h('div',{className:'frame'},
+   h(C.Theme,{theme:'g100',as:'header',className:'hdr'},h('span',{className:'brand'},'Cloud ',h('b',null,'Console')),h('nav',{className:'nav','aria-label':'Main'},h('span',{className:'on'},'Clusters'),h('span',null,'Storage'),h('span',null,'Billing'))),
+   h('div',{className:'body'},
+    h('main',{className:'main'},h('p',{className:'ph'},'Clusters'),
+     h('div',{className:'kpis'},[['11','Running'],['148','Nodes'],['$18,420','This month']].map(k=>h('div',{key:k[1],className:'kpi'},h('b',null,k[0]),h('span',null,k[1]))))),
+    h(C.Theme,{theme:'g90',as:'aside',className:'side','aria-label':'Active incident'},
+     h('div',null,h(C.Tag,{type:'red'},'Incident')),
+     h('p',null,'prod-us-2 is degraded'),h('p',{className:'s'},'2 of 9 nodes are not ready after a kernel update.'),
+     h('div',null,h(C.Button,{kind:'tertiary',size:'sm'},'View incident')))))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

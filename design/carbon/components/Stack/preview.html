@@ -1,0 +1,51 @@
+<!-- @dsCard group="Layout" height=910 subtitle="Vertical and horizontal stacks, gap steps 1-13, custom gap, as=ul, in a form" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;margin-bottom:24px}
+.box{background:var(--layer-accent-01);outline:1px solid var(--border-strong-01);outline-offset:-1px;padding:8px 12px;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+.bar{background:var(--layer-accent-01);outline:1px solid var(--border-strong-01);outline-offset:-1px;block-size:24px;inline-size:24px}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px 8px;margin-bottom:24px}
+.step{font:400 12px/16px var(--font-mono);letter-spacing:.32px;color:var(--text-helper);margin:0 0 4px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px}
+ul.plain{margin:0;padding:0;list-style:none}
+.item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--layer-01);font:400 14px/18px var(--font-sans);letter-spacing:.16px}
+.panel{padding:24px;background:var(--layer-01)}
+.title{margin:0;font:400 20px/28px var(--font-sans)}
+.sub{margin:4px 0 0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const B=t=>h('div',{className:'box',key:t},t);
+const steps=[['1','0.125rem','2px'],['2','0.25rem','4px'],['3','0.5rem','8px'],['4','0.75rem','12px'],['5','1rem','16px'],['6','1.5rem','24px'],['7','2rem','32px'],['8','2.5rem','40px'],['9','3rem','48px'],['10','4rem','64px'],['11','5rem','80px'],['12','6rem','96px'],['13','10rem','160px']];
+function App(){
+ return h('div',null,
+  h('div',{className:'row'},
+   h('div',null,Cap('Vertical (default), gap 3 / 8px'),h(C.Stack,{gap:3},['Cluster','Nodes','Pods'].map(B))),
+   h('div',null,Cap('Vertical, gap 5 / 16px'),h(C.Stack,{gap:5},['Cluster','Nodes','Pods'].map(B))),
+   h('div',null,Cap('Vertical, gap 7 / 32px'),h(C.Stack,{gap:7},['Cluster','Nodes','Pods'].map(B))),
+   h('div',null,Cap('Horizontal, gap 3 / 5 / custom "3.5rem"'),
+    h(C.Stack,{gap:5},
+     h(C.Stack,{orientation:'horizontal',gap:3},['Dev','Staging','Prod'].map(B)),
+     h(C.Stack,{orientation:'horizontal',gap:5},['Dev','Staging','Prod'].map(B)),
+     h(C.Stack,{orientation:'horizontal',gap:'3.5rem'},['Dev','Staging','Prod'].map(B))))),
+  Cap('gap steps 1 to 13 map to spacing-01 ... spacing-13 (gap between two 24px squares)'),
+  h('div',{className:'scale'},steps.map(s=>h('div',{key:s[0],style:s[0]==='13'?{gridColumn:'span 2'}:null},
+    h('p',{className:'step'},'gap='+s[0]+'  '+s[2]),
+    h(C.Stack,{orientation:'horizontal',gap:+s[0]},h('div',{className:'bar'}),h('div',{className:'bar'}))))),
+  h('div',{className:'two'},
+   h('div',null,Cap('as="ul" with gap 1: a list of rows separated by 2px'),
+    h(C.Stack,{as:'ul',gap:1,className:'plain'},
+     [['prod-eu-1','Healthy','green'],['prod-us-2','Degraded','red'],['staging-eu-1','Healthy','green'],['dev-sandbox','Stopped','gray']].map(r=>h('li',{key:r[0],className:'item'},r[0],h(C.Tag,{type:r[2],size:'sm'},r[1]))))),
+   h('div',null,Cap('In context: a form section, gap 6 (24px) between fields, gap 7 between title, fields and actions'),
+    h('div',{className:'panel'},
+     h(C.Stack,{gap:7},
+      h('div',null,h('p',{className:'title'},'Create API key'),h('p',{className:'sub'},'Keys inherit the access policies of the service ID.')),
+      h(C.Stack,{gap:6,as:C.Layer},
+       h(C.TextInput,{id:'st-name',labelText:'Name',placeholder:'e.g. ci-deploy',helperText:'Shown in audit logs'}),
+       h(C.TextInput,{id:'st-desc',labelText:'Description (optional)',placeholder:'What uses this key?'})),
+       h(C.ButtonSet,null,h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,null,'Create key')))))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

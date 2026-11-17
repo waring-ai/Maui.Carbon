@@ -1,0 +1,29 @@
+<!-- @dsCard group="Data" height=1342 subtitle="Inline, single line, multi-line with show more, wrap, disabled, no copy, on a layer, setup steps" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .stack{display:flex;flex-direction:column;gap:32px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px 24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.txt{margin:0;font:400 14px/24px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .lay{padding:16px} .steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:16px;max-width:768px} .steps li{display:flex;flex-direction:column;gap:8px} .steps h4{margin:0;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .card{border:1px solid var(--border-subtle-01);padding:16px} .card h3{margin:0 0 4px;font:400 20px/28px var(--font-sans)} .card>p{margin:0 0 16px;font:400 14px/20px var(--font-sans);color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const yaml=['apiVersion: apps/v1','kind: Deployment','metadata:','  name: checkout-api','  namespace: payments','  labels:','    app: checkout-api','spec:','  replicas: 3','  selector:','    matchLabels:','      app: checkout-api','  template:','    metadata:','      labels:','        app: checkout-api','    spec:','      containers:','        - name: checkout-api','          image: registry.example.cloud/payments/checkout-api:2.14.0','          ports:','            - containerPort: 8080','          resources:','            limits:','              cpu: "500m"','              memory: 512Mi'].join('\n');
+const curl='curl -X POST "https://api.example.cloud/v1/clusters/prod-us-east-1/workers" -H "Authorization: Bearer $API_KEY" -H "Content-Type: application/json" -d \'{"count": 3, "flavor": "bx2.4x16", "zone": "us-east-2"}\'';
+const env=['export CLUSTER=prod-us-east-1','export REGION=us-east','export KUBECONFIG=$HOME/.kube/prod-us-east-1.yaml'].join('\n');
+function App(){
+ return h('div',{className:'stack'},
+  B('type="inline": copies on click; hideCopyButton renders plain code',h('p',{className:'txt'},'Set ',h(C.CodeSnippet,{type:'inline',feedback:'Copied to clipboard'},'KUBECONFIG'),' to the downloaded file, then check access with ',h(C.CodeSnippet,{type:'inline',feedback:'Copied to clipboard'},'kubectl get nodes'),'. The namespace ',h(C.CodeSnippet,{type:'inline',hideCopyButton:true},'kube-system'),' is managed for you.')),
+  B('type="single" (default): one line; long commands scroll sideways under a fade',h(C.CodeSnippet,{type:'single','aria-label':'Add worker nodes with the API',feedback:'Copied to clipboard'},curl)),
+  B('type="multi": 26 lines collapsed to 15 with Show more',h(C.CodeSnippet,{type:'multi','aria-label':'Deployment manifest',feedback:'Copied to clipboard'},yaml)),
+  h('div',{className:'grid'},
+   B('Multi, short (no Show more), wrapText',h(C.CodeSnippet,{type:'multi',wrapText:true,'aria-label':'Environment variables'},env+'\n# Tokens expire after 24 hours; run "cloud login" again to refresh the kubeconfig file.')),
+   B('On a Layer: the fill follows the layer tokens',h(C.Layer,{withBackground:true,className:'lay'},h(C.CodeSnippet,{type:'single','aria-label':'Log in command'},'cloud login --sso --region us-east'))),
+   B('disabled: single and multi (no focus, no copy)',h('div',{style:{display:'flex',flexDirection:'column',gap:16}},h(C.CodeSnippet,{type:'single',disabled:true},'cloud cluster delete dev-jp-tok'),h(C.CodeSnippet,{type:'multi',disabled:true},'cloud cluster stop dev-jp-tok\ncloud cluster delete dev-jp-tok --force'))),
+   B('hideCopyButton: read-only output that should not be copied',h(C.CodeSnippet,{type:'multi',hideCopyButton:true,'aria-label':'Command output'},['NAME         STATUS   ROLES    AGE   VERSION','10.240.0.12  Ready    <none>   41d   v1.29.4','10.240.0.13  Ready    <none>   41d   v1.29.4','10.240.0.14  NotReady <none>   2m    v1.29.4'].join('\n')))),
+  B('In context: connect to a cluster',h('div',{className:'card'},h('h3',null,'Connect to prod-us-east-1'),h('p',null,'Run these commands in a terminal that has the cloud CLI installed.'),
+   h('ol',{className:'steps'},
+    h('li',null,h('h4',null,'1. Log in'),h(C.CodeSnippet,{type:'single','aria-label':'Step 1 command'},'cloud login --sso --region us-east')),
+    h('li',null,h('h4',null,'2. Download the cluster configuration'),h(C.CodeSnippet,{type:'single','aria-label':'Step 2 command'},'cloud ks cluster config --cluster prod-us-east-1')),
+    h('li',null,h('h4',null,'3. Check that the worker nodes are ready'),h(C.CodeSnippet,{type:'single','aria-label':'Step 3 command'},'kubectl get nodes -o wide'))))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

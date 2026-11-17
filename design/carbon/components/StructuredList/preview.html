@@ -1,0 +1,52 @@
+<!-- @dsCard group="Data" height=1569 subtitle="Default, selectable with radio and disabled row, condensed, flush, composed parts, plan picker" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .stack{display:flex;flex-direction:column;gap:32px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px 24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.panel{padding:16px 16px 24px;border:1px solid var(--border-subtle-01)} .ttl{margin:0 0 4px;font:400 20px/28px var(--font-sans);color:var(--text-primary)} .sub{margin:0 0 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .acts{display:flex;justify-content:flex-end;gap:1px;margin-top:16px} .num{font-variant-numeric:tabular-nums;white-space:nowrap}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const columns=['Flavor','vCPU / memory','Best for'];
+const rows=[
+ {id:'bx2-4x16',cells:['bx2.4x16','4 vCPU / 16 GB','General web apps and APIs with steady traffic.']},
+ {id:'cx2-8x16',cells:['cx2.8x16','8 vCPU / 16 GB','CPU-bound jobs such as builds, encoding and batch analytics.']},
+ {id:'mx2-8x64',cells:['mx2.8x64','8 vCPU / 64 GB','In-memory caches and databases that need a large heap.']}
+];
+const rowsDisabled=rows.map(r=>r.id==='mx2-8x64'?Object.assign({},r,{disabled:true,cells:[r.cells[0],r.cells[1],'Not available in jp-tok. Pick another zone to use it.']}):r);
+const plans=[
+ {id:'lite',name:'Lite',price:'$0 / month',desc:'1 cluster, 2 nodes, community support. Clusters are deleted after 30 days.'},
+ {id:'standard',name:'Standard',price:'$0.11 / node hour',desc:'Unlimited clusters, autoscaling worker pools and a 99.9% availability SLA.'},
+ {id:'enterprise',name:'Enterprise',price:'Contact sales',desc:'Dedicated hosts, private endpoints and 24/7 support with a 15-minute response.'}
+];
+function PlanPicker(){
+ const [plan,setPlan]=useState('standard');
+ return h('div',{className:'panel'},
+  h('h3',{className:'ttl'},'Choose a plan'),
+  h('p',{className:'sub'},'You can change the plan later from Billing. Selected: '+plans.find(p=>p.id===plan).name+'.'),
+  h(C.StructuredList,{selection:true,selectedRow:plan,onSelectionChange:setPlan,'aria-label':'Cluster plans'},
+   h(C.StructuredListHead,null,h(C.StructuredListRow,{head:true},h(C.StructuredListCell,{head:true},'Plan'),h(C.StructuredListCell,{head:true},'Price'),h(C.StructuredListCell,{head:true},'Includes'))),
+   h(C.StructuredListBody,null,plans.map(p=>h(C.StructuredListRow,{key:p.id,id:p.id,label:p.name+' plan'},
+    h(C.StructuredListCell,{noWrap:true},p.name),h(C.StructuredListCell,{noWrap:true,className:'num'},p.price),h(C.StructuredListCell,null,p.desc))))),
+  h('div',{className:'acts'},h(C.Button,{kind:'secondary'},'Back'),h(C.Button,{kind:'primary'},'Continue to networking')));
+}
+function App(){
+ return h('div',{className:'stack'},
+  h('div',{className:'grid'},
+   B('Default: read-only rows',h(C.StructuredList,{columns,rows,'aria-label':'Worker node flavors'})),
+   B('selection: one row at a time (cx2.8x16 selected), mx2.8x64 disabled',h(C.StructuredList,{columns,rows:rowsDisabled,selection:true,selectedInitialRow:'cx2-8x16','aria-label':'Choose a worker node flavor'})),
+   B('isCondensed: 8px cell padding',h(C.StructuredList,{columns,rows,isCondensed:true,'aria-label':'Worker node flavors, condensed'})),
+   B('isFlush: no start padding, aligns with text above (not for selectable lists)',h(C.StructuredList,{columns,rows,isFlush:true,'aria-label':'Worker node flavors, flush'}))),
+  h('div',{className:'grid'},
+   B('Composed from parts: label / value pairs, noWrap on the label column',
+    h(C.StructuredList,{isCondensed:true,'aria-label':'Cluster details'},
+     h(C.StructuredListHead,null,h(C.StructuredListRow,{head:true},h(C.StructuredListCell,{head:true},'Property'),h(C.StructuredListCell,{head:true},'Value'))),
+     h(C.StructuredListBody,null,[['Cluster ID','c7f2a91d-0b4e-4c6a-9d1e-58e2a7f0c311'],['Kubernetes version','1.29.4'],['Ingress subdomain','prod-us-east-1.containers.example.cloud'],['Created','March 4, 2026 by ops@example.com']].map(r=>
+      h(C.StructuredListRow,{key:r[0]},h(C.StructuredListCell,{noWrap:true},r[0]),h(C.StructuredListCell,null,r[1])))))),
+   B('Long text wraps inside its cell; keep row text to three short paragraphs at most',
+    h(C.StructuredList,{columns:['Event','Details'],'aria-label':'Maintenance notices',rows:[
+     {id:'m1',cells:['Control plane patch','Patch 1.29.4_1532 is applied to the master on April 12 between 02:00 and 04:00 UTC. Workloads keep running; kubectl may be unavailable for up to five minutes.']},
+     {id:'m2',cells:['Node reboot','Worker nodes reboot one zone at a time to pick up the kernel fix. Drain stateful pods first if they cannot tolerate a restart.']}]}))),
+  B('In context: plan picker in a create-cluster flow (select a row)',h(PlanPicker)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

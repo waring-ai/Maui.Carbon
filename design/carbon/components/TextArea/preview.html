@@ -1,0 +1,42 @@
+<!-- @dsCard group="Forms" height=1080 subtitle="Helper, character and word counters, invalid, warning, read-only, disabled, skeleton, on a layer; request form" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}
+.lay{padding:16px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+function App(){
+ const [why,setWhy]=React.useState('The checkout service needs 32 more vCPUs for the holiday sale.');
+ return h('div',null,
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text',h(C.TextArea,{labelText:'Cluster description',placeholder:'What runs on this cluster?',helperText:'Shown to everyone with access to the cluster',rows:3})),
+   Cell('Character counter',h(C.TextArea,{labelText:'Release notes',defaultValue:'Rotates the TLS certificates on every ingress node.',enableCounter:true,maxCount:120,rows:3})),
+   Cell('Word counter',h(C.TextArea,{labelText:'Incident summary',defaultValue:'API latency rose after the 14:05 deploy and recovered after rollback.',enableCounter:true,counterMode:'word',maxCount:40,rows:3})),
+   Cell('Invalid',h(C.TextArea,{labelText:'Change reason',defaultValue:'Fix',invalid:true,invalidText:'Enter at least 10 characters so reviewers know what changed',rows:3})),
+   Cell('Warning',h(C.TextArea,{labelText:'Alert message',defaultValue:'Disk usage on node pool db-primary is above 85 percent.',warn:true,warnText:'Messages over 140 characters are cut off in SMS alerts',rows:3})),
+   Cell('Read only',h(C.TextArea,{labelText:'Audit note',defaultValue:'Created by the policy engine on 3 Nov 2026.',readOnly:true,rows:3})),
+   Cell('Disabled',h(C.TextArea,{labelText:'Bucket policy notes',defaultValue:'Managed by your organization.',disabled:true,helperText:'Ask an administrator to change this',rows:3})),
+   Cell('Skeleton',h(C.TextAreaSkeleton)),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.TextArea,{labelText:'Comment',placeholder:'Add a comment for the on-call team',rows:2})))),
+  Cap('In context: quota request'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Request a quota increase'),
+   h('p',{className:'sub'},'Requests are reviewed within one business day.'),
+   h('div',{className:'row'},
+    h(C.Select,{id:'ta-res',labelText:'Resource'},h(C.SelectItem,{value:'vcpu',text:'vCPUs'}),h(C.SelectItem,{value:'mem',text:'Memory (GiB)'}),h(C.SelectItem,{value:'ip',text:'Public IP addresses'})),
+    h(C.NumberInput,{id:'ta-amt',label:'New limit',min:1,max:512,defaultValue:96})),
+   h(C.TextArea,{labelText:'Justification',value:why,onChange:e=>setWhy(e.target.value),enableCounter:true,maxCount:300,rows:4,helperText:'Say what the extra capacity is for and how long you need it'}),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'primary'},'Submit request'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

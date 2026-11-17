@@ -1,0 +1,64 @@
+<!-- @dsCard group="Navigation" height=593 subtitle="Sizes, icon-only, low contrast, disabled, usage panel" -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 32px;margin-bottom:32px}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.icons{display:flex;gap:24px;align-items:flex-end}
+.panel{background:var(--layer-01);padding:16px}
+.panel__head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.panel h3{margin:0;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+.panel__head .cds--content-switcher{max-width:320px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.stat{border-top:1px solid var(--border-subtle-01);padding-top:8px}
+.stat span{display:block;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.stat strong{display:block;margin-top:4px;font:400 28px/36px var(--font-sans);color:var(--text-primary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Views(p){
+ return h(C.ContentSwitcher,{size:p.size,selectedIndex:p.sel||0,lowContrast:p.low,onChange:()=>{}},
+  h(C.Switch,{name:'overview',text:'Overview',disabled:p.all}),
+  h(C.Switch,{name:'nodes',text:'Nodes',disabled:p.disabled||p.all}),
+  h(C.Switch,{name:'events',text:p.long?'Events and audit history':'Events',disabled:p.all}));
+}
+function IconViews(p){
+ return h(C.ContentSwitcher,{size:p.size,selectedIndex:p.sel||0,lowContrast:p.low,onChange:()=>{}},
+  h(C.IconSwitch,{name:'chart',text:'Chart view',renderIcon:'analytics'}),
+  h(C.IconSwitch,{name:'dashboard',text:'Dashboard view',renderIcon:'dashboard'}),
+  h(C.IconSwitch,{name:'report',text:'Report view',renderIcon:'report',disabled:p.disabled}));
+}
+const DATA={'1h':['42%','61%','18'],'24h':['37%','58%','212'],'7d':['35%','55%','1,480']};
+function Usage(){
+ const keys=['1h','24h','7d'];
+ const [i,setI]=React.useState(1);
+ const d=DATA[keys[i]];
+ return h('div',{className:'panel'},
+  h('div',{className:'panel__head'},
+   h('h3',null,'Cluster prod-us-south'),
+   h(C.ContentSwitcher,{size:'sm',selectedIndex:i,onChange:e=>setI(e.index),'aria-label':'Time range'},
+    h(C.Switch,{name:'1h',text:'Last hour'}),h(C.Switch,{name:'24h',text:'24 hours'}),h(C.Switch,{name:'7d',text:'7 days'}))),
+  h('div',{className:'stats'},
+   h('div',{className:'stat'},h('span',null,'Average CPU'),h('strong',null,d[0])),
+   h('div',{className:'stat'},h('span',null,'Average memory'),h('strong',null,d[1])),
+   h('div',{className:'stat'},h('span',null,'Pod restarts'),h('strong',null,d[2]))));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   h('div',null,Cap('sm (32px)'),h(Views,{size:'sm'})),
+   h('div',null,Cap('md (40px, default), second switch selected'),h(Views,{size:'md',sel:1})),
+   h('div',null,Cap('lg (48px)'),h(Views,{size:'lg'})),
+   h('div',null,Cap('Disabled switch; long label truncates'),h(Views,{disabled:true,long:true})),
+   h('div',null,Cap('Whole switcher disabled (selected switch fills with button-disabled)'),h(Views,{all:true,sel:1})),
+   h('div',null,Cap('lowContrast'),h(Views,{low:true,sel:2})),
+   h('div',null,Cap('Icon-only (IconSwitch): sm, md, lg'),
+    h('div',{className:'icons'},h(IconViews,{size:'sm'}),h(IconViews,{size:'md',sel:1}),h(IconViews,{size:'lg',sel:2}))),
+   h('div',null,Cap('Icon-only: lowContrast, disabled switch'),
+    h('div',{className:'icons'},h(IconViews,{low:true,sel:1}),h(IconViews,{disabled:true})))),
+  Cap('In context: switch the time range of a usage panel (arrow keys move and select)'),
+  h(Usage));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

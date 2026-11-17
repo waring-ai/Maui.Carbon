@@ -1,0 +1,56 @@
+<!-- @dsCard group="Forms" height=1014 subtitle="sm / md / lg; helper, invalid, warning, read-only, disabled, option groups, inline, skeleton, on a layer; create bucket form" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.lay{padding:16px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+const I=(v,t)=>h(C.SelectItem,{key:v,value:v,text:t});
+const regions=()=>[I('','Choose a region'),I('us-south','Dallas (us-south)'),I('us-east','Washington DC (us-east)'),I('eu-de','Frankfurt (eu-de)'),I('jp-tok','Tokyo (jp-tok)')];
+const classes=()=>[I('standard','Standard'),I('vault','Vault'),I('cold','Cold vault'),I('smart','Smart tier')];
+const grouped=()=>[
+ h(C.SelectItemGroup,{key:'am',label:'Americas'},I('us-south','Dallas (us-south)'),I('us-east','Washington DC (us-east)'),I('br-sao','Sao Paulo (br-sao)')),
+ h(C.SelectItemGroup,{key:'eu',label:'Europe'},I('eu-de','Frankfurt (eu-de)'),I('eu-gb','London (eu-gb)')),
+ h(C.SelectItemGroup,{key:'ap',label:'Asia Pacific'},I('jp-tok','Tokyo (jp-tok)'),I('au-syd','Sydney (au-syd)'))];
+function App(){
+ const [cls,setCls]=React.useState('cold');
+ return h('div',null,
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.Select,{id:'sel-sm',size:'sm',labelText:'Storage class',defaultValue:'standard'},classes()),
+   h(C.Select,{id:'sel-md',labelText:'Storage class',defaultValue:'standard'},classes()),
+   h(C.Select,{id:'sel-lg',size:'lg',labelText:'Storage class',defaultValue:'standard'},classes())),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text',h(C.Select,{id:'sel-help',labelText:'Region',helperText:'Data stays in the region you choose'},regions())),
+   Cell('Invalid',h(C.Select,{id:'sel-inv',labelText:'Region',invalid:true,invalidText:'Choose a region to create the bucket in'},regions())),
+   Cell('Warning',h(C.Select,{id:'sel-warn',labelText:'Kubernetes version',defaultValue:'1.29',warn:true,warnText:'Version 1.29 reaches end of support on 30 Nov 2026. Choose 1.31 or later.'},I('1.31','1.31 (default)'),I('1.30','1.30'),I('1.29','1.29'))),
+   Cell('Read only',h(C.Select,{id:'sel-ro',labelText:'Billing plan',defaultValue:'payg',readOnly:true},I('payg','Pay as you go'),I('sub','Subscription'))),
+   Cell('Disabled',h(C.Select,{id:'sel-dis',labelText:'Encryption',defaultValue:'kp',disabled:true,helperText:'Your organization requires Key Protect'},I('kp','Key Protect'),I('hpcs','Hyper Protect'))),
+   Cell('Option groups (SelectItemGroup)',h(C.Select,{id:'sel-grp',labelText:'Region',defaultValue:'eu-de'},grouped())),
+   Cell('Inline',h(C.Select,{id:'sel-inl',inline:true,labelText:'Show',defaultValue:'25'},I('10','10 per page'),I('25','25 per page'),I('50','50 per page'))),
+   Cell('Inline, invalid',h(C.Select,{id:'sel-inl-inv',inline:true,labelText:'Sort by',defaultValue:'',invalid:true,invalidText:'Choose a sort order'},I('','Choose'),I('name','Name'),I('created','Date created'))),
+   Cell('Skeleton',h(C.SelectSkeleton))),
+  Cap('In context: create bucket form section (on a layer, so fields use field-02)'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Create a bucket'),
+   h('p',{className:'sub'},'Buckets hold objects such as backups, logs and exports.'),
+   h('div',{className:'row'},
+    h(C.TextInput,{id:'bk-name',labelText:'Bucket name',defaultValue:'checkout-backups',helperText:'3 to 63 lowercase letters, numbers and dashes'}),
+    h(C.Select,{id:'bk-region',labelText:'Region',defaultValue:'us-south'},grouped())),
+   h('div',{className:'row'},
+    h(C.Select,{id:'bk-class',labelText:'Storage class',value:cls,onChange:e=>setCls(e.target.value),helperText:cls==='cold'?'Retrieval takes up to 12 hours':'Billed per GB stored each month'},classes()),
+    h(C.Select,{id:'bk-ret',labelText:'Retention policy',defaultValue:'90'},I('none','No retention'),I('30','30 days'),I('90','90 days'),I('365','1 year'))),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'primary'},'Create bucket'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

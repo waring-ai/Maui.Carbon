@@ -1,0 +1,71 @@
+<!-- @dsCard group="Forms" height=1198 subtitle="A create-cluster form: FormGroups, helper, invalid and warning fields, invalid and disabled groups, FormItem + FormLabel" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.page{display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:32px;align-items:start}
+.fh{margin:0 0 4px;font:400 28px/36px var(--font-sans)}
+.fs{margin:0 0 32px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.gh{margin:0 0 16px;font:600 16px/24px var(--font-sans)}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
+.zones{display:flex;gap:24px}
+.side{display:flex;flex-direction:column;gap:24px;position:sticky;top:0}
+.sum{background:var(--layer-01);padding:16px}
+.sum dl{display:grid;grid-template-columns:1fr auto;gap:8px 16px;margin:0 0 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.sum dt{color:var(--text-secondary)} .sum dd{margin:0;text-align:end}
+.tot{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--border-subtle-01);padding-top:12px;font:400 14px/20px var(--font-sans)}
+.tot b{font:400 20px/28px var(--font-sans)}
+.demo-field{box-sizing:border-box;inline-size:100%;block-size:40px;margin-block-start:8px;padding:0 16px;border:0;border-block-end:1px solid var(--border-strong-01);background:var(--field-01);color:var(--text-primary);font:400 14px/18px var(--font-sans);letter-spacing:.16px;outline:2px solid transparent;outline-offset:-2px}
+.demo-field::placeholder{color:var(--text-placeholder)}
+.demo-field:focus{outline-color:var(--focus)}
+.hint{margin:4px 0 0;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-helper)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function opt(v,t){return h(C.SelectItem,{key:v,value:v,text:t})}
+function App(){
+ const [name,setName]=React.useState('Prod_EU');
+ const [zones,setZones]=React.useState({});
+ const [tried,setTried]=React.useState(true);
+ const nameBad=!/^[a-z][a-z0-9-]{2,31}$/.test(name);
+ const zoneBad=!Object.values(zones).some(Boolean);
+ const tz=k=>e=>setZones(Object.assign({},zones,{[k]:e.target.checked}));
+ return h('div',{className:'page'},
+  h(C.Form,{'aria-labelledby':'f-title',noValidate:true,onSubmit:e=>{e.preventDefault();setTried(true)}},
+   h('h2',{className:'fh',id:'f-title'},'Create cluster'),
+   h('p',{className:'fs'},'Clusters run your containers on managed worker nodes. Most settings can be changed after creation.'),
+   h(C.Stack,{gap:9},
+    h(C.FormGroup,{legendText:h('span',{className:'gh'},'Details')},
+     h(C.Stack,{gap:7},
+      h(C.TextInput,{id:'f-name',labelText:'Cluster name',value:name,onChange:e=>setName(e.target.value),helperText:'3 to 32 characters: lowercase letters, numbers and dashes',invalid:tried&&nameBad,invalidText:'Use lowercase letters, numbers and dashes only, for example prod-eu-1'}),
+      h('div',{className:'pair'},
+       h(C.Select,{id:'f-rg',labelText:'Resource group',defaultValue:'platform'},opt('platform','platform'),opt('payments','payments'),opt('sandbox','sandbox')),
+       h(C.Select,{id:'f-ver',labelText:'Kubernetes version',defaultValue:'1.28',warn:true,warnText:'1.28 reaches end of support on 30 April. Choose 1.30 for new clusters.'},opt('1.30','1.30 (recommended)'),opt('1.29','1.29'),opt('1.28','1.28'))),
+      h(C.TextArea,{id:'f-desc',labelText:'Description (optional)',placeholder:'What runs on this cluster?',rows:2,enableCounter:true,maxCount:200}))),
+    h(C.FormGroup,{legendText:h('span',{className:'gh'},'Location')},
+     h(C.Stack,{gap:7},
+      h(C.Select,{id:'f-region',labelText:'Region',defaultValue:'eu-de'},opt('us-south','us-south (Dallas)'),opt('eu-de','eu-de (Frankfurt)'),opt('jp-tok','jp-tok (Tokyo)')),
+      h(C.FormGroup,{legendText:'Zones',invalid:tried&&zoneBad,message:true,messageText:tried&&zoneBad?'Select at least one zone. Three zones give a 99.99% SLA.':'Three zones give a 99.99% SLA.'},
+       h('div',{className:'zones'},['eu-de-1','eu-de-2','eu-de-3'].map(z=>h(C.Checkbox,{key:z,id:'f-'+z,labelText:z,checked:!!zones[z],onChange:tz(z)})))))),
+    h(C.FormGroup,{legendText:h('span',{className:'gh'},'Worker pool')},
+     h('div',{className:'pair'},
+      h(C.Select,{id:'f-flavor',labelText:'Flavor',defaultValue:'bx2.4x16',helperText:'4 vCPU and 16 GB memory per node'},opt('bx2.4x16','bx2.4x16'),opt('bx2.8x32','bx2.8x32'),opt('cx2.8x16','cx2.8x16')),
+      h(C.NumberInput,{id:'f-nodes',label:'Nodes per zone',defaultValue:3,min:1,max:50,helperText:'1 to 50'}))),
+    h(C.FormGroup,{legendText:h('span',{className:'gh'},'Billing'),disabled:true,message:true,messageText:'Billing is managed by your account owner.'},
+     h('div',{className:'pair'},
+      h(C.TextInput,{id:'f-acct',labelText:'Billing account',defaultValue:'Platform engineering (4021)'}),
+      h(C.Select,{id:'f-plan',labelText:'Pricing plan',defaultValue:'payg'},opt('payg','Pay as you go'),opt('sub','Subscription')))),
+    h(C.ButtonSet,null,h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{type:'submit'},'Create cluster')))),
+  h('div',{className:'side'},
+   h('div',{className:'sum',role:'status'},
+    h('p',{className:'gh',style:{margin:'0 0 12px'}},'Estimated cost'),
+    h('dl',null,h('dt',null,'3 nodes x 3 zones'),h('dd',null,'$1,134'),h('dt',null,'Cluster management'),h('dd',null,'$72')),
+    h('div',{className:'tot'},h('span',null,'Per month'),h('b',null,'$1,206'))),
+   h('div',null,Cap('FormItem + FormLabel around a custom control'),
+    h(C.FormItem,null,
+     h(C.FormLabel,{id:'f-tags'},'Tags (optional)'),
+     h('input',{id:'f-tags',className:'demo-field',placeholder:'env:prod, team:payments','aria-describedby':'f-tags-h'}),
+     h('p',{className:'hint',id:'f-tags-h'},'Separate tags with commas')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

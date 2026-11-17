@@ -1,0 +1,48 @@
+<!-- @dsCard group="Forms" height=1038 subtitle="Checkbox list with a count tag, label inside a 64px field: filterable, condensed, invalid, warning, disabled, read-only, skeleton" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .grid{display:grid;align-items:start;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-bottom:24px} .tall{min-height:320px} .grid .cds--list-box__wrapper.cds--list-box__wrapper--fluid{block-size:auto} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.bar{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);column-gap:1px;background:var(--border-strong-01);max-inline-size:640px}
+.list{list-style:none;margin:0;padding:0;max-inline-size:640px;border:1px solid var(--border-subtle-01);border-block-start:0} .list li{display:grid;grid-template-columns:1fr 120px 100px;gap:16px;padding:11px 16px;border-block-end:1px solid var(--border-subtle-01);font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .list li:last-child{border-block-end:0} .list li span+span{color:var(--text-secondary)} .empty{padding:11px 16px;margin:0;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el,tall){return h('div',{className:tall?'tall':null},Cap(t),el)}
+const zones=[{id:'d1',text:'Dallas 1 (us-south-1)'},{id:'d2',text:'Dallas 2 (us-south-2)'},{id:'d3',text:'Dallas 3 (us-south-3)'},{id:'f1',text:'Frankfurt 1 (eu-de-1)',disabled:true},{id:'f2',text:'Frankfurt 2 (eu-de-2)'},{id:'t1',text:'Tokyo 1 (jp-tok-1)'}];
+const base={titleText:'Zones',label:'Choose zones',items:zones};
+function MS(p){return h(C.FluidMultiSelect,Object.assign({},base,p))}
+const STATUS=[{id:'Running',text:'Running'},{id:'Pending',text:'Pending'},{id:'Failed',text:'Failed'},{id:'Stopped',text:'Stopped'}];
+const DEPLOYS=[['payments-api','Running','us-south'],['payments-worker','Failed','us-south'],['checkout-web','Running','eu-de'],['ledger-sync','Pending','us-south'],['invoice-pdf','Stopped','jp-tok']];
+
+function FilterBar(){
+ const [q,setQ]=React.useState('');
+ const [st,setSt]=React.useState([STATUS[0],STATUS[1]]);
+ const ids=st.map(function(s){return s.id});
+ const rows=DEPLOYS.filter(function(d){return (!ids.length||ids.indexOf(d[1])>-1)&&d[0].indexOf(q.trim().toLowerCase())>-1});
+ return h('div',null,
+  h('div',{className:'bar'},
+   h(C.FluidSearch,{id:'fb-q',labelText:'Search deployments',placeholder:'Filter by name',value:q,onChange:function(e){setQ(e.target.value)}}),
+   h(C.FluidMultiSelect,{id:'fb-st',titleText:'Status',label:'All statuses',items:STATUS,selectedItems:st,onChange:function(d){setSt(d.selectedItems)}})),
+  rows.length?h('ul',{className:'list','aria-label':'Deployments'},rows.map(function(d){return h('li',{key:d[0]},h('span',null,d[0]),h('span',null,d[1]),h('span',null,d[2]))}))
+   :h('div',{className:'list'},h('p',{className:'empty'},'No deployments match these filters. Clear a status or change the search.')));
+}
+
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   Cell('Open: nothing selected (64px rows)',MS({id:'fm-open',defaultOpen:true}),true),
+   Cell('Open, two selected (count tag)',MS({id:'fm-open-sel',initialSelectedItems:[zones[0],zones[2]],defaultOpen:true}),true),
+   Cell('Open, isFilterable + isCondensed',MS({id:'fm-filter',isFilterable:true,isCondensed:true,placeholder:'Filter zones',initialSelectedItems:[zones[1]],defaultOpen:true}),true)),
+  h('div',{className:'grid'},
+   Cell('Default (placeholder)',MS({id:'fm-def'})),
+   Cell('Selected',MS({id:'fm-sel',initialSelectedItems:[zones[0],zones[1],zones[2]]})),
+   Cell('Invalid',MS({id:'fm-inv',invalid:true,invalidText:'Choose at least one zone for the worker pool'})),
+   Cell('Warning',MS({id:'fm-warn',initialSelectedItems:[zones[0]],warn:true,warnText:'One zone has no failover; choose at least two'})),
+   Cell('Disabled',MS({id:'fm-dis',initialSelectedItems:[zones[0],zones[1]],disabled:true})),
+   Cell('Read only',MS({id:'fm-ro',initialSelectedItems:[zones[0],zones[1]],readOnly:true})),
+   Cell('Filterable, closed',MS({id:'fm-fdef',isFilterable:true,placeholder:'Filter zones',initialSelectedItems:[zones[5]]})),
+   Cell('Skeleton (FluidMultiSelectSkeleton)',h(C.FluidMultiSelectSkeleton))),
+  Cap('In context: a fluid filter bar above a deployment list (status filter is live)'),
+  h(FilterBar));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

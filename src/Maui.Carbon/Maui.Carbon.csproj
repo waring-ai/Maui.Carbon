@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(CarbonLibraryTargetFrameworks)</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <RootNamespace>Maui.Carbon</RootNamespace>
+    <AssemblyName>Maui.Carbon</AssemblyName>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+
+    <!-- Package -->
+    <PackageId>Maui.Carbon</PackageId>
+    <Title>Maui.Carbon — Carbon Design System for .NET MAUI</Title>
+    <Description>An unofficial .NET MAUI implementation of the Carbon Design System (v11): four themes, layering, IBM Plex type, Carbon icons and 92 components. Not affiliated with or endorsed by IBM.</Description>
+    <PackageTags>maui;carbon;design-system;ui;controls;dotnet-maui</PackageTags>
+    <PackageLicenseExpression>Apache-2.0 AND OFL-1.1</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Maui.Carbon.Tests" />
+  </ItemGroup>
+
+  <!-- IBM Plex (OFL-1.1) is embedded so UseCarbon() can register it from the package. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Fonts\*.ttf" LogicalName="Maui.Carbon.Fonts.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Shared Apple code lives in Platforms/Apple and compiles for iOS + Mac Catalyst only. -->
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'maccatalyst'">
+    <Compile Remove="Platforms\Apple\**\*.cs" />
+    <None Include="Platforms\Apple\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

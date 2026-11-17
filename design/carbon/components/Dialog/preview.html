@@ -1,0 +1,98 @@
+<!-- @dsCard group="Overlays" width=1280 height=1408 subtitle="Sizes xs to lg, danger, passive, scrolling body, three buttons, modal with loading" -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:32px;align-items:flex-start}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 24px}
+.keys{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 24px;margin:0}
+.keys dt{font-family:var(--font-mono);font-size:12px;line-height:20px;color:var(--text-primary)}
+.keys dd{margin:0;color:var(--text-secondary)}
+.chg{margin:0 0 16px;padding:0;list-style:none}
+.chg li{padding:8px 0;border-bottom:1px solid var(--border-subtle-01)}
+.chg strong{display:block;font-weight:600;color:var(--text-primary)}
+.launch{display:flex;align-items:center;gap:16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Head(sub,title,onClose){
+ return h(C.DialogHeader,null,
+  sub?h(C.DialogSubtitle,null,sub):null,
+  h(C.DialogTitle,null,title),
+  h(C.DialogControls,null,h(C.DialogCloseButton,{onClick:onClose})));
+}
+// Inline (non-modal) dialogs that reopen from a button after closing.
+function Reopen(p){
+ const [open,setOpen]=React.useState(true);
+ const close=()=>setOpen(false);
+ return h('div',null,
+  open?null:h(C.Button,{kind:'tertiary',size:'md',onClick:()=>setOpen(true)},'Show again'),
+  p.render(open,close));
+}
+const Danger=()=>h(Reopen,{render:(open,close)=>h(C.Dialog,{open:open,inline:true,size:'xs',role:'alertdialog',onRequestClose:close},
+ Head('logs-archive-prod','Delete bucket?',close),
+ h(C.DialogBody,null,h('p',null,'All 1,204 objects in the bucket are deleted. This cannot be undone.')),
+ h(C.DialogFooter,{danger:true,primaryButtonText:'Delete',secondaryButtonText:'Cancel',onRequestClose:close,onRequestSubmit:close}))});
+const Rename=()=>h(Reopen,{render:(open,close)=>h(C.Dialog,{open:open,inline:true,onRequestClose:close},
+ Head('Cluster prod-us-south','Rename cluster',close),
+ h(C.DialogBody,null,
+  h('p',null,'The new name appears in the cluster list, in billing reports and in alert notifications. Existing kubeconfig files keep working.'),
+  h(C.TextInput,{id:'dlg-name',labelText:'Cluster name',defaultValue:'prod-us-south',helperText:'Use 3 to 32 lowercase letters, numbers and hyphens.'})),
+ h(C.DialogFooter,{primaryButtonText:'Rename',secondaryButtonText:'Cancel',onRequestClose:close,onRequestSubmit:close}))});
+const CHANGES=[['Worker pool default','Scale from 3 to 5 nodes per zone'],['Kubernetes version','Upgrade master from 1.30.6 to 1.31.2'],['Ingress','Enable the public application load balancer'],['Logging','Forward container logs to logs-archive-prod'],['Monitoring','Install the metrics agent on all workers'],['Network policy','Deny traffic between namespaces by default']];
+const Scrolling=()=>h(Reopen,{render:(open,close)=>h(C.Dialog,{open:open,inline:true,size:'sm',onRequestClose:close},
+ Head('prod-us-south','Apply 6 changes?',close),
+ h(C.DialogBody,{style:{maxBlockSize:216}},
+  h('p',null,'Workers restart one zone at a time. Expect about 20 minutes of reduced capacity.'),
+  h('ul',{className:'chg'},CHANGES.map(c=>h('li',{key:c[0]},h('strong',null,c[0]),c[1])))),
+ h(C.DialogFooter,{primaryButtonText:'Apply changes',secondaryButtonText:'Cancel',onRequestClose:close,onRequestSubmit:close}))});
+const Passive=()=>h(Reopen,{render:(open,close)=>h(C.Dialog,{open:open,inline:true,size:'sm',onRequestClose:close},
+ Head(null,'Keyboard shortcuts',close),
+ h(C.DialogBody,null,h('dl',{className:'keys'},
+  h('dt',null,'/'),h('dd',null,'Search resources'),
+  h('dt',null,'G then C'),h('dd',null,'Go to clusters'),
+  h('dt',null,'G then B'),h('dd',null,'Go to billing'),
+  h('dt',null,'?'),h('dd',null,'Show this list'))))});
+const Large=()=>h(Reopen,{render:(open,close)=>h(C.Dialog,{open:open,inline:true,size:'lg',onRequestClose:close},
+ Head('Cluster prod-us-south','Create worker pool',close),
+ h(C.DialogBody,null,
+  h('p',null,'Workers in the pool use the same profile in every zone you select. You can resize the pool later.'),
+  h('div',{className:'cols'},
+   h(C.TextInput,{id:'wp-name',labelText:'Pool name',defaultValue:'gpu-a100'}),
+   h(C.TextInput,{id:'wp-profile',labelText:'Worker profile',defaultValue:'gx3-24x120x1a100'}),
+   h(C.TextInput,{id:'wp-zones',labelText:'Zones',defaultValue:'dal10, dal12'}),
+   h(C.TextInput,{id:'wp-nodes',labelText:'Workers per zone',defaultValue:'2',helperText:'Estimated cost: $4,380 per month'}))),
+ h(C.DialogFooter,{secondaryButtons:[{buttonText:'Cancel',onClick:close},{buttonText:'Save as template',onClick:close}],primaryButtonText:'Create worker pool',onRequestSubmit:close}))});
+function ModalDemo(){
+ const [open,setOpen]=React.useState(false);
+ const [status,setStatus]=React.useState('inactive');
+ const wrap=React.useRef(null);
+ // Button does not forward refs: point focusAfterCloseRef at the button inside the wrapper.
+ const btn=React.useMemo(()=>({get current(){return wrap.current&&wrap.current.querySelector('button')}}),[]);
+ const close=()=>{setOpen(false);setStatus('inactive')};
+ function submit(){setStatus('active');setTimeout(()=>setStatus('finished'),1200)}
+ return h('div',{className:'launch'},
+  h('span',{ref:wrap},h(C.Button,{kind:'danger',size:'md',onClick:()=>setOpen(true)},'Rotate API key')),
+  'Opens with showModal(): backdrop, page inert, Escape or the backdrop closes it, focus returns to the button.',
+  h(C.Dialog,{open:open,modal:true,size:'sm',onRequestClose:close,focusAfterCloseRef:btn},
+   Head('API key ci-deploy','Rotate API key?',close),
+   h(C.DialogBody,null,h('p',null,'The current key stops working immediately. Update the CI pipeline secret with the new key before the next deployment.')),
+   h(C.DialogFooter,{danger:true,primaryButtonText:'Rotate key',secondaryButtonText:'Cancel',onRequestClose:close,onRequestSubmit:submit,
+    loadingStatus:status,loadingDescription:status==='finished'?'Key rotated':'Rotating key',onLoadingSuccess:close})));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'row'},
+   h('div',null,Cap('xs, danger (role alertdialog): Cancel takes focus'),h(Danger)),
+   h('div',{style:{flex:'1 1 0'}},Cap('md (default), non-modal, transactional with a field'),h(Rename))),
+  h('div',{className:'row'},
+   h('div',{style:{flex:'1 1 0'}},Cap('sm, scrolling body: fades at the bottom, focusable region'),h(Scrolling)),
+   h('div',{style:{flex:'1 1 0'}},Cap('sm, passive: no footer, close icon or Escape'),h(Passive))),
+  h('div',{className:'row'},
+   h('div',{style:{flex:'1 1 0'}},Cap('lg, three-button footer (25% each, only the rightmost is primary)'),h(Large))),
+  Cap('In context: a modal confirmation with a loading state on submit'),
+  h(ModalDemo));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

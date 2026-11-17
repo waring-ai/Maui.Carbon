@@ -1,0 +1,42 @@
+<!-- @dsCard group="Data" height=1304 subtitle="Chevron at end or start, flush, three sizes, disabled, settings panel" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .stack{display:flex;flex-direction:column;gap:32px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:32px 24px} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.cds--accordion__content p{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px} .panel{display:grid;grid-template-columns:280px 1fr;border:1px solid var(--border-subtle-01)} .nav{padding:16px;border-inline-end:1px solid var(--border-subtle-01);font:400 14px/20px var(--font-sans);color:var(--text-secondary)} .nav h3{margin:0 0 8px;font:400 20px/28px var(--font-sans);color:var(--text-primary)} .body{padding:16px 16px 0} .fields{display:flex;flex-direction:column;gap:16px;padding-bottom:8px} .foot{display:flex;justify-content:flex-end;padding:16px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const P=t=>h('p',null,t);
+const faq=[
+ ['How is node usage billed?','Worker nodes are billed per hour from the moment they are provisioned until they are deleted. Stopped clusters still bill for attached storage.'],
+ ['Can I change a cluster’s region?','No. Create a cluster in the new region, move your workloads, then delete the old cluster.'],
+ ['What happens when my free trial ends?','Lite clusters are deleted after 30 days. Upgrade to Standard before then to keep them.']];
+function Faq(openFirst){return faq.map((f,i)=>h(C.AccordionItem,{key:i,title:f[0],open:openFirst&&i===0},P(f[1])))}
+function Settings(){
+ return h('div',{className:'panel'},
+  h('div',{className:'nav'},h('h3',null,'Cluster settings'),'prod-us-east-1 · Kubernetes 1.29.4. Expand a section to edit it; several sections can be open at once.'),
+  h('div',{className:'body'},
+   h(C.Accordion,null,
+    h(C.AccordionItem,{title:'General',open:true},h('div',{className:'fields'},
+     h(C.TextInput,{id:'acc-name',labelText:'Cluster name',defaultValue:'prod-us-east-1',helperText:'Lowercase letters, numbers and hyphens only'}),
+     h(C.Toggle,{id:'acc-del',labelText:'Delete protection',defaultToggled:true,labelA:'Off',labelB:'On'}))),
+    h(C.AccordionItem,{title:'Networking'},P('Private and public service endpoints, VLANs and ingress subdomain.')),
+    h(C.AccordionItem,{title:'Autoscaling',open:true},h('div',{className:'fields'},h(C.Toggle,{id:'acc-as',labelText:'Scale worker pools automatically',defaultToggled:false,labelA:'Off',labelB:'On'}))),
+    h(C.AccordionItem,{title:'Encryption (set at creation)',disabled:true},P('Key Protect instance and root key.'))),
+   h('div',{className:'foot'},h(C.Button,{kind:'primary',size:'md'},'Save changes'))));
+}
+function App(){
+ return h('div',{className:'stack'},
+  h('div',{className:'grid'},
+   B('Default: align="end" (chevron at the end), first item open',h(C.Accordion,null,Faq(true))),
+   B('align="start": chevron before the title (tree-like content)',h(C.Accordion,{align:'start'},Faq(true))),
+   B('isFlush: text and dividers line up with content beside it',h(C.Accordion,{isFlush:true},Faq(false))),
+   B('Disabled: one item, then the whole Accordion (disabled)',h('div',null,
+    h(C.Accordion,null,h(C.AccordionItem,{title:'Billing contacts'},P('Who receives invoices.')),h(C.AccordionItem,{title:'Payment method (managed by your organization)',disabled:true},P('Card on file.'))),
+    h('div',{style:{height:16}}),
+    h(C.Accordion,{disabled:true},h(C.AccordionItem,{title:'Spending limits'},P('Monthly cap.')),h(C.AccordionItem,{title:'Tax exemption'},P('Certificate.')))))),
+  h('div',{className:'grid3'},['sm','md','lg'].map(s=>B('size="'+s+'" ('+({sm:32,md:40,lg:48})[s]+'px heading)'+(s==='md'?', default':''),h(C.Accordion,{size:s},h(C.AccordionItem,{title:'Access policies'},P('Who can view and edit this bucket.')),h(C.AccordionItem,{title:'Lifecycle rules'},P('Archive or delete objects after a set time.'))),{key:s}))),
+  B('In context: a settings panel; open sections hold form fields',h(Settings)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

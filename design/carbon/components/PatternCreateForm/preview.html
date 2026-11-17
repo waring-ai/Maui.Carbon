@@ -1,0 +1,90 @@
+<!-- @dsCard group="Patterns" height=1307 subtitle="Create cluster page: grouped fields, server error summary, invalid and warning fields, cost summary" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.page{display:grid;grid-template-columns:minmax(0,1fr) 272px;gap:32px;align-items:start}
+.head{margin:16px 0 32px}
+.head h1{margin:0 0 8px;color:var(--text-primary)}
+.head p{margin:0;max-width:640px;color:var(--text-secondary)}
+.form{max-width:576px}
+.form .cds--inline-notification{max-width:none;margin:0 0 32px}
+.form fieldset.cds--fieldset{margin:0 0 32px}
+.form .cds--fieldset > legend{margin-bottom:16px}
+.group-title{margin:0 0 16px;color:var(--text-primary)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* workaround: the Dropdown label is inline-block, so its line box sits 4px lower than the Select label */
+.row2 .cds--list-box__wrapper > .cds--label{display:block}
+.checks{display:grid;gap:8px}
+.actions{padding-top:16px}
+/* form groups end with 32px; 16px more gives Carbon's 48px between the last input and the buttons */
+.summary{position:sticky;top:24px;background:var(--layer-01);padding:16px}
+.summary h2{margin:0 0 16px;color:var(--text-primary)}
+.summary dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font:400 14px/18px var(--font-sans);letter-spacing:.16px}
+.summary dt{color:var(--text-secondary)}
+.summary dd{margin:0;color:var(--text-primary);text-align:right}
+.summary .total{margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle-01);display:flex;justify-content:space-between;align-items:baseline;color:var(--text-primary)}
+.summary .total span:first-child{font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.summary .note{margin:8px 0 0;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-helper)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function App(){
+ const [plan,setPlan]=useState('standard');
+ const [nodes,setNodes]=useState(2);
+ const [auto,setAuto]=useState(true);
+ const price={free:0,standard:0.42,dedicated:1.18}[plan];
+ const monthly=Math.round(price*nodes*730);
+ return h('div',{className:'page'},
+  h('div',null,
+   h(C.Breadcrumb,{noTrailingSlash:true},
+    h(C.BreadcrumbItem,{href:'#'},'Kubernetes'),
+    h(C.BreadcrumbItem,{href:'#'},'Clusters'),
+    h(C.BreadcrumbItem,{isCurrentPage:true},'Create cluster')),
+   h('div',{className:'head'},
+    h(C.Heading,{className:'cds--type-heading-05'},'Create cluster'),
+    h('p',{className:'cds--type-body-01'},'Provision a managed Kubernetes cluster. You can add worker pools and change the node count after the cluster is created.')),
+   h(C.Form,{className:'form','aria-label':'Create cluster',onSubmit:e=>e.preventDefault(),noValidate:true},
+    h(C.InlineNotification,{kind:'error',title:'Fix 1 error before you continue.',subtitle:'Cluster name: use lowercase letters, numbers and hyphens, starting with a letter.',hideCloseButton:true,lowContrast:true}),
+    h(C.FormGroup,{legendText:h('span',{className:'cds--type-heading-03 group-title'},'Cluster details')},
+     h(C.Stack,{gap:6},
+      h(C.TextInput,{id:'pcf-name',labelText:'Cluster name',defaultValue:'Prod_EU 01',invalid:true,invalidText:'Use lowercase letters, numbers and hyphens, starting with a letter. For example, prod-eu-01.'}),
+      h('div',{className:'row2'},
+       h(C.Select,{id:'pcf-region',labelText:'Region',defaultValue:'eu-de',helperText:'Choose the region closest to your users.'},
+        h(C.SelectItem,{value:'us-south',text:'Dallas (us-south)'}),
+        h(C.SelectItem,{value:'us-east',text:'Washington DC (us-east)'}),
+        h(C.SelectItem,{value:'eu-de',text:'Frankfurt (eu-de)'}),
+        h(C.SelectItem,{value:'eu-gb',text:'London (eu-gb)'}),
+        h(C.SelectItem,{value:'jp-tok',text:'Tokyo (jp-tok)'})),
+       h(C.Dropdown,{id:'pcf-version',titleText:'Kubernetes version',label:'Choose a version',items:['1.31.2 (default)','1.30.6','1.29.10'],initialSelectedItem:'1.31.2 (default)',helperText:'Supported until June 2027.'})),
+      h(C.TextArea,{id:'pcf-desc',labelText:'Description (optional)',rows:3,enableCounter:true,maxCount:200,defaultValue:'Production workloads for the EU storefront.',helperText:'Shown in the cluster list and in billing reports.'}))),
+    h(C.FormGroup,{legendText:h('span',{className:'cds--type-heading-03 group-title'},'Capacity')},
+     h(C.Stack,{gap:6},
+      h(C.RadioButtonGroup,{name:'pcf-plan',legendText:'Plan',valueSelected:plan,onChange:v=>setPlan(v),orientation:'vertical'},
+       h(C.RadioButton,{value:'free',labelText:'Free: 1 node, 2 vCPU, 4 GB, deleted after 30 days'}),
+       h(C.RadioButton,{value:'standard',labelText:'Standard: 4 vCPU, 16 GB per node'}),
+       h(C.RadioButton,{value:'dedicated',labelText:'Dedicated: 16 vCPU, 64 GB per node, single tenant'})),
+      h(C.NumberInput,{id:'pcf-nodes',label:'Worker nodes',min:1,max:50,value:nodes,onChange:(e,d)=>setNodes(Number(d&&d.value!=null?d.value:e.target.value)||1),
+       warn:nodes<3,warnText:'Clusters with fewer than 3 worker nodes are not highly available.',helperText:'1 to 50 nodes per zone.'}))),
+    h(C.FormGroup,{legendText:h('span',{className:'cds--type-heading-03 group-title'},'Options')},
+     h(C.Stack,{gap:6},
+      h(C.Toggle,{id:'pcf-auto',labelText:'Autoscale worker nodes',labelA:'Off',labelB:'On',toggled:auto,onToggle:setAuto}),
+      h('div',{className:'checks'},
+       h(C.Checkbox,{id:'pcf-enc',labelText:'Encrypt boot volumes with my own key',defaultChecked:true}),
+       h(C.Checkbox,{id:'pcf-logs',labelText:'Send cluster logs to Log Analysis'})))),
+    h('div',{className:'actions'},
+     h(C.ButtonSet,null,
+      h(C.Button,{kind:'primary',type:'submit'},'Create cluster'),
+      h(C.Button,{kind:'secondary'},'Cancel'))))),
+  h('aside',{className:'summary','aria-label':'Cost estimate'},
+   h('h2',{className:'cds--type-heading-compact-02'},'Estimated cost'),
+   h('dl',null,
+    h('dt',null,'Plan'),h('dd',null,plan[0].toUpperCase()+plan.slice(1)),
+    h('dt',null,'Region'),h('dd',null,'Frankfurt'),
+    h('dt',null,'Worker nodes'),h('dd',null,String(nodes)),
+    h('dt',null,'Autoscaling'),h('dd',null,auto?'On':'Off')),
+   h('div',{className:'total'},h('span',null,'Per month'),h('span',{className:'cds--type-heading-04'},'$'+monthly.toLocaleString('en-US'))),
+   h('p',{className:'note'},'Estimate based on 730 hours. Storage and egress are billed separately.')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

@@ -1,0 +1,44 @@
+<!-- @dsCard group="Status" height=483 subtitle="Toggle tag: selected and unselected, sizes, icon, disabled, truncation, a region filter group" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sep{inline-size:1px;block-size:24px;background:var(--border-subtle-01);margin-inline:8px}
+.ctx{border:1px solid var(--border-subtle-01);padding:16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.ctx h4{font:600 14px/18px var(--font-sans);letter-spacing:.16px;margin:0 0 8px}.grp{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.list{margin:0;padding:0;list-style:none}.list li{display:flex;justify-content:space-between;padding:12px 16px;background:var(--layer-01);border-block-end:1px solid var(--border-subtle-01)}.list li span:last-child{color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const CLUSTERS=[['prod-us-east','us-east'],['prod-eu-west','eu-west'],['staging-eu','eu-west'],['analytics-ap','ap-south'],['dr-us-west','us-west']];
+function RegionFilter(){
+ const [sel,setSel]=React.useState(['us-east','eu-west']);
+ const toggle=(r,on)=>setSel(on?sel.concat(r):sel.filter(x=>x!==r));
+ const shown=CLUSTERS.filter(c=>!sel.length||sel.includes(c[1]));
+ return h('div',{className:'ctx'},
+  h('h4',{id:'rf-h'},'Region'),
+  h('div',{className:'grp',role:'group','aria-labelledby':'rf-h'},['us-east','us-west','eu-west','ap-south'].map(r=>h(C.SelectableTag,{key:r,text:r,selected:sel.includes(r),onChange:on=>toggle(r,on)}))),
+  h('ul',{className:'list'},shown.map(c=>h('li',{key:c[0]},h('span',null,c[0]),h('span',null,c[1])))));
+}
+function App(){
+ const [on,setOn]=React.useState(true);
+ return h('div',null,
+  Cap('Unselected, selected (defaultSelected), controlled (selected + onChange), disabled, disabled and selected'),
+  h('div',{className:'row'},
+   h(C.SelectableTag,{text:'Running'}),
+   h(C.SelectableTag,{text:'Stopped',defaultSelected:true}),
+   h(C.SelectableTag,{text:on?'Autoscaling: on':'Autoscaling: off',selected:on,onChange:setOn}),
+   h('span',{className:'sep'}),
+   h(C.SelectableTag,{text:'Deleting',disabled:true}),
+   h(C.SelectableTag,{text:'Archived',disabled:true,defaultSelected:true})),
+  Cap('Sizes sm, md (default), lg; renderIcon (not at sm); a truncated label shows its full text in a tooltip'),
+  h('div',{className:'row'},
+   h(C.SelectableTag,{text:'GPU nodes',size:'sm'}),
+   h(C.SelectableTag,{text:'GPU nodes',size:'md',defaultSelected:true}),
+   h(C.SelectableTag,{text:'GPU nodes',size:'lg'}),
+   h(C.SelectableTag,{text:'Starred',renderIcon:'star'}),
+   h(C.SelectableTag,{text:'Starred',renderIcon:'star',size:'lg',defaultSelected:true}),
+   h(C.SelectableTag,{text:'Owned by payments-platform-oncall'})),
+  Cap('In context: a region filter. Tags in a labelled group; each toggles a region and the list updates'),
+  h(RegionFilter));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

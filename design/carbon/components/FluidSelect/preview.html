@@ -1,0 +1,42 @@
+<!-- @dsCard group="Forms" height=728 subtitle="Native select with in-field label: option groups, invalid, warning, read-only, disabled, skeleton" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start;margin-bottom:24px}
+.panel{max-inline-size:400px;background:var(--background);border:1px solid var(--border-subtle-01)} .ph{padding:16px} .ph h3{margin:0 0 4px;font:600 16px/22px var(--font-sans);color:var(--text-primary)} .ph p,.sum{margin:0;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .sum{padding:12px 16px 16px}
+.pf{display:flex} .pf > .cds--btn{flex:1 1 0;max-inline-size:none}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+function Regions(){return [h(C.SelectItem,{key:'p',value:'',text:'Choose a region',disabled:true,hidden:true}),h(C.SelectItem,{key:'a',value:'us-south',text:'Dallas (us-south)'}),h(C.SelectItem,{key:'b',value:'eu-de',text:'Frankfurt (eu-de)'}),h(C.SelectItem,{key:'c',value:'jp-tok',text:'Tokyo (jp-tok)'})]}
+function Profiles(){return [
+ h(C.SelectItemGroup,{key:'b',label:'Balanced'},h(C.SelectItem,{value:'bx2-2x8',text:'bx2-2x8 (2 vCPU, 8 GB)'}),h(C.SelectItem,{value:'bx2-4x16',text:'bx2-4x16 (4 vCPU, 16 GB)'})),
+ h(C.SelectItemGroup,{key:'c',label:'Compute'},h(C.SelectItem,{value:'cx2-4x8',text:'cx2-4x8 (4 vCPU, 8 GB)'}),h(C.SelectItem,{value:'cx2-8x16',text:'cx2-8x16 (8 vCPU, 16 GB)'}))]}
+const PLANS={lite:['Lite','Free: 1 cluster, 2 workers, deleted after 30 days idle'],standard:['Standard','$0.11 per worker hour, billed monthly'],enterprise:['Enterprise','$0.09 per worker hour with a 12-month commitment']};
+
+function PlanPanel(){
+ const [plan,setPlan]=React.useState('standard');
+ return h('div',{className:'panel'},
+  h('div',{className:'ph'},h('h3',null,'Change billing plan'),h('p',null,'Applies to every cluster in the payments resource group.')),
+  h(C.FluidForm,{'aria-label':'Change billing plan',onSubmit:function(e){e.preventDefault()}},
+   h(C.FluidSelect,{id:'bp-plan',labelText:'Billing plan',value:plan,onChange:function(e){setPlan(e.target.value)}},
+    Object.keys(PLANS).map(function(k){return h(C.SelectItem,{key:k,value:k,text:PLANS[k][0]})}))),
+  h('p',{className:'sum'},PLANS[plan][1]),
+  h('div',{className:'pf'},h(C.Button,{kind:'secondary',size:'xl'},'Cancel'),h(C.Button,{kind:'primary',size:'xl',disabled:plan==='standard'},'Change plan')));
+}
+
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   Cell('Default (placeholder option)',h(C.FluidSelect,{labelText:'Region',defaultValue:''},Regions())),
+   Cell('Filled',h(C.FluidSelect,{labelText:'Region',defaultValue:'eu-de'},Regions())),
+   Cell('Option groups (SelectItemGroup)',h(C.FluidSelect,{labelText:'Worker profile',defaultValue:'bx2-4x16'},Profiles())),
+   Cell('Invalid',h(C.FluidSelect,{labelText:'Region',defaultValue:'',invalid:true,invalidText:'Choose a region to continue'},Regions())),
+   Cell('Warning',h(C.FluidSelect,{labelText:'Region',defaultValue:'jp-tok',warn:true,warnText:'Far from your other clusters; expect higher latency'},Regions())),
+   Cell('Read only',h(C.FluidSelect,{labelText:'Region',defaultValue:'us-south',readOnly:true},Regions())),
+   Cell('Disabled',h(C.FluidSelect,{labelText:'Region',defaultValue:'us-south',disabled:true},Regions())),
+   Cell('Skeleton (FluidSelectSkeleton)',h(C.FluidSelectSkeleton))),
+  Cap('In context: a plan picker in a side panel'),
+  h(PlanPanel));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

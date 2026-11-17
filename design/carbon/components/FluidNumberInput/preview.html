@@ -1,0 +1,38 @@
+<!-- @dsCard group="Forms" height=709 subtitle="Steppers inside a 64px field: decimal step, empty, out of range, warning, read-only, disabled, no steppers, skeleton" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start;margin-bottom:24px}
+.panel{max-inline-size:400px;background:var(--background);border:1px solid var(--border-subtle-01)} .ph{padding:16px} .ph h3{margin:0 0 4px;font:600 16px/22px var(--font-sans);color:var(--text-primary)} .ph p,.sum{margin:0;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .sum{padding:12px 16px 16px}
+.pf{display:flex} .pf > .cds--btn{flex:1 1 0;max-inline-size:none}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+
+function ScalePanel(){
+ const [n,setN]=React.useState(4);
+ const ok=n!==''&&n>=1&&n<=20;
+ return h('div',{className:'panel'},
+  h('div',{className:'ph'},h('h3',null,'Resize worker pool'),h('p',null,'default-pool runs in 3 zones: Dallas 1, 2 and 3.')),
+  h(C.FluidForm,{'aria-label':'Resize worker pool',onSubmit:function(e){e.preventDefault()}},
+   h(C.FluidNumberInput,{id:'wp-n',label:'Workers per zone',value:n,min:1,max:20,onChange:function(e,s){setN(s.value)},invalidText:'Enter 1 to 20 workers per zone'})),
+  h('p',{className:'sum'},ok?(n*3)+' workers in total, about $'+(n*3*96).toLocaleString('en-US')+' a month':'Total not available'),
+  h('div',{className:'pf'},h(C.Button,{kind:'secondary',size:'xl'},'Cancel'),h(C.Button,{kind:'primary',size:'xl',disabled:!ok},'Resize pool')));
+}
+
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   Cell('Default',h(C.FluidNumberInput,{label:'Replicas',defaultValue:3,min:1,max:20})),
+   Cell('Decimal step (step 0.25)',h(C.FluidNumberInput,{label:'CPU per replica (vCPU)',defaultValue:0.5,step:0.25,min:0.25,max:8})),
+   Cell('Empty (allowEmpty, placeholder)',h(C.FluidNumberInput,{label:'Rate limit (requests per second)',allowEmpty:true,defaultValue:'',placeholder:'No limit',min:1})),
+   Cell('Invalid (above max)',h(C.FluidNumberInput,{label:'Replicas',defaultValue:24,min:1,max:20,invalidText:'Enter a value from 1 to 20'})),
+   Cell('Warning',h(C.FluidNumberInput,{label:'Replicas',defaultValue:18,min:1,max:20,warn:true,warnText:'More than 15 replicas may exceed your quota'})),
+   Cell('Read only',h(C.FluidNumberInput,{label:'Nodes',defaultValue:6,readOnly:true})),
+   Cell('Disabled',h(C.FluidNumberInput,{label:'Replicas',defaultValue:3,disabled:true})),
+   Cell('No steppers (hideSteppers)',h(C.FluidNumberInput,{label:'Container port',defaultValue:8080,min:1,max:65535,hideSteppers:true})),
+   Cell('Skeleton (FluidNumberInputSkeleton)',h(C.FluidNumberInputSkeleton))),
+  Cap('In context: resizing a worker pool, with the total updated as you step'),
+  h(ScalePanel));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

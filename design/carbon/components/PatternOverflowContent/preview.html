@@ -1,0 +1,128 @@
+<!-- @dsCard group="Patterns" height=1106 subtitle="End, front and mid-line truncation with the full text available, overflow menu, show more, load more, tag overflow" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:40px}
+.sec:last-child{margin-bottom:0}
+/* Carbon's global truncation utilities (the bundle only ships the end variant, scoped to the UI shell) */
+.cds--text-truncate--end{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+.cds--text-truncate--front{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;vertical-align:bottom}
+.cds--text-truncate--front > bdi{direction:ltr;unicode-bidi:isolate}
+.types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tbox{background:var(--layer-01);padding:16px;min-width:0}
+.tbox .k{display:block;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin-bottom:8px}
+.tbox .v{font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+.tbox .mono{font:400 14px/20px var(--font-mono);color:var(--text-primary);white-space:nowrap}
+.tbox .full{display:block;margin-top:12px;font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-helper);word-break:break-all}
+.idrow{display:flex;align-items:center;gap:4px}
+/* table with a fixed-width description column; the row menu column is 40px */
+.tbl .cds--data-table-container{margin:0;padding:0}
+.tbl .cds--data-table-content{overflow:visible}
+.tbl table{table-layout:fixed}
+.tbl th:nth-child(1){width:192px}
+.tbl td .cds--popover-container{display:block;max-width:100%}.tbl th:nth-child(3){width:128px}.tbl th:nth-child(4){width:40px}
+.tbl td{white-space:nowrap}
+.tbl td .cds--text-truncate--end{max-width:100%}
+.tbl tbody td:last-child{padding:0;text-align:end}
+.tbl{padding-bottom:16px}
+/* page header actions: two visible, the rest in the overflow menu */
+.hdr{display:flex;justify-content:space-between;gap:16px;padding:16px;background:var(--layer-01);min-height:304px;align-items:flex-start;box-sizing:border-box}
+.hdr h3{margin:0 0 4px;color:var(--text-primary)}
+.hdr p{margin:0;color:var(--text-secondary)}
+.hdr .acts{display:flex;align-items:center}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+.desc{background:var(--layer-01);padding:16px}
+.desc h3,.events h3{margin:0 0 8px;color:var(--text-primary)}
+.desc p{margin:0;color:var(--text-primary)}
+.desc .clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.desc .cds--btn{margin:8px 0 0 -16px}
+.events .cds--contained-list{background:var(--layer-01)}
+.events .more{display:flex;align-items:center;justify-content:space-between;padding:0 0 0 16px;background:var(--layer-01);border-top:1px solid var(--border-subtle-01);font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.tagrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
+.tagrow .cds--popover-container{display:inline-block}
+.pop{padding:16px;display:flex;flex-wrap:wrap;gap:8px;inline-size:256px;box-sizing:border-box}
+.pop .t{inline-size:100%;margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+// mid-line truncation needs script: keep the start and the end, drop the middle (at least 3 characters)
+function midTruncate(s,head,tail){return s.length<=head+tail+3?s:s.slice(0,head)+'…'+s.slice(-tail)}
+const objPath='backups/prod-eu-01/2026-11-17/etcd-snapshot-full-0200.tar.gz';
+const podPath='namespaces/payments/deployments/checkout-api/pods/checkout-api-7d9f8c6b5-x2k4q';
+const crn='crn:v1:public:containers-kubernetes:eu-de:a/a7f3c9e2b41d4e8f:c7k2m9d40f8e1a3b6c55::';
+function Types(){
+ return h('div',{className:'types'},
+  h('div',{className:'tbox'},h('span',{className:'k'},'End: names and descriptions'),
+   h('span',{className:'v cds--text-truncate--end',title:objPath},objPath),
+   h('span',{className:'full'},'Full text in the title: '+objPath)),
+  h('div',{className:'tbox'},h('span',{className:'k'},'Front: paths where the end matters'),
+   h('span',{className:'v cds--text-truncate--front',title:podPath},h('bdi',null,podPath)),
+   h('span',{className:'full'},'Full text in the title: '+podPath)),
+  h('div',{className:'tbox'},h('span',{className:'k'},'Mid-line: IDs that differ at both ends'),
+   h('div',{className:'idrow'},h('span',{className:'mono',title:crn},midTruncate(crn,12,12)),
+    h(C.CopyButton,{size:'sm',iconDescription:'Copy cluster CRN',onClick:()=>{}})),
+   h('span',{className:'full'},'Copy always copies the full value.')));
+}
+const rows=[
+ {id:'d1',name:'checkout-api-canary-eu-frankfurt',desc:'Canary release of checkout-api 4.3.0 receiving 5% of storefront traffic in Frankfurt',updated:'2 minutes ago'},
+ {id:'d2',name:'search-indexer',desc:'Rebuilds the product search index from the catalog database every night at 02:00',updated:'1 hour ago'},
+ {id:'d3',name:'payments-webhook-relay-v2',desc:'Relays payment provider webhooks to the internal event bus with retries',updated:'Yesterday'}];
+const headers=[{key:'name',header:'Deployment'},{key:'desc',header:'Description'},{key:'updated',header:'Updated'},{key:'menu',header:h('span',{className:'cds--visually-hidden'},'Actions'),isSortable:false}];
+function cell(v,row,hd){
+ if(hd.key==='name'){
+  const link=h(C.Link,{href:'#',className:'cds--text-truncate--end',style:{maxWidth:'100%'}},v);
+  return row.id==='d1'?h(C.Tooltip,{label:v,align:'bottom-start',defaultOpen:true},link):h(C.Tooltip,{label:v,align:'bottom-start'},link);
+ }
+ if(hd.key==='desc')return h('span',{className:'cds--text-truncate--end',title:v},v);
+ if(hd.key==='menu')return h(C.OverflowMenu,{size:'md',flipped:true,iconDescription:'Actions for '+row.name},h(C.MenuItem,{label:'View logs'}),h(C.MenuItem,{label:'Roll back'}),h(C.MenuItemDivider),h(C.MenuItem,{label:'Delete deployment',kind:'danger'}));
+ return v;
+}
+function ShowMore(){
+ const [open,setOpen]=useState(false);
+ return h('div',{className:'desc'},
+  h('h3',{className:'cds--type-heading-compact-01'},'About this cluster'),
+  h('p',{id:'oc-desc',className:'cds--type-body-01'+(open?'':' clamp')},'prod-eu-01 runs the EU storefront: checkout, catalog, search and the payment webhooks. It has 3 worker pools across eu-de-1, eu-de-2 and eu-de-3 so a zone outage leaves two thirds of capacity. Autoscaling adds up to 8 nodes per pool when CPU stays above 70% for 5 minutes. Maintenance runs on the first Sunday of each month between 02:00 and 04:00 CET; workloads are drained one node at a time. Contact the platform team in #platform-eu before changing node pools or ingress rules.'),
+  // workaround: the base Button drops aria-expanded / aria-controls, so this is a native button with the ghost Button classes
+  h('button',{type:'button',className:'cds--btn cds--btn--ghost cds--btn--sm','aria-expanded':open,'aria-controls':'oc-desc',onClick:()=>setOpen(!open)},open?'Show less':'Show more'));
+}
+const allEvents=['Node kube-pool1-c3 drained for maintenance','Autoscaler added node kube-pool2-a4','Ingress certificate renewed','checkout-api 4.3.0 deployed','Node kube-pool1-a1 rebooted','Worker pool pool3 resized to 6 nodes','search-indexer job completed','Backup snap-2026-11-17-0200 created','Autoscaler removed node kube-pool2-b5','Ingress rule /api/v2 added'];
+function Events(){
+ const [n,setN]=useState(4);
+ const total=24;
+ return h('div',{className:'events'},
+  h(C.ContainedList,{label:'Recent events',size:'sm'},allEvents.slice(0,n).map(e=>h(C.ContainedListItem,{key:e},e))),
+  h('div',{className:'more'},'Showing '+n+' of '+total,
+   h(C.Button,{kind:'ghost',size:'sm',disabled:n>=allEvents.length,onClick:()=>setN(Math.min(n+3,allEvents.length))},'Load more')));
+}
+function Tags(){
+ const [open,setOpen]=useState(true);
+ const more=['tier:gold','backup:daily','owner:platform','compliance:pci'];
+ return h('div',{className:'tagrow'},
+  ['env:production','team:payments','region:eu'].map(t=>h(C.Tag,{key:t,type:'gray'},t)),
+  h(C.Popover,{open,align:'bottom-start',onRequestClose:()=>setOpen(false)},
+   h(C.OperationalTag,{text:'+'+more.length,'aria-expanded':open,'aria-label':'Show '+more.length+' more labels',onClick:()=>setOpen(!open)}),
+   h(C.PopoverContent,null,h('div',{className:'pop'},h('p',{className:'t'},'4 more labels'),more.map(t=>h(C.Tag,{key:t,type:'gray'},t))))));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'sec'},Cap('Truncation types. The ellipsis replaces at least 3 characters; the full text stays reachable through the title tooltip, a copy button or a details view'),h(Types)),
+  h('div',{className:'sec tbl'},Cap('In a table: fixed column widths, end truncation in cells; links get a Tooltip so the full name is available on hover and keyboard focus'),
+   h(C.DataTable,{'aria-label':'Deployments',headers,rows,renderCell:cell,size:'md'})),
+  h('div',{className:'sec'},
+   h('div',null,Cap('Cluster header. Actions: the main ones stay visible, the rest move into the overflow menu, destructive last. Labels: the first few, then a +n tag that opens the rest'),
+    h('div',{className:'hdr'},
+     h('div',null,h('h3',{className:'cds--type-heading-03'},'prod-eu-01'),h('p',{className:'cds--type-body-compact-01'},'Kubernetes 1.31.2 in Frankfurt'),h(Tags)),
+     h('div',{className:'acts'},
+      h(C.Button,{kind:'ghost',size:'md',renderIcon:'restart'},'Restart'),
+      h(C.Button,{kind:'primary',size:'md',renderIcon:'add'},'Add nodes'),
+      h(C.OverflowMenu,{size:'md',flipped:true,defaultOpen:true,iconDescription:'More actions for prod-eu-01'},
+       h(C.MenuItem,{label:'Download config'}),h(C.MenuItem,{label:'Update version'}),h(C.MenuItem,{label:'Rename'}),
+       h(C.MenuItemDivider),h(C.MenuItem,{label:'Delete cluster',kind:'danger'})))))),
+  h('div',{className:'sec two'},
+   h('div',null,Cap('Show more for long text: 3 lines, then a button; Show less collapses it again'),h(ShowMore)),
+   h('div',null,Cap('Load more for long lists: show the count and fetch the next batch on request'),h(Events))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

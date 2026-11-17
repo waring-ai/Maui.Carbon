@@ -1,0 +1,63 @@
+<!-- @dsCard group="Forms" height=1236 subtitle="Open: selected item, typed filter, no match; sm / md / lg; helper, invalid, warning, read-only, disabled, custom value, skeleton, on a layer; add project members" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tall{min-height:292px}
+.lay{padding:16px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.add{display:grid;grid-template-columns:minmax(0,1fr) 160px auto;gap:16px;align-items:end}
+.add .cds--btn{margin-block-end:0}
+.who{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;min-height:32px;align-items:center}
+.u{display:flex;gap:8px;min-width:0}
+.u span:last-child{overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary)}
+[aria-disabled] .u span:last-child{color:var(--text-disabled)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el,cls){return h('div',{className:cls},Cap(t),el)}
+const zones=['us-south-1','us-south-2','us-south-3','us-east-1','us-east-2','eu-de-1','eu-de-2','eu-gb-1','jp-tok-1','au-syd-1'];
+const images=['ubuntu-24.04-minimal','ubuntu-22.04-minimal','rhel-9.4','rhel-8.10','debian-12','windows-2022'];
+const users=[{id:'ak',name:'Ana Kovacs',email:'ana@example.com'},{id:'bo',name:'Ben Okafor',email:'ben@example.com'},{id:'cl',name:'Chen Li',email:'chen@example.com'},{id:'dp',name:'Diya Patel',email:'diya@example.com'},{id:'ef',name:'Emil Fischer',email:'emil@example.com',disabled:true}];
+const uStr=u=>u?u.name+' ('+u.email+')':'';
+function User(u){return h('span',{className:'u'},h('span',null,u.name),h('span',null,u.email))}
+function App(){
+ const [pick,setPick]=React.useState(null);
+ const [members,setMembers]=React.useState([users[2]]);
+ const add=()=>{ if(pick&&!members.some(m=>m.id===pick.id)) setMembers(members.concat([pick])); setPick(null); };
+ return h('div',null,
+  Cap('Open'),
+  h('div',{className:'g3 sec'},
+   Cell('Selected item: the full list, selection checked',h(C.ComboBox,{id:'cb-sel',titleText:'Zone',placeholder:'Choose or type a zone',items:zones,initialSelectedItem:'us-south-2',defaultOpen:true}),'tall'),
+   Cell('Typed text filters the list (case-insensitive)',h(C.ComboBox,{id:'cb-flt',titleText:'Zone',placeholder:'Choose or type a zone',items:zones,initialInputValue:'south',defaultOpen:true,helperText:'Type part of a zone name'}),'tall'),
+   Cell('Rich items, disabled item (itemToElement)',h(C.ComboBox,{id:'cb-rich',titleText:'Owner',placeholder:'Search people',items:users,itemToString:uStr,itemToElement:User,initialInputValue:'e',defaultOpen:true}),'tall')),
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.ComboBox,{id:'cb-s',size:'sm',titleText:'Image',placeholder:'Choose an image',items:images,initialSelectedItem:images[0]}),
+   h(C.ComboBox,{id:'cb-m',titleText:'Image',placeholder:'Choose an image',items:images,initialSelectedItem:images[0]}),
+   h(C.ComboBox,{id:'cb-l',size:'lg',titleText:'Image',placeholder:'Choose an image',items:images,initialSelectedItem:images[0]})),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text, empty',h(C.ComboBox,{id:'cb-help',titleText:'Image',placeholder:'Choose an image',items:images,helperText:'Minimal images boot fastest'})),
+   Cell('Invalid',h(C.ComboBox,{id:'cb-inv',titleText:'Image',placeholder:'Choose an image',items:images,initialSelectedItem:images[5],invalid:true,invalidText:'Windows images need a bx2.8x32 flavor or larger'})),
+   Cell('Warning',h(C.ComboBox,{id:'cb-warn',titleText:'Image',placeholder:'Choose an image',items:images,initialSelectedItem:images[3],warn:true,warnText:'RHEL 8 reaches end of maintenance in 2029'})),
+   Cell('Read only',h(C.ComboBox,{id:'cb-ro',titleText:'Zone',placeholder:'Choose a zone',items:zones,initialSelectedItem:'us-east-2',readOnly:true})),
+   Cell('Disabled',h(C.ComboBox,{id:'cb-dis',titleText:'Zone',placeholder:'Choose a zone',items:zones,initialSelectedItem:'jp-tok-1',disabled:true,helperText:'Set by the cluster template'})),
+   Cell('Custom value (allowCustomValue)',h(C.ComboBox,{id:'cb-cust',titleText:'Image',placeholder:'Choose or enter an image ID',items:images,allowCustomValue:true,initialInputValue:'r014-7a1d3c9e',helperText:'Press Enter to use an image ID that is not listed'})),
+   Cell('Skeleton (DropdownSkeleton)',h(C.DropdownSkeleton)),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.ComboBox,{id:'cb-lay',titleText:'Zone',placeholder:'Choose a zone',items:zones,initialSelectedItem:'eu-gb-1'})))),
+  Cap('In context: add members to a project'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Project members'),
+   h('p',{className:'sub'},'Members of checkout-platform can view and deploy its clusters.'),
+   h('div',{className:'add'},
+    h(C.ComboBox,{id:'cb-ctx',titleText:'Person',placeholder:'Type a name or email',items:users,itemToString:uStr,itemToElement:User,selectedItem:pick,onChange:d=>setPick(d.selectedItem)}),
+    h(C.Dropdown,{id:'cb-role',titleText:'Role',label:'Choose a role',items:['Viewer','Operator','Administrator'],initialSelectedItem:'Operator'}),
+    h(C.Button,{kind:'primary',size:'md',disabled:!pick,onClick:add},'Add')),
+   h('div',{className:'who'},members.map(m=>h(C.Tag,{key:m.id,type:'gray',filter:true,onClose:()=>setMembers(members.filter(x=>x.id!==m.id))},m.name)))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

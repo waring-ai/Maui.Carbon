@@ -1,0 +1,35 @@
+<!-- @dsCard group="Containers" height=638 subtitle="Base tile, ClickableTile (link, button, external icon, disabled), on a layer, dashboard" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:32px} .tiles>div{display:flex;flex-direction:column} .tiles>div>.cds--tile{flex:1} h4{margin:0 0 8px;font:600 14px/18px var(--font-sans);letter-spacing:.16px} .tile-p{margin:0;color:var(--text-secondary);font:400 14px/20px var(--font-sans);letter-spacing:.16px} .cds--tile--disabled .tile-p{color:var(--text-disabled)}
+.layer{background:var(--layer-01);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px} .metric{font:300 32px/40px var(--font-sans);color:var(--text-primary);margin:8px 0 4px} .row{display:flex;gap:16px;align-items:center;margin-top:16px} .dash{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node){return h('div',null,Cap(cap),node)}
+function T(title,body){return [h('h4',{key:'t'},title),h('p',{key:'b',className:'tile-p'},body)]}
+
+function Clickable(){
+ const [n,setN]=useState(0);
+ return h(C.ClickableTile,{onClick:()=>setN(n+1),renderIcon:'restart'},T('Run health check','Checks nodes, ingress and DNS.'+(n?' Ran '+n+'x.':'')));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'tiles'},
+   B('Tile (static)',h(C.Tile,null,T('Storage used','4.2 TB of 10 TB in 48 buckets.'))),
+   B('ClickableTile with href',h(C.ClickableTile,{href:'#clusters'},T('View clusters','12 clusters in 4 regions.'))),
+   B('renderIcon="launch" (external)',h(C.ClickableTile,{href:'#docs',renderIcon:'launch'},T('API reference','Endpoints, limits and examples.'))),
+   B('ClickableTile onClick (a button)',h(Clickable))),
+  h('div',{className:'tiles'},
+   B('ClickableTile disabled',h(C.ClickableTile,{href:'#gpu',disabled:true},T('GPU clusters','Not available in your plan.'))),
+   B('Base tile with its own actions',h(C.Tile,null,h('h4',null,'Billing alerts'),h('p',{className:'tile-p'},'Email at 80% of the monthly budget.'),h('div',{className:'row'},h(C.Link,{href:'#',size:'sm'},'Edit alert')))),
+   h('div',{style:{gridColumn:'span 2'}},Cap('Inside a layer-01 container, wrap tiles in Layer so they step to layer-02'),
+    h('div',{className:'layer'},h(C.Layer,null,h(C.Tile,null,T('Nodes ready','9 of 9'))),h(C.Layer,null,h(C.ClickableTile,{href:'#events'},T('Events','3 warnings in the last hour.')))))),
+  Cap('In context: a dashboard summary row (static tiles plus one that links to details)'),
+  h('div',{className:'dash'},
+   h(C.Tile,null,h('p',{className:'tile-p'},'Clusters'),h('p',{className:'metric'},'12'),h(C.Tag,{type:'green',size:'sm'},'All healthy')),
+   h(C.Tile,null,h('p',{className:'tile-p'},'Monthly spend'),h('p',{className:'metric'},'$8,420'),h(C.Tag,{type:'gray',size:'sm'},'64% of budget')),
+   h(C.Tile,null,h('p',{className:'tile-p'},'API calls today'),h('p',{className:'metric'},'1.8 M'),h(C.Tag,{type:'blue',size:'sm'},'+12% vs. yesterday')),
+   h(C.ClickableTile,{href:'#alerts'},h('p',{className:'tile-p'},'Open alerts'),h('p',{className:'metric'},'3'),h(C.Tag,{type:'red',size:'sm'},'1 critical'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

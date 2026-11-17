@@ -1,0 +1,47 @@
+<!-- @dsCard group="Forms" height=884 subtitle="Show / hide toggle; sm / md / lg; helper, invalid, warning, revealed, read-only, disabled, on a layer; database connection form" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}
+.lay{padding:16px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+function App(){
+ const [pw,setPw]=React.useState('pg-admin-2026'), [pw2,setPw2]=React.useState('pg-admin-2025');
+ const mismatch=pw2!=='' && pw!==pw2;
+ return h('div',null,
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.PasswordInput,{id:'pw-sm',size:'sm',labelText:'API key',defaultValue:'ak_live_93f1c2'}),
+   h(C.PasswordInput,{id:'pw-md',labelText:'API key',defaultValue:'ak_live_93f1c2'}),
+   h(C.PasswordInput,{id:'pw-lg',size:'lg',labelText:'API key',defaultValue:'ak_live_93f1c2'})),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text',h(C.PasswordInput,{id:'pw-help',labelText:'Root password',placeholder:'Enter a password',helperText:'At least 12 characters, with a number and a symbol'})),
+   Cell('Invalid',h(C.PasswordInput,{id:'pw-inv',labelText:'Root password',defaultValue:'admin1',invalid:true,invalidText:'Use at least 12 characters'})),
+   Cell('Warning',h(C.PasswordInput,{id:'pw-warn',labelText:'Root password',defaultValue:'Summer2026!',warn:true,warnText:'This password appears in known breach lists. Choose another one.'})),
+   Cell('Revealed (type="text")',h(C.PasswordInput,{id:'pw-rev',labelText:'Webhook secret',defaultValue:'whsec_7Kq2mP9x',type:'text'})),
+   Cell('Read only',h(C.PasswordInput,{id:'pw-ro',labelText:'Service account token',defaultValue:'sat_4f8a1b0c',readOnly:true})),
+   Cell('Disabled',h(C.PasswordInput,{id:'pw-dis',labelText:'SMTP password',defaultValue:'smtp-secret',disabled:true,helperText:'Managed by your identity provider'}))),
+  Cap('In context: database connection (on a layer, field-02)'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Connect to PostgreSQL'),
+   h('p',{className:'sub'},'Credentials are encrypted and stored in your secrets vault.'),
+   h('div',{className:'row'},
+    h(C.TextInput,{id:'db-host',labelText:'Host',defaultValue:'db-prod.us-south.internal'}),
+    h(C.TextInput,{id:'db-user',labelText:'Username',defaultValue:'app_admin'})),
+   h('div',{className:'row'},
+    h(C.PasswordInput,{id:'db-pw',labelText:'Password',value:pw,onChange:e=>setPw(e.target.value),autoComplete:'new-password'}),
+    h(C.PasswordInput,{id:'db-pw2',labelText:'Confirm password',value:pw2,onChange:e=>setPw2(e.target.value),autoComplete:'new-password',invalid:mismatch,invalidText:'Passwords do not match'})),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Test connection'),h(C.Button,{kind:'primary',disabled:mismatch},'Save connection'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

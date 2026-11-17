@@ -1,0 +1,40 @@
+<!-- @dsCard group="Status" height=402 subtitle="Removable filter tag: twelve colors, three sizes, icon, disabled, truncation, a filter bar" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.ctx{border:1px solid var(--border-subtle-01);padding:16px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-block-size:48px;padding:8px 0 8px 16px;background:var(--layer-01);box-sizing:border-box}
+.bar .lbl{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin-inline-end:8px}.bar .sp{flex:1}
+.res{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);padding:12px 16px 0}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const COLORS=[['gray','Compute'],['red','Security'],['magenta','Billing'],['purple','Identity'],['blue','Networking'],['cyan','Storage'],['teal','Databases'],['green','Monitoring'],['cool-gray','Containers'],['warm-gray','Logging'],['high-contrast','Production'],['outline','Archived']];
+const START=[['region','Region: us-east','blue'],['status','Status: running','green'],['owner','Owner: platform-team','purple'],['created','Created: last 7 days','gray']];
+function FilterBar(){
+ const [tags,setTags]=React.useState(START);
+ const n=Math.max(3,48-tags.length*9);
+ return h('div',{className:'ctx'},
+  h('div',{className:'bar'},h('span',{className:'lbl'},'Filters'),
+   tags.length?tags.map(t=>h(C.DismissibleTag,{key:t[0],text:t[1],type:t[2],title:'Remove filter',onClose:()=>setTags(tags.filter(x=>x[0]!==t[0]))})):h('span',{className:'lbl'},'None'),
+   h('span',{className:'sp'}),
+   h(C.Button,{kind:'ghost',size:'md',onClick:()=>setTags(tags.length?[]:START)},tags.length?'Clear filters':'Restore filters')),
+  h('div',{className:'res'},tags.length?n+' clusters match '+tags.length+' filters':'Showing all 48 clusters'));
+}
+function App(){
+ return h('div',null,
+  Cap('type: gray (default), red, magenta, purple, blue, cyan, teal, green, cool-gray, warm-gray, high-contrast, outline'),
+  h('div',{className:'row'},COLORS.map(c=>h(C.DismissibleTag,{key:c[0],text:c[1],type:c[0]}))),
+  Cap('Sizes sm (18px), md (default, 24px), lg (32px); renderIcon (not shown at sm); disabled; a long label truncates at 13rem and keeps the full text in its title'),
+  h('div',{className:'row'},
+   h(C.DismissibleTag,{text:'us-east',size:'sm',type:'blue'}),
+   h(C.DismissibleTag,{text:'us-east',size:'md',type:'blue'}),
+   h(C.DismissibleTag,{text:'us-east',size:'lg',type:'blue'}),
+   h(C.DismissibleTag,{text:'Owner: me',renderIcon:'user',type:'teal'}),
+   h(C.DismissibleTag,{text:'Owner: me',renderIcon:'user',size:'lg',type:'teal'}),
+   h(C.DismissibleTag,{text:'Locked by policy',disabled:true}),
+   h(C.DismissibleTag,{text:'Label: team=payments-platform-oncall',type:'cyan'})),
+  Cap('In context: applied filters above a clusters table. Remove a tag or clear them all; each close button is named "Remove filter <label>"'),
+  h(FilterBar));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

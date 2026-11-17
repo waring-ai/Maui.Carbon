@@ -1,0 +1,79 @@
+<!-- @dsCard group="Forms" height=1503 subtitle="Button and drag-and-drop variants; FileUploaderButton, FileUploaderDropContainer and FileUploaderItem (uploading, complete, edit, invalid; sm / md / lg); disabled, skeleton; support case attachments" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 48px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.btns{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.items .cds--file__selected-file{max-width:none}
+.ctx{padding:24px}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.lbl{font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary);margin:0 0 8px}
+.desc{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 16px}
+.list{margin-top:16px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+const demo=[
+ {uuid:'a',name:'cluster-config.yaml',status:'complete'},
+ {uuid:'b',name:'node-pool-autoscaler-diagnostics-2026-11-14.tar.gz',status:'edit'}];
+const MB=1024*1024;
+let n=0;
+function App(){
+ const [files,setFiles]=React.useState([
+  {uuid:'s1',name:'checkout-api-logs.txt',status:'complete'},
+  {uuid:'s2',name:'heap-dump-worker-3.hprof',status:'uploading'},
+  {uuid:'s3',name:'screen-recording.mov',status:'edit',invalid:true,errorSubject:'File size exceeds limit',errorBody:'Files can be up to 10 MB. Compress the file or share a link in the description.'}]);
+ React.useEffect(()=>{const t=setTimeout(()=>setFiles(fs=>fs.map(x=>x.uuid==='s2'?Object.assign({},x,{status:'complete'}):x)),4000);return ()=>clearTimeout(t);},[]);
+ const addFiles=(e,{addedFiles})=>{
+  const next=addedFiles.map(f=>{const big=f.size>10*MB;return {uuid:'u'+(++n),name:f.name,status:big?'edit':'uploading',invalid:big,errorSubject:big?'File size exceeds limit':undefined,errorBody:big?'Files can be up to 10 MB.':undefined};});
+  setFiles(fs=>fs.concat(next));
+  next.filter(f=>!f.invalid).forEach(f=>setTimeout(()=>setFiles(fs=>fs.map(x=>x.uuid===f.uuid?Object.assign({},x,{status:'complete'}):x)),1500));
+ };
+ const remove=uuid=>setFiles(fs=>fs.filter(f=>f.uuid!==uuid));
+ return h('div',null,
+  Cap('FileUploader: button variant (default) and drag-and-drop variant'),
+  h('div',{className:'g2 sec'},
+   h(C.FileUploader,{labelTitle:'Upload configuration',labelDescription:'Max file size is 10 MB. Supported file types are .yaml, .json, .csv and .tar.gz.',buttonLabel:'Add files',multiple:true,accept:['.yaml','.json','.csv','.tar.gz'],defaultFiles:demo}),
+   h(C.FileUploader,{variant:'drop',labelTitle:'Import users',labelDescription:'Max file size is 10 MB. Only .csv files are supported.',dropLabel:'Drag and drop a .csv file here or click to upload',accept:['.csv'],multiple:false,defaultFiles:[{uuid:'e',name:'users-team-checkout.csv',status:'complete'}]})),
+  Cap('FileUploaderButton (kinds and sizes; the button shows the chosen file name unless disableLabelChanges)'),
+  h('div',{className:'btns sec'},
+   h(C.FileUploaderButton,{labelText:'Add files',multiple:true}),
+   h(C.FileUploaderButton,{labelText:'Choose certificate',buttonKind:'tertiary',size:'md',accept:['.pem','.crt']}),
+   h(C.FileUploaderButton,{labelText:'Add file',buttonKind:'ghost',size:'sm'}),
+   h(C.FileUploaderButton,{labelText:'Add files',disabled:true})),
+  Cap('FileUploaderItem: status and size (lg 48px default, md 40px, sm 32px)'),
+  h('div',{className:'g3 sec items'},
+   Cell('Uploading',h(C.FileUploaderItem,{uuid:'i1',name:'backup-2026-11-16.tar.gz',status:'uploading'})),
+   Cell('Complete',h(C.FileUploaderItem,{uuid:'i2',name:'backup-2026-11-15.tar.gz',status:'complete',iconDescription:'Upload complete'})),
+   Cell('Edit (removable)',h(C.FileUploaderItem,{uuid:'i3',name:'backup-2026-11-14.tar.gz',status:'edit'})),
+   Cell('Invalid, one line',h(C.FileUploaderItem,{uuid:'i4',name:'id_rsa',status:'edit',invalid:true,errorSubject:'Private keys cannot be uploaded'})),
+   Cell('Invalid, subject and body',h(C.FileUploaderItem,{uuid:'i5',name:'traffic-capture.pcap',status:'edit',invalid:true,errorSubject:'File size exceeds limit',errorBody:'Files can be up to 10 MB. Split the capture and try again.'})),
+   Cell('Sizes md and sm',h('div',null,h(C.FileUploaderItem,{uuid:'i6',name:'values.yaml',status:'complete',size:'md'}),h(C.FileUploaderItem,{uuid:'i7',name:'values.yaml',status:'edit',size:'sm'})))),
+  h('div',{className:'g3 sec'},
+   Cell('FileUploaderDropContainer',h(C.FileUploaderDropContainer,{labelText:'Drag and drop files here or click to upload',multiple:true})),
+   Cell('FileUploaderDropContainer, disabled',h(C.FileUploaderDropContainer,{labelText:'Uploads are paused during maintenance',disabled:true})),
+   Cell('Skeleton',h(C.FileUploaderSkeleton))),
+  Cap('In context: attach files to a support case (choose files to see them upload)'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Open a support case'),
+   h('p',{className:'sub'},'Case for cluster checkout-prod, Dallas (us-south).'),
+   h('div',{className:'cols'},
+    h('div',null,
+     h(C.TextInput,{id:'case-subj',labelText:'Subject',defaultValue:'Worker 3 restarts every few minutes'}),
+     h('div',{style:{height:24}}),
+     h(C.TextArea,{id:'case-desc',labelText:'Description',rows:5,defaultValue:'Since the 14:05 deploy, worker 3 in pool web-frontend restarts with OOMKilled. Other workers are healthy.'})),
+    h('div',null,
+     h('p',{className:'lbl'},'Attachments'),
+     h('p',{className:'desc'},'Add logs or screenshots. Max file size is 10 MB.'),
+     h(C.FileUploaderDropContainer,{labelText:'Drag and drop files here or click to upload',multiple:true,onAddFiles:addFiles}),
+     h('div',{className:'list'},files.map(f=>h(C.FileUploaderItem,Object.assign({key:f.uuid,size:'md',onDelete:()=>remove(f.uuid)},f)))))),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Cancel'),h(C.Button,{kind:'primary',disabled:files.some(f=>f.status==='uploading')},'Submit case'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

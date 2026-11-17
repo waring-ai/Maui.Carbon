@@ -1,0 +1,48 @@
+<Project>
+  <!-- Optional, git-ignored per-machine overrides (e.g. CarbonIncludeAndroid). -->
+  <Import Project="Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <Authors>Joshua Waring</Authors>
+    <Copyright>Copyright (c) Joshua Waring</Copyright>
+    <RepositoryUrl>https://github.com/waring-ai/Maui.Carbon</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/waring-ai/Maui.Carbon</PackageProjectUrl>
+
+    <!-- Local builds get a dev version; CI passes -p:Version from the git tag. -->
+    <Version Condition="'$(Version)' == ''">0.1.0-dev</Version>
+
+    <!-- MAUI -->
+    <MauiVersion>10.0.130</MauiVersion>
+    <CarbonNetVersion>net10.0</CarbonNetVersion>
+    <!-- The .NET 10 Apple packs pin an older Xcode than the one installed on dev machines/CI images. -->
+    <ValidateXcodeVersion Condition="'$(ValidateXcodeVersion)' == ''">false</ValidateXcodeVersion>
+
+    <!-- Android needs the Android SDK + JDK 17: on in CI, or when ANDROID_HOME is set, or opt-in. -->
+    <CarbonIncludeAndroid Condition="'$(CarbonIncludeAndroid)' == '' and ('$(GITHUB_ACTIONS)' == 'true' or '$(ANDROID_HOME)' != '')">true</CarbonIncludeAndroid>
+    <CarbonIsWindows>$([MSBuild]::IsOSPlatform('windows'))</CarbonIsWindows>
+    <CarbonIsMac>$([MSBuild]::IsOSPlatform('osx'))</CarbonIsMac>
+
+    <!-- Library: net10.0 (unit tests) + every platform this host can compile. -->
+    <CarbonLibraryTargetFrameworks>$(CarbonNetVersion)</CarbonLibraryTargetFrameworks>
+    <CarbonLibraryTargetFrameworks Condition="'$(CarbonIncludeAndroid)' == 'true'">$(CarbonLibraryTargetFrameworks);$(CarbonNetVersion)-android</CarbonLibraryTargetFrameworks>
+    <CarbonLibraryTargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(CarbonLibraryTargetFrameworks);$(CarbonNetVersion)-ios;$(CarbonNetVersion)-maccatalyst</CarbonLibraryTargetFrameworks>
+    <CarbonLibraryTargetFrameworks Condition="'$(CarbonIsWindows)' == 'true'">$(CarbonLibraryTargetFrameworks);$(CarbonNetVersion)-windows10.0.19041.0</CarbonLibraryTargetFrameworks>
+
+    <!-- Apps: Apple heads only on macOS, Windows head only on Windows. -->
+    <CarbonAppTargetFrameworks></CarbonAppTargetFrameworks>
+    <CarbonAppTargetFrameworks Condition="'$(CarbonIncludeAndroid)' == 'true'">$(CarbonNetVersion)-android</CarbonAppTargetFrameworks>
+    <CarbonAppTargetFrameworks Condition="'$(CarbonIsMac)' == 'true'">$(CarbonAppTargetFrameworks);$(CarbonNetVersion)-ios;$(CarbonNetVersion)-maccatalyst</CarbonAppTargetFrameworks>
+    <CarbonAppTargetFrameworks Condition="'$(CarbonIsWindows)' == 'true'">$(CarbonAppTargetFrameworks);$(CarbonNetVersion)-windows10.0.19041.0</CarbonAppTargetFrameworks>
+    <CarbonAppTargetFrameworks>$(CarbonAppTargetFrameworks.TrimStart(';'))</CarbonAppTargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

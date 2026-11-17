@@ -1,0 +1,49 @@
+<!-- @dsCard group="Forms" height=968 subtitle="sm / md / lg; decimal step, out-of-range invalid, warning, read-only, disabled, no steppers, skeleton; autoscaling form" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}
+.lay{padding:16px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el){return h('div',null,Cap(t),el)}
+function App(){
+ const [n,setN]=React.useState(3);
+ const [min,setMin]=React.useState(2), [max,setMax]=React.useState(1);
+ const bad=max!=='' && min!=='' && Number(max)<Number(min);
+ return h('div',null,
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.NumberInput,{id:'ni-sm',size:'sm',label:'Worker nodes',min:1,max:10,defaultValue:3}),
+   h(C.NumberInput,{id:'ni-md',label:'Worker nodes',min:1,max:10,value:n,onChange:(e,s)=>setN(s.value),helperText:'Between 1 and 10'}),
+   h(C.NumberInput,{id:'ni-lg',size:'lg',label:'Worker nodes',min:1,max:10,defaultValue:3})),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Decimal step (0.25)',h(C.NumberInput,{id:'ni-dec',label:'CPU limit (cores)',min:0.25,max:8,step:0.25,defaultValue:1.5,helperText:'In steps of 0.25 cores'})),
+   Cell('Out of range (automatic invalid)',h(C.NumberInput,{id:'ni-inv',label:'Replicas',min:1,max:5,defaultValue:9,invalidText:'Enter a number from 1 to 5'})),
+   Cell('Warning',h(C.NumberInput,{id:'ni-warn',label:'Request timeout (s)',min:1,max:300,defaultValue:240,warn:true,warnText:'Timeouts over 120 s can hold connections open during deploys'})),
+   Cell('Read only',h(C.NumberInput,{id:'ni-ro',label:'Max pods per node',defaultValue:110,readOnly:true})),
+   Cell('Disabled',h(C.NumberInput,{id:'ni-dis',label:'Reserved IP addresses',defaultValue:4,disabled:true,helperText:'Set by your network policy'})),
+   Cell('Without steppers',h(C.NumberInput,{id:'ni-hide',label:'Port',min:1,max:65535,defaultValue:8443,hideSteppers:true,helperText:'1 to 65535'})),
+   Cell('Empty allowed',h(C.NumberInput,{id:'ni-empty',label:'Monthly budget cap (USD)',allowEmpty:true,defaultValue:'',placeholder:'No cap',min:0,helperText:'Leave empty for no cap'})),
+   Cell('Skeleton',h(C.NumberInputSkeleton)),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.NumberInput,{id:'ni-lay',label:'Retention (days)',min:1,max:365,defaultValue:30})))),
+  Cap('In context: autoscaling settings'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Autoscaling'),
+   h('p',{className:'sub'},'Node pool web-frontend scales between these limits.'),
+   h('div',{className:'row'},
+    h(C.NumberInput,{id:'as-min',label:'Minimum nodes',min:1,max:50,value:min,allowEmpty:true,onChange:(e,s)=>setMin(s.value)}),
+    h(C.NumberInput,{id:'as-max',label:'Maximum nodes',min:1,max:50,value:max,allowEmpty:true,onChange:(e,s)=>setMax(s.value),invalid:bad,invalidText:'Must be at least the minimum ('+min+')'}),
+    h(C.NumberInput,{id:'as-cpu',label:'Target CPU (%)',min:10,max:95,step:5,defaultValue:70})),
+   h('div',{className:'actions'},h(C.Button,{kind:'primary',disabled:bad},'Save changes'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

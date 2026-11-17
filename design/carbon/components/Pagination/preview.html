@@ -1,0 +1,30 @@
+<!-- @dsCard group="Data" height=1077 subtitle="Three sizes, unknown total, disabled, narrow, custom range text, under a list" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .stack{display:flex;flex-direction:column;gap:24px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .narrow{max-width:360px} .ev{display:flex;justify-content:space-between;gap:16px} .ev span:last-child{color:var(--text-secondary);white-space:nowrap}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const buckets=(min,max,total)=>min+'–'+max+' of '+total+' buckets';
+const events=Array.from({length:47},(_,i)=>{const acts=['Created API key ci-deploy','Resized cluster prod-eu-de-1 to 9 nodes','Rotated access keys for bucket logs-archive','Invited a user to the Operators group','Deleted snapshot db-backup-0412','Updated billing contact'];return {id:i,text:acts[i%acts.length],when:(i*7%23+1)+' h ago'}});
+function Audit(){
+ const [pg,setPg]=useState({page:1,pageSize:5});
+ const rows=events.slice((pg.page-1)*pg.pageSize,pg.page*pg.pageSize);
+ return h('div',null,
+  h(C.ContainedList,{label:'Audit log',size:'md'},rows.map(e=>h(C.ContainedListItem,{key:e.id},h('div',{className:'ev'},h('span',null,e.text),h('span',null,e.when))))),
+  h(C.Pagination,{page:pg.page,pageSize:pg.pageSize,pageSizes:[5,10,20],totalItems:events.length,onChange:setPg,itemsPerPageText:'Events per page:',itemRangeText:(a,b,t)=>a+'–'+b+' of '+t+' events'}));
+}
+function App(){
+ return h('div',{className:'stack'},
+  B('size="md" (default, 40px): 103 items, 10 per page, page 1',h(C.Pagination,{pageSizes:[10,20,30,40,50],pageSize:10,totalItems:103,page:1,itemRangeText:buckets})),
+  B('size="sm" (32px): page 4 of 11',h(C.Pagination,{size:'sm',pageSizes:[10,20,30],pageSize:10,totalItems:103,page:4,itemRangeText:buckets})),
+  B('size="lg" (48px): last page, next disabled',h(C.Pagination,{size:'lg',pageSizes:[10,20,30],pageSize:10,totalItems:103,page:11,itemRangeText:buckets})),
+  B('pagesUnknown: total not known yet, shows "page N" and keeps next enabled',h(C.Pagination,{pageSizes:[25,50],pageSize:25,pagesUnknown:true,page:3,itemText:(a,b)=>a+'–'+b+' objects'})),
+  B('pagesUnknown with isLastPage: the server reported no more results',h(C.Pagination,{pageSizes:[25,50],pageSize:25,pagesUnknown:true,isLastPage:true,page:6,itemText:(a,b)=>a+'–'+b+' objects'})),
+  B('disabled (while the list reloads)',h(C.Pagination,{disabled:true,pageSizes:[10,20],pageSize:10,totalItems:40,page:2})),
+  B('pageSizeInputDisabled: the page size is fixed',h(C.Pagination,{pageSizeInputDisabled:true,pageSizes:[10],pageSize:10,totalItems:40,page:2})),
+  B('Narrow container (under 42rem): only the range and previous / next remain',h(C.Pagination,{pageSizes:[10,20],pageSize:10,totalItems:103,page:1,itemRangeText:buckets}),{className:'narrow'}),
+  B('In context: under a list of audit events (try the controls)',h(Audit)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

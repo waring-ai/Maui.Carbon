@@ -1,0 +1,44 @@
+<!-- @dsCard group="Forms" height=1103 subtitle="Label inside a 64px field: open (64px and condensed rows), selected, invalid, warning, disabled, read-only, skeleton" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .grid{display:grid;align-items:start;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-bottom:24px} .tall{min-height:320px} .grid .cds--list-box__wrapper.cds--list-box__wrapper--fluid{block-size:auto} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.panel{max-inline-size:560px;background:var(--background);border:1px solid var(--border-subtle-01)} .ph{padding:16px} .ph h3{margin:0 0 4px;font:600 16px/22px var(--font-sans);color:var(--text-primary)} .ph p,.sum{margin:0;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .sum{padding:12px 16px 16px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:1px;background:var(--border-strong-01)} .pf{display:flex} .pf > .cds--btn{flex:1 1 0;max-inline-size:none}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el,tall){return h('div',{className:tall?'tall':null},Cap(t),el)}
+const classes=[{id:'smart',text:'Smart Tier',note:'Billed by how often each object is read'},{id:'standard',text:'Standard',note:'For data read more than once a month'},{id:'vault',text:'Vault',note:'For data read about once a month'},{id:'cold',text:'Cold Vault',note:'For data read a few times a year'},{id:'archive',text:'Archive (set per rule, not per bucket)',disabled:true}];
+const base={titleText:'Storage class',label:'Choose a storage class',items:classes};
+function D(p){return h(C.FluidDropdown,Object.assign({},base,p))}
+
+function BucketPanel(){
+ const [cls,setCls]=React.useState(classes[0]);
+ return h('div',{className:'panel'},
+  h('div',{className:'ph'},h('h3',null,'Create bucket'),h('p',null,'Buckets in payments-storage are encrypted with your root key.')),
+  h(C.FluidForm,{'aria-label':'Create bucket',onSubmit:function(e){e.preventDefault()}},
+   h('div',{className:'row'},
+    h(C.FluidTextInput,{id:'cb-name',labelText:'Bucket name',defaultValue:'payments-exports'}),
+    h(C.FluidDropdown,Object.assign({},base,{id:'cb-class',selectedItem:cls,onChange:function(d){setCls(d.selectedItem)}})))),
+  h('p',{className:'sum'},cls?cls.note:'Choose a storage class to see how it is billed'),
+  h('div',{className:'pf'},h(C.Button,{kind:'secondary',size:'xl'},'Cancel'),h(C.Button,{kind:'primary',size:'xl',disabled:!cls},'Create bucket')));
+}
+
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   Cell('Open: 64px menu rows (default)',D({id:'fd-open',defaultOpen:true}),true),
+   Cell('Open, item selected',D({id:'fd-open-sel',initialSelectedItem:classes[1],defaultOpen:true}),true),
+   Cell('Open, isCondensed (40px rows)',D({id:'fd-cond',isCondensed:true,initialSelectedItem:classes[0],defaultOpen:true}),true)),
+  h('div',{className:'grid'},
+   Cell('Default (placeholder)',D({id:'fd-def'})),
+   Cell('Selected',D({id:'fd-sel',initialSelectedItem:classes[2]})),
+   Cell('Invalid',D({id:'fd-inv',invalid:true,invalidText:'Choose a storage class to create the bucket'})),
+   Cell('Warning',D({id:'fd-warn',initialSelectedItem:classes[3],warn:true,warnText:'Reads within 90 days are billed a retrieval fee'})),
+   Cell('Disabled',D({id:'fd-dis',initialSelectedItem:classes[1],disabled:true})),
+   Cell('Read only',D({id:'fd-ro',initialSelectedItem:classes[1],readOnly:true})),
+   Cell('Skeleton (FluidDropdownSkeleton)',h(C.FluidDropdownSkeleton))),
+  Cap('In context: a fluid row in a create panel; the note below follows the selection'),
+  h(BucketPanel));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

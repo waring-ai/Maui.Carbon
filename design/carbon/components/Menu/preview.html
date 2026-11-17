@@ -1,0 +1,79 @@
+<!-- @dsCard group="Actions" height=734 subtitle="Sizes, icons, shortcuts, selectable, radio, submenus, danger, context menu" -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.row{display:flex;flex-wrap:wrap;gap:24px;margin-bottom:16px;align-items:flex-start}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.box{position:relative}
+.objects{position:relative;height:216px;border:1px solid var(--border-subtle-01);background:var(--layer-01);font:400 14px/18px var(--font-sans);letter-spacing:.16px}
+.objects>.list{list-style:none;margin:0;padding:0}
+.objects>.list>li{display:grid;grid-template-columns:minmax(0,1fr) 120px 160px;gap:16px;align-items:center;height:48px;padding:0 16px;border-bottom:1px solid var(--border-subtle-01);color:var(--text-secondary);cursor:context-menu}
+.objects>.list>li:first-child{height:32px;font-size:12px;letter-spacing:.32px;font-weight:600;color:var(--text-primary);background:var(--layer-accent-01);cursor:default}
+.objects>.list>li.on{background:var(--layer-selected-01);color:var(--text-primary)}
+.objects .name{color:var(--text-primary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Box(w,hh,cap,menu){return h('div',{style:{width:w}},Cap(cap),h('div',{className:'box',style:{height:hh}},menu))}
+const M=C.Menu,I=C.MenuItem;
+const OBJECTS=[['access-2026-11-17.log.gz','14.2 MB','Nov 17, 2026 09:12'],['access-2026-11-16.log.gz','13.8 MB','Nov 16, 2026 09:10'],['access-2026-11-15.log.gz','12.9 MB','Nov 15, 2026 09:11']];
+function ContextMenuDemo(){
+ const [menu,setMenu]=React.useState({open:true,x:248,y:44,row:1});
+ const ref=React.useRef(null);
+ React.useEffect(()=>{
+  if(!menu.open)return;
+  const down=e=>{if(ref.current&&!ref.current.querySelector('.cds--menu')?.contains(e.target))setMenu(m=>Object.assign({},m,{open:false}))};
+  document.addEventListener('mousedown',down);return()=>document.removeEventListener('mousedown',down);
+ },[menu.open]);
+ function onCtx(e,row){
+  e.preventDefault();
+  const r=ref.current.getBoundingClientRect();
+  setMenu({open:true,x:Math.min(e.clientX-r.left,r.width-200),y:Math.min(e.clientY-r.top,64),row:row});
+ }
+ return h('div',{className:'objects',ref:ref},
+  h('ul',{className:'list'},
+   h('li',null,h('span',null,'Object'),h('span',null,'Size'),h('span',null,'Last modified')),
+   OBJECTS.map((o,i)=>h('li',{key:o[0],className:menu.open&&menu.row===i?'on':'',onContextMenu:e=>onCtx(e,i)},h('span',{className:'name'},o[0]),h('span',null,o[1]),h('span',null,o[2])))),
+  h(M,{label:'Object actions',open:menu.open,x:menu.x,y:menu.y,onClose:()=>setMenu(m=>Object.assign({},m,{open:false}))},
+   h(I,{label:'Download',renderIcon:'download',shortcut:'Ctrl+D'}),
+   h(I,{label:'Share link',renderIcon:'share',shortcut:'Ctrl+L'}),
+   h(I,{label:'Change storage class',renderIcon:'settings'},
+    h(C.MenuItemRadioGroup,{label:'Storage class',items:['Standard','Vault','Cold vault'],defaultSelectedItem:'Standard'})),
+   h(C.MenuItemDivider),
+   h(I,{label:'Delete object',renderIcon:'close',kind:'danger',shortcut:'Del'})));
+}
+function App(){
+ const sizes=['xs','sm','md','lg'].map(s=>Box(160,156,s+(s==='sm'?' (default)':'')+', '+{xs:24,sm:32,md:40,lg:48}[s]+'px items',
+  h(M,{label:'Cluster actions',size:s,open:true},h(I,{label:'Restart'}),h(I,{label:'Scale'}),h(I,{label:'Rename'}))));
+ return h('div',null,
+  h('div',{className:'row'},sizes,
+   Box(160,156,'border, background token',
+    h(M,{label:'Account',open:true,border:true,backgroundToken:'background'},h(I,{label:'Profile'}),h(I,{label:'API keys'}),h(I,{label:'Log out'})))),
+  h('div',{className:'row'},
+   Box(240,192,'Icons, shortcuts, disabled, divider, danger (red on hover/focus)',
+    h(M,{label:'Cluster actions',open:true},
+     h(I,{label:'Edit labels',renderIcon:'edit',shortcut:'Ctrl+E'}),
+     h(I,{label:'Export config',renderIcon:'export',shortcut:'Ctrl+S'}),
+     h(I,{label:'Restart',renderIcon:'restart'}),
+     h(I,{label:'Upgrade',renderIcon:'arrow--up',disabled:true}),
+     h(C.MenuItemDivider),
+     h(I,{label:'Delete cluster',renderIcon:'close',kind:'danger',shortcut:'Del'}))),
+   Box(240,192,'Selectable items and a radio group',
+    h(M,{label:'Table settings',open:true},
+     h(C.MenuItemSelectable,{label:'Show region',defaultSelected:true}),
+     h(C.MenuItemSelectable,{label:'Show node count'}),
+     h(C.MenuItemDivider),
+     h(C.MenuItemRadioGroup,{label:'Sort by',items:['Name','Created','Status'],defaultSelectedItem:'Created'}))),
+   Box(384,192,'Submenu (hover, click or ArrowRight) and a group',
+    h(M,{label:'Deployment actions',open:true},
+     h(I,{label:'Redeploy'}),
+     h(I,{label:'Roll back',shortcut:'Ctrl+Z'}),
+     h(I,{label:'Move to',defaultSubmenuOpen:true},h(I,{label:'default'}),h(I,{label:'production'}),h(I,{label:'staging'})),
+     h(C.MenuItemDivider),
+     h(C.MenuItemGroup,{label:'Logs'},h(I,{label:'View logs'}),h(I,{label:'Download logs'}))))),
+  Cap('In context: right-click an object for its context menu (Menu positioned with x and y)'),
+  h(ContextMenuDemo));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

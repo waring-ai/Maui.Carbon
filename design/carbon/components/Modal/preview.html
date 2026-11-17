@@ -1,0 +1,80 @@
+<!-- @dsCard group="Overlays" height=2762 subtitle="Modal and ComposedModal: sizes, danger, passive, form, scrolling, loading" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px} .mb{margin-bottom:24px}
+.list{margin:0;padding:0;list-style:none;font:400 14px/20px var(--font-sans);letter-spacing:.16px}.list li{display:flex;justify-content:space-between;gap:16px;padding:12px 16px;border-block-end:1px solid var(--border-subtle-01)}.list li span:last-child{color:var(--text-secondary)}
+.page{position:relative;block-size:22rem;border:1px solid var(--border-subtle-01);background:var(--background);overflow:hidden}.page-in{padding:16px 24px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}.page h3{font:400 20px/28px var(--font-sans);margin:0 0 16px}.row{display:flex;justify-content:space-between;padding:12px 0;border-block-end:1px solid var(--border-subtle-01)}.row span:nth-child(2){color:var(--text-secondary)}.over{position:absolute;inset:0}.over .cds--modal-preview-frame{border:0;background:transparent}
+.try{display:flex;align-items:center;gap:16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,noop=()=>{};
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(cap,el){return h('div',null,Cap(cap),el)}
+const H='18rem';
+const M=(p,...kids)=>h(C.Modal,Object.assign({inline:true,inlineHeight:H,open:true,onRequestClose:noop,onRequestSubmit:noop},p),...kids);
+const P=t=>h('p',null,t);
+const changes=['Scale node pool workers from 3 to 5','Upgrade Kubernetes from 1.29.4 to 1.30.2','Rotate the cluster CA certificate','Enable audit logging to bucket audit-logs-prod','Move ingress to the public load balancer','Restart all nodes, one zone at a time','Update the default storage class to ssd-retain','Remove the deprecated metrics agent'];
+function Launcher(){
+ const [open,setOpen]=React.useState(false);const [name,setName]=React.useState('');
+ return h('div',{className:'try'},
+  h(C.Button,{kind:'tertiary',size:'md',onClick:()=>setOpen(true)},'Create API key'),
+  'Opens a real modal over the page: focus moves inside, Tab wraps, Escape closes and focus returns here.',
+  h(C.ComposedModal,{open,size:'sm',onClose:()=>{setOpen(false);return true}},
+   h(C.ModalHeader,{label:'Access',title:'Create API key'}),
+   h(C.ModalBody,{hasForm:true},h(C.TextInput,{id:'mk-name',labelText:'Key name',helperText:'Say where the key is used, for example ci-deploy.',value:name,onChange:e=>setName(e.target.value),'data-modal-primary-focus':true})),
+   h(C.ModalFooter,{primaryButtonText:'Create key',secondaryButtonText:'Cancel',primaryButtonDisabled:!name,onRequestSubmit:()=>setOpen(false)})));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   Cell('Transactional, size md (default), with label',
+    M({modalLabel:'prod-us-east',modalHeading:'Restart cluster',primaryButtonText:'Restart cluster',secondaryButtonText:'Cancel'},
+     P('Nodes restart one zone at a time. Workloads move to the other zones, so expect about 10 minutes of reduced capacity.'))),
+   Cell('danger: danger primary button, focus starts on Cancel',
+    M({danger:true,modalLabel:'billing-exports',modalHeading:'Delete bucket?',primaryButtonText:'Delete bucket',secondaryButtonText:'Cancel'},
+     P('All 1,284 objects in billing-exports are deleted permanently. You cannot undo this.')))),
+  h('div',{className:'grid'},
+   Cell('passiveModal: no footer, closes on a scrim click',
+    M({passiveModal:true,modalLabel:'Billing',modalHeading:'How billing cycles work'},
+     P('Your billing cycle runs from the 1st to the last day of each month. Usage in a partial month is prorated by the hour.'))),
+   Cell('ComposedModal: ModalHeader, ModalBody hasForm, ModalFooter',
+    h(C.ComposedModal,{inline:true,inlineHeight:H,open:true},
+     h(C.ModalHeader,{label:'Access',title:'Create API key'}),
+     h(C.ModalBody,{hasForm:true},
+      h(C.TextInput,{labelText:'Key name',defaultValue:'ci-deploy',helperText:'Say where the key is used.'})),
+     h(C.ModalFooter,{primaryButtonText:'Create key',secondaryButtonText:'Cancel'})))),
+  h('div',{className:'grid'},
+   Cell('Size sm, form field',
+    M({size:'sm',modalHeading:'Rename deployment',primaryButtonText:'Rename',secondaryButtonText:'Cancel'},
+     h(C.TextInput,{labelText:'Deployment name',defaultValue:'checkout-api'}))),
+   Cell('primaryButtonDisabled until the user confirms',
+    M({danger:true,modalHeading:'Delete cluster prod-us-east?',primaryButtonText:'Delete cluster',secondaryButtonText:'Cancel',primaryButtonDisabled:true},
+     h(C.TextInput,{labelText:'Type prod-us-east to confirm',placeholder:'prod-us-east'})))),
+  h('div',{className:'mb'},
+   Cell('Size xs (48% of the viewport from 672px, 32% from 1056px)',
+    M({size:'xs',inlineHeight:'14rem',modalHeading:'Remove node?',primaryButtonText:'Remove',secondaryButtonText:'Cancel'},P('worker-3 is drained and removed from the pool.')))),
+  h('div',{className:'mb'},
+   Cell('Size lg, scrolling content (body scrolls with a fade; the region is focusable)',
+    M({size:'lg',inlineHeight:'20rem',modalLabel:'checkout-api',modalHeading:'Review deployment plan',primaryButtonText:'Deploy',secondaryButtonText:'Cancel',hasScrollingContent:true},
+     P('These changes apply to prod-us-east in the order shown.'),
+     h('ol',{style:{margin:'12px 0 0',paddingInlineStart:20}},changes.map(c=>h('li',{key:c,style:{marginBottom:8}},c)))))),
+  h('div',{className:'mb'},
+   Cell('Three-button footer (secondaryButtons), size lg',
+    M({size:'lg',inlineHeight:'15rem',modalHeading:'Leave without saving?',primaryButtonText:'Save and leave',secondaryButtons:[{buttonText:'Discard changes',onClick:noop},{buttonText:'Keep editing',onClick:noop}]},
+     P('You changed the autoscaling policy for worker-pool-a. Save the changes before you leave this page?')))),
+  h('div',{className:'grid'},
+   Cell('loadingStatus="active": footer buttons disabled',
+    M({modalHeading:'Create cluster',primaryButtonText:'Create cluster',secondaryButtonText:'Cancel',loadingStatus:'active',loadingDescription:'Creating...'},
+     P('prod-eu-west: 3 worker nodes with 4 vCPU and 16 GB each, spread across three zones.'))),
+   Cell('isFullWidth: body without padding, for a list or table',
+    M({isFullWidth:true,modalHeading:'Nodes in worker-pool-a',primaryButtonText:'Done',secondaryButtonText:'Cancel'},
+     h('ul',{className:'list'},[['worker-1','Ready'],['worker-2','Ready'],['worker-3','Draining']].map(r=>h('li',{key:r[0]},h('span',null,r[0]),h('span',null,r[1]))))))),
+  h('div',{className:'mb'},h(Launcher)),
+  Cap('In context: a danger confirmation over the API keys page'),
+  h('div',{className:'page'},
+   h('div',{className:'page-in'},h('h3',null,'API keys'),
+    [['ci-deploy','Created 12 Mar 2026'],['terraform-prod','Created 2 Feb 2026'],['metrics-export','Created 18 Jan 2026'],['backup-agent','Created 9 Dec 2025']].map(r=>h('div',{className:'row',key:r[0]},h('span',null,r[0]),h('span',null,r[1])))),
+   h('div',{className:'over'},
+    M({danger:true,size:'sm',inlineHeight:'100%',modalLabel:'terraform-prod',modalHeading:'Revoke API key?',primaryButtonText:'Revoke key',secondaryButtonText:'Cancel'},
+     P('Requests that use this key fail as soon as it is revoked. Pipelines that deploy to production use it.')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

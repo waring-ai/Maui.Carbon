@@ -1,0 +1,47 @@
+<!-- @dsCard group="Data" height=600 subtitle="OrderedList and UnorderedList: nested, native, expressive, long items; setup steps in context" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 32px;margin-bottom:24px}
+.cols>div>ol,.cols>div>ul{padding-inline-start:24px}
+.cols>div>ul.cds--list--unordered{padding-inline-start:8px}
+.panel{background:var(--layer-01);padding:24px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px}
+.ph{margin:0 0 4px;font:400 20px/28px var(--font-sans)}
+.psub{margin:0 0 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.panel ol{padding-inline-start:24px}
+.panel ul{padding-inline-start:8px}
+.st{margin:0 0 8px;font:600 14px/18px var(--font-sans);letter-spacing:.16px}
+code{font:400 12px/16px var(--font-mono);letter-spacing:.32px;background:var(--layer-accent-01);padding:1px 4px}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const I=(...t)=>h(C.ListItem,null,...t);
+function App(){
+ return h('div',null,
+  h('div',{className:'cols'},
+   h('div',null,Cap('OrderedList: numbers, nested level uses letters'),
+    h(C.OrderedList,null,I('Create a cluster'),I('Add a worker pool',h(C.OrderedList,{nested:true},I('Choose a flavor'),I('Set nodes per zone'))),I('Deploy the app'))),
+   h('div',null,Cap('OrderedList native: browser ::marker numbers'),
+    h(C.OrderedList,{native:true},I('Create a cluster'),I('Add a worker pool',h(C.OrderedList,{nested:true,native:true},I('Choose a flavor'),I('Set nodes per zone'))),I('Deploy the app'))),
+   h('div',null,Cap('UnorderedList: en dash; nested uses squares'),
+    h(C.UnorderedList,null,I('Logging'),I('Monitoring',h(C.UnorderedList,{nested:true},I('Metrics'),I('Alerts'))),I('Daily backups'))),
+   h('div',null,Cap('isExpressive: body-02 (16px / 24px)'),
+    h(C.OrderedList,{isExpressive:true},I('Create a cluster'),I('Add a worker pool',h(C.OrderedList,{nested:true,isExpressive:true},I('Choose a flavor'))),I('Deploy the app'))),
+   h('div',null,Cap('UnorderedList isExpressive'),
+    h(C.UnorderedList,{isExpressive:true},I('Logging'),I('Monitoring',h(C.UnorderedList,{nested:true,isExpressive:true},I('Alerts'))),I('Daily backups'))),
+   h('div',null,Cap('Long items wrap under the text, not the marker'),
+    h(C.UnorderedList,null,I('Clusters in a degraded state for more than 24 hours are flagged in the weekly report.'),I('Nodes are replaced one at a time.')))),
+  Cap('In context: getting-started steps with nested sub-steps and a prerequisites list'),
+  h('div',{className:'panel'},
+   h('div',null,h('p',{className:'ph'},'Deploy your first app'),h('p',{className:'psub'},'About 10 minutes. You need a cluster and a container image.'),
+    h(C.OrderedList,null,
+     I('Install the CLI and log in with ',h('code',null,'cloud login')),
+     I('Target your cluster',h(C.OrderedList,{nested:true},I('List clusters with ',h('code',null,'cloud ks clusters')),I('Download the kubeconfig for prod-eu-1'))),
+     I('Apply the deployment file with ',h('code',null,'kubectl apply -f app.yaml')),
+     I('Open the app URL shown on the Ingress tab'))),
+   h('div',null,h('p',{className:'st'},'Before you start'),
+    h(C.UnorderedList,null,I('A cluster on Kubernetes 1.29 or later'),I('Push access to a registry namespace',h(C.UnorderedList,{nested:true},I('Writer role'),I('An API key for CI'))),I('An Ingress subdomain')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

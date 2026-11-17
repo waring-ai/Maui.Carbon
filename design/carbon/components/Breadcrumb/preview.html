@@ -1,0 +1,60 @@
+<!-- @dsCard group="Navigation" height=504 subtitle="md and sm, trailing slash, current page, overflow crumb, page top" -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 32px;margin-bottom:32px}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.open{height:132px}
+.page{border:1px solid var(--border-subtle-01);background:var(--layer-01);padding:16px 24px 24px}
+.page__row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-top:16px}
+.page h1{margin:0;font:400 28px/36px var(--font-sans);color:var(--text-primary)}
+.page p{margin:4px 0 0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.page__actions{display:flex;gap:1px}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Trail(p){
+ return h(C.Breadcrumb,{size:p.size,noTrailingSlash:p.noTrailingSlash},
+  h(C.BreadcrumbItem,{href:'#'},'Dashboard'),
+  h(C.BreadcrumbItem,{href:'#'},'Object storage'),
+  h(C.BreadcrumbItem,{href:'#'},'Buckets'),
+  p.noTrailingSlash?h(C.BreadcrumbItem,{href:'#',isCurrentPage:true},'logs-archive-prod'):null);
+}
+function Overflow(p){
+ return h(C.Breadcrumb,{noTrailingSlash:true,size:p.size},
+  h(C.BreadcrumbItem,{href:'#'},'Dashboard'),
+  h(C.BreadcrumbItem,null,
+   h(C.OverflowMenu,{defaultOpen:p.open,iconDescription:'Show 3 more levels'},
+    h(C.MenuItem,{label:'Kubernetes'}),
+    h(C.MenuItem,{label:'Clusters'}),
+    h(C.MenuItem,{label:'prod-us-south'}))),
+  h(C.BreadcrumbItem,{href:'#'},'Worker pools'),
+  h(C.BreadcrumbItem,{href:'#',isCurrentPage:true},'pool-gpu-a100'));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   h('div',null,Cap('md (default): parent levels only, the slash leads into a page title'),h(Trail)),
+   h('div',null,Cap('md, noTrailingSlash, current page last (aria-current)'),h(Trail,{noTrailingSlash:true})),
+   h('div',null,Cap('sm (page headers, dense areas), noTrailingSlash'),h(Trail,{size:'sm',noTrailingSlash:true})),
+   h('div',null,Cap('Current page as plain text (no href)'),
+    h(C.Breadcrumb,{noTrailingSlash:true},
+     h(C.BreadcrumbItem,{href:'#'},'Account'),
+     h(C.BreadcrumbItem,{href:'#'},'Users'),
+     h(C.BreadcrumbItem,{isCurrentPage:true},'Invite users'))),
+   h('div',null,Cap('Overflow crumb (sm), long trail collapsed'),h(Overflow,{size:'sm'})),
+   h('div',{className:'open'},Cap('Overflow crumb open: hidden levels in a menu'),h(Overflow,{open:true}))),
+  Cap('In context: top of a bucket details page (parent levels only, trailing slash leads into the title)'),
+  h('div',{className:'page'},
+   h(C.Breadcrumb,null,
+    h(C.BreadcrumbItem,{href:'#'},'Object storage'),
+    h(C.BreadcrumbItem,{href:'#'},'Buckets')),
+   h('div',{className:'page__row'},
+    h('div',null,h('h1',null,'logs-archive-prod'),h('p',null,'Standard class · us-south · 2.4 TB stored')),
+    h('div',{className:'page__actions'},
+     h(C.Button,{kind:'tertiary',size:'md'},'Configure'),
+     h(C.Button,{kind:'primary',size:'md',renderIcon:'upload'},'Upload objects')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

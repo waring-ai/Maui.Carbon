@@ -1,0 +1,30 @@
+<!-- @dsCard group="Data" height=760 subtitle="Numbered pages with overflow selects; three sizes, few pages, loop, overflow disabled" -->
+<style>body{margin:0;padding:24px;background:var(--background)} .stack{display:flex;flex-direction:column;gap:24px} .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.results{max-width:640px;border-top:1px solid var(--border-subtle-01);font-family:var(--font-sans)} .res{padding:12px 0;border-bottom:1px solid var(--border-subtle-01)} .res h5{margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--link-primary)} .res p{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)} .meta{margin:0 0 8px;font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)} .navrow{margin-top:8px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement,{useState}=React;
+function Cap(t){return h('p',{className:'cap'},t)}
+function B(cap,node,p){return h('div',p||null,Cap(cap),node)}
+const docs=['Create a Kubernetes cluster','Scale worker pools automatically','Rotate API keys without downtime','Set lifecycle rules on a bucket','Read your monthly invoice','Restrict access with IAM policies','Back up block storage volumes','Monitor node health','Connect a private network','Upgrade a cluster version'];
+function Search(){
+ const [p,setP]=useState(0);
+ const start=(p*3)%docs.length, hits=[0,1,2].map(i=>docs[(start+i)%docs.length]);
+ return h('div',{className:'results'},
+  h('p',{className:'meta',style:{marginTop:12}},'138 results for "cluster" · page '+(p+1)+' of 14'),
+  hits.map(t=>h('div',{key:t,className:'res'},h('h5',null,t),h('p',null,'Docs · Updated 3 days ago'))),
+  h('div',{className:'navrow'},h(C.PaginationNav,{totalItems:14,page:p,itemsShown:7,onChange:setP,'aria-label':'Search results pages'})));
+}
+function App(){
+ return h('div',{className:'stack'},
+  B('size="lg" (default, 48px), 20 pages, first page: previous disabled',h(C.PaginationNav,{totalItems:20,page:0,'aria-label':'Release notes pages'})),
+  B('Page 10 of 20: hidden pages collapse into "..." selects at both ends',h(C.PaginationNav,{totalItems:20,page:9,'aria-label':'Release notes pages'})),
+  h('div',{className:'grid'},
+   B('size="md" (40px), itemsShown 5',h(C.PaginationNav,{totalItems:20,page:9,size:'md',itemsShown:5,'aria-label':'Pages, medium'})),
+   B('size="sm" (32px), itemsShown 7',h(C.PaginationNav,{totalItems:20,page:9,size:'sm',itemsShown:7,'aria-label':'Pages, small'})),
+   B('5 pages (no overflow) with loop: next stays enabled on the last page and wraps to 1',h(C.PaginationNav,{totalItems:5,page:4,loop:true,'aria-label':'Pages, loop'})),
+   B('disableOverflow: "..." is shown but not selectable',h(C.PaginationNav,{totalItems:20,page:9,itemsShown:7,disableOverflow:true,'aria-label':'Pages, overflow disabled'}))),
+  B('In context: documentation search results (try the controls)',h(Search)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

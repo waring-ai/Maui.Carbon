@@ -1,0 +1,25 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{csproj,props,targets,slnx,xml,xaml,json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace
+dotnet_sort_system_directives_first = true
+# One flat public namespace (Maui.Carbon) regardless of folder.
+dotnet_diagnostic.IDE0130.severity = none
+
+[**/Generated/*.g.cs]
+generated_code = true

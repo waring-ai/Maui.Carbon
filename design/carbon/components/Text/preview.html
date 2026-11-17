@@ -1,0 +1,58 @@
+<!-- @dsCard group="Layout" height=552 subtitle="dir auto / ltr / rtl, as, nested Text, TextDirection; user-named buckets in context" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary);font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;align-items:start;margin-bottom:24px}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.rows{display:flex;flex-direction:column;gap:12px}
+.line{display:block;padding:8px 16px;background:var(--layer-01);font-size:.875rem;line-height:1.42857;letter-spacing:.16px}
+.meta{display:block;margin-top:2px;font:400 12px/16px var(--font-mono);letter-spacing:.32px;color:var(--text-helper)}
+p{margin:0}
+.tbl{inline-size:100%;border-collapse:collapse;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.tbl th{text-align:start;padding:12px 16px;background:var(--layer-accent-01);font-weight:600}
+.tbl td{padding:12px 16px;border-block-end:1px solid var(--border-subtle-01);background:var(--layer-01)}
+.tbl td.bad{color:var(--text-secondary)}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+// Shows the element and the dir attribute Text actually rendered.
+function Probe(props){
+ const ref=React.useRef(null),[info,setInfo]=React.useState('');
+ React.useLayoutEffect(()=>{const el=ref.current;const d=el.getAttribute('dir');setInfo('<'+el.tagName.toLowerCase()+(d?' dir="'+d+'"':' (no dir)')+'>')});
+ return h('div',null,h(C.Text,Object.assign({ref,className:'line'},props)),h('span',{className:'meta'},info));
+}
+function NestedProbe(){
+ const ref=React.useRef(null),[info,setInfo]=React.useState('');
+ React.useLayoutEffect(()=>{const els=ref.current.querySelectorAll('[data-n]');setInfo([...els].map(e=>e.getAttribute('data-n')+': '+(e.getAttribute('dir')||'none')).join(', '))});
+ return h('div',{ref},
+  h(C.Text,{as:'p',dir:'rtl',className:'line','data-n':'outer'},'דוח שבועי ',h(C.Text,{dir:'rtl','data-n':'same'},'(טיוטה)'),' ',h(C.Text,{dir:'ltr','data-n':'ltr'},'prod-eu-1')),
+  h('span',{className:'meta'},'dir written: '+info));
+}
+const guess=t=>/[֐-׿؀-ۿ]/.test(String(t))?'rtl':'ltr';
+const BUCKETS=[['logs-prod-eu','Application logs, 30 days'],['גיבויים-יומיים','גיבוי יומי: 14 עותקים!'],['النسخ-اليومية','نسخ احتياطية يومية (14)'],['ci-artifacts','Build output from CI']];
+function App(){
+ return h('div',null,
+  h('div',{className:'grid'},
+   h('div',null,Cap('as and dir: default auto, ltr, rtl'),
+    h('div',{className:'rows'},
+     h(Probe,null,'Default: span, dir="auto"'),
+     h(Probe,{as:'p',dir:'ltr'},'as="p", dir="ltr"'),
+     h(Probe,{as:'p',dir:'rtl'},'שלום עולם'))),
+   h('div',null,Cap('Nested Text: writes dir only when it differs from the parent'),
+    h(NestedProbe),
+    h('div',{style:{height:12}}),
+    h('p',{className:'cap',style:{margin:'0 0 8px'}},'dir="auto": the browser picks rtl from the first strong letter'),h(Probe,{as:'p'},'النسخ الاحتياطية اليومية')),
+   h('div',null,Cap('TextDirection: getTextDirection picks ltr or rtl per string'),
+    h(C.TextDirection,{getTextDirection:guess},
+     h('div',{className:'rows'},
+      h(Probe,{as:'p'},'Latin text resolves to ltr'),
+      h(Probe,{as:'p'},'שלום עולם'))))),
+  Cap('In context: user-named buckets. Plain cells (left) misplace punctuation in right-to-left names; Text with dir="auto" (right) renders each in its own direction'),
+  h('table',{className:'tbl'},
+   h('thead',null,h('tr',null,h('th',null,'Name (plain)'),h('th',null,'Description (plain)'),h('th',null,'Name (Text)'),h('th',null,'Description (Text)'))),
+   h('tbody',null,BUCKETS.map(b=>h('tr',{key:b[0]},
+    h('td',{className:'bad'},b[0]),h('td',{className:'bad'},b[1]),
+    h('td',null,h(C.Text,{as:'div'},b[0])),h('td',null,h(C.Text,{as:'div'},b[1])))))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

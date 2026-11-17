@@ -1,0 +1,58 @@
+<!-- @dsCard group="Forms" height=1252 subtitle="Open lists in sm / md / lg with selected and disabled items; helper, invalid, warning, read-only, disabled, inline, skeleton, on a layer; create cluster form" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tall{min-height:292px}
+.lay{padding:16px}
+.ctx{padding:24px;max-width:592px}
+.ttl{font:600 16px/24px var(--font-sans);color:var(--text-primary);margin:0 0 4px}
+.sub{font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary);margin:0 0 24px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.fl{display:flex;justify-content:space-between;gap:16px;inline-size:100%}
+.fl span:last-child{color:var(--text-secondary)}
+.actions{display:flex;justify-content:flex-end;margin-top:32px}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el,cls){return h('div',{className:cls},Cap(t),el)}
+const regions=[{id:'us-south',label:'Dallas (us-south)'},{id:'us-east',label:'Washington DC (us-east)'},{id:'eu-de',label:'Frankfurt (eu-de)'},{id:'eu-gb',label:'London (eu-gb)'},{id:'jp-tok',label:'Tokyo (jp-tok)',disabled:true}];
+const sorts=['Name','Date created','Last deployed','Monthly cost'];
+const versions=['1.31.2 (default)','1.30.6','1.29.10','1.28.15 (end of support)'];
+const flavors=[{id:'bx2.4x16',label:'bx2.4x16',price:'$0.19/hr'},{id:'bx2.8x32',label:'bx2.8x32',price:'$0.38/hr'},{id:'mx2.8x64',label:'mx2.8x64',price:'$0.51/hr'},{id:'gx3.16x80',label:'gx3.16x80 (1 GPU)',price:'$2.40/hr'}];
+function Flavor(it){return h('span',{className:'fl'},h('span',null,it.label),h('span',null,it.price))}
+function App(){
+ const [region,setRegion]=React.useState(null);
+ const [tried,setTried]=React.useState(true);
+ const [ver,setVer]=React.useState(versions[3]);
+ return h('div',null,
+  Cap('Open: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   Cell('Small, nothing selected',h(C.Dropdown,{id:'dd-sm',size:'sm',titleText:'Sort clusters by',label:'Choose a sort order',items:sorts,defaultOpen:true}),'tall'),
+   Cell('Medium, selected item and a disabled item',h(C.Dropdown,{id:'dd-md',titleText:'Region',label:'Choose a region',items:regions,initialSelectedItem:regions[2],defaultOpen:true}),'tall'),
+   Cell('Large, rich items (itemToElement)',h(C.Dropdown,{id:'dd-lg',size:'lg',titleText:'Worker flavor',label:'Choose a flavor',items:flavors,itemToElement:Flavor,initialSelectedItem:flavors[1],defaultOpen:true}),'tall')),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text',h(C.Dropdown,{id:'dd-help',titleText:'Region',label:'Choose a region',items:regions,helperText:'Choose the region closest to your users'})),
+   Cell('Invalid',h(C.Dropdown,{id:'dd-inv',titleText:'Region',label:'Choose a region',items:regions,invalid:true,invalidText:'Choose a region to deploy the cluster in'})),
+   Cell('Warning',h(C.Dropdown,{id:'dd-warn',titleText:'Kubernetes version',label:'Choose a version',items:versions,initialSelectedItem:versions[3],warn:true,warnText:'1.28 is out of support. Choose 1.30 or later.'})),
+   Cell('Read only',h(C.Dropdown,{id:'dd-ro',titleText:'Resource group',label:'Choose a group',items:['default','payments'],initialSelectedItem:'payments',readOnly:true})),
+   Cell('Disabled',h(C.Dropdown,{id:'dd-dis',titleText:'Billing account',label:'Choose an account',items:['Acme Corp'],initialSelectedItem:'Acme Corp',disabled:true,helperText:'Only owners can change the billing account'})),
+   Cell('Skeleton',h(C.DropdownSkeleton)),
+   Cell('Inline (type="inline")',h(C.Dropdown,{id:'dd-inl',type:'inline',titleText:'Sort by',label:'Choose',items:sorts,initialSelectedItem:sorts[2]})),
+   Cell('Inline, invalid',h(C.Dropdown,{id:'dd-inl-inv',type:'inline',titleText:'Group by',label:'Choose',items:['Region','Owner'],invalid:true,invalidText:'Choose a grouping'})),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.Dropdown,{id:'dd-lay',titleText:'Environment',label:'Choose an environment',items:['Production','Staging','Development'],initialSelectedItem:'Staging'})))),
+  Cap('In context: create cluster form section, after Next was pressed without a region'),
+  h(C.Layer,{withBackground:true,className:'ctx'},
+   h('p',{className:'ttl'},'Location and version'),
+   h('p',{className:'sub'},'You cannot move a cluster to another region after it is created.'),
+   h('div',{className:'row'},
+    h(C.Dropdown,{id:'cc-region',titleText:'Region',label:'Choose a region',items:regions,selectedItem:region,onChange:d=>setRegion(d.selectedItem),invalid:tried&&!region,invalidText:'Choose a region to continue'}),
+    h(C.Dropdown,{id:'cc-ver',titleText:'Kubernetes version',label:'Choose a version',items:versions,selectedItem:ver,onChange:d=>setVer(d.selectedItem),
+     warn:ver===versions[3],warnText:'Out of support. Choose 1.30 or later.',helperText:'New patch versions install automatically'})),
+   h(C.Dropdown,{id:'cc-flavor',titleText:'Worker flavor',label:'Choose a flavor',items:flavors,itemToElement:Flavor,initialSelectedItem:flavors[0],helperText:'3 workers per zone'}),
+   h('div',{className:'actions'},h(C.Button,{kind:'secondary'},'Back'),h(C.Button,{kind:'primary',onClick:()=>setTried(true)},'Next'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

@@ -1,0 +1,57 @@
+<!-- @dsCard group="Layout" height=986 subtitle="Levels one to three with tiles, fields and tags; nesting, LayerLevel override, in a settings tile" -->
+<style>body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans);color:var(--text-primary)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px}
+.panel{padding:16px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;height:100%;outline:1px solid var(--border-subtle-00);outline-offset:-1px}
+.lvl{font:600 14px/18px var(--font-sans);letter-spacing:.16px;margin:0}
+.meta{font:400 12px/16px var(--font-mono);letter-spacing:.32px;color:var(--text-helper);margin:0}
+.tile-h{margin:0 0 4px;font:600 14px/18px var(--font-sans);letter-spacing:.16px}
+.tile-p{margin:0;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.nest{padding:16px;display:flex;flex-direction:column;gap:12px}
+.ctx-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.actions{display:flex;justify-content:flex-end;gap:8px}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const regions=['us-south (Dallas)','eu-de (Frankfurt)','jp-tok (Tokyo)'];
+// Reports the level a component sees through useLayer().
+function Level(){const l=C.useLayer?C.useLayer().level:'?';return h('p',{className:'meta'},'useLayer().level = '+l)}
+function Content(p){return [
+  h(C.Tile,{key:'t'},h('p',{className:'tile-h'},'prod-eu-1'),h('p',{className:'tile-p'},'12 nodes, Kubernetes 1.30')),
+  h(C.TextInput,{key:'i',id:'ly-name-'+p,labelText:'Cluster name',placeholder:'e.g. prod-eu-1'}),
+  h(C.Dropdown,{key:'d',id:'ly-reg-'+p,titleText:'Region',label:'Choose a region',items:regions,initialSelectedItem:regions[1]}),
+  h('div',{key:'g',className:'tags'},h(C.Tag,{type:'green'},'Healthy'),h(C.Tag,{type:'gray'},'Production'),h(C.Tag,{type:'outline'},'eu-de'))]}
+function App(){
+ return h('div',null,
+  Cap('Same components at each level: Tile uses layer-01, fields use field-01; each Layer remaps them to the -02, then -03 tokens'),
+  h('div',{className:'three'},
+   h('div',{className:'panel',style:{background:'var(--background)'}},h('p',{className:'lvl'},'Level one (page)'),h(Level),Content(1)),
+   h(C.Layer,{withBackground:true,className:'panel'},h('p',{className:'lvl'},'<Layer> : level two'),h(Level),Content(2)),
+   h(C.Layer,null,h(C.Layer,{withBackground:true,className:'panel'},h('p',{className:'lvl'},'<Layer><Layer> : level three'),h(Level),Content(3)))),
+  h('div',{className:'two',style:{marginBottom:24}},
+   h('div',null,Cap('Nesting: each Layer steps up one level; a fourth stays at three'),
+    h(C.Layer,{withBackground:true,className:'nest'},h('p',{className:'lvl'},'Level two'),
+     h(C.Layer,{withBackground:true,className:'nest'},h('p',{className:'lvl'},'Level three'),
+      h(C.Layer,{withBackground:true,className:'nest'},h('p',{className:'lvl'},'Still level three (maximum)'),h(Level))))),
+   h('div',null,Cap('level={LayerLevel.three} jumps straight to a level; withBackground off (fields only) and on'),
+    h('div',{style:{display:'grid',gap:16}},
+     h(C.Layer,{level:C.LayerLevel.three,withBackground:true,className:'nest'},h('p',{className:'lvl'},'level={LayerLevel.three}, on the page'),h(C.TextInput,{id:'ly-ov',labelText:'API key name',placeholder:'e.g. ci-deploy'})),
+     h(C.Layer,{className:'nest',style:{padding:0}},h(C.TextInput,{id:'ly-nobg',labelText:'Layer without withBackground: only the field steps up',placeholder:'e.g. ci-deploy'}))))),
+  Cap('In context: fields inside a Tile sit in a Layer so they contrast with the tile (field-02 on layer-01)'),
+  h(C.Tile,null,
+   h('div',{className:'ctx-head'},
+    h('div',null,h('p',{className:'tile-h'},'Worker pool settings'),h('p',{className:'tile-p'},'Changes apply to new nodes; existing nodes are replaced one at a time.')),
+    h(C.Tag,{type:'blue'},'3 zones')),
+   h(C.Layer,null,
+    h('div',{className:'ctx-grid'},
+     h(C.TextInput,{id:'ly-pool',labelText:'Pool name',defaultValue:'default-pool'}),
+     h(C.Dropdown,{id:'ly-flavor',titleText:'Flavor',label:'Choose a flavor',items:['bx2.4x16','bx2.8x32','cx2.16x32'],initialSelectedItem:'bx2.4x16'})),
+    h('div',{className:'actions'},h(C.Button,{kind:'secondary',size:'md'},'Cancel'),h(C.Button,{size:'md'},'Save changes')))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

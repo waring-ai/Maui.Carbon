@@ -1,0 +1,50 @@
+<!-- @dsCard group="Overlays" height=1200 subtitle="Twelve alignments, caret, high contrast, border, shadow, on a layer" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:8px}.cell{display:flex;align-items:center;justify-content:center;height:96px}.cell.b{align-items:flex-start}.cell.t{align-items:flex-end}.cell.l{justify-content:flex-end;padding-inline-end:40px}.cell.r{justify-content:flex-start;padding-inline-start:40px}
+.pad{display:block;padding:12px 16px;font:400 14px/20px var(--font-sans);letter-spacing:.16px;white-space:nowrap}
+.opts{display:grid;grid-template-columns:repeat(5,1fr);margin-bottom:24px}.opts .cell{height:112px}
+.lyr{padding:16px 16px 72px;margin:0 0 24px;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.ctx{position:relative;border:1px solid var(--border-subtle-01);padding:16px;block-size:360px;box-sizing:border-box;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+.tb{display:flex;align-items:center;gap:8px;background:var(--layer-01);padding-inline-start:16px;block-size:48px}.tb strong{flex:1;font-weight:600}
+.fp{padding:16px;inline-size:288px;box-sizing:border-box}.fp h4{font:600 14px/18px var(--font-sans);letter-spacing:.16px;margin:0 0 8px}.fp .grp{margin-bottom:16px}
+.fbtns{display:flex;margin:0 -16px -16px}.fbtns .cds--btn{flex:1 1 50%;max-inline-size:none}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Trig(t,extra){return h('button',Object.assign({type:'button',className:'cds--btn cds--btn--tertiary cds--btn--sm',style:{paddingInlineEnd:15}},extra),t)}
+function Pop(p,label,body){return h(C.Popover,Object.assign({open:true},p),Trig(label||p.align),h(C.PopoverContent,null,h('span',{className:'pad'},body||'Content')))}
+function Filter(){
+ const [open,setOpen]=React.useState(true);
+ return h('div',{className:'tb'},h('strong',null,'Clusters'),
+  h(C.Popover,{open,align:'bottom-end',onRequestClose:()=>setOpen(false)},
+   h('button',{type:'button',className:'cds--btn cds--btn--ghost cds--btn--lg cds--btn--icon-only','aria-label':'Filter clusters','aria-expanded':open,onClick:()=>setOpen(!open)},h(C.Icon,{name:'filter',size:16,className:'cds--btn__icon'})),
+   h(C.PopoverContent,null,h('div',{className:'fp'},
+    h('h4',null,'Region'),h('div',{className:'grp'},['us-east','eu-west','ap-south'].map((r,i)=>h(C.Checkbox,{key:r,id:'pf-'+r,labelText:r,defaultChecked:i<2}))),
+    h('h4',null,'Status'),h('div',{className:'grp'},['Running','Stopped'].map((r,i)=>h(C.Checkbox,{key:r,id:'pf-'+r,labelText:r,defaultChecked:i===0}))),
+    h('div',{className:'fbtns'},h(C.Button,{kind:'secondary',size:'md'},'Reset'),h(C.Button,{kind:'primary',size:'md',onClick:()=>setOpen(false)},'Apply'))))),
+  h(C.Button,{kind:'primary',size:'lg'},'Create cluster'));
+}
+function App(){
+ const row=(cls,list)=>h('div',{className:'grid'},list.map(a=>h('div',{className:'cell '+cls,key:a},Pop({align:a}))));
+ return h('div',null,
+  Cap('align: all twelve positions (caret and drop shadow on by default). Older top-left / left-top spellings map to -start / -end'),
+  row('b',['bottom-start','bottom','bottom-end']),
+  row('t',['top-start','top','top-end']),
+  row('l',['left-start','left','left-end']),
+  row('r',['right-start','right','right-end']),
+  Cap('Options: highContrast, border, caret={false}, dropShadow={false}, highContrast without caret'),
+  h('div',{className:'opts'},
+   h('div',{className:'cell b'},Pop({align:'bottom',highContrast:true},'highContrast','Inverse surface')),
+   h('div',{className:'cell b'},Pop({align:'bottom',border:true},'border','1px border')),
+   h('div',{className:'cell b'},Pop({align:'bottom',caret:false},'caret off','No caret, no gap')),
+   h('div',{className:'cell b'},Pop({align:'bottom',dropShadow:false,border:true},'shadow off','Flat surface')),
+   h('div',{className:'cell b'},Pop({align:'bottom',highContrast:true,caret:false},'both','Inverse, no caret'))),
+  Cap('On a layer: inside Layer the surface steps to the next layer token so it stays distinct from its parent'),
+  h(C.Layer,{withBackground:true,className:'lyr'},'Layer 1 panel ',
+   h('span',{style:{display:'inline-block',marginInlineStart:16}},Pop({align:'bottom-start'},'Usage details','vCPU: 12 of 16 used'))),
+  Cap('In context: a filter popover anchored to a table toolbar button (click outside or Apply to close; click the icon to reopen)'),
+  h('div',{className:'ctx'},h(Filter)));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

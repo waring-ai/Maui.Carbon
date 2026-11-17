@@ -1,0 +1,76 @@
+# Icon sources
+
+- **Artifact subset (78 files):** copied verbatim from the Carbon design-system artifact (Icons asset group), originally from Carbon v11.99.0 packages/icons/src/svg. See README.md in this folder.
+- **Extra files (69):** copied from the npm package @carbon/icons 11.91.0 (published 2026-10-21, Apache-2.0, see LICENSE-carbon-icons) from package/svg/16, 20 and 32. No existing artifact file was overwritten. Only sizes that exist in the package were copied.
+
+Extra files:
+
+- arrow--down-16.svg
+- arrow--down-32.svg
+- arrow--left-16.svg
+- arrow--left-32.svg
+- arrow--right-32.svg
+- arrow--up-32.svg
+- attachment-32.svg
+- caret--sort--down-32.svg
+- caret--sort--up-32.svg
+- caret--sort-32.svg
+- caret--up-32.svg
+- checkbox--checked-32.svg
+- checkbox--indeterminate-32.svg
+- checkbox-32.svg
+- checkmark-20.svg
+- chevron--down-32.svg
+- chevron--left-32.svg
+- chevron--right-32.svg
+- chevron--up-32.svg
+- close--filled-32.svg
+- document--add-32.svg
+- download-32.svg
+- drag--vertical-32.svg
+- edit--off-32.svg
+- error--outline-16.svg
+- error--outline-32.svg
+- error-32.svg
+- events-32.svg
+- export-32.svg
+- help-32.svg
+- launch-32.svg
+- maximize-16.svg
+- maximize-32.svg
+- menu-20.svg
+- menu-32.svg
+- microphone-32.svg
+- minimize-16.svg
+- minimize-32.svg
+- notification-32.svg
+- plan-32.svg
+- play-32.svg
+- renew-32.svg
+- restart-32.svg
+- save-20.svg
+- save-32.svg
+- search-32.svg
+- send-32.svg
+- settings-32.svg
+- star--filled-16.svg
+- star--filled-32.svg
+- star-32.svg
+- stop-32.svg
+- subtract-32.svg
+- thumbs-down-32.svg
+- thumbs-up-32.svg
+- time-20.svg
+- time-32.svg
+- trash-can-32.svg
+- undefined-32.svg
+- unknown-32.svg
+- upload-32.svg
+- user--avatar-16.svg
+- user--avatar-32.svg
+- user-32.svg
+- view--off-32.svg
+- view-32.svg
+- warning--alt-32.svg
+- warning--filled-32.svg
+- warning-32.svg

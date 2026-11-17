@@ -1,0 +1,71 @@
+<!-- @dsCard group="Forms" height=1206 subtitle="Open: nothing selected, selected items on top with count tag, filterable; sm / md / lg; helper, invalid, warning, read-only, disabled, inline, skeleton, on a layer; deployment filter bar" -->
+<style>body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:32px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tall{min-height:300px}
+.lay{padding:16px}
+.ctx{max-width:912px}
+.fb{display:flex;align-items:center;gap:16px;background:var(--layer-01);padding-inline-end:16px}
+.fb .cds--search{flex:1}
+.tbl{width:100%;border-collapse:collapse;font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.tbl th{font-weight:600;text-align:left;color:var(--text-primary);background:var(--layer-accent-01);height:48px;padding:0 16px}
+.tbl td{height:48px;padding:0 16px;border-top:1px solid var(--border-subtle-01);background:var(--layer-01)}
+.tbl td:first-child{color:var(--text-primary)}
+.empty{padding:16px;background:var(--layer-01);border-top:1px solid var(--border-subtle-01);font:400 14px/20px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+function Cell(t,el,cls){return h('div',{className:cls},Cap(t),el)}
+const events=['Cluster created','Cluster deleted','Node pool resized','Deployment failed','Certificate expiring','Quota reached'];
+const channels=['Email','Slack','PagerDuty','Webhook'];
+const roles=['Viewer','Operator','Editor','Administrator','Billing manager'];
+const deploys=[
+ ['checkout-api','v2.14.0','Dallas (us-south)','Succeeded','green'],
+ ['checkout-web','v2.14.0','Frankfurt (eu-de)','In progress','blue'],
+ ['payments-worker','v1.9.3','Dallas (us-south)','Failed','red'],
+ ['search-indexer','v0.31.1','Tokyo (jp-tok)','Succeeded','green'],
+ ['email-sender','v3.2.0','Frankfurt (eu-de)','Failed','red']];
+const statuses=['Succeeded','In progress','Failed'], regions=['Dallas (us-south)','Frankfurt (eu-de)','Tokyo (jp-tok)'];
+function App(){
+ const [st,setSt]=React.useState(['Failed']);
+ const [rg,setRg]=React.useState([]);
+ const [q,setQ]=React.useState('');
+ const lbl=(sel,noun)=>!sel.length?'All':sel.length===1?sel[0]:sel.length+' '+noun;
+ const rows=deploys.filter(d=>(!st.length||st.includes(d[3]))&&(!rg.length||rg.includes(d[2]))&&d[0].includes(q.trim().toLowerCase()));
+ return h('div',null,
+  Cap('Open'),
+  h('div',{className:'g3 sec'},
+   Cell('Nothing selected',h(C.MultiSelect,{id:'ms-none',titleText:'Notify me about',label:'Choose events',items:events,defaultOpen:true}),'tall'),
+   Cell('Two selected: count tag, selected listed first',h(C.MultiSelect,{id:'ms-two',titleText:'Notify me about',label:'Choose events',items:events,initialSelectedItems:[events[3],events[4]],defaultOpen:true}),'tall'),
+   Cell('Filterable, typed text',h(C.MultiSelect,{id:'ms-flt',filterable:true,titleText:'Roles',placeholder:'Filter roles',items:roles,initialSelectedItems:[roles[1]],defaultOpen:true}),'tall')),
+  Cap('Sizes: sm 32px, md 40px (default), lg 48px'),
+  h('div',{className:'g3 sec'},
+   h(C.MultiSelect,{id:'ms-sm',size:'sm',titleText:'Channels',label:'Choose channels',items:channels,initialSelectedItems:[channels[0]]}),
+   h(C.MultiSelect,{id:'ms-md',titleText:'Channels',label:'Choose channels',items:channels,initialSelectedItems:[channels[0]]}),
+   h(C.MultiSelect,{id:'ms-lg',size:'lg',titleText:'Channels',label:'Choose channels',items:channels,initialSelectedItems:[channels[0]]})),
+  Cap('States'),
+  h('div',{className:'g3 sec'},
+   Cell('Helper text',h(C.MultiSelect,{id:'ms-help',titleText:'Channels',label:'Choose channels',items:channels,helperText:'Alerts go to every channel you choose'})),
+   Cell('Invalid',h(C.MultiSelect,{id:'ms-inv',titleText:'Channels',label:'Choose channels',items:channels,invalid:true,invalidText:'Choose at least one channel so alerts reach someone'})),
+   Cell('Warning',h(C.MultiSelect,{id:'ms-warn',titleText:'Channels',label:'Choose channels',items:channels,initialSelectedItems:[channels[3]],warn:true,warnText:'Webhook https://hooks.example.com failed its last test'})),
+   Cell('Read only',h(C.MultiSelect,{id:'ms-ro',titleText:'Roles',label:'Choose roles',items:roles,initialSelectedItems:[roles[0],roles[4]],readOnly:true})),
+   Cell('Disabled',h(C.MultiSelect,{id:'ms-dis',titleText:'Roles',label:'Choose roles',items:roles,initialSelectedItems:[roles[3]],disabled:true,helperText:'Owners always have every role'})),
+   Cell('Filterable, closed with a selection',h(C.MultiSelect,{id:'ms-fc',filterable:true,titleText:'Roles',placeholder:'Filter roles',items:roles,initialSelectedItems:[roles[0],roles[2]]})),
+   Cell('Inline (type="inline")',h(C.MultiSelect,{id:'ms-inl',type:'inline',titleText:'Status',label:'Failed',items:statuses,initialSelectedItems:[statuses[2]]})),
+   Cell('Skeleton (DropdownSkeleton)',h(C.DropdownSkeleton)),
+   Cell('On a layer (field-02)',h(C.Layer,{withBackground:true,className:'lay'},h(C.MultiSelect,{id:'ms-lay',titleText:'Channels',label:'Choose channels',items:channels,initialSelectedItems:[channels[1],channels[2]]})))),
+  Cap('In context: deployment filter bar (inline multiselects filter the table)'),
+  h('div',{className:'ctx'},
+   h('div',{className:'fb'},
+    h(C.Search,{size:'lg',labelText:'Search deployments',placeholder:'Search deployments',value:q,onChange:e=>setQ(e.target.value)}),
+    h(C.MultiSelect,{id:'fb-st',type:'inline',titleText:'Status',label:lbl(st,'statuses'),items:statuses,selectedItems:st,onChange:d=>setSt(d.selectedItems)}),
+    h(C.MultiSelect,{id:'fb-rg',type:'inline',titleText:'Region',label:lbl(rg,'regions'),items:regions,selectedItems:rg,onChange:d=>setRg(d.selectedItems)})),
+   h('table',{className:'tbl'},
+    h('thead',null,h('tr',null,['Deployment','Version','Region','Status'].map(t=>h('th',{key:t},t)))),
+    h('tbody',null,rows.map(r=>h('tr',{key:r[0]},h('td',null,r[0]),h('td',null,r[1]),h('td',null,r[2]),h('td',null,h(C.Tag,{type:r[4],size:'sm'},r[3])))))),
+   rows.length?null:h('div',{className:'empty'},'No deployments match these filters. Clear a filter to see more.')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

@@ -1,0 +1,91 @@
+<!-- @dsCard group="Patterns" height=1993 subtitle="Inline, toast, actionable, banner, callout or modal: which one, shown in context" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:40px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.guide .cds--structured-list{margin-bottom:0}
+.guide strong{font-weight:600;color:var(--text-primary)}
+.panel{background:var(--layer-01);padding:16px}
+.panel h3,.doc h3{margin:0 0 16px;color:var(--text-primary)}
+.panel .cds--inline-notification{margin:0 0 24px;max-width:none}
+.btns{display:flex;justify-content:flex-start;margin-top:24px}
+.doc p{margin:0 0 16px;color:var(--text-secondary);max-width:60ch}
+.doc .cds--actionable-notification,.doc .cds--callout{margin:0 0 16px}
+.doc code{font-family:var(--font-mono);font-size:13px;color:var(--text-primary)}
+/* page frame: a transformed ancestor keeps the stacked toasts inside it */
+.frame{position:relative;transform:translateZ(0);height:584px;overflow:hidden;border:1px solid var(--border-subtle-01);background:var(--background)}
+.frame .bar{height:48px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border-subtle-00);font:600 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-primary)}
+.frame .content{padding:24px;width:560px}
+.frame .content h3{margin:0 0 16px;color:var(--text-primary)}
+.frame .content .cds--actionable-notification{margin:0 0 24px}
+.toasts{position:absolute;top:105px;right:8px;display:flex;flex-direction:column;gap:8px;z-index:6000;margin:0;padding:0;list-style:none}
+.toasts .cds--toast-notification,.toasts .cds--actionable-notification{margin:0}
+.frame .cds--data-table-container{margin:0;padding:0}
+.frame .banner{border-bottom:1px solid var(--border-subtle-00)}
+.frame .banner .cds--actionable-notification{max-width:none;margin:0}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const noop=()=>{};
+const guide=[
+ ['InlineNotification','The message is about one section or form and stays until the issue is fixed.','Top of the form or section it is about','Form errors, quota warnings'],
+ ['ToastNotification','The system reports an outcome or event that does not need a response.','Top-right of the page, stacked, newest first','Cluster created, export ready'],
+ ['ActionableNotification','The person can act on the message with one action, such as undo or retry.','Inline next to the content, or as a toast','Undo delete, retry a failed sync'],
+ ['Banner','A product or account message not tied to the current task. Built from an inline ActionableNotification; one at a time, stays until dismissed.','Top of the content area, under the header; scrolls with the page','Payment method expiring, planned maintenance'],
+ ['Callout','You are giving guidance that is part of the content, before they act. Not dismissible.','Next to the content it explains','Key is shown once, region limits'],
+ ['Modal','The person must decide or acknowledge before they can continue.','Centered over the page, blocks it','Session expiring, delete confirmation']];
+function Guide(){
+ return h(C.StructuredList,{'aria-label':'Which notification to use',isCondensed:true},
+  h(C.StructuredListHead,null,h(C.StructuredListRow,{head:true},
+   ['Component','Use when','Where','Examples'].map(t=>h(C.StructuredListCell,{head:true,key:t},t)))),
+  h(C.StructuredListBody,null,guide.map(r=>h(C.StructuredListRow,{key:r[0]},
+   h(C.StructuredListCell,{noWrap:true},h('strong',null,r[0])),
+   h(C.StructuredListCell,null,r[1]),h(C.StructuredListCell,null,r[2]),h(C.StructuredListCell,null,r[3])))));
+}
+function FormPanel(){
+ return h('div',{className:'panel'},
+  h('h3',{className:'cds--type-heading-03'},'Invite users'),
+  h(C.InlineNotification,{kind:'warning',lowContrast:true,hideCloseButton:true,title:'You can invite 2 more users.',subtitle:'Your plan includes 25 seats and 23 are in use. Remove inactive users or upgrade the plan to add more.'}),
+  h(C.Layer,null,
+   h(C.Stack,{gap:6},
+    h(C.TextInput,{id:'pn-emails',labelText:'Email addresses',defaultValue:'ana.silva@northwind.dev, raj.patel@northwind.dev',helperText:'Separate addresses with commas.'}),
+    h(C.Select,{id:'pn-group',labelText:'Access group',defaultValue:'dev'},
+     h(C.SelectItem,{value:'dev',text:'Developers'}),h(C.SelectItem,{value:'ops',text:'Operators'}),h(C.SelectItem,{value:'billing',text:'Billing viewers'})))),
+  h('div',{className:'btns'},h(C.ButtonSet,null,h(C.Button,{kind:'primary'},'Send invites'),h(C.Button,{kind:'secondary'},'Cancel'))));
+}
+function Doc(){
+ return h('div',{className:'doc'},
+  h('h3',{className:'cds--type-heading-03'},'Create an API key'),
+  h('p',{className:'cds--type-body-01'},'API keys let scripts and CI pipelines call the console API as you. Each key has the same access as your user.'),
+  h(C.Callout,{kind:'info',titleId:'pn-co1',title:'The key is shown once.',subtitle:'Copy it or download it when you create it. You can’t view it again later.'}),
+  h(C.Callout,{kind:'warning',titleId:'pn-co2',title:'Keys don’t expire.',subtitle:h('span',null,'Rotate keys every 90 days and delete keys you no longer use. ',h(C.Link,{href:'#',inline:true,'aria-describedby':'pn-co2'},'Set a rotation policy'))}));
+}
+function PageWithToasts(){
+ return h('div',{className:'frame'},
+  h('div',{className:'bar'},'Cloud console'),
+  h('div',{className:'banner'},h(C.ActionableNotification,{inline:true,lowContrast:true,role:'status',hasFocus:false,kind:'warning',title:'Payment method expires soon.',subtitle:'The card ending 4242 expires on Nov 30, 2026.',actionButtonLabel:'Update card',onClose:()=>false})),
+  h('div',{className:'content'},
+   h('h3',{className:'cds--type-heading-04'},'Buckets'),
+   h(C.DataTable,{'aria-label':'Buckets',size:'md',headers:[{key:'name',header:'Name'},{key:'loc',header:'Location'},{key:'size',header:'Size',align:'right'}],
+    rows:[['web-assets-eu','Frankfurt','1.2 GB'],['backups-prod','Dallas','412 GB'],['logs-archive','London','86 GB'],['ci-cache','Frankfurt','9.4 GB'],['audit-logs-eu','Frankfurt','3.1 GB'],['ml-datasets','Dallas','2.7 TB']].map((r,i)=>({id:'b'+i,name:r[0],loc:r[1],size:r[2]}))})),
+  h('ul',{className:'toasts','aria-label':'Notifications',role:'log'},
+   h('li',null,h(C.ActionableNotification,{role:'status',hasFocus:false,kind:'info',title:'Bucket deleted',subtitle:'1,204 objects removed.',caption:'Just now',actionButtonLabel:'Undo',onClose:()=>false})),
+   h('li',null,h(C.ToastNotification,{kind:'success',title:'Export ready',subtitle:'usage-oct-2026.csv is ready.',caption:'2 minutes ago',onClose:()=>false})),
+   h('li',null,h(C.ToastNotification,{kind:'error',title:'Deployment failed',subtitle:'checkout-api 4.2.0 failed its health check.',caption:'5 minutes ago',onClose:()=>false}))));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'sec guide'},Cap('Which one to use'),h(Guide)),
+  h('div',{className:'sec grid'},
+   h('div',null,Cap('InlineNotification at the top of the form it is about'),h(FormPanel)),
+   h('div',null,Cap('Callout inside content, before the person acts'),h(Doc))),
+  h('div',{className:'sec'},Cap('System and task messages on one page: a banner under the header for the account, toasts stacked top-right (newest first), the newest with an Undo action'),h(PageWithToasts)),
+  h('div',null,Cap('Modal when the person must respond before continuing'),
+   h(C.Modal,{inline:true,inlineHeight:'16rem',open:true,alert:true,size:'sm',modalHeading:'Your session is about to expire',primaryButtonText:'Stay logged in',secondaryButtonText:'Log out',onRequestClose:noop,onRequestSubmit:noop},
+    h('p',null,'You’ll be logged out in 2 minutes because of inactivity. Unsaved changes will be lost.'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

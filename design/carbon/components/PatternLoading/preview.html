@@ -1,0 +1,91 @@
+<!-- @dsCard group="Patterns" height=1632 subtitle="Skeleton to loaded, inline loading in a button row, upload progress, blocking overlay" page -->
+<style>
+body{margin:0;padding:24px;background:var(--background)}
+.cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.sec{margin-bottom:40px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.panel{background:var(--layer-01);padding:16px}
+.panel-in{display:flex;flex-direction:column;gap:16px}
+.panel h3{margin:0;color:var(--text-primary)}
+.panel p.lead{margin:0;color:var(--text-secondary)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr)}
+.stat{padding:12px 0 0;display:flex;flex-direction:column;gap:4px;height:64px;box-sizing:border-box}
+.stat:not(:first-child){padding-left:16px;border-left:1px solid var(--border-subtle-01)}
+.stat .k{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary)}
+.stat .v{color:var(--text-primary)}
+.stat .cds--skeleton__text{margin:0}
+.panel .cds--data-table-container,.panel .cds--skeleton.cds--data-table-container{margin:0;padding-top:0}
+.pb-sk{display:grid;gap:8px}.pb-sk .cds--skeleton__text{margin:0}
+.rows{display:grid;gap:16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;background:var(--layer-01)}
+.row .what{font:400 14px/18px var(--font-sans);letter-spacing:.16px;color:var(--text-secondary)}
+.btnrow{display:flex;align-items:center}
+.btnrow .cds--btn{width:196px}
+/* the InlineLoading takes the primary button's slot, same width, inset 16px like the button label */
+.btnrow .slot{width:196px;height:48px;box-sizing:border-box;padding:0 16px;display:flex;align-items:center}
+.uploads{padding:16px;background:var(--layer-01)}
+.uploads-in{display:grid;gap:24px}
+.frame{position:relative;transform:translateZ(0);height:240px;overflow:hidden;border:1px solid var(--border-subtle-01);background:var(--background)}
+.frame .inner{padding:24px;display:grid;gap:16px}
+.frame h3{margin:0;color:var(--text-primary)}
+.frame p{margin:0;color:var(--text-secondary);max-width:60ch}
+</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const nodeHeaders=[{key:'name',header:'Node'},{key:'zone',header:'Zone'},{key:'cpu',header:'CPU',align:'right'},{key:'state',header:'State'}];
+const nodes=[
+ {id:'n1',name:'kube-pool1-a1',zone:'eu-de-1',cpu:'38%',state:'Ready'},
+ {id:'n2',name:'kube-pool1-b2',zone:'eu-de-2',cpu:'52%',state:'Ready'},
+ {id:'n3',name:'kube-pool1-c3',zone:'eu-de-3',cpu:'47%',state:'Ready'}];
+function Stat(k,v){return h('div',{className:'stat'},h('span',{className:'k'},k),h('span',{className:'v cds--type-heading-03'},v))}
+function SkStat(k){return h('div',{className:'stat'},h('span',{className:'k'},k),h(C.SkeletonText,{width:'60%',heading:true}))}
+function Skeleton(){
+ return h('div',{className:'panel','aria-busy':'true'},h(C.Layer,{className:'panel-in'},
+  h(C.SkeletonText,{heading:true,width:'45%'}),
+  h(C.SkeletonText,{paragraph:true,lineCount:2}),
+  h('div',{className:'stats'},SkStat('Worker nodes'),SkStat('Pods'),SkStat('CPU usage')),
+  h('div',{className:'pb-sk'},h(C.SkeletonText,{width:'30%'}),h(C.SkeletonPlaceholder,{style:{width:'100%',height:8}}),h(C.SkeletonText,{width:'40%'})),
+  h(C.DataTableSkeleton,{headers:nodeHeaders.map(x=>({header:x.header})),columnCount:4,rowCount:3,showToolbar:false,showHeader:false})));
+}
+function Loaded(){
+ return h('div',{className:'panel'},h(C.Layer,{className:'panel-in'},
+  h('h3',{className:'cds--type-heading-03'},'prod-eu-01'),
+  h('p',{className:'lead cds--type-body-01'},'Kubernetes 1.31.2 in Frankfurt. Created Nov 3, 2026 by the platform team.'),
+  h('div',{className:'stats'},Stat('Worker nodes','12'),Stat('Pods','184'),Stat('CPU usage','46%')),
+  h(C.ProgressBar,{label:'Pod capacity',value:184,max:330,helperText:'184 of 330 pods scheduled'}),
+  h(C.DataTable,{'aria-label':'Nodes',headers:nodeHeaders,rows:nodes})));
+}
+function BtnRow(cap,status,desc){
+ return h('div',{className:'row'},
+  h('span',{className:'what'},cap),
+  h('div',{className:'btnrow'},
+   h(C.Button,{kind:'secondary',disabled:status==='active'},'Cancel'),
+   status?h('div',{className:'slot'},h(C.InlineLoading,{status:status,description:desc})):h(C.Button,{kind:'primary'},'Create cluster')));
+}
+function App(){
+ return h('div',null,
+  h('div',{className:'sec'},Cap('Skeleton first: the page layout renders immediately with skeletons the same size as the content (left); content replaces them in place when it arrives (right)'),
+   h('div',{className:'grid'},Skeleton(),Loaded())),
+  h('div',{className:'sec'},Cap('InlineLoading takes the primary button’s place while the request runs, then reports the outcome'),
+   h('div',{className:'rows'},
+    BtnRow('Before submitting',null),
+    BtnRow('status="active": Cancel is disabled','active','Creating cluster...'),
+    BtnRow('status="finished"','finished','Cluster created'),
+    BtnRow('status="error"','error','Creation failed'))),
+  h('div',{className:'sec'},Cap('ProgressBar for an upload with a known size: running, finished, failed'),
+   h('div',{className:'uploads'},h(C.Layer,{className:'uploads-in'},
+    h(C.ProgressBar,{label:'Uploading backup-2026-11-17.tar.gz',value:412,max:640,helperText:'412 MB of 640 MB, about 1 minute left'}),
+    h(C.ProgressBar,{label:'Uploading media-assets.zip',value:100,status:'finished',helperText:'Upload complete. 1.2 GB added to bucket web-assets-eu.'}),
+    h(C.ProgressBar,{label:'Uploading logs-archive-q3.tar.gz',value:30,status:'error',helperText:'Upload failed: the connection was reset. Choose the file again to retry.'})))),
+  h('div',null,Cap('Loading with overlay blocks a page while an action that must finish runs (restoring a snapshot); the page beneath is disabled'),
+   h('div',{className:'frame'},
+    h('div',{className:'inner','aria-hidden':'true'},
+     h('h3',{className:'cds--type-heading-04'},'Restore snapshot'),
+     h('p',{className:'cds--type-body-01'},'Restoring snap-2026-11-16-0200 to cluster prod-eu-01 replaces its persistent volumes. Workloads restart when the restore finishes.'),
+     h('div',null,h(C.Button,{kind:'primary',disabled:true},'Restore'))),
+    h(C.Loading,{description:'Restoring snapshot'}))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>

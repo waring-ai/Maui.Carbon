@@ -1,0 +1,25 @@
+<!-- @dsCard group="Status" height=694 subtitle="Status glyph and label: twelve kinds at 16 and 20px, in a deployments status column" -->
+<style>body{margin:0;padding:24px;background:var(--background);color:var(--text-primary)} .cap{font:400 12px/16px var(--font-sans);letter-spacing:.32px;color:var(--text-secondary);margin:0 0 8px}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 24px;margin-bottom:24px}
+table{inline-size:100%;border-collapse:collapse;font:400 14px/20px var(--font-sans);letter-spacing:.16px}
+th{block-size:48px;padding:0 16px;text-align:start;font-weight:600;background:var(--layer-accent-01);color:var(--text-primary)}
+td{block-size:48px;padding:0 16px;background:var(--layer-01);border-block-end:1px solid var(--border-subtle-01);color:var(--text-secondary)}td:first-child{color:var(--text-primary)}</style>
+<div id="root"></div>
+<script>
+const C=window.Carbon,h=React.createElement;
+function Cap(t){return h('p',{className:'cap'},t)}
+const kinds=[['failed','Failed'],['caution-major','Degraded'],['caution-minor','Needs attention'],['undefined','Undefined'],['succeeded','Succeeded'],['normal','Healthy'],['in-progress','Deploying'],['incomplete','Partially deployed'],['not-started','Not started'],['pending','Queued'],['unknown','Unknown'],['informative','Update available']];
+const rows=[['checkout-api','prod-us-east','succeeded','Succeeded','2 min ago'],['payments-worker','prod-us-east','in-progress','Deploying (3 of 5 pods)','just now'],['search-indexer','prod-eu-west','failed','Failed: image pull error','14 min ago'],['notifications','prod-eu-west','caution-major','Degraded: 2 of 4 pods ready','1 h ago'],['billing-export','staging','pending','Queued','3 min ago'],['audit-log','staging','not-started','Not started','never']];
+function App(){
+ return h('div',null,
+  Cap('All twelve kinds, size 16 (default), label in body-compact-01; each label names its kind'),
+  h('div',{className:'cols'},kinds.map(k=>h(C.IconIndicator,{key:k[0],kind:k[0],label:k[0][0].toUpperCase()+k[0].slice(1).replace('-',' ')}))),
+  Cap('size 20, label in body-compact-02, with example product copy for each kind (same order)'),
+  h('div',{className:'cols'},kinds.map(k=>h(C.IconIndicator,{key:k[0],kind:k[0],size:20,label:k[1]}))),
+  Cap('In context: the status column of a deployments table'),
+  h('table',null,
+   h('thead',null,h('tr',null,['Deployment','Cluster','Status','Last change'].map(t=>h('th',{key:t},t)))),
+   h('tbody',null,rows.map(r=>h('tr',{key:r[0]},h('td',null,r[0]),h('td',null,r[1]),h('td',null,h(C.IconIndicator,{kind:r[2],label:r[3]})),h('td',null,r[4]))))));
+}
+ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+</script>
