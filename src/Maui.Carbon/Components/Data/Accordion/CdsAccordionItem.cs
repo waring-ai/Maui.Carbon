@@ -128,6 +128,9 @@ public class CdsAccordionItem : CdsContainer
     }
 
     /// <inheritdoc/>
+    protected internal override bool WantsEscapeKey => IsOpen;
+
+    /// <inheritdoc/>
     protected internal override bool OnKeyDown(CdsKeyEventArgs e)
     {
         if (e.Key != CdsKey.Escape || !IsOpen) return false;
