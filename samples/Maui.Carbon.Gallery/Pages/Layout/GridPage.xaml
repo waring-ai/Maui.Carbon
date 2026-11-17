@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Layout.GridPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Columns by breakpoint" Description="16 columns from lg (1056), 8 from md (672), 4 below. Each column has 16 of padding on both sides (a 32 gutter); the margins are 0 at sm, 16 from md and 24 at max.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsText Text="Breakpoint Lg: 16 columns" TypeStyle="Label01" Tone="Secondary" />
+                <cds:CdsGrid x:Name="LgGrid" Breakpoint="Lg" />
+                <cds:CdsText Text="Breakpoint Md: 8 columns" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="MdGrid" Breakpoint="Md" />
+                <cds:CdsText Text="Breakpoint Sm: 4 columns" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="SmGrid" Breakpoint="Sm" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Spans per breakpoint" Description="SpanSm, SpanMd and SpanLg set the span from that breakpoint up; a breakpoint without a value inherits the smaller one. The same columns at each breakpoint: 4/8/8 and 2/4/4, and a fourth column that is hidden below md (span 0).">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsText Text="Sm" TypeStyle="Label01" Tone="Secondary" />
+                <cds:CdsGrid x:Name="SpanSmGrid" Breakpoint="Sm" />
+                <cds:CdsText Text="Md" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="SpanMdGrid" Breakpoint="Md" />
+                <cds:CdsText Text="Lg" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="SpanLgGrid" Breakpoint="Lg" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Offsets" Description="Offset is the column a child starts at, counted from the start of its row: Offset 4 with Span 8 starts at column 5; Offset 12 with Span 4 fills the last four columns.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsGrid x:Name="OffsetGrid" Breakpoint="Lg" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Modes" Description="Wide (default) has a 32 gutter; Narrow removes the gutter before each column so content hangs 16 into the gutter; Condensed uses a 1 gutter for tiles that read as one unit.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsText Text="Wide" TypeStyle="Label01" Tone="Secondary" />
+                <cds:CdsGrid x:Name="WideGrid" Breakpoint="Lg" />
+                <cds:CdsText Text="Narrow" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="NarrowGrid" Breakpoint="Lg" Mode="Narrow" />
+                <cds:CdsText Text="Condensed" TypeStyle="Label01" Tone="Secondary" Margin="0,16,0,0" />
+                <cds:CdsGrid x:Name="CondensedGrid" Breakpoint="Lg" Mode="Condensed" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In context" Description="A console overview page on the page's own breakpoint: the title spans the row, filters take 4 of 16 (the full row below lg), content the other 12.">
+            <cds:CdsGrid x:Name="PageGrid" FullWidth="True" />
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

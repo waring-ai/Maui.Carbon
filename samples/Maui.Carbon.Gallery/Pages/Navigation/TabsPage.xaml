@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.TabsPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Line tabs" Description="40 high on a 2px border-subtle-00 rule; the selected tab is text-primary, semibold, with a 2px border-interactive underline. Hover strengthens the rule; disabled tabs are text-disabled.">
+            <cds:CdsTabs Label="Cluster sections">
+                <cds:CdsTab Text="Overview">
+                    <cds:CdsText Text="prod-us-south is running 12 nodes across 3 zones." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Nodes">
+                    <cds:CdsText Text="Node table goes here." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Networking">
+                    <cds:CdsText Text="Ingress and load balancers." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Billing" IsEnabled="False" />
+            </cds:CdsTabs>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Contained tabs" Description="48 high layer-accent-01 blocks separated by 1px; the selected tab is layer-01 with a 2px border-interactive top edge. SelectedIndex is set to 1.">
+            <cds:CdsTabs Type="Contained" SelectedIndex="1" Label="Cluster sections">
+                <cds:CdsTab Text="Overview">
+                    <cds:CdsText Text="Overview content." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Nodes">
+                    <cds:CdsText Text="Nodes content on a layer-01 panel." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Access">
+                    <cds:CdsText Text="Access content." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Billing" IsEnabled="False" />
+            </cds:CdsTabs>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icons and secondary labels" Description="An icon is pinned after the label. A secondary label adds a second line and makes contained tabs 64 high. Do not mix tabs with and without icons.">
+            <VerticalStackLayout Spacing="32">
+                <cds:CdsTabs>
+                    <cds:CdsTab Text="Clusters" Icon="Dashboard" />
+                    <cds:CdsTab Text="Keys" Icon="Settings" />
+                    <cds:CdsTab Text="Members" Icon="User" />
+                </cds:CdsTabs>
+                <cds:CdsTabs Type="Contained">
+                    <cds:CdsTab Text="Clusters" SecondaryLabel="12 running" />
+                    <cds:CdsTab Text="Keys" SecondaryLabel="3 active" />
+                    <cds:CdsTab Text="Members" SecondaryLabel="8 invited" />
+                </cds:CdsTabs>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icon only" Description="Every tab needs an icon; Text becomes its accessible name and tooltip. IconSize Md is 40, Lg is 48.">
+            <VerticalStackLayout Spacing="32">
+                <cds:CdsTabs IsIconOnly="True">
+                    <cds:CdsTab Text="Clusters" Icon="Dashboard" />
+                    <cds:CdsTab Text="Keys" Icon="Settings" />
+                    <cds:CdsTab Text="Members" Icon="User" />
+                    <cds:CdsTab Text="Alerts" Icon="Notification" IsEnabled="False" />
+                </cds:CdsTabs>
+                <cds:CdsTabs IsIconOnly="True" IconSize="Lg" Type="Contained">
+                    <cds:CdsTab Text="Clusters" Icon="Dashboard" />
+                    <cds:CdsTab Text="Keys" Icon="Settings" />
+                    <cds:CdsTab Text="Members" Icon="User" />
+                </cds:CdsTabs>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Full width" Description="Contained tabs can share the width equally from 672 up (auto width below). Works best with four or fewer.">
+            <cds:CdsTabs Type="Contained" IsFullWidth="True">
+                <cds:CdsTab Text="Overview" />
+                <cds:CdsTab Text="Nodes" />
+                <cds:CdsTab Text="Networking" />
+                <cds:CdsTab Text="Access" />
+            </cds:CdsTabs>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Dismissible" Description="For user-created content such as open files: each tab gets a close icon, TabCloseRequested fires and you remove the tab; the selection moves to a neighbour.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTabs x:Name="FileTabs" IsDismissible="True" TabCloseRequested="OnTabCloseRequested" />
+                <cds:CdsText x:Name="CloseStatus" Text="3 files open" TypeStyle="Label01" Tone="Secondary" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Overflow scrolling" Description="When the tabs do not fit, the row scrolls and 32 wide scroll buttons appear at the edges.">
+            <cds:CdsTabs x:Name="ManyTabs" WidthRequest="420" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click, or Tab into the row and use Left, Right, Home and End. Activation Manual only moves focus; Enter or Space select.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTabs x:Name="InteractiveTabs" Activation="Manual" SelectionChanged="OnSelectionChanged">
+                    <cds:CdsTab Text="Overview" />
+                    <cds:CdsTab Text="Nodes" />
+                    <cds:CdsTab Text="Access" />
+                </cds:CdsTabs>
+                <cds:CdsText x:Name="Status" Text="Selected: Overview" TypeStyle="Label01" Tone="Secondary" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Line and contained tabs in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="24">
+                            <cds:CdsTabs SelectedIndex="1">
+                                <cds:CdsTab Text="One" />
+                                <cds:CdsTab Text="Two" />
+                                <cds:CdsTab Text="Off" IsEnabled="False" />
+                            </cds:CdsTabs>
+                            <cds:CdsTabs Type="Contained" SelectedIndex="1">
+                                <cds:CdsTab Text="One" />
+                                <cds:CdsTab Text="Two" />
+                                <cds:CdsTab Text="Off" IsEnabled="False" />
+                            </cds:CdsTabs>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Contained tabs on a layer-01 surface step to the next layer's tokens.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTabs Type="Contained" SelectedIndex="1">
+                            <cds:CdsTab Text="One" />
+                            <cds:CdsTab Text="Two" />
+                            <cds:CdsTab Text="Three" />
+                        </cds:CdsTabs>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
