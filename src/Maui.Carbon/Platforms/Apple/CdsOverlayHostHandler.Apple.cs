@@ -79,7 +79,7 @@ internal sealed class CdsAppleHostView : LayoutView
         {
             inputs.AddRange([UIKeyCommand.UpArrow, UIKeyCommand.DownArrow, UIKeyCommand.LeftArrow, UIKeyCommand.RightArrow]);
             if (OperatingSystem.IsIOSVersionAtLeast(13, 4) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 4))
-                inputs.AddRange([UIKeyCommand.Home, UIKeyCommand.End]);
+                inputs.AddRange([UIKeyCommand.Home, UIKeyCommand.End, UIKeyCommand.PageUp, UIKeyCommand.PageDown]);
         }
         if (activation) inputs.AddRange([new NSString("\r"), new NSString(" ")]);
 
@@ -104,6 +104,8 @@ internal sealed class CdsAppleHostView : LayoutView
         {
             if (input == UIKeyCommand.Home) return CdsKey.Home;
             if (input == UIKeyCommand.End) return CdsKey.End;
+            if (input == UIKeyCommand.PageUp) return CdsKey.PageUp;
+            if (input == UIKeyCommand.PageDown) return CdsKey.PageDown;
         }
         return input switch { "\r" => CdsKey.Enter, " " => CdsKey.Space, "\t" => CdsKey.Tab, _ => null };
     }
@@ -117,6 +119,9 @@ internal sealed class CdsAppleHostView : LayoutView
         UIKeyboardHidUsage.KeyboardRightArrow => CdsKey.Right,
         UIKeyboardHidUsage.KeyboardHome => CdsKey.Home,
         UIKeyboardHidUsage.KeyboardEnd => CdsKey.End,
+        UIKeyboardHidUsage.KeyboardPageUp => CdsKey.PageUp,
+        UIKeyboardHidUsage.KeyboardPageDown => CdsKey.PageDown,
+        UIKeyboardHidUsage.KeyboardDeleteForward => CdsKey.Delete,
         UIKeyboardHidUsage.KeyboardReturnOrEnter => CdsKey.Enter,
         UIKeyboardHidUsage.KeyboardSpacebar => CdsKey.Space,
         _ => null,

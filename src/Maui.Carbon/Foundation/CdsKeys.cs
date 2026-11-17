@@ -23,6 +23,12 @@ public enum CdsKey
     End,
     /// <summary>Tab.</summary>
     Tab,
+    /// <summary>Page Up.</summary>
+    PageUp,
+    /// <summary>Page Down.</summary>
+    PageDown,
+    /// <summary>Delete or Backspace (dismissible tabs, tags, file rows).</summary>
+    Delete,
 }
 
 /// <summary>A key press routed to Carbon controls and overlays.</summary>

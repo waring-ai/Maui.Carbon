@@ -187,8 +187,8 @@ public partial class CdsOverlayHost : Grid
         {
             if (TopOverlay is { } top)
                 return (true, top.Options.Keys.HasFlag(CdsOverlayKeys.Navigation), top.Options.Keys.HasFlag(CdsOverlayKeys.Activation));
-            var focused = CdsFocusTracker.Focused;
-            return (false, focused?.WantsNavigationKeys == true, false);
+            var chain = CdsFocusTracker.FocusChain().ToList();
+            return (chain.Any(c => c.WantsEscapeKey), chain.Any(c => c.WantsNavigationKeys), false);
         }
     }
 

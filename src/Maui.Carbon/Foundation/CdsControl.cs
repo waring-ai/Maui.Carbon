@@ -221,8 +221,14 @@ public abstract class CdsControl : ContentView
     /// </summary>
     protected internal virtual bool OnKeyDown(CdsKeyEventArgs e) => false;
 
-    /// <summary>Whether this control wants arrow/Home/End keys routed to it while focused. Default <c>false</c>.</summary>
+    /// <summary>Whether this control wants arrow/Home/End/PageUp/PageDown keys routed to it while focused. Default <c>false</c>.</summary>
     protected internal virtual bool WantsNavigationKeys => false;
+
+    /// <summary>
+    /// Whether this control wants Escape routed to it while it (or a descendant) has focus and no overlay is open
+    /// (clearing a search, dismissing a notification). Default <c>false</c>.
+    /// </summary>
+    protected internal virtual bool WantsEscapeKey => false;
 
     /// <inheritdoc/>
     protected override void OnPropertyChanged(string? propertyName = null)
