@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.AI.AILabelPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Sizes" Description="mini 16, 2xs 20, xs 24 (default), sm 32, md 40, lg 48, xl 64. The button is a square with a 1px border-inverse border and semibold text-primary text; hover fills it with border-inverse. Use mini on tiles, xs beside fields and table headers.">
+            <HorizontalStackLayout Spacing="24" x:Name="SizesRow" VerticalOptions="End">
+                <cds:CdsAILabel Size="Mini" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="TwoXs" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="Xs" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="Sm" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="Md" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="Lg" Label="Why this is suggested" />
+                <cds:CdsAILabel Size="Xl" Label="Why this is suggested" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline" Description="A 4px (8px at lg and xl) icon-primary square before AI, no box; hover shows an icon-secondary border and text-secondary text. With TextLabel it gets the bordered inline-with-content look. Use sm, md or lg matched to the adjacent text.">
+            <HorizontalStackLayout Spacing="32" VerticalOptions="End" x:Name="InlineRow">
+                <cds:CdsAILabel Kind="Inline" Size="Sm" Label="Why this is suggested" />
+                <cds:CdsAILabel Kind="Inline" Size="Md" Label="Why this is suggested" />
+                <cds:CdsAILabel Kind="Inline" Size="Lg" Label="Why this is suggested" />
+                <cds:CdsAILabel Kind="Inline" Size="Md" TextLabel="Generated" />
+                <cds:CdsAILabel Kind="Inline" Size="Lg" TextLabel="Generated" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Explainability callout" Description="8px radius, 1px gradient border from tag-background-blue to border-interactive, background fill fading to a blue tint at the bottom, 280 minimum width, 24 padding with 80 at the bottom for the actions toolbar (docked right, no gaps). Shown here as a static preview; click a label above or below to open it for real.">
+            <ContentView x:Name="CalloutHost" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click, Enter or Space opens the callout (click-to-open, light dismiss); Escape or a tap outside closes it and focus returns to the label. IsOpen is two-way.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsText Text="Memory-optimized node pool" VerticalOptions="Center" TypeStyle="Body01" />
+                    <cds:CdsAILabel x:Name="Live" Label="Why this is suggested" Closed="OnClosed">
+                        <cds:CdsAILabelContent>
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                <cds:CdsText Text="Suggested because two nodes ran out of memory last week." TypeStyle="Body01" />
+                            </VerticalStackLayout>
+                        </cds:CdsAILabelContent>
+                    </cds:CdsAILabel>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Open callout" Kind="Tertiary" Size="Md" Clicked="OnOpenClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Callout closed" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="As a container decorator" Description="A container takes the AI gradient, gradient border and soft shadow (CdsAiTreatment.IsActive); the label sits top-end with a 16 margin. When the person edits the value, remove the treatment and set IsRevertActive: the label becomes a ghost revert icon button that restores both.">
+            <HorizontalStackLayout Spacing="32">
+                <Border x:Name="AiTile" WidthRequest="272" HeightRequest="112" StrokeShape="Rectangle" Padding="16" cds:CdsAiTreatment.IsActive="True">
+                    <Grid>
+                        <VerticalStackLayout Spacing="4" Margin="0,0,40,0">
+                            <cds:CdsText Text="Memory-optimized pool" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="8 vCPU, 64 GB per node" Tone="Secondary" TypeStyle="BodyCompact01" />
+                        </VerticalStackLayout>
+                        <cds:CdsAILabel x:Name="TileLabel" Size="Mini" HorizontalOptions="End" VerticalOptions="Start" Label="Why this is suggested" RevertClicked="OnRevertClicked" />
+                    </Grid>
+                </Border>
+                <VerticalStackLayout Spacing="8" VerticalOptions="Center">
+                    <cds:CdsButton Text="Edit value" Kind="Tertiary" Size="Md" Clicked="OnEditClicked" />
+                    <cds:CdsText x:Name="TileStatus" Text="AI suggestion" Tone="Secondary" TypeStyle="Label01" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Revert" Description="IsRevertActive swaps the button for a ghost icon button (undo icon; RevertLabel is its tooltip and accessible name) that raises RevertClicked. The size follows the label size.">
+            <HorizontalStackLayout Spacing="24" VerticalOptions="End">
+                <cds:CdsAILabel Size="Xs" IsRevertActive="True" />
+                <cds:CdsAILabel Size="Sm" IsRevertActive="True" />
+                <cds:CdsAILabel Size="Md" IsRevertActive="True" RevertLabel="Revert to suggested value" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The AI treatment is built from highlight, tag-background-blue, border-interactive and background, so it follows each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <HorizontalStackLayout Spacing="16">
+                                <cds:CdsAILabel Size="Mini" />
+                                <cds:CdsAILabel Size="Xs" />
+                                <cds:CdsAILabel Kind="Inline" Size="Md" TextLabel="Generated" />
+                            </HorizontalStackLayout>
+                            <Border HeightRequest="88" StrokeShape="Rectangle" Padding="16" cds:CdsAiTreatment.IsActive="True">
+                                <cds:CdsText Text="AI-suggested value" TypeStyle="BodyCompact01" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Layered" Description="On layer-02 surfaces the treatment keeps its colors.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <Border HeightRequest="88" StrokeShape="Rectangle" Padding="16" cds:CdsAiTreatment.IsActive="True">
+                            <cds:CdsText Text="AI-suggested value" TypeStyle="BodyCompact01" />
+                        </Border>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

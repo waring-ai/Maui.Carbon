@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.AI.AISkeletonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Text" Description="16 high lines (24 for a heading), fully rounded, tag-background-blue with a fast sliding interactive shimmer (1250ms), 8 between lines. A paragraph varies the line widths.">
+            <VerticalStackLayout Spacing="24" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsAISkeletonText />
+                <cds:CdsAISkeletonText IsHeading="True" WidthPercent="60" />
+                <cds:CdsAISkeletonText IsParagraph="True" LineCount="4" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Placeholder and icon" Description="Placeholders have an 8px radius (100 x 100 by default); icons a 2px radius (16 x 16 by default). Size them like the content they replace.">
+            <HorizontalStackLayout Spacing="24" VerticalOptions="End">
+                <cds:CdsAISkeletonPlaceholder />
+                <cds:CdsAISkeletonPlaceholder WidthRequest="200" HeightRequest="100" />
+                <cds:CdsAISkeletonIcon />
+                <cds:CdsAISkeletonIcon Size="24" />
+                <cds:CdsAISkeletonIcon Size="32" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In a generating region" Description="Use AI skeletons only where the pending content is AI-generated, in a container that already carries an AILabel. Put busy state on the region and announce progress; do not move focus into a skeleton.">
+            <Border WidthRequest="352" StrokeShape="Rectangle" Padding="16" HorizontalOptions="Start" cds:CdsAiTreatment.IsActive="True">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="16">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsAISkeletonIcon Size="24" />
+                        <cds:CdsAISkeletonText IsHeading="True" WidthRequest="200" HorizontalOptions="Start" />
+                    </HorizontalStackLayout>
+                    <cds:CdsAISkeletonText Grid.Row="1" IsParagraph="True" LineCount="3" />
+                </Grid>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The fill is tag-background-blue (exact in white and g10, a brighter blue than Carbon in g90 and g100); the shimmer is interactive at 50% opacity.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsAISkeletonText IsHeading="True" WidthPercent="60" />
+                            <cds:CdsAISkeletonText IsParagraph="True" LineCount="3" />
+                            <HorizontalStackLayout Spacing="16">
+                                <cds:CdsAISkeletonPlaceholder WidthRequest="64" HeightRequest="64" />
+                                <cds:CdsAISkeletonIcon Size="24" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

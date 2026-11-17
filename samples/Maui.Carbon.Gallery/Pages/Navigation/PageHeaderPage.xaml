@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.PageHeaderPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Full page header" Description="Breadcrumb bar (40 high, own border), title with icon and a large status tag, page actions on the end (one primary, the rest ghost icon buttons), subtitle, body text and the tab bar with tags. layer-01 with a 1px border-subtle-01 bottom border.">
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderBreadcrumbBar>
+                    <cds:CdsBreadcrumb Size="Sm">
+                        <cds:CdsBreadcrumbItem Text="Compute" />
+                        <cds:CdsBreadcrumbItem Text="Virtual servers" />
+                    </cds:CdsBreadcrumb>
+                </cds:CdsPageHeaderBreadcrumbBar>
+                <cds:CdsPageHeaderContent Title="dal-vm-01" Icon="VirtualMachine">
+                    <cds:CdsPageHeaderContent.ContextualActions>
+                        <cds:CdsTag Text="Running" Type="Green" Size="Lg" />
+                    </cds:CdsPageHeaderContent.ContextualActions>
+                    <cds:CdsPageHeaderContent.PageActions>
+                        <cds:CdsPageHeaderActions>
+                            <cds:CdsIconButton Icon="Restart" Label="Restart" Kind="Ghost" Size="Md" />
+                            <cds:CdsIconButton Icon="Share" Label="Share" Kind="Ghost" Size="Md" />
+                            <cds:CdsButton Text="Create snapshot" Icon="Add" Size="Md" />
+                        </cds:CdsPageHeaderActions>
+                    </cds:CdsPageHeaderContent.PageActions>
+                    <cds:CdsPageHeaderContentText Subtitle="Checkout service, US storefront" Text="Backups run nightly at 02:00 UTC." />
+                </cds:CdsPageHeaderContent>
+                <cds:CdsPageHeaderTabBar x:Name="FullTabs">
+                    <cds:CdsTab Text="Overview" />
+                    <cds:CdsTab Text="Storage volumes" />
+                    <cds:CdsTab Text="Networking" />
+                    <cds:CdsTab Text="Billing" IsEnabled="False" />
+                    <cds:CdsPageHeaderTabBar.Tags>
+                        <cds:CdsTag Text="prod" Type="Blue" />
+                        <cds:CdsTag Text="us-south" Type="Gray" />
+                    </cds:CdsPageHeaderTabBar.Tags>
+                </cds:CdsPageHeaderTabBar>
+            </cds:CdsPageHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Title only" Description="Top-level pages need only a title; the bottom border closes the header.">
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderContent Title="Clusters" />
+            </cds:CdsPageHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Breadcrumb bar with actions" Description="Content actions (a medium button) and page actions (medium ghost icon buttons) sit on the end of the bar; HasBorder is off here because nothing but the content follows.">
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderBreadcrumbBar HasBorder="False" Icon="Folder">
+                    <cds:CdsPageHeaderBreadcrumbBar.Breadcrumb>
+                        <cds:CdsBreadcrumb Size="Sm">
+                            <cds:CdsBreadcrumbItem Text="Storage" />
+                            <cds:CdsBreadcrumbItem Text="Buckets" />
+                        </cds:CdsBreadcrumb>
+                    </cds:CdsPageHeaderBreadcrumbBar.Breadcrumb>
+                    <cds:CdsPageHeaderBreadcrumbBar.ContentActions>
+                        <cds:CdsButton Text="Upload" Icon="Upload" Size="Md" Kind="Tertiary" />
+                    </cds:CdsPageHeaderBreadcrumbBar.ContentActions>
+                    <cds:CdsPageHeaderBreadcrumbBar.PageActions>
+                        <cds:CdsPageHeaderActions>
+                            <cds:CdsIconButton Icon="Download" Label="Download" Kind="Ghost" Size="Md" />
+                            <cds:CdsIconButton Icon="Settings" Label="Settings" Kind="Ghost" Size="Md" />
+                        </cds:CdsPageHeaderActions>
+                    </cds:CdsPageHeaderBreadcrumbBar.PageActions>
+                </cds:CdsPageHeaderBreadcrumbBar>
+                <cds:CdsPageHeaderContent Title="backups-eu-de" />
+            </cds:CdsPageHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Long title" Description="The title clamps to two lines and 640 wide (one line when contextual actions are present); a clipped title gets a tooltip with its full text.">
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderContent Title="production-us-south-kubernetes-cluster-with-an-unusually-long-resource-name-that-wraps-to-a-second-line-and-then-truncates-after-that" />
+            </cds:CdsPageHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Tab bar" Description="Switch your own panels from SelectionChanged; the strip pulls 16 to the start so tab labels line up with the title. Left and Right move and select, Home and End jump.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsPageHeader>
+                    <cds:CdsPageHeaderContent Title="Access groups" />
+                    <cds:CdsPageHeaderTabBar SelectionChanged="OnTabsChanged" Label="Access group sections">
+                        <cds:CdsTab Text="Members" />
+                        <cds:CdsTab Text="Policies" />
+                        <cds:CdsTab Text="Audit" />
+                    </cds:CdsPageHeaderTabBar>
+                </cds:CdsPageHeader>
+                <cds:CdsText x:Name="Status" Text="Panel: Members" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Hero image" Description="A 2 x 1 box (3 x 2 below lg) beside the header content, for landing pages.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="0">
+                <cds:CdsPageHeader>
+                    <cds:CdsPageHeaderContent Title="Welcome to Platform">
+                        <cds:CdsPageHeaderContentText Subtitle="Build, ship and run" Text="Start with a template or bring your own." />
+                    </cds:CdsPageHeaderContent>
+                </cds:CdsPageHeader>
+                <cds:CdsPageHeaderHeroImage Grid.Column="1" x:Name="Hero" VerticalOptions="Start" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The page header sits on layer-01, so it follows the theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsPageHeader>
+                            <cds:CdsPageHeaderBreadcrumbBar>
+                                <cds:CdsBreadcrumb Size="Sm">
+                                    <cds:CdsBreadcrumbItem Text="Compute" />
+                                </cds:CdsBreadcrumb>
+                            </cds:CdsPageHeaderBreadcrumbBar>
+                            <cds:CdsPageHeaderContent Title="dal-vm-01">
+                                <cds:CdsPageHeaderContentText Subtitle="Checkout service" />
+                            </cds:CdsPageHeaderContent>
+                            <cds:CdsPageHeaderTabBar>
+                                <cds:CdsTab Text="Overview" />
+                                <cds:CdsTab Text="Storage" />
+                            </cds:CdsPageHeaderTabBar>
+                        </cds:CdsPageHeader>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

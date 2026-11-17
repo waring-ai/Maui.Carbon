@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.HeaderPanelPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Switcher panel" Description="Standalone use: a Grid under your own header, with the panel aligned to the end in the row below it. The action's IsActive shows the layer-01 fill and side borders that flow into the panel; Escape (with focus inside) and a tap on the page behind close it.">
+            <Border x:Name="Frame1" HeightRequest="304" StrokeShape="Rectangle" Padding="0">
+                <Grid RowDefinitions="48,*">
+                    <cds:CdsHeader Label="Platform">
+                        <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                        <cds:CdsHeaderGlobalBar>
+                            <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                            <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" />
+                            <cds:CdsHeaderGlobalAction x:Name="SwitcherAction" Icon="Switcher" Label="Switcher" IsActive="True" Clicked="OnSwitcherClicked" />
+                        </cds:CdsHeaderGlobalBar>
+                    </cds:CdsHeader>
+                    <VerticalStackLayout Grid.Row="1" Padding="32" Spacing="8">
+                        <cds:CdsText Text="Platform" TypeStyle="Heading03" />
+                        <cds:CdsText Text="The panel floats over the page; it does not push content." Tone="Secondary" TypeStyle="Body01" />
+                    </VerticalStackLayout>
+                    <BoxView x:Name="Catcher" Grid.Row="1" Color="Transparent" IsVisible="True" />
+                    <cds:CdsHeaderPanel x:Name="Panel" Grid.Row="1" IsExpanded="True" ReturnFocusTo="{x:Reference SwitcherAction}" HorizontalOptions="End">
+                        <cds:CdsSwitcher Label="Switch product">
+                            <cds:CdsSwitcherItem Text="Platform" IsActive="True" Clicked="OnItemClicked" />
+                            <cds:CdsSwitcherDivider />
+                            <cds:CdsSwitcherItem Text="Analytics" Clicked="OnItemClicked" />
+                            <cds:CdsSwitcherItem Text="Storage" Clicked="OnItemClicked" />
+                            <cds:CdsSwitcherItem Text="Security" Clicked="OnItemClicked" />
+                            <cds:CdsSwitcherDivider />
+                            <cds:CdsSwitcherItem Text="All products" Clicked="OnItemClicked" />
+                        </cds:CdsSwitcher>
+                    </cds:CdsHeaderPanel>
+                </Grid>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Inside a UIShell the shell closes the panel on an outside tap for you; standalone, set IsExpanded yourself. ArrowUp and ArrowDown move between switcher items and wrap, skipping dividers; items are tabbable only while the panel is open.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle panel" Kind="Tertiary" Size="Md" Clicked="OnSwitcherClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Panel open" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom content" Description="Any layer-01 content: here a notifications list. ClosesOnOutsideTap defaults to off for custom content (only a switcher closes on an outside tap); give the panel a Label.">
+            <Border x:Name="Frame2" HeightRequest="304" StrokeShape="Rectangle" Padding="0">
+                <Grid RowDefinitions="48,*">
+                    <cds:CdsHeader Label="Platform">
+                        <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                        <cds:CdsHeaderGlobalBar>
+                            <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" IsActive="True" />
+                        </cds:CdsHeaderGlobalBar>
+                    </cds:CdsHeader>
+                    <cds:CdsHeaderPanel Grid.Row="1" IsExpanded="True" Label="Notifications" HorizontalOptions="End">
+                        <VerticalStackLayout Padding="16" Spacing="16">
+                            <cds:CdsText Text="Notifications" TypeStyle="Heading02" />
+                            <VerticalStackLayout Spacing="4">
+                                <cds:CdsText Text="Backup completed" TypeStyle="HeadingCompact01" />
+                                <cds:CdsText Text="prod-eu-de-1 finished at 02:00 UTC." Tone="Secondary" TypeStyle="BodyCompact01" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="4">
+                                <cds:CdsText Text="Node not ready" TypeStyle="HeadingCompact01" />
+                                <cds:CdsText Text="worker-3 has been unreachable for 5 minutes." Tone="Secondary" TypeStyle="BodyCompact01" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </cds:CdsHeaderPanel>
+                </Grid>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Switcher items" Description="32 high rows in heading-compact-01 text-secondary; the current product is layer-selected-01 with text-primary; dividers are 224 wide with 8 above and below.">
+            <Border x:Name="Frame3" WidthRequest="256" HorizontalOptions="Start" StrokeShape="Rectangle" Padding="0">
+                <cds:CdsSwitcher Label="Switcher items">
+                    <cds:CdsSwitcherItem Text="Platform (selected)" IsActive="True" />
+                    <cds:CdsSwitcherItem Text="Analytics" />
+                    <cds:CdsSwitcherItem Text="Storage with a long name that truncates at the panel edge" />
+                    <cds:CdsSwitcherDivider />
+                    <cds:CdsSwitcherItem Text="All products" />
+                </cds:CdsSwitcher>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Panel and switcher in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHeaderPanel IsExpanded="True" HorizontalOptions="Start" HeightRequest="208">
+                            <cds:CdsSwitcher Label="Switch product">
+                                <cds:CdsSwitcherItem Text="Platform" IsActive="True" />
+                                <cds:CdsSwitcherDivider />
+                                <cds:CdsSwitcherItem Text="Analytics" />
+                                <cds:CdsSwitcherItem Text="Storage" />
+                            </cds:CdsSwitcher>
+                        </cds:CdsHeaderPanel>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
