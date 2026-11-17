@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.PopoverPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Popover" Description="Click the trigger; click outside or press Escape to close. The surface is layer-01 with a 12x6 caret and drop shadow.">
+            <HorizontalStackLayout Spacing="32">
+                <cds:CdsPopover x:Name="FilterPopover" Placement="BottomStart">
+                    <cds:CdsButton Text="Filter" Kind="Tertiary" Icon="Filter" Size="Md" Clicked="OnFilterClicked" />
+                    <cds:CdsPopover.PopoverContent>
+                        <VerticalStackLayout Padding="16" Spacing="8" WidthRequest="240">
+                            <cds:CdsText Text="Filters" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="Region and status filters go here." TypeStyle="Body01" Tone="Secondary" />
+                            <cds:CdsButton Text="Apply" Size="Sm" Clicked="OnApplyClicked" />
+                        </VerticalStackLayout>
+                    </cds:CdsPopover.PopoverContent>
+                </cds:CdsPopover>
+
+                <cds:CdsPopover x:Name="ContrastPopover" Placement="Right" IsHighContrast="True">
+                    <cds:CdsButton Text="High contrast" Kind="Ghost" Size="Md" Clicked="OnContrastClicked" />
+                    <cds:CdsPopover.PopoverContent>
+                        <cds:CdsText Text="High-contrast popovers use background-inverse." Tone="Inverse" Padding="16" WidthRequest="220" />
+                    </cds:CdsPopover.PopoverContent>
+                </cds:CdsPopover>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inside a theme zone" Description="The popover is shown in the page's overlay host but mirrors the trigger's theme and layer.">
+            <cds:CdsTheme Theme="G100">
+                <ContentView Padding="24">
+                    <cds:CdsPopover x:Name="ZonePopover" Placement="BottomStart">
+                        <cds:CdsButton Text="Open in g100" Kind="Tertiary" Size="Md" Clicked="OnZoneClicked" />
+                        <cds:CdsPopover.PopoverContent>
+                            <cds:CdsText Text="This surface uses g100's layer-01." Padding="16" WidthRequest="220" />
+                        </cds:CdsPopover.PopoverContent>
+                    </cds:CdsPopover>
+                </ContentView>
+            </cds:CdsTheme>
+        </g:GalleryExample>
+
+        <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+    </VerticalStackLayout>
+</g:GalleryPage>

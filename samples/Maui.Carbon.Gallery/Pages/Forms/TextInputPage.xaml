@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.TextInputPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Label above, helper text below. Placeholder is a format hint only.">
+            <cds:CdsTextInput Label="Cluster name" Placeholder="e.g. prod-eu-de-1" HelperText="Lowercase letters, numbers and dashes." WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid shows a 2px support-error outline, an icon and the error; warning shows a triangle; read-only stays focusable and copyable; disabled is skipped by Tab.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput Label="Cluster name" Text="Prod EU 1" IsInvalid="True" InvalidText="Remove spaces and use lowercase letters." />
+                <cds:CdsTextInput Label="Replicas" Text="1" IsWarning="True" WarnText="One replica has no redundancy." />
+                <cds:CdsTextInput Label="Cluster ID" Text="c-7d2f9a1e" IsReadOnly="True" />
+                <cds:CdsTextInput Label="Region" Text="eu-de" IsEnabled="False" HelperText="Region can't change after creation." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes, counter and inline" Description="xs 24, sm 32, md 40 (default), lg 48. The counter stops input at the maximum. Inline puts the label beside the field.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput Label="Small" Size="Sm" Placeholder="32 high" />
+                <cds:CdsTextInput Label="Large" Size="Lg" Placeholder="48 high" />
+                <cds:CdsTextInput Label="Description" EnableCounter="True" MaxCount="40" Placeholder="Up to 40 characters" />
+                <cds:CdsTextInput Label="Bucket" IsInline="True" Placeholder="logs-eu" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Validation on completion: type a name with spaces and press Return.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput x:Name="NameInput" Label="Cluster name" Placeholder="e.g. prod-eu-de-1" Completed="OnNameCompleted" TextChanged="OnNameChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fields on a layer-01 surface go inside a CdsLayer so they step to field-02.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTextInput Label="Pool name" Text="default-pool" HelperText="Shown in the console." />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

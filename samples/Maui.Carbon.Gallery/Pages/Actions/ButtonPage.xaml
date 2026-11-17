@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.ButtonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Kinds" Description="One primary per view; secondary for the negative choice, tertiary and ghost for supporting actions, danger for destructive steps.">
+            <FlexLayout Wrap="Wrap" AlignItems="End">
+                <cds:CdsButton Text="Create cluster" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Cancel" Kind="Secondary" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Export logs" Kind="Tertiary" Icon="Download" Margin="0,0,16,16" />
+                <cds:CdsButton Text="View nodes" Kind="Ghost" Icon="ArrowRight" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Delete cluster" Kind="Danger" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Remove node" Kind="DangerTertiary" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Revoke key" Kind="DangerGhost" Margin="0,0,16,16" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="xs 24, sm 32, md 40, lg 48 (default), xl 64, 2xl 80; xl and 2xl put the label at the top. Expressive uses a 16px label and 20px icon.">
+            <FlexLayout Wrap="Wrap" AlignItems="End">
+                <cds:CdsButton Text="Add tag" Size="Xs" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Add node" Size="Sm" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Add node" Size="Md" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Add node" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Start free trial" IsExpressive="True" Icon="ArrowRight" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Add node" Size="Xl" Icon="Add" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Add node" Size="Xxl" Icon="Add" Margin="0,0,16,16" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icon-only and selected" Description="IconDescription is the accessible name and tooltip. Ghost icon-only buttons with IsSelected act as toggles.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsButton IsIconOnly="True" Icon="Add" IconDescription="Add node" Size="Sm" />
+                <cds:CdsButton IsIconOnly="True" Kind="Secondary" Icon="Download" IconDescription="Download report" Size="Md" />
+                <cds:CdsButton IsIconOnly="True" Kind="Tertiary" Icon="Copy" IconDescription="Copy API key" />
+                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="OverflowMenuVertical" IconDescription="More actions" />
+                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Star" IconDescription="Favorite" Size="Md" IsSelected="True" />
+                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Notification" IconDescription="Watch for alerts" Size="Md" IsSelected="False" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled buttons use button-disabled fills (transparent for tertiary and ghost); never lowered opacity.">
+            <FlexLayout Wrap="Wrap">
+                <cds:CdsButton Text="Deploy" IsEnabled="False" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Cancel" Kind="Secondary" IsEnabled="False" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Export" Kind="Tertiary" IsEnabled="False" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Restart" Kind="Ghost" Icon="Restart" IsEnabled="False" Margin="0,0,16,16" />
+                <cds:CdsButton Text="Delete" Kind="Danger" IsEnabled="False" Margin="0,0,16,16" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Clicked and Command both fire; keyboard: Tab to focus, Enter or Space to activate.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="CountButton" Text="Add node" Icon="Add" Clicked="OnCountClicked" />
+                    <cds:CdsButton Text="Reset" Kind="Ghost" Clicked="OnResetClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="0 nodes" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same buttons in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsButton Text="Primary" Size="Md" />
+                            <cds:CdsButton Text="Tertiary" Kind="Tertiary" Size="Md" />
+                            <cds:CdsButton Text="Ghost" Kind="Ghost" Icon="ArrowRight" Size="Md" />
+                            <cds:CdsButton Text="Danger" Kind="Danger" Size="Md" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In context" Description="Confirm step at the end of a side panel: secondary and danger, full width.">
+            <Grid ColumnDefinitions="*,*" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsButton Text="Cancel" Kind="Secondary" HorizontalOptions="Fill" />
+                <cds:CdsButton Grid.Column="1" Text="Delete cluster" Kind="Danger" HorizontalOptions="Fill" />
+            </Grid>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

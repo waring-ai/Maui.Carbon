@@ -1,0 +1,82 @@
+namespace Maui.Carbon.Gallery.Infrastructure;
+
+/// <summary>
+/// Screenshot mode for visual review: launch with <c>--snapshot &lt;dir&gt; [--pages a,b] [--themes white,g100]</c>
+/// (or the CARBON_SNAPSHOT_DIR / CARBON_SNAPSHOT_PAGES / CARBON_SNAPSHOT_THEMES environment variables). The app visits
+/// each page in each theme, saves <c>&lt;route&gt;-&lt;theme&gt;.png</c> and quits.
+/// </summary>
+public static class SnapshotRunner
+{
+    public static void AttachIfRequested(Window window)
+    {
+        var args = Environment.GetCommandLineArgs();
+        string? Arg(string name, string env)
+        {
+            var i = Array.IndexOf(args, name);
+            return i >= 0 && i + 1 < args.Length ? args[i + 1] : Environment.GetEnvironmentVariable(env);
+        }
+
+        var dir = Arg("--snapshot", "CARBON_SNAPSHOT_DIR");
+        if (string.IsNullOrEmpty(dir)) return;
+        var pages = Arg("--pages", "CARBON_SNAPSHOT_PAGES")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var themes = (Arg("--themes", "CARBON_SNAPSHOT_THEMES") ?? "white,g10,g90,g100")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(t => Enum.Parse<CdsThemeName>(t, ignoreCase: true))
+            .ToArray();
+
+        var started = false;
+        async void Start()
+        {
+            if (started) return;
+            started = true;
+            Console.WriteLine($"snapshot: writing to {dir}");
+            await RunAsync(dir, pages, themes);
+        }
+        // Launched from a shell the app may never become active, so start from the first layout pass.
+        window.Created += (_, _) => window.Dispatcher.DispatchDelayed(TimeSpan.FromSeconds(2), Start);
+        window.Activated += (_, _) => Start();
+    }
+
+    static async Task RunAsync(string dir, string[]? pages, CdsThemeName[] themes)
+    {
+        Directory.CreateDirectory(dir);
+        await Task.Delay(1500);
+        var entries = GalleryRegistry.Entries
+            .Where(e => pages is null || pages.Any(p =>
+                string.Equals(p, e.Info.Title.Replace(" ", ""), StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(p, e.Info.Route, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        var log = new List<string>();
+        foreach (var entry in entries)
+        {
+            foreach (var theme in themes)
+            {
+                try
+                {
+                    CdsThemeManager.SetTheme(theme);
+                    await Shell.Current.GoToAsync("//" + entry.Info.Route);
+                    await Task.Delay(700);
+                    var page = Shell.Current.CurrentPage;
+                    var shot = await page.CaptureAsync();
+                    if (shot is null)
+                    {
+                        log.Add($"{entry.Info.Route} {theme}: capture returned null");
+                        continue;
+                    }
+                    var path = Path.Combine(dir, $"{entry.Info.Route}-{theme.ToString().ToLowerInvariant()}.png");
+                    await using var src = await shot.OpenReadAsync(ScreenshotFormat.Png);
+                    await using var dst = File.Create(path);
+                    await src.CopyToAsync(dst);
+                    log.Add($"{entry.Info.Route} {theme}: ok");
+                    Console.WriteLine($"snapshot: {entry.Info.Route} {theme}");
+                }
+                catch (Exception ex)
+                {
+                    log.Add($"{entry.Info.Route} {theme}: {ex.GetType().Name}: {ex.Message}");
+                }
+            }
+        }
+        await File.WriteAllLinesAsync(Path.Combine(dir, "snapshot-log.txt"), log);
+        Application.Current?.Quit();
+    }
+}

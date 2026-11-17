@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.TagPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Types" Description="Ten categorical colors plus high contrast (most emphasis) and outline (least).">
+            <FlexLayout Wrap="Wrap">
+                <cds:CdsTag Text="Red" Type="Red" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Magenta" Type="Magenta" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Purple" Type="Purple" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Blue" Type="Blue" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Cyan" Type="Cyan" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Teal" Type="Teal" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Green" Type="Green" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Gray" Type="Gray" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Cool gray" Type="CoolGray" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Warm gray" Type="WarmGray" Margin="0,0,8,8" />
+                <cds:CdsTag Text="High contrast" Type="HighContrast" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Outline" Type="Outline" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes, icons and disabled" Description="sm 18 for dense rows, md 24 by default, lg 32 beside 32 controls. Icons are not drawn at sm. Long labels truncate at 208.">
+            <FlexLayout Wrap="Wrap" AlignItems="Center">
+                <cds:CdsTag Text="us-south" Type="Blue" Size="Sm" Margin="0,0,8,8" />
+                <cds:CdsTag Text="us-south" Type="Blue" Margin="0,0,8,8" />
+                <cds:CdsTag Text="us-south" Type="Blue" Size="Lg" Margin="0,0,8,8" />
+                <cds:CdsTag Text="AI assisted" Type="Teal" Icon="AiGenerate" Margin="0,0,8,8" />
+                <cds:CdsTag Text="AI assisted" Type="Teal" Icon="AiGenerate" Size="Lg" Margin="0,0,8,8" />
+                <cds:CdsTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
+                <cds:CdsTag Text="A very long tag label that will certainly be truncated" Type="Purple" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <FlexLayout Wrap="Wrap">
+                            <cds:CdsTag Text="Red" Type="Red" Margin="0,0,8,8" />
+                            <cds:CdsTag Text="Blue" Type="Blue" Margin="0,0,8,8" />
+                            <cds:CdsTag Text="Green" Type="Green" Margin="0,0,8,8" />
+                            <cds:CdsTag Text="Gray" Margin="0,0,8,8" />
+                            <cds:CdsTag Text="High contrast" Type="HighContrast" Margin="0,0,8,8" />
+                            <cds:CdsTag Text="Outline" Type="Outline" Margin="0,0,8,8" />
+                        </FlexLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

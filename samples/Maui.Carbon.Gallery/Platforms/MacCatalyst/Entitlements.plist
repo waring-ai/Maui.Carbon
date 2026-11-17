@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <!-- The gallery is a development showcase, not an App Store app: no App Sandbox, so snapshot mode can write
+         screenshots anywhere. Re-enable com.apple.security.app-sandbox for a store build. -->
+    <dict>
+        <key>com.apple.security.network.client</key>
+        <true/>
+    </dict>
+</plist>

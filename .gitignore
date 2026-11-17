@@ -66,3 +66,4 @@ shots/
 Directory.Build.local.props
 .DS_Store
 .claude/settings.local.json
+.claude/worktrees/

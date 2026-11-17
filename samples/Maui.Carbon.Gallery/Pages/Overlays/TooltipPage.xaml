@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Overlays.TooltipPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Placements" Description="Hover for 100 ms or Tab to the trigger. The tooltip names icon-only controls.">
+            <HorizontalStackLayout Spacing="48" Padding="0,48">
+                <cds:CdsTooltip Text="Download logs" Placement="Top">
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Download" IconDescription="Download logs" Size="Md" />
+                </cds:CdsTooltip>
+                <cds:CdsTooltip Text="Settings" Placement="Bottom">
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Settings" IconDescription="Settings" Size="Md" />
+                </cds:CdsTooltip>
+                <cds:CdsTooltip Text="Copy to clipboard" Placement="Right">
+                    <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Copy" IconDescription="Copy to clipboard" Size="Md" />
+                </cds:CdsTooltip>
+                <cds:CdsTooltip Text="Restarting drains each node before it reboots, so running workloads move to other nodes first." Role="Description" Placement="Bottom">
+                    <cds:CdsButton Text="Restart cluster" Kind="Tertiary" Size="Md" />
+                </cds:CdsTooltip>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Low contrast" Description="IsHighContrast=False uses layer-01 with text-primary.">
+            <cds:CdsTooltip Text="Last deployed 3 hours ago" IsHighContrast="False" Placement="Right">
+                <cds:CdsButton IsIconOnly="True" Kind="Ghost" Icon="Information" IconDescription="Deployment info" Size="Md" />
+            </cds:CdsTooltip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
