@@ -30,6 +30,8 @@ public partial class CdsHitTargetHandler
         b.SetPadding(0, 0, 0, 0);
     }
 
+    partial void UpdateTabStop(CdsHitTarget target) => PlatformView.Focusable = target.IsTabStop;
+
     partial void UpdateAccessibility(CdsHitTarget target)
     {
         if (PlatformView is not CdsAndroidHitTargetView view) return;

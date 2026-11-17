@@ -52,6 +52,10 @@ public sealed class CdsHitTarget : Button
     public static readonly BindableProperty IsExpandedProperty = BindableProperty.Create(
         nameof(IsExpanded), typeof(bool?), typeof(CdsHitTarget), null);
 
+    /// <summary>Bindable property for <see cref="IsTabStop"/>.</summary>
+    public static readonly BindableProperty IsTabStopProperty = BindableProperty.Create(
+        nameof(IsTabStop), typeof(bool), typeof(CdsHitTarget), true);
+
     /// <summary>Creates a hit target.</summary>
     public CdsHitTarget()
     {
@@ -93,6 +97,17 @@ public sealed class CdsHitTarget : Button
     {
         get => (bool?)GetValue(IsExpandedProperty);
         set => SetValue(IsExpandedProperty, value);
+    }
+
+    /// <summary>
+    /// Whether keyboard focus can land on the target (Tab order / focus system). Default <c>true</c>. Rows of a
+    /// virtual-focus menu or list box, and secondary parts such as number-input steppers, turn it off: they stay
+    /// clickable and visible to screen readers but are skipped by Tab.
+    /// </summary>
+    public bool IsTabStop
+    {
+        get => (bool)GetValue(IsTabStopProperty);
+        set => SetValue(IsTabStopProperty, value);
     }
 
     /// <summary>
