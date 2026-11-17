@@ -21,6 +21,7 @@ public static class SnapshotRunner
         Directory.CreateDirectory(dir);
         void Trace(string m) => File.AppendAllText(Path.Combine(dir, "trace.txt"), $"{DateTime.Now:HH:mm:ss.fff} {m}\n");
         Trace("attach");
+        var category = Arg("--category", "CARBON_SNAPSHOT_CATEGORY");
         var pages = Arg("--pages", "CARBON_SNAPSHOT_PAGES")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var themes = (Arg("--themes", "CARBON_SNAPSHOT_THEMES") ?? "white,g10,g90,g100")
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -33,7 +34,7 @@ public static class SnapshotRunner
             if (started) return;
             started = true;
             Console.WriteLine($"snapshot: writing to {dir}");
-            await RunAsync(dir, pages, themes);
+            await RunAsync(dir, pages, category, themes);
         }
         // Launched from a shell the app may never become active, so start from the first layout pass.
         window.Created += (_, _) =>
@@ -45,11 +46,12 @@ public static class SnapshotRunner
         Application.Current?.Dispatcher.DispatchDelayed(TimeSpan.FromSeconds(4), () => { Trace("fallback timer"); Start(); });
     }
 
-    static async Task RunAsync(string dir, string[]? pages, CdsThemeName[] themes)
+    static async Task RunAsync(string dir, string[]? pages, string? category, CdsThemeName[] themes)
     {
         Directory.CreateDirectory(dir);
         await Task.Delay(1500);
         var entries = GalleryRegistry.Entries
+            .Where(e => category is null || string.Equals(e.Info.Category.ToString(), category, StringComparison.OrdinalIgnoreCase))
             .Where(e => pages is null || pages.Any(p =>
                 string.Equals(p, e.Info.Title.Replace(" ", ""), StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(p, e.Info.Route, StringComparison.OrdinalIgnoreCase)))
@@ -61,7 +63,9 @@ public static class SnapshotRunner
             {
                 try
                 {
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
                     CdsThemeManager.SetTheme(theme);
+                    File.AppendAllText(Path.Combine(dir, "trace.txt"), $"{DateTime.Now:HH:mm:ss.fff} {entry.Info.Route} switch {theme} {watch.ElapsedMilliseconds}ms\n");
                     await Shell.Current.GoToAsync("//" + entry.Info.Route);
                     await Task.Delay(700);
                     var page = Shell.Current.CurrentPage;
@@ -84,7 +88,7 @@ public static class SnapshotRunner
                 }
             }
         }
-        await File.WriteAllLinesAsync(Path.Combine(dir, "snapshot-log.txt"), log);
+        await File.AppendAllLinesAsync(Path.Combine(dir, "snapshot-log.txt"), log);
         Application.Current?.Quit();
     }
 }
