@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:d="clr-namespace:Maui.Carbon.Gallery.Pages.Actions.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.MenuPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Items" Description="Icons in their own 16px column, shortcut text at the end, a divider, and a danger item last. The first row is highlighted as the keyboard would leave it (layer-hover-01 with the inset focus ring).">
+            <HorizontalStackLayout Spacing="32">
+                <d:MenuPreviewView Sample="Actions" Highlight="0" />
+                <d:MenuPreviewView Sample="Actions" Highlight="4" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Selectable items and radio group" Description="A leading 16px checkmark column for selected items; choosing one toggles it (or selects the radio choice) and closes the menu.">
+            <d:MenuPreviewView Sample="Selectable" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Submenu" Description="An item with nested items shows a caret. Right arrow or hover (after 100 ms) opens it beside the parent; Left or Escape closes it. One level at most.">
+            <HorizontalStackLayout Spacing="0">
+                <d:MenuPreviewView Sample="Submenu" Highlight="1" />
+                <ContentView x:Name="SubmenuHost" Margin="-14,0,0,0" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled items use text-disabled, keep a plain layer-01 background on hover and are skipped by the keyboard.">
+            <d:MenuPreviewView Sample="Disabled" Highlight="0" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Row heights xs 24, sm 32 (default), md 40 and lg 48 match the trigger. Width fits the labels between 10rem and 18rem.">
+            <HorizontalStackLayout Spacing="24">
+                <d:MenuPreviewView Sample="Plain" Size="Xs" />
+                <d:MenuPreviewView Sample="Plain" Size="Sm" />
+                <d:MenuPreviewView Sample="Plain" Size="Md" />
+                <d:MenuPreviewView Sample="Plain" Size="Lg" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="CdsMenu.Open(anchor, placement) shows the menu next to any element. Up/Down/Home/End move, Enter or Space chooses, Escape closes and focus returns to the button.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="OpenButton" Text="Object actions" Kind="Tertiary" Size="Md" Icon="ChevronDown" Clicked="OnOpenClicked" />
+                    <cds:CdsButton x:Name="OpenSubmenuButton" Text="With submenu" Kind="Tertiary" Size="Md" Clicked="OnOpenSubmenuClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The menu surface is layer-01 in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <d:MenuPreviewView Sample="Plain" Highlight="0" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
