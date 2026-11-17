@@ -56,7 +56,7 @@
                     <VerticalStackLayout Spacing="8">
                         <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
                         <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
-                        <cds:CdsButton Text="Renew now" Kind="Ghost" Size="Sm" />
+                        <cds:CdsButton Text="Renew now" Kind="Ghost" Size="Sm" Margin="-16,0,0,0" />
                     </VerticalStackLayout>
                     <cds:CdsExpandableTile.ExpandedContent>
                         <cds:CdsText Text="Renewal takes about two minutes and does not interrupt traffic." Tone="Secondary" />
@@ -65,7 +65,7 @@
                 <cds:CdsExpandableTile WidthRequest="320" IsExpanded="True" CollapsedDescription="Show renewal details" ExpandedDescription="Hide renewal details">
                     <VerticalStackLayout Spacing="8">
                         <cds:CdsText Text="Signing key" TypeStyle="HeadingCompact01" />
-                        <cds:CdsButton Text="Rotate key" Kind="Ghost" Size="Sm" />
+                        <cds:CdsButton Text="Rotate key" Kind="Ghost" Size="Sm" Margin="-16,0,0,0" />
                     </VerticalStackLayout>
                     <cds:CdsExpandableTile.ExpandedContent>
                         <cds:CdsText Text="Last rotated 90 days ago." Tone="Secondary" />

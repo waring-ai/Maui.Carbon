@@ -51,6 +51,12 @@ public static class CdsProgressStepTokens
 /// <summary>The state logic of a progress indicator (pure, tested).</summary>
 internal static class ProgressIndicatorModel
 {
+    /// <summary>
+    /// The widest a label may be: 160 in a vertical indicator; horizontally unlimited, so the label takes what is left of the
+    /// step (128, or its share when spaced equally) beside the icon and only then truncates.
+    /// </summary>
+    public static double LabelMaxWidth(bool vertical) => vertical ? 160 : double.PositiveInfinity;
+
     /// <summary>The state that follows from the position alone: earlier steps are complete, the current one is current.</summary>
     public static CdsProgressStepState Underlying(int index, int currentIndex, bool forceComplete) =>
         index == currentIndex ? CdsProgressStepState.Current

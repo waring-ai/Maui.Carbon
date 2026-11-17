@@ -21,11 +21,12 @@ public class ActionableNotificationTests
             IsLowContrast = true,
         };
         n.IsInline = true;
-        Assert.Equal(608, n.MaximumWidthRequest);
+        Assert.Equal(608, n.MaxContentWidth);
         Assert.Equal(-1, n.WidthRequest);
         n.IsInline = false;
         Assert.Equal(288, n.WidthRequest);
         Assert.Equal(288, n.MaximumWidthRequest);
+        Assert.True(double.IsPositiveInfinity(n.MaxContentWidth));
     }
 
     [Fact]

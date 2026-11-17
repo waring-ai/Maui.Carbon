@@ -44,7 +44,7 @@ internal sealed class CdsProgressStepView : CdsControl
         _label.Text = step.Label;
         _label.LineBreakMode = vertical ? LineBreakMode.WordWrap : LineBreakMode.TailTruncation;
         _label.MaxLines = vertical ? 0 : 1;
-        _label.MaximumWidthRequest = vertical ? 160 : spaceEqually ? double.PositiveInfinity : 88;
+        _label.MaximumWidthRequest = ProgressIndicatorModel.LabelMaxWidth(vertical);
         _secondary.Text = step.SecondaryLabel;
         _secondary.IsVisible = !string.IsNullOrEmpty(step.SecondaryLabel);
         ToolTipProperties.SetText(_layout, step.Label ?? "");
@@ -76,7 +76,7 @@ internal sealed class CdsProgressStepView : CdsControl
         }
         else
         {
-            // 2px connector along the top edge; icon 10px below it; label up to 88 wide (or the share of the width).
+            // 2px connector along the top edge; icon 10px below it; label uses the width the step has left of the icon.
             _layout.MinimumHeightRequest = -1;
             _layout.RowDefinitions.Add(new RowDefinition(new GridLength(2)));
             _layout.RowDefinitions.Add(new RowDefinition(GridLength.Auto));

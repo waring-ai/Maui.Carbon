@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Ratios" Description="The height is the width divided by the ratio. The 2x Grid recommends 1:1, 2:1, 2:3, 3:2, 4:3 and 16:9; every box here is 160 wide.">
-            <FlexLayout x:Name="RatioFlex" Wrap="Wrap" AlignItems="End" />
+            <FlexLayout x:Name="RatioFlex" Wrap="Wrap" AlignItems="End" MaximumWidthRequest="720" HorizontalOptions="Start" />
         </g:GalleryExample>
 
         <g:GalleryExample Title="Custom ratio and media" Description="CustomRatio overrides the named ratio. Children fill the box and are clipped to it; the box adds no background, border or padding.">

@@ -32,6 +32,9 @@ internal static class ExpandableTileModel
     public static bool UseInteractiveVariant(bool? forced, Element? above, Element? below) =>
         forced ?? (ContainsInteractive(above) || ContainsInteractive(below));
 
+    /// <summary>Bottom padding of the expanded content: 16, or 48 (the chevron row) when the chevron shows a label.</summary>
+    public static double ExpandedBottomPadding(bool chevronHasLabel) => chevronHasLabel ? 48 : CdsSpacing.Spacing05;
+
     /// <summary>The height of the tile at animation progress <paramref name="progress"/> (0 to 1) between two heights.</summary>
     public static double HeightAt(double from, double to, double progress) =>
         from + (to - from) * Math.Min(Math.Max(progress, 0), 1);

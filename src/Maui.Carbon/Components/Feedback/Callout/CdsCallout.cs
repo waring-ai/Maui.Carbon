@@ -55,7 +55,7 @@ public class CdsCallout : CdsNotificationBase
 
         Surface.MinimumHeightRequest = CdsSizing.Large;
         MinimumWidthRequest = 288;
-        MaximumWidthRequest = 608;
+        SetMaxContentWidth(608);
         HorizontalOptions = LayoutOptions.Fill;
         SetBody(_content);
     }

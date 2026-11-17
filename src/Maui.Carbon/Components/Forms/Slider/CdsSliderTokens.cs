@@ -105,7 +105,6 @@ internal sealed class CdsSliderGlyph : CdsGlyphView
         {
             canvas.FillColor = TrackColor!;
             canvas.FillRectangle(PadX, cy - 1, length, 2);
-            canvas.FillRectangle(PadX + length / 2 - 1, cy - 5, 2, 4); // the tick at mid-track
         }
         if (Visible(FillColor))
         {
