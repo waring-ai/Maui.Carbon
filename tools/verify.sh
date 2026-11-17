@@ -38,12 +38,11 @@ if [[ $FAST == 0 ]]; then
   STUB_SDK="$PWD/out/stub-android-sdk"
   mkdir -p "$STUB_SDK/platform-tools" && touch "$STUB_SDK/platform-tools/adb" && chmod +x "$STUB_SDK/platform-tools/adb"
   step "library net10.0-android (compile only)"
-  dotnet build src/Maui.Carbon -t:Compile -f net10.0-android -p:CarbonIncludeAndroid=true \
-    -p:_AndroidAllowMissingSdkTooling=true -p:AndroidSdkDirectory="$STUB_SDK" -p:TreatWarningsAsErrors=false \
-    -p:NoWarn='XA0034%3BXARAT7003%3BMSB4181' "${FLAGS[@]}" 2>&1 | grep -E 'error|Warn.*CS' || true
-  dotnet build src/Maui.Carbon -t:Compile -f net10.0-android -p:CarbonIncludeAndroid=true \
-    -p:_AndroidAllowMissingSdkTooling=true -p:AndroidSdkDirectory="$STUB_SDK" -p:TreatWarningsAsErrors=false "${FLAGS[@]}" >/dev/null 2>&1 \
-    || { echo "android compile failed"; exit 1; }
+  # The stub SDK makes the Android tooling warn; fail only on compiler/analyzer warnings or errors.
+  ANDROID_LOG=$(dotnet build src/Maui.Carbon -t:Compile -f net10.0-android -p:CarbonIncludeAndroid=true \
+    -p:_AndroidAllowMissingSdkTooling=true -p:AndroidSdkDirectory="$STUB_SDK" -p:TreatWarningsAsErrors=false "${FLAGS[@]}" 2>&1) \
+    || { echo "$ANDROID_LOG" | grep -E 'error' ; echo "android compile failed"; exit 1; }
+  if echo "$ANDROID_LOG" | grep -E ' warning (CS|CA|IL|SYSLIB)[0-9]+' ; then echo "android compile has warnings"; exit 1; fi
 
   step "library net10.0-windows (compile only)"
   dotnet build src/Maui.Carbon -t:Compile -f net10.0-windows10.0.19041.0 -p:CarbonIsWindows=true -p:EnableWindowsTargeting=true "${FLAGS[@]}"
