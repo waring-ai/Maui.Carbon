@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.SkeletonPlaceholderPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Sizes" Description="100 by 100 by default; size it to match the content it becomes so the layout does not jump.">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsSkeletonPlaceholder />
+                <cds:CdsSkeletonPlaceholder WidthRequest="160" HeightRequest="100" />
+                <cds:CdsSkeletonPlaceholder WidthRequest="64" HeightRequest="64" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Chart tile" Description="Paired with SkeletonText inside the same card so the whole layout appears at once.">
+            <VerticalStackLayout Spacing="8" WidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsText Text="CPU usage, last 24 h" TypeStyle="HeadingCompact01" />
+                <cds:CdsSkeletonPlaceholder WidthRequest="360" HeightRequest="120" />
+                <cds:CdsSkeletonText WidthPercent="60" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsSkeletonPlaceholder WidthRequest="160" HeightRequest="80" />
+                            <cds:CdsSkeletonText WidthPercent="60" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

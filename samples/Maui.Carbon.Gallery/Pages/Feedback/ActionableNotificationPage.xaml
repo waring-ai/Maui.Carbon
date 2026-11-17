@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.ActionableNotificationPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Inline layout" Description="Ghost action; the action moves to the same row from about 600 wide. IsInline, low contrast and high contrast shown.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsActionableNotification IsInline="True" Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Payment method expires soon" Subtitle="The card ending 4242 expires on 30 Nov 2026." ActionButtonLabel="Update card" />
+                <cds:CdsActionableNotification IsInline="True" Kind="Error" Role="Status" HasFocus="False" Title="Backup failed" Subtitle="The last snapshot of orders-db did not finish." ActionButtonLabel="View logs" />
+                <cds:CdsActionableNotification IsInline="True" Kind="Info" IsLowContrast="True" Role="Status" HasFocus="False" HideCloseButton="True" Title="New version available" Subtitle="Cluster version 1.31 is ready to install." ActionButtonLabel="Review" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Toast layout" Description="288 wide with a shadow; the tertiary action sits under the text, aligned with the title. It stays until dismissed.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <cds:CdsActionableNotification Kind="Error" Role="Status" HasFocus="False" Title="Node unreachable" Subtitle="worker-3 stopped responding." Caption="2 minutes ago" ActionButtonLabel="Restart node" Margin="0,0,24,24" />
+                <cds:CdsActionableNotification Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Disk almost full" Subtitle="orders-db is at 91% of 500 GB." Caption="Just now" ActionButtonLabel="Add storage" Margin="0,0,24,24" />
+                <cds:CdsActionableNotification Kind="Success" IsLowContrast="True" Role="Status" HasFocus="False" Title="Import complete" Subtitle="1,204 records were added." ActionButtonLabel="View records" Margin="0,0,24,24" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="ActionClicked fires on the action; the default role is alertdialog, which moves focus to the action unless HasFocus is false.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsActionableNotification IsInline="True" Kind="Info" IsLowContrast="True" Role="Status" HasFocus="False" Title="Update available" Subtitle="Version 2.4.1 fixes a scheduling bug." ActionButtonLabel="Update now" ActionClicked="OnAction" />
+                <cds:CdsText x:Name="Status" Text="No action yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsActionableNotification Kind="Error" Role="Status" HasFocus="False" Title="Node unreachable" Subtitle="worker-3 stopped." ActionButtonLabel="Restart node" WidthRequest="240" MaximumWidthRequest="240" />
+                            <cds:CdsActionableNotification Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Disk almost full" Subtitle="91% of 500 GB." ActionButtonLabel="Add storage" WidthRequest="240" MaximumWidthRequest="240" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

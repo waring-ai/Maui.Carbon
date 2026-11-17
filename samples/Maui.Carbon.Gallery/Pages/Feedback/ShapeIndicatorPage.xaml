@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.ShapeIndicatorPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Kinds with 12 text" Description="Orange and yellow shapes get a darker outline token so they hold 3:1 contrast on light surfaces.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsShapeIndicator Kind="Failed" Label="Failed" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Critical" Label="Critical" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="High" Label="High" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Medium" Label="Medium" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Low" Label="Low" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Cautious" Label="Cautious" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Undefined" Label="Undefined" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Stable" Label="Stable" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Informative" Label="Informative" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Incomplete" Label="Incomplete" TextSize="12" />
+                <cds:CdsShapeIndicator Kind="Draft" Label="Draft" TextSize="12" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Kinds with 14 text" Description="TextSize 14 matches 14px row text in tables; the shape is always 16.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsShapeIndicator Kind="Failed" Label="Failed" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Critical" Label="Critical" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="High" Label="High" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Medium" Label="Medium" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Low" Label="Low" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Cautious" Label="Cautious" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Undefined" Label="Undefined" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Stable" Label="Stable" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Informative" Label="Informative" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Incomplete" Label="Incomplete" TextSize="14" />
+                <cds:CdsShapeIndicator Kind="Draft" Label="Draft" TextSize="14" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In context" Description="Severity column of an alerts table.">
+            <Grid ColumnDefinitions="200,140" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" HorizontalOptions="Start">
+                <cds:CdsText Text="Disk pressure on worker-3" TypeStyle="BodyCompact01" />
+                <cds:CdsShapeIndicator Grid.Column="1" Kind="Critical" Label="Critical" TextSize="14" />
+                <cds:CdsText Grid.Row="1" Text="High memory on api-7" />
+                <cds:CdsShapeIndicator Grid.Row="1" Grid.Column="1" Kind="High" Label="High" TextSize="14" />
+                <cds:CdsText Grid.Row="2" Text="Slow query in orders-db" />
+                <cds:CdsShapeIndicator Grid.Row="2" Grid.Column="1" Kind="Medium" Label="Medium" TextSize="14" />
+                <cds:CdsText Grid.Row="3" Text="Deprecated API in use" />
+                <cds:CdsShapeIndicator Grid.Row="3" Grid.Column="1" Kind="Low" Label="Low" TextSize="14" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsShapeIndicator Kind="Failed" Label="Failed" />
+                            <cds:CdsShapeIndicator Kind="Critical" Label="Critical" />
+                            <cds:CdsShapeIndicator Kind="High" Label="High" />
+                            <cds:CdsShapeIndicator Kind="Medium" Label="Medium" />
+                            <cds:CdsShapeIndicator Kind="Low" Label="Low" />
+                            <cds:CdsShapeIndicator Kind="Cautious" Label="Cautious" />
+                            <cds:CdsShapeIndicator Kind="Undefined" Label="Undefined" />
+                            <cds:CdsShapeIndicator Kind="Stable" Label="Stable" />
+                            <cds:CdsShapeIndicator Kind="Informative" Label="Informative" />
+                            <cds:CdsShapeIndicator Kind="Incomplete" Label="Incomplete" />
+                            <cds:CdsShapeIndicator Kind="Draft" Label="Draft" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

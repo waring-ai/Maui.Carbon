@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.InlineLoadingPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Statuses" Description="Active shows the small spinner; finished a success check; error an error icon; inactive keeps only the text.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsInlineLoading Status="Active" Description="Saving..." />
+                <cds:CdsInlineLoading Status="Finished" Description="Saved" SuccessDelay="600000" />
+                <cds:CdsInlineLoading Status="Error" Description="Could not save" />
+                <cds:CdsInlineLoading Status="Inactive" Description="Idle" />
+                <cds:CdsInlineLoading Status="Active" IconDescription="Checking the cluster name" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Replacing a button" Description="The button gives way to the indicator while saving; Success fires 1500 ms after finishing and restores the button. Disable the rest of the form while active.">
+            <VerticalStackLayout Spacing="16">
+                <Grid HeightRequest="48" HorizontalOptions="Start">
+                    <cds:CdsButton x:Name="SaveButton" Text="Save changes" Clicked="OnSave" />
+                    <cds:CdsInlineLoading x:Name="Saving" IsVisible="False" Status="Active" Description="Saving..." Success="OnSuccess" />
+                </Grid>
+                <cds:CdsText x:Name="Status" Text="Idle" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsInlineLoading Status="Active" Description="Saving..." />
+                            <cds:CdsInlineLoading Status="Finished" Description="Saved" SuccessDelay="600000" />
+                            <cds:CdsInlineLoading Status="Error" Description="Could not save" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>
