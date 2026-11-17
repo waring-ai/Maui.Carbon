@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.PaginationNavPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Fourteen pages in seven slots: the first and last page always show and the rest collapse into '…' selects that list the hidden pages. Pick a page, or use the arrows.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsPaginationNav x:Name="Interactive" Label="Search results pages" TotalItems="14" ItemsShown="7" Page="6" PageChanged="OnChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Page 7 of 14" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Window positions" Description="Near the start, in the middle and near the end of the series.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsPaginationNav Label="Start" TotalItems="14" ItemsShown="7" Page="1" />
+                <cds:CdsPaginationNav Label="Middle" TotalItems="14" ItemsShown="7" Page="7" />
+                <cds:CdsPaginationNav Label="End" TotalItems="14" ItemsShown="7" Page="12" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Small (32), medium (40) and large (48, default). Medium allows 4 or 5 slots, small 4 to 7.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsPaginationNav Size="Sm" Label="Small" TotalItems="14" ItemsShown="7" Page="6" />
+                <cds:CdsPaginationNav Size="Md" Label="Medium" TotalItems="14" ItemsShown="5" Page="6" />
+                <cds:CdsPaginationNav Size="Lg" Label="Large" TotalItems="14" ItemsShown="7" Page="6" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Few pages and loop" Description="Everything shows when it fits. With Loop, previous on the first page wraps to the last (and next on the last to the first) instead of disabling.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsPaginationNav Label="Few pages" TotalItems="5" Page="2" />
+                <cds:CdsPaginationNav Label="Looping" TotalItems="5" Page="0" Loop="True" />
+                <cds:CdsPaginationNav Label="Disabled ends" TotalItems="5" Page="0" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Overflow disabled" Description="The '…' is shown but cannot be opened.">
+            <cds:CdsPaginationNav Label="Locked overflow" TotalItems="14" ItemsShown="7" Page="6" IsOverflowDisabled="True" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The nav in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsPaginationNav Size="Sm" Label="Pages" TotalItems="14" ItemsShown="5" Page="6" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.DataTablePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Resource table" Description="Declarative: define the headers, set ItemsSource and the table builds the toolbar, header, selection, sorting and row menus. Search filters as you type, every header sorts (none, ascending, descending), the checkboxes drive the batch bar and each row has a menu (visible on hover or focus).">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsDataTable x:Name="MainTable"
+                                  Title="Clusters"
+                                  Description="Kubernetes clusters in your account. Select rows to restart or delete them in bulk."
+                                  IsSortable="True"
+                                  Selection="Multi"
+                                  IsSearchable="True"
+                                  SearchPlaceholder="Filter clusters"
+                                  SortKey="name"
+                                  SortDirection="Ascending"
+                                  SelectionChanged="OnMainSelectionChanged"
+                                  SortChanged="OnMainSortChanged"
+                                  SearchChanged="OnMainSearchChanged">
+                    <cds:CdsDataTableHeader Key="name" Header="Name" Width="*" />
+                    <cds:CdsDataTableHeader Key="region" Header="Region" Width="140" />
+                    <cds:CdsDataTableHeader Key="status" Header="Status" Width="160" />
+                    <cds:CdsDataTableHeader Key="nodes" Header="Nodes" Width="100" Align="End" />
+                    <cds:CdsDataTable.BatchActions>
+                        <cds:CdsDataTableBatchAction Label="Restart" Icon="Restart" Invoked="OnBatchRestart" />
+                        <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" Invoked="OnBatchDelete" />
+                    </cds:CdsDataTable.BatchActions>
+                    <cds:CdsDataTable.ToolbarContent>
+                        <cds:CdsButton Text="Create cluster" Icon="Add" Size="Lg" />
+                    </cds:CdsDataTable.ToolbarContent>
+                </cds:CdsDataTable>
+                <cds:CdsText x:Name="MainStatus" Tone="Secondary" Text="Sorted by name, ascending. Nothing selected." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Batch actions" Description="While rows are selected the batch bar replaces the toolbar: background-brand with the count, your actions and Cancel. Two rows are selected here; the select-all checkbox is indeterminate.">
+            <cds:CdsDataTable x:Name="BatchTable" Title="Clusters" Selection="Multi" IsSearchable="True" IsSortable="True" Size="Lg">
+                <cds:CdsDataTable.BatchActions>
+                    <cds:CdsDataTableBatchAction Label="Restart" Icon="Restart" />
+                    <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" />
+                </cds:CdsDataTable.BatchActions>
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Expandable rows" Description="A chevron column and a child row (indented 56, or 88 with a checkbox column). The first row is expanded; the child content is created from a template when a row first opens.">
+            <cds:CdsDataTable x:Name="ExpandTable" Title="Clusters" IsExpandable="True" IsSortable="True" Size="Lg">
+                <cds:CdsDataTableHeader Key="name" Header="Name" Width="*" />
+                <cds:CdsDataTableHeader Key="region" Header="Region" Width="140" />
+                <cds:CdsDataTableHeader Key="status" Header="Status" Width="160" />
+                <cds:CdsDataTableHeader Key="nodes" Header="Nodes" Width="100" Align="End" />
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sorted column and zebra" Description="Nodes is sorted descending: the active header uses layer-selected-hover-01 with a rotated arrow. Zebra stripes every second row; a selected row keeps its own fill.">
+            <cds:CdsDataTable x:Name="ZebraTable" Title="Clusters by size" UseZebraStyles="True" IsSortable="True" Selection="Multi" SortKey="nodes" SortDirection="Descending" Size="Md" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Rows are 24, 32, 40, 48 (default) and 64 high. The toolbar is 32 high in xs and sm tables and 48 otherwise; match the pagination to the table.">
+            <VerticalStackLayout x:Name="SizesHost" Spacing="32" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Radio selection" Description="One row at a time; a disabled row (ml-training is pending) cannot be chosen.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsDataTable x:Name="RadioTable" Title="Choose a cluster" Selection="Radio" Size="Md" SelectionChanged="OnRadioSelectionChanged" />
+                <cds:CdsText x:Name="RadioStatus" Tone="Secondary" Text="Chosen: ci-runners" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sticky header" Description="The header row stays pinned while the body scrolls inside a 300 high area.">
+            <cds:CdsDataTable x:Name="StickyTable" Title="All clusters" StickyHeader="True" IsSortable="True" Size="Md" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Empty state" Description="Under the header row: a short title, one sentence that says what to do and at most one action. The second table shows what a search with no matches looks like.">
+            <VerticalStackLayout Spacing="32">
+                <cds:CdsDataTable x:Name="EmptyTable" Title="Clusters" IsSearchable="True" Size="Lg">
+                    <cds:CdsDataTable.EmptyState>
+                        <cds:CdsDataTableEmptyState Title="No clusters yet" Description="Create a cluster to deploy your first workload." ActionText="Create cluster" />
+                    </cds:CdsDataTable.EmptyState>
+                </cds:CdsDataTable>
+                <cds:CdsDataTable x:Name="NoMatchTable" Title="Clusters" IsSearchable="True" IsPersistentSearch="True" SearchText="zzz" Size="Lg">
+                    <cds:CdsDataTable.EmptyState>
+                        <cds:CdsDataTableEmptyState Title="No clusters match your search" Description="Try another name or clear the filter." />
+                    </cds:CdsDataTable.EmptyState>
+                </cds:CdsDataTable>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With pagination" Description="A Pagination directly under the table drops its top border. Changing the page size keeps the first visible row on screen.">
+            <VerticalStackLayout Spacing="0">
+                <cds:CdsDataTable x:Name="PagedTable" Title="Clusters" IsSortable="True" Size="Md" />
+                <cds:CdsPagination x:Name="Pager" PageSizes="5, 10" PageSize="5" TotalItems="14" PageChanged="OnPageChanged" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Table primitives" Description="CdsTable, CdsTableHead, CdsTableRow, CdsTableHeader and CdsTableCell build a static table by hand with the same styling. Sorting here is yours to implement: the header raises Clicked and you set SortDirection.">
+            <cds:CdsTable x:Name="Primitive" Size="Md" Label="API keys">
+                <cds:CdsTable.Head>
+                    <cds:CdsTableHead>
+                        <cds:CdsTableHeader Text="Name" IsSortable="True" SortDirection="Ascending" Width="*" Clicked="OnPrimitiveHeaderClicked" />
+                        <cds:CdsTableHeader Text="Created" Width="160" />
+                        <cds:CdsTableHeader Text="Calls" Align="End" IsSortable="True" Width="120" />
+                    </cds:CdsTableHead>
+                </cds:CdsTable.Head>
+                <cds:CdsTableRow>
+                    <cds:CdsTableCell Text="ci-deploy" />
+                    <cds:CdsTableCell Text="Mar 4, 2026" />
+                    <cds:CdsTableCell Text="1,204" />
+                </cds:CdsTableRow>
+                <cds:CdsTableRow IsSelected="True">
+                    <cds:CdsTableCell Text="web-frontend" />
+                    <cds:CdsTableCell Text="Feb 11, 2026" />
+                    <cds:CdsTableCell Text="88" />
+                </cds:CdsTableRow>
+                <cds:CdsTableRow>
+                    <cds:CdsTableCell Text="billing-sync" />
+                    <cds:CdsTableCell Text="Jan 27, 2026" />
+                    <cds:CdsTableCell Text="31,870" />
+                </cds:CdsTableRow>
+            </cds:CdsTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="A compact table with a sorted column, zebra and a selected row (batch bar) in every theme zone, layered on a surface.">
+            <g:ThemeStrip x:Name="Strip" Layered="True" />
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

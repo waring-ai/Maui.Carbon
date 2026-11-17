@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.DataTableSkeletonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A title block, toolbar, header row and five rows of five columns. Header bars invert the skeleton tokens; the bars stop pulsing under reduced motion.">
+            <cds:CdsDataTableSkeleton Label="Clusters (loading)" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Real headers" Description="Keep the headers you already know: pass their labels instead of header bars, and hide the title block when the page shows a real one.">
+            <cds:CdsDataTableSkeleton Label="Clusters (loading)" ShowHeader="False" RowCount="4" ColumnCount="5">
+                <x:String>Name</x:String>
+                <x:String>Status</x:String>
+                <x:String>Region</x:String>
+                <x:String>Nodes</x:String>
+                <x:String>Created</x:String>
+            </cds:CdsDataTableSkeleton>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="No toolbar, three columns, zebra" Description="Match the column count and approximate row count of the table that will replace it so the layout does not shift.">
+            <cds:CdsDataTableSkeleton Label="API keys (loading)" ShowHeader="False" ShowToolbar="False" ColumnCount="3" RowCount="4" UseZebraStyles="True" MaximumWidthRequest="560" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The skeleton in every theme zone.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDataTableSkeleton ShowHeader="False" ColumnCount="3" RowCount="3" UseZebraStyles="True" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
