@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.DatePickerPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Single, open" Description="A 288 by 336 calendar on layer-01 with a shadow under the field: today has a dot, the selected day is button-primary, days before MinDate are disabled and neighbouring-month days use text-helper.">
+            <Grid HeightRequest="440" WidthRequest="288" HorizontalOptions="Start">
+                <cds:CdsDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" MinDate="{x:Static data:GListData.EarliestDate}"
+                                   VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Range" Description="Two fields share one calendar. Pick the start, then the end; the days between use the highlight token. One message spans both fields.">
+            <Grid HeightRequest="440" WidthRequest="288" HorizontalOptions="Start">
+                <cds:CdsDatePicker x:Name="RangePicker" Type="Range" Label="Start date" EndLabel="End date"
+                                   StartDate="{x:Static data:GListData.RangeStart}" EndDate="{x:Static data:GListData.RangeEnd}"
+                                   HelperText="Choose up to 92 days" VerticalOptions="Start" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Formats and locale" Description="DateFormat uses Carbon's flatpickr tokens (m n d j Y y). Locale sets the week start and the month and weekday names; the calendar here opens on a Monday.">
+            <Grid HeightRequest="440" WidthRequest="288" HorizontalOptions="Start">
+                <cds:CdsDatePicker Label="Certificate expiry" Size="Lg" DateFormat="Y-m-d" Locale="de-DE"
+                                   Value="{x:Static data:GListData.CertificateExpiry}" VerticalOptions="Start" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Variants and sizes" Description="Simple is a typed date with no calendar; sm is 32 high.">
+            <VerticalStackLayout Spacing="24" HorizontalOptions="Start">
+                <cds:CdsDatePicker Type="Simple" Label="Contract start" HelperText="Format mm/dd/yyyy" />
+                <cds:CdsDatePicker Type="Simple" IsShort="True" Label="Short" Placeholder="mm/dd/yy" DateFormat="m/d/y" />
+                <cds:CdsDatePicker Size="Sm" Label="Report date" Value="{x:Static data:GListData.RangeStart}" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid outlines the field; for a range both fields are outlined and one message spans them. The calendar icon gives way to the status icon. Read-only does not open the calendar.">
+            <VerticalStackLayout Spacing="24" HorizontalOptions="Start">
+                <cds:CdsDatePicker Label="Go-live date" HelperText="Deployments are frozen on public holidays" />
+                <cds:CdsDatePicker Label="Snapshot date" Value="{x:Static data:GListData.RangeStart}" IsInvalid="True" InvalidText="Choose a date in the last 30 days" />
+                <cds:CdsDatePicker Label="Maintenance date" Value="{x:Static data:GListData.RangeEnd}" IsWarning="True" WarnText="December 26 is a holiday in some regions" />
+                <cds:CdsDatePicker Type="Range" Label="Start date" EndLabel="End date" StartDate="{x:Static data:GListData.RangeStart}" EndDate="{x:Static data:GListData.RangeEnd}"
+                                   IsInvalid="True" InvalidText="Choose a range of 14 days or less" />
+                <cds:CdsDatePicker Type="Range" Label="Start date" EndLabel="End date" StartDate="{x:Static data:GListData.RangeStart}" EndDate="{x:Static data:GListData.RangeEnd}"
+                                   IsWarning="True" WarnText="Data before the 5th is still being processed" />
+                <cds:CdsDatePicker Label="Created on" Value="{x:Static data:GListData.RangeStart}" IsReadOnly="True" />
+                <cds:CdsDatePicker Label="Renewal date" Value="{x:Static data:GListData.RangeEnd}" IsEnabled="False" HelperText="Renews automatically" />
+                <cds:CdsDatePickerSkeleton />
+                <cds:CdsDatePickerSkeleton Range="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Typed dates and validation" Description="Type a date and press Return, or leave the field. Weekends are unavailable and dates before MinDate are rejected, each with its own message. Down arrow moves into the calendar.">
+            <VerticalStackLayout Spacing="16" WidthRequest="288" HorizontalOptions="Start">
+                <cds:CdsDatePicker Label="Deployment date" IsDateDisabled="{x:Static data:GListData.IsWeekend}" MinDate="{x:Static data:GListData.EarliestDate}"
+                                   HelperText="Weekends are unavailable" DateChanged="OnDateChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No date chosen" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fields on a layer-01 surface go inside a CdsLayer so they step to field-02.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDatePicker Type="Simple" Label="Contract start" Value="{x:Static data:GListData.RangeStart}" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Every color is a token, so the field and calendar follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDatePicker Type="Simple" Label="Snapshot date" Value="{x:Static data:GListData.RangeEnd}" HelperText="mm/dd/yyyy" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

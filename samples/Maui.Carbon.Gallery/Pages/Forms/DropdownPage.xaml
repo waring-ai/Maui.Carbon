@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.DropdownPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open" Description="The list opens under the field on layer-01 with a shadow, rows as tall as the field and about five and a half rows before it scrolls. The chosen row is checked; the disabled row is skipped by the keyboard.">
+            <Grid HeightRequest="300" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}"
+                                 IsItemDisabled="{x:Static data:GListData.RegionDisabled}" SelectedItem="Frankfurt (eu-de)"
+                                 VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default) and lg 48. Rows match the field height.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Label="Sort clusters by" Placeholder="Choose a sort order" Size="Sm" ItemsSource="{x:Static data:GListData.Sorts}" />
+                <cds:CdsDropdown Label="Sort clusters by" Placeholder="Choose a sort order" ItemsSource="{x:Static data:GListData.Sorts}" SelectedItem="Date created" />
+                <cds:CdsDropdown Label="Sort clusters by" Placeholder="Choose a sort order" Size="Lg" ItemsSource="{x:Static data:GListData.Sorts}" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Rich rows" Description="An ItemTemplate renders a row from an object item; the field shows its ItemToString text.">
+            <Grid HeightRequest="320" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown x:Name="FlavorDropdown" Label="Worker flavor" Placeholder="Choose a flavor" Size="Lg" VerticalOptions="Start"
+                                 ItemsSource="{x:Static data:GListData.Flavors}" ItemToString="{x:Static data:GListData.FlavorToString}">
+                    <cds:CdsDropdown.ItemTemplate>
+                        <DataTemplate x:DataType="data:GFlavor">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <cds:CdsText Text="{Binding Name}" LineBreakMode="TailTruncation" />
+                                <cds:CdsText Grid.Column="1" Text="{Binding Price}" Tone="Secondary" />
+                            </Grid>
+                        </DataTemplate>
+                    </cds:CdsDropdown.ItemTemplate>
+                </cds:CdsDropdown>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid and warning are ignored while disabled or read-only. Read-only keeps its underline in border-subtle-01 and stays focusable; disabled is skipped by Tab.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" HelperText="Choose the region closest to your users" />
+                <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" IsInvalid="True" InvalidText="Choose a region to deploy the cluster in" />
+                <cds:CdsDropdown Label="Kubernetes version" Placeholder="Choose a version" ItemsSource="{x:Static data:GListData.Versions}" SelectedItem="1.28.15 (end of support)" IsWarning="True" WarnText="1.28 is out of support. Choose 1.30 or later." />
+                <cds:CdsDropdown Label="Resource group" Placeholder="Choose a group" ItemsSource="{x:Static data:GListData.Environments}" SelectedItem="Staging" IsReadOnly="True" />
+                <cds:CdsDropdown Label="Billing account" Placeholder="Choose an account" ItemsSource="{x:Static data:GListData.Environments}" SelectedItem="Production" IsEnabled="False" HelperText="Only owners can change the billing account" />
+                <cds:CdsDropdownSkeleton />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline" Description="No fill and no underline, the label to the start: for toolbars and filter bars.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Type="Inline" Label="Sort by" Placeholder="Choose" ItemsSource="{x:Static data:GListData.Sorts}" SelectedItem="Last deployed" />
+                <cds:CdsDropdown Type="Inline" Label="Group by" Placeholder="Choose" ItemsSource="{x:Static data:GListData.Statuses}" IsInvalid="True" InvalidText="Choose a grouping" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Open upwards" Description="Direction Top opens the list above the field, for fields near the bottom of a panel.">
+            <Grid HeightRequest="300" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Label="Environment" Placeholder="Choose an environment" Direction="Top" ItemsSource="{x:Static data:GListData.Environments}"
+                                 SelectedItem="Staging" VerticalOptions="End" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Choose a region; the status follows the selection.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}"
+                                 IsItemDisabled="{x:Static data:GListData.RegionDisabled}" SelectionChanged="OnRegionChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing chosen" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fields on a layer-01 surface go inside a CdsLayer so they step to field-02; the list stays on layer-01 tokens.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDropdown Label="Environment" Placeholder="Choose an environment" ItemsSource="{x:Static data:GListData.Environments}" SelectedItem="Staging" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Every color is a token, so the field and list follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectedItem="London (eu-gb)" HelperText="Closest to your users" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

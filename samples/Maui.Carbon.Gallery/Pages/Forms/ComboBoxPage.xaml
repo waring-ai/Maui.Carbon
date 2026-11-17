@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.ComboBoxPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open, filtered" Description="Typed text filters the list (case-insensitive contains); the first match is highlighted. With the text equal to the chosen zone the full list shows.">
+            <Grid HeightRequest="300" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}"
+                                 InputText="south" HelperText="Type part of a zone name" VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Selected item" Description="Choosing a row fills the field and shows the clear button, left of the chevron.">
+            <Grid HeightRequest="300" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}"
+                                 SelectedItem="us-south-2" VerticalOptions="Start" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default) and lg 48. There is no inline variant.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" Size="Sm" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Ubuntu 24.04 LTS minimal" />
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Ubuntu 24.04 LTS minimal" />
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" Size="Lg" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Ubuntu 24.04 LTS minimal" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="The invalid and warning icons sit left of the clear button. Read-only drops the fill; disabled uses text-disabled.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" HelperText="Minimal images boot fastest" />
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Windows Server 2022" IsInvalid="True" InvalidText="Windows images need a bx2.8x32 flavor or larger" />
+                <cds:CdsComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Red Hat Enterprise Linux 8" IsWarning="True" WarnText="RHEL 8 reaches end of maintenance in 2029" />
+                <cds:CdsComboBox Label="Zone" Placeholder="Choose a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-east-2" IsReadOnly="True" />
+                <cds:CdsComboBox Label="Zone" Placeholder="Choose a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="jp-tok-1" IsEnabled="False" HelperText="Set by the cluster template" />
+                <cds:CdsDropdownSkeleton />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Rich items and a custom filter" Description="Rows from an ItemTemplate; ItemToString gives the text the filter and the field use. Eric and Elena both match 'e'.">
+            <Grid HeightRequest="360" WidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsComboBox Label="Owner" Placeholder="Search people" Size="Lg" ItemsSource="{x:Static data:GListData.People}"
+                                 ItemToString="{x:Static data:GListData.PersonToString}" VerticalOptions="Start">
+                    <cds:CdsComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="data:GPerson">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <cds:CdsText Text="{Binding Name}" />
+                                <cds:CdsText Grid.Column="1" Text="{Binding Email}" Tone="Secondary" LineBreakMode="TailTruncation" />
+                            </Grid>
+                        </DataTemplate>
+                    </cds:CdsComboBox.ItemTemplate>
+                </cds:CdsComboBox>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom value" Description="AllowCustomValue keeps typed text that matches nothing: press Return to use an image ID that is not listed.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsComboBox x:Name="CustomCombo" Label="Image" Placeholder="Choose or enter an image ID" ItemsSource="{x:Static data:GListData.Images}"
+                                 AllowCustomValue="True" InputText="r014-7a1d3c9e" HelperText="Press Enter to use an image ID that is not listed"
+                                 SelectionChanged="OnImageChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fields on a layer-01 surface go inside a CdsLayer so they step to field-02.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsComboBox Label="Zone" Placeholder="Choose a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="eu-gb-1" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Every color is a token, so the field and list follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-south-2" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

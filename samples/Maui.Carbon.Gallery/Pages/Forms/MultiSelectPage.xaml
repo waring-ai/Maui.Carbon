@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.MultiSelectPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open, two selected" Description="Checkbox rows; the rows that were selected when the list opened are listed first, and the field shows the count tag. The list stays open while you toggle.">
+            <Grid HeightRequest="320" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}"
+                                    SelectedItems="{x:Static data:GListData.SelectedEvents}" VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Nothing selected" Description="Without a selection the field shows only its text and no tag.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Filterable" Description="IsFilterable turns the field into a text input that narrows the list; the list stays open while choosing. Space types a space.">
+            <Grid HeightRequest="300" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Filter roles" IsFilterable="True" ItemsSource="{x:Static data:GListData.Roles}"
+                                    SelectedItems="{x:Static data:GListData.SelectedRole}" VerticalOptions="Start" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Selection feedback" Description="TopAfterReopen (default) lists the rows selected when the list opened first; Top moves rows as they are chosen; Fixed keeps the order of the items.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Top after reopen" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannels}" />
+                <cds:CdsMultiSelect Label="Top" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannels}" SelectionFeedback="Top" />
+                <cds:CdsMultiSelect Label="Fixed" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannels}" SelectionFeedback="Fixed" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default) and lg 48.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" Size="Sm" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannel}" />
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannel}" />
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" Size="Lg" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannel}" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid and warning are ignored while disabled or read-only. The tag mutes when the field is disabled or read-only.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" HelperText="Alerts go to every channel you choose" />
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" IsInvalid="True" InvalidText="Choose at least one channel so alerts reach someone" />
+                <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedWebhook}" IsWarning="True" WarnText="Webhook https://hooks.example.com failed its last test" />
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Choose roles" ItemsSource="{x:Static data:GListData.Roles}" SelectedItems="{x:Static data:GListData.SelectedRoles}" IsReadOnly="True" />
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Choose roles" ItemsSource="{x:Static data:GListData.Roles}" SelectedItems="{x:Static data:GListData.SelectedRole}" IsEnabled="False" HelperText="Owners always have every role" />
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Filter roles" IsFilterable="True" ItemsSource="{x:Static data:GListData.Roles}" SelectedItems="{x:Static data:GListData.SelectedRoles}" />
+                <cds:CdsDropdownSkeleton />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline" Description="No fill, the label to the start: for filter bars, with 'All' as the empty label. Not for filterable lists in forms.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Type="Inline" Label="Status" Placeholder="All" ItemsSource="{x:Static data:GListData.Statuses}" SelectedItems="{x:Static data:GListData.SelectedStatus}" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Choose statuses; the count and the selection are reported below.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Status" Placeholder="All" ItemsSource="{x:Static data:GListData.Statuses}" SelectionChanged="OnStatusChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Showing every status" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fields on a layer-01 surface go inside a CdsLayer so they step to field-02.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannels}" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Every color is a token, so the field, tag and list follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsMultiSelect Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectedItems="{x:Static data:GListData.SelectedChannels}" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
