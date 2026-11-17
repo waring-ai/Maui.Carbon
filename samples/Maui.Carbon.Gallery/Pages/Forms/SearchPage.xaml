@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.SearchPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="The clear button appears once there is text; Escape clears it too. The label is never shown: it names the input.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSearch Label="Search clusters" Placeholder="Search by name or region" />
+                <cds:CdsSearch Label="Search clusters" Text="prod-eu" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default), lg 48. Match the height of the controls beside it; lg in a table toolbar.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSearch Label="Small" Size="Sm" Text="Small" />
+                <cds:CdsSearch Label="Medium" Size="Md" Text="Medium" />
+                <cds:CdsSearch Label="Large" Size="Lg" Text="Large" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Expandable" Description="Collapsed to the magnifier in tight toolbars; activating it expands the field and focuses the input. It collapses again on blur or Escape while empty.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSearch Label="Search API keys" Placeholder="Search API keys" IsExpandable="True" />
+                <cds:CdsSearch Label="Search API keys" Placeholder="Search API keys" IsExpandable="True" IsExpanded="True" Text="ci-" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled hides the placeholder and dims the icons.">
+            <cds:CdsSearch Label="Search clusters" IsEnabled="False" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Type and press Return to search; the clear button and Escape report Cleared.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSearch x:Name="Query" Label="Search clusters" Placeholder="Search by name or region" Completed="OnCompleted" Cleared="OnCleared" TextChanged="OnTextChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for a query" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsSearch Label="Search" Placeholder="Search by name" />
+                            <cds:CdsSearch Label="Search" Text="prod-eu" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSearch Label="Search" Text="prod-eu" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

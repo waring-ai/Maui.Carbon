@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.NumberInputPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Steppers clamp to Min and Max. State the allowed range in the helper text, not only in the error.">
+            <cds:CdsNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" HelperText="Between 1 and 10" InvalidText="Enter a number from 1 to 10" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default), lg 48; the steppers are as wide as the field is tall.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInput Label="Small" Size="Sm" Value="4" />
+                <cds:CdsNumberInput Label="Medium" Value="4" />
+                <cds:CdsNumberInput Label="Large" Size="Lg" Value="4" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="A value outside the range, or an empty field without AllowEmpty, is invalid automatically. Read-only dims the steppers; disabled uses text-disabled.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInput Label="Worker nodes" Min="1" Max="10" Value="14" InvalidText="Enter a number from 1 to 10" />
+                <cds:CdsNumberInput Label="Replicas" Value="1" IsWarning="True" WarnText="One replica has no redundancy." />
+                <cds:CdsNumberInput Label="Pool size" Value="6" IsReadOnly="True" />
+                <cds:CdsNumberInput Label="Zones" Value="3" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Decimals, empty and no steppers" Description="Precision follows the step and the value (0.1 steps never show 0.30000000000000004). AllowEmpty lets the field be blank; HideSteppers leaves a typed value with Up and Down.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInput Label="CPU limit (cores)" Step="0.1" Min="0.1" Max="4" Value="0.5" />
+                <cds:CdsNumberInput Label="Timeout (seconds, optional)" AllowEmpty="True" Value="{x:Null}" Placeholder="No timeout" />
+                <cds:CdsNumberInput Label="Retries" HideSteppers="True" Min="0" Max="5" Value="2" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Use the buttons, the Up and Down keys, or type: the status reports value and direction.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" ValueChanged="OnValueChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Value is 3" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" HelperText="Between 1 and 10" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNumberInput Label="Replicas" Min="1" Max="5" Value="2" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
