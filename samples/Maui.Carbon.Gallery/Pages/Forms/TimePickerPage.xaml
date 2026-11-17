@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.TimePickerPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="12-hour with time zone" Description="A specific moment needs AM or PM and a time zone. The time field is set in the mono font and sits 1px from the selects.">
+            <cds:CdsTimePicker x:Name="MaintenanceStart" Label="Start time" Text="2:30" Period="Pm" SelectedTimeZone="CET">
+                <cds:CdsTimePicker.TimeZones>
+                    <x:String>UTC</x:String>
+                    <x:String>CET</x:String>
+                    <x:String>EST</x:String>
+                </cds:CdsTimePicker.TimeZones>
+            </cds:CdsTimePicker>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="24-hour" Description="24-hour times need neither the AM/PM select nor a zone.">
+            <cds:CdsTimePicker Label="Backup time" Is24Hour="True" Text="14:30" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default), lg 48 for the input and the selects.">
+            <VerticalStackLayout Spacing="24" HorizontalOptions="Start">
+                <cds:CdsTimePicker Label="Small" Size="Sm" Text="9:00" />
+                <cds:CdsTimePicker Label="Medium" Text="9:00" />
+                <cds:CdsTimePicker Label="Large" Size="Lg" Text="9:00" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="The message sits under the whole group. Invalid and warning widen the time field for the icon.">
+            <VerticalStackLayout Spacing="24" HorizontalOptions="Start">
+                <cds:CdsTimePicker Label="Start time" Text="25:61" IsInvalid="True" InvalidText="Use the format hh:mm, for example 2:30" />
+                <cds:CdsTimePicker Label="Start time" Text="11:55" Period="Pm" IsWarning="True" WarnText="Starts five minutes before midnight." />
+                <cds:CdsTimePicker Label="Window start" Text="2:30" IsReadOnly="True" />
+                <cds:CdsTimePicker Label="Window end" Text="4:30" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Type a time and leave the field (or press Return): malformed text is flagged by Validate.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <cds:CdsTimePicker x:Name="Typed" Label="Report time" Is24Hour="True" TextChanged="OnTextChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTimePicker Label="Start time" Text="2:30" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTimePicker Label="Start time" Is24Hour="True" Text="14:30" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

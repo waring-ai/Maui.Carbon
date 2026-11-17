@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.FormPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="A create form" Description="Header, labelled fields 32 apart, one FormGroup per related set, actions last: Cancel before the primary action.">
+            <cds:CdsForm WidthRequest="420" HorizontalOptions="Start" SemanticProperties.Description="Create cluster">
+                <cds:CdsText Text="Create cluster" TypeStyle="Heading03" />
+                <cds:CdsFormGroup Legend="Location" MessageText="Pick where the cluster runs.">
+                    <cds:CdsSelect Label="Region" SelectedItem="eu-de" HelperText="Data stays in the region you choose.">
+                        <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                        <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                        <cds:CdsSelectItem Value="jp-tok" Text="Tokyo (jp-tok)" />
+                    </cds:CdsSelect>
+                </cds:CdsFormGroup>
+                <cds:CdsTextInput Label="Cluster name" Placeholder="e.g. prod-eu-de-1" HelperText="Lowercase letters, numbers and dashes." />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                    <cds:CdsButton x:Name="CreateButton" Text="Create cluster" Clicked="OnCreate" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Not submitted" />
+            </cds:CdsForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="FormGroup states" Description="The group message turns text-error when the group is invalid. A disabled group disables every nested control and greys the legend.">
+            <VerticalStackLayout Spacing="32" WidthRequest="420" HorizontalOptions="Start">
+                <cds:CdsFormGroup Legend="Billing contact" MessageText="Add at least one contact." IsInvalid="True">
+                    <cds:CdsTextInput Label="Email" Placeholder="name@example.com" />
+                </cds:CdsFormGroup>
+                <cds:CdsFormGroup Legend="Zones" MessageText="Zones can't change after creation." IsEnabled="False">
+                    <cds:CdsTextInput Label="Primary zone" Text="eu-de-1" />
+                </cds:CdsFormGroup>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="FormItem and FormLabel" Description="Wrap a custom control so it lines up with Carbon fields. FormLabel can hold a toggletip after its text, and tapping it focuses the control.">
+            <cds:CdsFormItem WidthRequest="420" HorizontalOptions="Start">
+                <cds:CdsFormLabel x:Name="ReplicaLabel" Text="Replicas (optional)" />
+                <cds:CdsNumberInput x:Name="ReplicaInput" Label="Replicas" HideLabel="True" Min="1" Max="5" Value="2" />
+            </cds:CdsFormItem>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Tight form" Description="Dense forms stack fields 24 apart.">
+            <cds:CdsForm IsTight="True" WidthRequest="420" HorizontalOptions="Start">
+                <cds:CdsTextInput Label="Key name" Placeholder="e.g. ci-pipeline" />
+                <cds:CdsTextInput Label="Owner" Text="platform-team" />
+            </cds:CdsForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsForm IsTight="True">
+                            <cds:CdsFormGroup Legend="Location" MessageText="Pick where the cluster runs.">
+                                <cds:CdsTextInput Label="Region" Text="eu-de" />
+                            </cds:CdsFormGroup>
+                            <cds:CdsFormGroup Legend="Zones" MessageText="Not editable." IsEnabled="False">
+                                <cds:CdsTextInput Label="Zone" Text="eu-de-1" />
+                            </cds:CdsFormGroup>
+                        </cds:CdsForm>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsFormGroup Legend="Location" MessageText="Pick where the cluster runs.">
+                            <cds:CdsTextInput Label="Region" Text="eu-de" />
+                        </cds:CdsFormGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

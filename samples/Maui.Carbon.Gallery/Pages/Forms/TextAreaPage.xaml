@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.TextAreaPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Four rows by default; helper text says what a good answer contains.">
+            <cds:CdsTextArea Label="Justification" HelperText="Say what the extra capacity is for and how long you need it" Placeholder="e.g. Black Friday traffic" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Counter" Description="By characters (native limit) or by words (extra words are cut off). Pair the counter with a limit people can act on.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextArea Label="Justification" EnableCounter="True" MaxCount="300" Text="We expect 3x traffic during the sale." Rows="3" />
+                <cds:CdsTextArea Label="Summary" EnableCounter="True" MaxCount="20" CounterMode="Word" Text="Scale the checkout service ahead of the sale." Rows="3" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid draws a 2px support-error outline and an icon at the top right; warning uses the triangle; read-only drops the fill; disabled is skipped by Tab.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextArea Label="Justification" Rows="2" IsInvalid="True" InvalidText="Tell reviewers why you need the capacity." />
+                <cds:CdsTextArea Label="Justification" Rows="2" Text="Short note" IsWarning="True" WarnText="Reviewers usually ask for more detail." />
+                <cds:CdsTextArea Label="Approval note" Rows="2" Text="Approved by the platform team." IsReadOnly="True" />
+                <cds:CdsTextArea Label="Reviewer comment" Rows="2" Text="Locked after approval." IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="A 40-character limit: the counter follows as you type.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextArea Label="Change reason" Rows="3" EnableCounter="True" MaxCount="40" TextChanged="OnTextChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTextArea Label="Justification" Rows="3" Text="Capacity for the sale." HelperText="Say how long you need it" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTextArea Label="Comment" Rows="3" EnableCounter="True" MaxCount="100" Text="Looks good." />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
