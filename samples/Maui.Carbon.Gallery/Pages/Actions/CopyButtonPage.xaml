@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.CopyButtonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Feedback state" Description="After activation the tooltip switches to 'Copied!' for FeedbackTimeout ms. This button renders in that state (IsCopied) so it shows without interaction.">
+            <ContentView Padding="0,0,0,48">
+                <cds:CdsCopyButton Text="key-9f2c4e1a" IconDescription="Copy key ID" IsCopied="True" FeedbackTimeout="600000" />
+            </ContentView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm (32) inside a 32px field or value row, md (40, default) on its own, lg (48).">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsCopyButton Text="sm" Size="Sm" IconDescription="Copy small" />
+                <cds:CdsCopyButton Text="md" Size="Md" IconDescription="Copy medium" />
+                <cds:CdsCopyButton Text="lg" Size="Lg" IconDescription="Copy large" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled uses icon-disabled and ignores input.">
+            <cds:CdsCopyButton Text="key-9f2c4e1a" IsEnabled="False" IconDescription="Copy key ID" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Next to a value" Description="Size it to the row it sits in: sm beside a 32px value row. The value is copied to the clipboard on activation.">
+            <Grid ColumnDefinitions="*,Auto" HorizontalOptions="Start" WidthRequest="360" BackgroundColor="Transparent">
+                <cds:CdsText x:Name="ValueLabel" Text="https://api.eu-de.example.cloud/v1/clusters" LineBreakMode="TailTruncation" VerticalOptions="Center" Margin="0,0,16,0" />
+                <cds:CdsCopyButton x:Name="EndpointCopy" Grid.Column="1" Size="Sm" Text="https://api.eu-de.example.cloud/v1/clusters"
+                                   IconDescription="Copy endpoint" Copied="OnCopied" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Tab to the button and press Enter or Space; the Copied event fires and 'Copied!' is announced to screen readers.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsCopyButton Text="prod-eu-de-1" IconDescription="Copy cluster name" Copied="OnCopied" TooltipPlacement="Right" />
+                <cds:CdsText x:Name="Status" Text="Nothing copied yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Layer-01 fill in every theme zone; layered zones step to the next layer's tokens.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsCopyButton Text="x" Size="Md" />
+                            <cds:CdsCopyButton Text="x" Size="Md" IsEnabled="False" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.ButtonSetPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Two buttons" Description="Equal widths, no gap, a 1px button-separator hairline between them. In a dialog or side panel the primary goes last; in an in-page form it goes first.">
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsButtonSet Label="Dialog actions">
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                    <cds:CdsButton Text="Create cluster" Kind="Primary" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet Label="Form actions">
+                    <cds:CdsButton Text="Save changes" Kind="Primary" />
+                    <cds:CdsButton Text="Discard" Kind="Tertiary" />
+                </cds:CdsButtonSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Three buttons" Description="At most three; more actions belong in a menu button.">
+            <cds:CdsButtonSet>
+                <cds:CdsButton Text="Back" Kind="Ghost" />
+                <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                <cds:CdsButton Text="Next" Kind="Primary" />
+            </cds:CdsButtonSet>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Stacked" Description="IsStacked for narrow columns and side panels. The primary is first.">
+            <cds:CdsButtonSet IsStacked="True">
+                <cds:CdsButton Text="Create cluster" Kind="Primary" />
+                <cds:CdsButton Text="Save as draft" Kind="Secondary" />
+                <cds:CdsButton Text="Cancel" Kind="Ghost" />
+            </cds:CdsButtonSet>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Danger and disabled" Description="Disabled buttons use their own separator color (icon-on-color-disabled, layer-selected-disabled when stacked).">
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                    <cds:CdsButton Text="Delete key" Kind="Danger" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                    <cds:CdsButton Text="Deploy" Kind="Primary" IsEnabled="False" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet IsStacked="True">
+                    <cds:CdsButton Text="Deploy" Kind="Primary" IsEnabled="False" />
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" IsEnabled="False" />
+                </cds:CdsButtonSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Heights follow the Button size; use one size per set.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Sm" />
+                    <cds:CdsButton Text="Apply" Kind="Primary" Size="Sm" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Md" />
+                    <cds:CdsButton Text="Apply" Kind="Primary" Size="Md" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Xl" />
+                    <cds:CdsButton Text="Apply" Kind="Primary" Size="Xl" />
+                </cds:CdsButtonSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Fluid" Description="The modal-footer form: right-aligned and filling its container, sorted by kind whatever the child order, stacking itself (primary first) when narrow.">
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsButtonSet IsFluid="True" MaximumWidthRequest="640" HorizontalOptions="Start" WidthRequest="640">
+                    <cds:CdsButton Text="Delete key" Kind="Danger" Size="Xl" />
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Xl" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet IsFluid="True" MaximumWidthRequest="640" HorizontalOptions="Start" WidthRequest="640">
+                    <cds:CdsButton Text="Next" Kind="Primary" Size="Xl" />
+                    <cds:CdsButton Text="Back" Kind="Secondary" Size="Xl" />
+                    <cds:CdsButton Text="Skip" Kind="Ghost" Size="Xl" />
+                </cds:CdsButtonSet>
+                <cds:CdsButtonSet IsFluid="True" MaximumWidthRequest="320" HorizontalOptions="Start" WidthRequest="320">
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Xl" />
+                    <cds:CdsButton Text="Save" Kind="Primary" Size="Xl" />
+                </cds:CdsButtonSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Each button reports through its own Clicked event.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsButtonSet>
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Clicked="OnCancelClicked" />
+                    <cds:CdsButton Text="Create cluster" Kind="Primary" Clicked="OnCreateClicked" />
+                </cds:CdsButtonSet>
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same set in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsButtonSet>
+                            <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Md" />
+                            <cds:CdsButton Text="Apply" Kind="Primary" Size="Md" />
+                        </cds:CdsButtonSet>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

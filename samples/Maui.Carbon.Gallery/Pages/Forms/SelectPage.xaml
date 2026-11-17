@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.SelectPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="The platform's own list inside Carbon chrome. Preselect the common default; use Placeholder only when a choice is required.">
+            <cds:CdsSelect Label="Region" SelectedItem="us-south" HelperText="Data stays in the region you choose" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelectItemGroup Label="Americas">
+                    <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                    <cds:CdsSelectItem Value="us-east" Text="Washington DC (us-east)" />
+                </cds:CdsSelectItemGroup>
+                <cds:CdsSelectItemGroup Label="Europe">
+                    <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                    <cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" />
+                </cds:CdsSelectItemGroup>
+            </cds:CdsSelect>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 (default), lg 48.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelect x:Name="SmallSelect" Label="Small" Size="Sm" />
+                <cds:CdsSelect x:Name="MediumSelect" Label="Medium" />
+                <cds:CdsSelect x:Name="LargeSelect" Label="Large" Size="Lg" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid draws a 2px support-error outline and icon; warning shows the triangle; read-only blocks changes but stays focusable; disabled is skipped by Tab.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelect x:Name="InvalidSelect" Label="Region" IsInvalid="True" InvalidText="Choose a region." Placeholder="Choose a region" />
+                <cds:CdsSelect x:Name="WarnSelect" Label="Storage class" IsWarning="True" WarnText="Cold storage has a retrieval fee." />
+                <cds:CdsSelect x:Name="ReadOnlySelect" Label="Plan" IsReadOnly="True" />
+                <cds:CdsSelect x:Name="DisabledSelect" Label="Zone" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline" Description="Transparent with no underline and the label beside it: for toolbars and table headers, not stacked forms.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelect x:Name="InlineSelect" Label="Sort by" IsInline="True" />
+                <cds:CdsSelect x:Name="InlineInvalidSelect" Label="Sort by" IsInline="True" IsInvalid="True" InvalidText="Pick a sort order." Placeholder="Choose" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Choose a size: the status shows the selected item and its index.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelect x:Name="Sizes" Label="Node size" SelectedItemChanged="OnSelectedItemChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing chosen" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSelect Label="Region" SelectedItem="eu-de" HelperText="Pick one">
+                            <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                            <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                        </cds:CdsSelect>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSelect Label="Region" SelectedItem="eu-de">
+                            <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                            <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                        </cds:CdsSelect>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -38,6 +38,8 @@ public partial class CdsHitTargetHandler
         b.MinWidth = 0;
     }
 
+    partial void UpdateTabStop(CdsHitTarget target) => PlatformView.IsTabStop = target.IsTabStop;
+
     partial void UpdateAccessibility(CdsHitTarget target)
     {
         if (PlatformView is not CdsWindowsHitTargetView view) return;

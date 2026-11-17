@@ -15,6 +15,7 @@ public partial class CdsHitTargetHandler : ButtonHandler
             [nameof(CdsHitTarget.IsSelected)] = MapAccessibility,
             [nameof(CdsHitTarget.IsExpanded)] = MapAccessibility,
             [nameof(IView.IsEnabled)] = MapIsEnabled,
+            [nameof(CdsHitTarget.IsTabStop)] = static (h, t) => h.UpdateTabStop(t),
         };
 
     /// <summary>Creates the handler.</summary>
@@ -35,4 +36,6 @@ public partial class CdsHitTargetHandler : ButtonHandler
     partial void StripChrome();
 
     partial void UpdateAccessibility(CdsHitTarget target);
+
+    partial void UpdateTabStop(CdsHitTarget target);
 }

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.LinkPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Sizes" Description="sm 12/16, md 14/18 (default) and lg 16/22. Standalone links have no underline until hover.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsLink Text="View all buckets" Href="https://example.com/buckets" Size="Sm" />
+                <cds:CdsLink Text="View all buckets" Href="https://example.com/buckets" />
+                <cds:CdsLink Text="View all buckets" Href="https://example.com/buckets" Size="Lg" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With icon" Description="The 16 icon sits 8 after the text in the text color: ArrowRight for internal destinations, Launch for external ones.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsLink Text="Cluster overview" Href="https://example.com/clusters" Icon="ArrowRight" />
+                <cds:CdsLink Text="Service status page" Href="https://status.example.com" Icon="Launch" />
+                <cds:CdsLink Text="Service status page" Href="https://status.example.com" Icon="Launch" Size="Lg" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline" Description="Inline links are underlined so they are distinguishable without color. CdsLinkSpan lives inside formatted text and takes the paragraph's size; it cannot take keyboard focus, so keep an alternative route to the destination.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <cds:CdsText TypeStyle="Body01">
+                    <cds:CdsText.FormattedText>
+                        <FormattedString>
+                            <Span Text="Volumes are kept for 7 days, see " />
+                            <cds:CdsLinkSpan Text="volume retention" Href="https://example.com/docs/retention" />
+                            <Span Text=" to change this. Backups follow the " />
+                            <cds:CdsLinkSpan Text="snapshot policy" Href="https://example.com/docs/snapshots" IsVisited="True" />
+                            <Span Text="." />
+                        </FormattedString>
+                    </cds:CdsText.FormattedText>
+                </cds:CdsText>
+                <cds:CdsLink Text="Inline link as a block" Href="https://example.com/docs" IsInline="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Visited and disabled" Description="IsVisited opts in to link-visited for destinations the user has been to (use sparingly). A disabled link is text-disabled and leaves the tab order; explain nearby why it is unavailable.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsLink Text="Visited destination" Href="https://example.com/visited" IsVisited="True" />
+                <cds:CdsLink Text="Unavailable report" Href="https://example.com/report" IsEnabled="False" />
+                <cds:CdsLink Text="Unavailable report" Href="https://example.com/report" Icon="Launch" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On an inverse surface" Description="High-contrast surfaces (notifications, toggletips) use the link-inverse colors.">
+            <Border StrokeThickness="0" Padding="16" HorizontalOptions="Start" BackgroundColor="{DynamicResource CdsBackgroundInverse}">
+                <VerticalStackLayout Spacing="8">
+                    <cds:CdsText Text="Your trial ends in 3 days." Tone="Inverse" />
+                    <cds:CdsLink Text="Upgrade your plan" Href="https://example.com/upgrade" IsInverse="True" Icon="ArrowRight" />
+                </VerticalStackLayout>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Tab to the link and press Enter, or click: Clicked fires before the address opens.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsLink x:Name="DemoLink" Text="Open the documentation" Href="https://carbondesignsystem.com" Icon="Launch" Clicked="OnLinkClicked" />
+                <cds:CdsText x:Name="Status" Text="Not clicked yet" TypeStyle="Label01" Tone="Secondary" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same links in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsLink Text="View all buckets" Href="https://example.com/buckets" />
+                            <cds:CdsLink Text="Service status" Href="https://status.example.com" Icon="Launch" />
+                            <cds:CdsLink Text="Visited" Href="https://example.com/v" IsVisited="True" />
+                            <cds:CdsLink Text="Disabled" Href="https://example.com/d" IsEnabled="False" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.LoadingPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Large and small" Description="Large is 88 with a 10-unit arc; small is 16 with a track. Both rotate once every 690ms (a static arc under reduced motion). Without WithOverlay it renders only the spinner.">
+            <HorizontalStackLayout Spacing="48" VerticalOptions="Center">
+                <cds:CdsLoading WithOverlay="False" Description="Refreshing metrics" />
+                <cds:CdsLoading IsSmall="True" WithOverlay="False" Description="Refreshing metrics" />
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsLoading IsSmall="True" WithOverlay="False" Description="Loading data" />
+                    <cds:CdsText Text="Loading data..." TypeStyle="Label02" Tone="Secondary" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Overlay" Description="WithOverlay opens a modal overlay (the default) and covers the page with the overlay scrim for 3 seconds. It does not trap focus.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsButton Text="Recalculate billing" Size="Md" Clicked="OnRecalculate" />
+                <cds:CdsLoading x:Name="Overlay" IsActive="False" Description="Recalculating billing summary" />
+                <cds:CdsText x:Name="Status" Text="Idle" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="24">
+                            <cds:CdsLoading WithOverlay="False" Description="Loading" />
+                            <cds:CdsLoading IsSmall="True" WithOverlay="False" Description="Loading" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

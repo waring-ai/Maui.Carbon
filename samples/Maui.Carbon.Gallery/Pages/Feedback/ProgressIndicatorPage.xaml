@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.ProgressIndicatorPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Horizontal" Description="Steps before CurrentIndex are complete, that step is current, later ones incomplete. A 2px line runs along the top edge of each step.">
+            <cds:CdsProgressIndicator CurrentIndex="1">
+                <cds:CdsProgressStep Label="Choose plan" />
+                <cds:CdsProgressStep Label="Configure nodes" />
+                <cds:CdsProgressStep Label="Networking" />
+                <cds:CdsProgressStep Label="Review" />
+            </cds:CdsProgressIndicator>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Space equally" Description="Steps share the width, at least 128 each.">
+            <cds:CdsProgressIndicator CurrentIndex="2" SpaceEqually="True" MaximumWidthRequest="720" HorizontalOptions="Start">
+                <cds:CdsProgressStep Label="Choose plan" />
+                <cds:CdsProgressStep Label="Configure nodes" />
+                <cds:CdsProgressStep Label="Networking" />
+                <cds:CdsProgressStep Label="Review" />
+            </cds:CdsProgressIndicator>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Vertical with invalid, optional and disabled" Description="Invalid shows a support-error warning with a hint in the secondary label; disabled steps use icon-disabled and text-disabled and are skipped by Tab.">
+            <cds:CdsProgressIndicator IsVertical="True" CurrentIndex="2">
+                <cds:CdsProgressStep Label="Choose plan" />
+                <cds:CdsProgressStep Label="Configure nodes" />
+                <cds:CdsProgressStep Label="Networking" IsInvalid="True" SecondaryLabel="Fix the subnet" />
+                <cds:CdsProgressStep Label="Add-ons" SecondaryLabel="Optional" />
+                <cds:CdsProgressStep Label="Review" IsDisabled="True" />
+            </cds:CdsProgressIndicator>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="IsClickable makes steps tabbable and clickable (not the current or disabled ones). Here only earlier steps can be revisited; Back and Next move CurrentIndex.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsProgressIndicator x:Name="Demo" IsClickable="True" CurrentIndex="1" StepRequested="OnStepRequested" CurrentIndexChanged="OnIndexChanged">
+                    <cds:CdsProgressStep Label="Choose plan" />
+                    <cds:CdsProgressStep Label="Configure nodes" />
+                    <cds:CdsProgressStep Label="Networking" />
+                    <cds:CdsProgressStep Label="Add-ons" SecondaryLabel="Optional" />
+                    <cds:CdsProgressStep Label="Review" />
+                </cds:CdsProgressIndicator>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Back" Kind="Secondary" Size="Md" Clicked="OnBack" />
+                    <cds:CdsButton Text="Next" Size="Md" Clicked="OnNext" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Step 2 of 5" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsProgressIndicator IsVertical="True" CurrentIndex="1">
+                            <cds:CdsProgressStep Label="Choose plan" />
+                            <cds:CdsProgressStep Label="Configure" />
+                            <cds:CdsProgressStep Label="Networking" IsInvalid="True" SecondaryLabel="Fix subnet" />
+                            <cds:CdsProgressStep Label="Review" IsDisabled="True" />
+                        </cds:CdsProgressIndicator>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

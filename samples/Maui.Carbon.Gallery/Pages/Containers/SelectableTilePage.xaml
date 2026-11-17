@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Containers.SelectableTilePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default and selected" Description="A 16px checkbox glyph sits 16px from the top-right corner: icon-secondary when unselected, icon-primary when selected, when the tile also gets a 1px layer-selected-inverse border.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsSelectableTile WidthRequest="240">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Search and retain logs for 30 days" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile IsSelected="True" WidthRequest="240">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Daily snapshots, 14 day retention" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile WidthRequest="240">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Monitoring" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Metrics and alerts" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled tiles use icon-disabled, no hover, and border-disabled when selected.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsSelectableTile IsEnabled="False" WidthRequest="240">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Dedicated hardware" TypeStyle="HeadingCompact01" Tone="Disabled" />
+                        <cds:CdsText Text="Not available in this region" Tone="Disabled" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile IsEnabled="False" IsSelected="True" WidthRequest="240">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Audit trail" TypeStyle="HeadingCompact01" Tone="Disabled" />
+                        <cds:CdsText Text="Included in your plan" Tone="Disabled" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click anywhere on a tile, or focus it with Tab and press Space or Enter. Summarize the selection near the action.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsSelectableTile x:Name="LogsTile" SelectedChanged="OnSelectionChanged" WidthRequest="240">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="$20 per month" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsSelectableTile>
+                    <cds:CdsSelectableTile x:Name="BackupsTile" SelectedChanged="OnSelectionChanged" WidthRequest="240">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="$35 per month" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsSelectableTile>
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No add-ons selected" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="On a layer-01 panel the tiles sit inside a CdsLayer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsSelectableTile>
+                                <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                            </cds:CdsSelectableTile>
+                            <cds:CdsSelectableTile IsSelected="True">
+                                <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                            </cds:CdsSelectableTile>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same tiles in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsSelectableTile>
+                                <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                            </cds:CdsSelectableTile>
+                            <cds:CdsSelectableTile IsSelected="True">
+                                <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                            </cds:CdsSelectableTile>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

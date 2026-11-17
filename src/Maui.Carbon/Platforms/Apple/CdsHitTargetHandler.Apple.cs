@@ -22,6 +22,11 @@ public partial class CdsHitTargetHandler
         PlatformView.TintColor = UIColor.Clear;
     }
 
+    partial void UpdateTabStop(CdsHitTarget target)
+    {
+        if (PlatformView is CdsAppleHitTargetView view) view.IsTabStop = target.IsTabStop;
+    }
+
     partial void UpdateAccessibility(CdsHitTarget target)
     {
         var traits = target.Role switch
@@ -77,7 +82,9 @@ internal sealed class CdsAppleHitTargetView : UIButton
 
     CdsHitTarget? Target => Owner is not null && Owner.TryGetTarget(out var t) ? t : null;
 
-    public override bool CanBecomeFocused => Enabled && !Hidden && UserInteractionEnabled;
+    public bool IsTabStop { get; set; } = true;
+
+    public override bool CanBecomeFocused => IsTabStop && Enabled && !Hidden && UserInteractionEnabled;
 
     public override void DidUpdateFocus(UIFocusUpdateContext context, UIFocusAnimationCoordinator coordinator)
     {

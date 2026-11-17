@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Layout.AspectRatioPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Ratios" Description="The height is the width divided by the ratio. The 2x Grid recommends 1:1, 2:1, 2:3, 3:2, 4:3 and 16:9; every box here is 160 wide.">
+            <FlexLayout x:Name="RatioFlex" Wrap="Wrap" AlignItems="End" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom ratio and media" Description="CustomRatio overrides the named ratio. Children fill the box and are clipped to it; the box adds no background, border or padding.">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsAspectRatio CustomRatio="2.39" WidthRequest="240">
+                    <BoxView Color="{DynamicResource CdsLayerAccent01}" />
+                    <cds:CdsText Text="2.39:1" HorizontalOptions="Center" VerticalOptions="Center" />
+                </cds:CdsAspectRatio>
+                <cds:CdsAspectRatio Ratio="Ratio16x9" WidthRequest="240">
+                    <BoxView Color="{DynamicResource CdsLayer01}" />
+                    <VerticalStackLayout VerticalOptions="End" Padding="16" Spacing="2">
+                        <cds:CdsText Text="Cluster topology" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="prod-eu-1" TypeStyle="Label01" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsAspectRatio>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On the grid" Description="Inside grid columns the box follows the column width, so a row of thumbnails always lines up.">
+            <cds:CdsGrid x:Name="ThumbGrid" Breakpoint="Lg" />
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.FileUploaderPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Button" Description="The title and description state the limits; Accept filters the platform picker. Rows show every status: uploading (spinner), editable (remove button) and complete (check).">
+            <cds:CdsFileUploader x:Name="ButtonUploader" LabelTitle="Attach logs" LabelDescription="Max file size is 500 MB. Supported types are .log, .txt and .png." ButtonLabel="Add files" Accept=".log, .txt, .png" WidthRequest="400" HorizontalOptions="Start" FilesAdded="OnFilesAdded" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Drop container" Description="Drag files onto the dashed box, or click it to open the picker. Dragging over it draws the 2px focus outline.">
+            <cds:CdsFileUploader x:Name="DropUploader" Variant="Drop" LabelTitle="Import configuration" LabelDescription="Max file size is 10 MB. Supported types are .json and .yaml." Accept=".json, .yaml" Size="Md" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Invalid row" Description="A rejected file stays in the list with a 2px support-error outline, the error icon beside the remove button, and a title and supporting text under a divider.">
+            <cds:CdsFileUploader x:Name="InvalidUploader" LabelTitle="Attach logs" LabelDescription="Max file size is 500 MB." WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Row sizes" Description="Rows and the button share the height of the other fields: sm 32, md 40, lg 48 (default).">
+            <VerticalStackLayout Spacing="8" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFileUploaderItem Name="small-row.log" Size="Sm" />
+                <cds:CdsFileUploaderItem Name="medium-row.log" Size="Md" Status="Complete" />
+                <cds:CdsFileUploaderItem Name="large-row-with-a-very-long-file-name-that-needs-an-ellipsis.log" Status="Uploading" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled">
+            <cds:CdsFileUploader LabelTitle="Attach logs" LabelDescription="Uploads are paused during maintenance." IsEnabled="False" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Add files with the picker: the status reports what was added and removed.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFileUploader x:Name="LiveUploader" LabelTitle="Attach files" LabelDescription="Pick any file; it is marked complete after a moment." FilesAdded="OnLiveAdded" FileRemoved="OnLiveRemoved" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No files yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In the four themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsFileUploader LabelTitle="Attach logs" LabelDescription="Max file size is 500 MB." ButtonLabel="Add files" />
+                            <cds:CdsFileUploaderItem Name="cluster.log" Status="Complete" />
+                            <cds:CdsFileUploaderItem Name="events.log" Status="Uploading" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsFileUploaderItem Name="cluster.log" />
+                            <cds:CdsFileUploaderItem Name="events.log" IsInvalid="True" ErrorSubject="File is too large" ErrorBody="Choose a file under 500 MB." />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

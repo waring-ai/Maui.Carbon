@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.OverflowMenuPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open" Description="While the menu is open the trigger takes the layer-01 fill and the menu shadow, so it reads as part of the menu. Escape or a tap outside closes it.">
+            <ContentView HeightRequest="240" Padding="0,0,0,0">
+                <cds:CdsOverflowMenu x:Name="OpenMenu" IconDescription="Actions for ci-deploy" Size="Lg" IsOpen="True" Opened="OnOpened" Closed="OnClosed">
+                    <cds:CdsMenuItem Text="Rename" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Rotate key" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="View audit log" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Delete API key" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsOverflowMenu>
+            </ContentView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Match the row: xs 24, sm 32, md 40 (default) and lg 48. The menu items use the same height.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsOverflowMenu Size="Xs" IconDescription="Actions for row 1"><cds:CdsMenuItem Text="Rename" /><cds:CdsMenuItem Text="Delete" Kind="Danger" /></cds:CdsOverflowMenu>
+                <cds:CdsOverflowMenu Size="Sm" IconDescription="Actions for row 2"><cds:CdsMenuItem Text="Rename" /><cds:CdsMenuItem Text="Delete" Kind="Danger" /></cds:CdsOverflowMenu>
+                <cds:CdsOverflowMenu Size="Md" IconDescription="Actions for row 3"><cds:CdsMenuItem Text="Rename" /><cds:CdsMenuItem Text="Delete" Kind="Danger" /></cds:CdsOverflowMenu>
+                <cds:CdsOverflowMenu Size="Lg" IconDescription="Actions for row 4"><cds:CdsMenuItem Text="Rename" /><cds:CdsMenuItem Text="Delete" Kind="Danger" /></cds:CdsOverflowMenu>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icons" Description="Vertical dots (default) or horizontal dots; keep the standard icon.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsOverflowMenu Icon="OverflowMenuVertical" IconDescription="Vertical options"><cds:CdsMenuItem Text="Rename" /></cds:CdsOverflowMenu>
+                <cds:CdsOverflowMenu Icon="OverflowMenuHorizontal" IconDescription="Horizontal options"><cds:CdsMenuItem Text="Rename" /></cds:CdsOverflowMenu>
+                <cds:CdsOverflowMenu IconDescription="Disabled options" IsEnabled="False"><cds:CdsMenuItem Text="Rename" /></cds:CdsOverflowMenu>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In a table row" Description="Use IsFlipped when the trigger sits at the end of a row or card so the menu's end edge lines up with the trigger's and stays inside.">
+            <Grid ColumnDefinitions="*,Auto" WidthRequest="480" HorizontalOptions="Start" HeightRequest="48">
+                <cds:CdsText Text="ci-deploy" VerticalOptions="Center" Margin="16,0,0,0" />
+                <cds:CdsOverflowMenu Grid.Column="1" Size="Lg" IsFlipped="True" IconDescription="Actions for ci-deploy">
+                    <cds:CdsMenuItem Text="Rename" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Rotate key" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Delete API key" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsOverflowMenu>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Tab to the trigger, Enter or Space opens the menu, Up/Down move, Enter chooses, Escape returns focus to the trigger.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsOverflowMenu Size="Lg" IconDescription="Actions for prod-eu-de-1">
+                    <cds:CdsMenuItem Text="Restart" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Scale" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Upgrade" IsEnabled="False" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Delete cluster" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsOverflowMenu>
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same trigger in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsOverflowMenu Size="Md" IconDescription="Options"><cds:CdsMenuItem Text="Rename" /></cds:CdsOverflowMenu>
+                            <cds:CdsOverflowMenu Size="Md" IconDescription="Disabled options" IsEnabled="False"><cds:CdsMenuItem Text="Rename" /></cds:CdsOverflowMenu>
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

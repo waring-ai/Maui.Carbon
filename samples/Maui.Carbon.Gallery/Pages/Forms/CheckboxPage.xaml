@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.CheckboxPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A 16px box with a 1px icon-primary border. Checked and indeterminate fill with icon-primary and draw the mark in icon-inverse. The box and its label are one click target.">
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Start">
+                <cds:CdsCheckbox Label="Unchecked" />
+                <cds:CdsCheckbox Label="Checked" IsChecked="True" />
+                <cds:CdsCheckbox Label="Indeterminate" IsIndeterminate="True" />
+                <cds:CdsCheckbox Label="A long label wraps under itself instead of being truncated, so people can always read the whole option" IsChecked="True" WidthRequest="260" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Disabled uses icon-disabled and text-disabled. Read-only stays focusable and shows an outlined box with an icon-primary mark. Invalid draws the box in support-error with an error icon and message; warning adds a triangle.">
+            <HorizontalStackLayout Spacing="48">
+                <VerticalStackLayout Spacing="8" WidthRequest="260">
+                    <cds:CdsCheckbox Label="Disabled" IsEnabled="False" />
+                    <cds:CdsCheckbox Label="Disabled and checked" IsEnabled="False" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Disabled and indeterminate" IsEnabled="False" IsIndeterminate="True" />
+                    <cds:CdsCheckbox Label="Read-only" IsReadOnly="True" />
+                    <cds:CdsCheckbox Label="Read-only and checked" IsReadOnly="True" IsChecked="True" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="16" WidthRequest="300">
+                    <cds:CdsCheckbox Label="With helper text" HelperText="Sent once a day, at 08:00 UTC" />
+                    <cds:CdsCheckbox Label="Accept the terms" IsInvalid="True" InvalidText="You must accept the terms to continue" />
+                    <cds:CdsCheckbox Label="Public endpoint" IsChecked="True" IsWarning="True" WarnText="Anyone on the internet can reach this cluster" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Hidden label" Description="HideLabel keeps the label only for screen readers, for example in a table row.">
+            <cds:CdsCheckbox Label="Select row prod-eu-de-1" HideLabel="True" IsChecked="True" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Select all" Description="The parent is checked when every child is, indeterminate when some are, and unchecked when none are. Checking the parent checks every child.">
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Start">
+                <cds:CdsCheckbox x:Name="AllBox" Label="Select all clusters" CheckedChanged="OnAllChanged" />
+                <VerticalStackLayout Spacing="8" Margin="24,0,0,0">
+                    <cds:CdsCheckbox x:Name="ChildA" Label="prod-eu-de-1" IsChecked="True" CheckedChanged="OnChildChanged" />
+                    <cds:CdsCheckbox x:Name="ChildB" Label="prod-us-south-1" CheckedChanged="OnChildChanged" />
+                    <cds:CdsCheckbox x:Name="ChildC" Label="staging-eu-gb-1" CheckedChanged="OnChildChanged" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Activate the checkbox with a click or tap, or focus it with Tab and press Space.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <cds:CdsCheckbox Label="Email me when a deployment finishes" CheckedChanged="OnEmailChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Not checked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same checkboxes in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsCheckbox Label="Unchecked" />
+                            <cds:CdsCheckbox Label="Checked" IsChecked="True" />
+                            <cds:CdsCheckbox Label="Indeterminate" IsIndeterminate="True" />
+                            <cds:CdsCheckbox Label="Invalid" IsInvalid="True" InvalidText="Required" />
+                            <cds:CdsCheckbox Label="Disabled" IsChecked="True" IsEnabled="False" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

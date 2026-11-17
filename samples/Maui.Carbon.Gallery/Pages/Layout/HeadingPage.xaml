@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Layout.HeadingPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Nested sections" Description="A heading outside any section is level 1; every enclosing CdsSection adds one. The heading style follows the level (heading-05, -04, -03, -02, -01, heading-compact-01), and the level is reported to screen readers.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsHeading Text="prod-eu-1 (level 1)" />
+                <cds:CdsSection>
+                    <VerticalStackLayout Spacing="8">
+                        <cds:CdsHeading Text="Worker pools (level 2)" />
+                        <cds:CdsText Text="Supporting copy uses body-01 in text-secondary." TypeStyle="Body01" Tone="Secondary" />
+                        <cds:CdsSection>
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsHeading Text="default (level 3)" />
+                                <cds:CdsSection>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsHeading Text="Zones (level 4)" />
+                                        <cds:CdsSection>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsHeading Text="eu-de-1 (level 5)" />
+                                                <cds:CdsSection>
+                                                    <cds:CdsHeading Text="Nodes (level 6)" />
+                                                </cds:CdsSection>
+                                            </VerticalStackLayout>
+                                        </cds:CdsSection>
+                                    </VerticalStackLayout>
+                                </cds:CdsSection>
+                            </VerticalStackLayout>
+                        </cds:CdsSection>
+                    </VerticalStackLayout>
+                </cds:CdsSection>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Reusable component" Description="A card that contains a heading works at any depth: wrap it in a section and its heading takes the next level. Here the same card sits at level 2 and, nested one deeper, at level 3.">
+            <HorizontalStackLayout Spacing="48" x:Name="CardRow" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Forced level" Description="CdsSection.Level forces the level of its subtree. A TypeStyle set on the heading changes the look, never the structure.">
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsSection Level="3">
+                    <VerticalStackLayout Spacing="8">
+                        <cds:CdsHeading Text="Section forced to level 3" />
+                        <cds:CdsHeading Text="Level 3 in a compact style" TypeStyle="HeadingCompact01" />
+                    </VerticalStackLayout>
+                </cds:CdsSection>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Headings use text-primary in every theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsHeading Text="Clusters" />
+                            <cds:CdsSection>
+                                <cds:CdsHeading Text="Worker pools" />
+                            </cds:CdsSection>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

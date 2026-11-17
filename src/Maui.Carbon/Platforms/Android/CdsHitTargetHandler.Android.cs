@@ -30,6 +30,8 @@ public partial class CdsHitTargetHandler
         b.SetPadding(0, 0, 0, 0);
     }
 
+    partial void UpdateTabStop(CdsHitTarget target) => PlatformView.Focusable = target.IsTabStop;
+
     partial void UpdateAccessibility(CdsHitTarget target)
     {
         if (PlatformView is not CdsAndroidHitTargetView view) return;
@@ -69,7 +71,9 @@ internal sealed class CdsAndroidHitTargetView : MaterialButton
         if (Role is CdsAccessibilityRole.Checkbox or CdsAccessibilityRole.Radio or CdsAccessibilityRole.Switch or CdsAccessibilityRole.ToggleButton)
         {
             info.Checkable = true;
+#pragma warning disable CA1422 // Obsolete on API 36 in favour of a tri-state setter, but still honoured there.
             info.Checked = CheckedState == true;
+#pragma warning restore CA1422
         }
         if (Role is CdsAccessibilityRole.Tab or CdsAccessibilityRole.Option)
             info.Selected = SelectedState;

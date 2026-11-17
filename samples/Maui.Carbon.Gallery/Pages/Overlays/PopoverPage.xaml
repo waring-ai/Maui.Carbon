@@ -31,7 +31,7 @@
         <g:GalleryExample Title="Inside a theme zone" Description="The popover is shown in the page's overlay host but mirrors the trigger's theme and layer.">
             <cds:CdsTheme Theme="G100">
                 <ContentView Padding="24">
-                    <cds:CdsPopover x:Name="ZonePopover" Placement="BottomStart">
+                    <cds:CdsPopover x:Name="ZonePopover" Placement="BottomStart" IsOpen="True">
                         <cds:CdsButton Text="Open in g100" Kind="Tertiary" Size="Md" Clicked="OnZoneClicked" />
                         <cds:CdsPopover.PopoverContent>
                             <cds:CdsText Text="This surface uses g100's layer-01." Padding="16" WidthRequest="220" />

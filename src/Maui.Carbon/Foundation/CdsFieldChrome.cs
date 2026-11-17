@@ -130,6 +130,12 @@ public sealed class CdsFieldChrome : Grid
         }
     }
 
+    /// <summary>
+    /// Flat field: no fill and no bottom rule (inline Select and Dropdown, toolbar fields). Focus and error outlines
+    /// still show.
+    /// </summary>
+    public bool IsFlat { get; set; }
+
     /// <summary>The message currently shown (helper, error or warning), for the input's accessibility hint.</summary>
     public string? CurrentMessage => _message.IsVisible ? _message.Text : null;
 
@@ -144,9 +150,9 @@ public sealed class CdsFieldChrome : Grid
         var hover = state.HasFlag(CdsInteractionState.Hover) && !disabled && !readOnly;
 
         Set(_field, VisualElement.BackgroundColorProperty,
-            readOnly ? null : hover ? CdsColorKeys.FieldHover01 : CdsColorKeys.Field01);
+            readOnly ? null : hover ? CdsColorKeys.FieldHover01 : IsFlat ? null : CdsColorKeys.Field01);
         Set(_rule, BoxView.ColorProperty,
-            disabled ? null : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01);
+            disabled || IsFlat ? null : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01);
         Set(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         Set(_counter, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
 

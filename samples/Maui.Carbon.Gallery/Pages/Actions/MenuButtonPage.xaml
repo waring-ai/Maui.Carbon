@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.MenuButtonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open" Description="The chevron turns 180 degrees while the menu is open. With the default Bottom alignment the menu is at least as wide as the button.">
+            <ContentView HeightRequest="240">
+                <cds:CdsMenuButton x:Name="OpenButton" Label="Actions" Kind="Primary" IsOpen="True">
+                    <cds:CdsMenuItem Text="Restart cluster" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Scale worker pool" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Upgrade version" IsEnabled="False" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Delete cluster" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsMenuButton>
+            </ContentView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Kinds" Description="Primary (default), tertiary and ghost; secondary also renders. Non-ghost triggers are at least 12rem wide; ghost keeps its natural width.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <cds:CdsMenuButton Label="Actions" Kind="Primary" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /><cds:CdsMenuItem Text="Scale" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Export" Kind="Secondary" Margin="0,0,16,16"><cds:CdsMenuItem Text="As CSV" /><cds:CdsMenuItem Text="As JSON" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Export" Kind="Tertiary" Margin="0,0,16,16"><cds:CdsMenuItem Text="As CSV" /><cds:CdsMenuItem Text="As JSON" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="More" Kind="Ghost" Margin="0,0,16,16"><cds:CdsMenuItem Text="Share" /><cds:CdsMenuItem Text="Duplicate" /></cds:CdsMenuButton>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="xs 24, sm 32, md 40 and lg 48 (default); the menu items use the same height.">
+            <FlexLayout Wrap="Wrap" AlignItems="End">
+                <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Xs" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Sm" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Md" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Lg" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="A disabled menu button leaves the tab order and cannot open.">
+            <FlexLayout Wrap="Wrap">
+                <cds:CdsMenuButton Label="Actions" Kind="Primary" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Export" Kind="Tertiary" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="More" Kind="Ghost" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Menu alignment" Description="BottomEnd aligns the menu's end edge to the button's end edge and uses the menu's own width; TopStart opens above.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsMenuButton Label="Bottom end" Kind="Tertiary" Size="Md" MenuAlignment="BottomEnd"><cds:CdsMenuItem Text="Restart cluster" /><cds:CdsMenuItem Text="Scale worker pool" /></cds:CdsMenuButton>
+                <cds:CdsMenuButton Label="Top start" Kind="Tertiary" Size="Md" MenuAlignment="TopStart"><cds:CdsMenuItem Text="Restart cluster" /><cds:CdsMenuItem Text="Scale worker pool" /></cds:CdsMenuButton>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Tab to the button; Enter or Space opens the menu, Up/Down move, Enter chooses, Escape closes and returns focus to the button.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Md">
+                    <cds:CdsMenuItem Text="Restart cluster" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Scale worker pool" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Delete cluster" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsMenuButton>
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same buttons in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsMenuButton Label="Actions" Kind="Primary" Size="Md"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                            <cds:CdsMenuButton Label="Export" Kind="Tertiary" Size="Md"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                            <cds:CdsMenuButton Label="More" Kind="Ghost" Size="Md"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

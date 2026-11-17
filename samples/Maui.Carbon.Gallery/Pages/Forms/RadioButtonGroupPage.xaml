@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.RadioButtonGroupPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="An 18px circle with a 1px icon-primary ring and a half-size dot when selected. Prefer vertical: it scans faster and long labels wrap under themselves.">
+            <cds:CdsRadioButtonGroup Legend="Cluster type" Orientation="Vertical" SelectedValue="multi" HelperText="You can't change this after creation" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsRadioButton Label="Single zone" Value="single" />
+                <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                <cds:CdsRadioButton Label="A label that is long enough to need a second line so you can see it wrap under itself" Value="long" />
+            </cds:CdsRadioButtonGroup>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal and label position" Description="Horizontal radios sit 16px apart (the default). The label can sit left of the circle.">
+            <VerticalStackLayout Spacing="32" HorizontalOptions="Start">
+                <cds:CdsRadioButtonGroup Legend="Update policy" SelectedValue="auto" WidthRequest="520">
+                    <cds:CdsRadioButton Label="Automatic" Value="auto" />
+                    <cds:CdsRadioButton Label="Manual" Value="manual" />
+                    <cds:CdsRadioButton Label="Never" Value="never" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Label on the left" Orientation="Vertical" LabelPosition="Left" SelectedValue="b" WidthRequest="200">
+                    <cds:CdsRadioButton Label="Small" Value="a" />
+                    <cds:CdsRadioButton Label="Medium" Value="b" />
+                    <cds:CdsRadioButton Label="Large" Value="c" />
+                </cds:CdsRadioButtonGroup>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid turns the rings support-error and shows the message; warning shows a triangle. Read-only uses an icon-disabled ring and the selection cannot change. Disabled uses icon-disabled and text-disabled.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsRadioButtonGroup Legend="Invalid" Orientation="Vertical" IsInvalid="True" InvalidText="Choose a cluster type" HelperText="Hidden while invalid" WidthRequest="240">
+                    <cds:CdsRadioButton Label="Single zone" Value="single" />
+                    <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Warning" Orientation="Vertical" IsWarning="True" WarnText="Single zone has no failover" SelectedValue="single" WidthRequest="240">
+                    <cds:CdsRadioButton Label="Single zone" Value="single" />
+                    <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Read-only" Orientation="Vertical" IsReadOnly="True" SelectedValue="multi" WidthRequest="240">
+                    <cds:CdsRadioButton Label="Single zone" Value="single" />
+                    <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Disabled" Orientation="Vertical" IsEnabled="False" SelectedValue="single" HelperText="Hidden while disabled" WidthRequest="240">
+                    <cds:CdsRadioButton Label="Single zone" Value="single" />
+                    <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                </cds:CdsRadioButtonGroup>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click a radio, or focus the group with Tab and use the arrow keys: they move and select, wrapping at the ends and skipping disabled radios.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsRadioButtonGroup x:Name="Plan" Legend="Plan" Orientation="Vertical" SelectionChanged="OnPlanChanged">
+                    <cds:CdsRadioButton Label="Development" Value="dev" />
+                    <cds:CdsRadioButton Label="Standard" Value="std" />
+                    <cds:CdsRadioButton Label="Enterprise (contact sales)" Value="ent" IsEnabled="False" />
+                    <cds:CdsRadioButton Label="Premium" Value="pro" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing selected" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same group in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsRadioButtonGroup Legend="Cluster type" Orientation="Vertical" SelectedValue="multi" HelperText="Fixed after creation">
+                            <cds:CdsRadioButton Label="Single zone" Value="single" />
+                            <cds:CdsRadioButton Label="Multizone" Value="multi" />
+                        </cds:CdsRadioButtonGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

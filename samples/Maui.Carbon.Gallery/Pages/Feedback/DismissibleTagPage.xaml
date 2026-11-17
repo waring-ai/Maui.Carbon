@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Feedback.DismissibleTagPage">
+    <VerticalStackLayout Spacing="48">
+        <g:GalleryExample Title="Types" Description="Colors separate categories (region, status, owner). The close button hover circle uses tag-hover-*.">
+            <FlexLayout Wrap="Wrap">
+                <cds:CdsDismissibleTag Text="Red" Type="Red" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Magenta" Type="Magenta" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Purple" Type="Purple" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Blue" Type="Blue" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Cyan" Type="Cyan" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Teal" Type="Teal" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Green" Type="Green" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Gray" Type="Gray" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="CoolGray" Type="CoolGray" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="WarmGray" Type="WarmGray" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="HighContrast" Type="HighContrast" DismissLabel="Remove filter" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Outline" Type="Outline" DismissLabel="Remove filter" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes, icon and disabled" Description="sm 18, md 24, lg 32; icons are hidden at sm. Disabled uses layer-01 with an icon-disabled close icon; long labels truncate at 208.">
+            <FlexLayout Wrap="Wrap" AlignItems="Center">
+                <cds:CdsDismissibleTag Text="Region: us-east" Type="Blue" Size="Sm" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Region: us-east" Type="Blue" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Region: us-east" Type="Blue" Size="Lg" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="AI assisted" Type="Teal" Icon="AiGenerate" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
+                <cds:CdsDismissibleTag Text="A very long filter label that will certainly be truncated" Type="Purple" Margin="0,0,8,8" />
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Dismissed fires on the close button (Tab to it, Enter or Space); the tag does not hide itself, so remove it from your own state.">
+            <VerticalStackLayout Spacing="16">
+                <FlexLayout x:Name="Filters" Wrap="Wrap" />
+                <cds:CdsText x:Name="Status" Text="3 filters" />
+                <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Clicked="OnReset" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <FlexLayout Wrap="Wrap">
+                            <cds:CdsDismissibleTag Text="Region: us-east" Type="Blue" Margin="0,0,8,8" />
+                            <cds:CdsDismissibleTag Text="Status: running" Type="Green" Margin="0,0,8,8" />
+                            <cds:CdsDismissibleTag Text="High contrast" Type="HighContrast" Margin="0,0,8,8" />
+                            <cds:CdsDismissibleTag Text="Outline" Type="Outline" Margin="0,0,8,8" />
+                            <cds:CdsDismissibleTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
+                        </FlexLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

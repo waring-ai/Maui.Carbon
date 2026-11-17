@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.BreadcrumbPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Leave the current page out: the trail ends with its parent and the trailing slash leads into the page title.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsBreadcrumb>
+                    <cds:CdsBreadcrumbItem Text="Dashboard" Href="https://example.com/" />
+                    <cds:CdsBreadcrumbItem Text="Kubernetes" Href="https://example.com/kubernetes" />
+                    <cds:CdsBreadcrumbItem Text="Clusters" Href="https://example.com/kubernetes/clusters" />
+                </cds:CdsBreadcrumb>
+                <cds:CdsText Text="prod-us-south" TypeStyle="Heading04" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Current page, no trailing slash" Description="Include the current page only when the page has no visible title: it is not a link, uses text-primary and is announced as the current page. NoTrailingSlash drops the last slash.">
+            <cds:CdsBreadcrumb NoTrailingSlash="True">
+                <cds:CdsBreadcrumbItem Text="Dashboard" Href="https://example.com/" />
+                <cds:CdsBreadcrumbItem Text="Kubernetes" Href="https://example.com/kubernetes" />
+                <cds:CdsBreadcrumbItem Text="prod-us-south" IsCurrentPage="True" />
+            </cds:CdsBreadcrumb>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Small" Description="Size sm (12, 4 around the slash) is for page headers and dense areas.">
+            <cds:CdsBreadcrumb Size="Sm" NoTrailingSlash="True">
+                <cds:CdsBreadcrumbItem Text="Dashboard" Href="https://example.com/" />
+                <cds:CdsBreadcrumbItem Text="Kubernetes" Href="https://example.com/kubernetes" />
+                <cds:CdsBreadcrumbItem Text="Clusters" Href="https://example.com/kubernetes/clusters" />
+            </cds:CdsBreadcrumb>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Automatic overflow" Description="MaxVisibleItems keeps the first level and the last two and collapses the middle into the … crumb. Here a trail of six levels shows four crumbs.">
+            <cds:CdsBreadcrumb x:Name="LongTrail" MaxVisibleItems="4" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Overflow list" Description="The … crumb is link-primary (link-primary-hover with a 1px underline on hover) and opens a layer-01 list of the collapsed levels: Up and Down move, Enter chooses, Escape closes. Shown open.">
+            <VerticalStackLayout Margin="0,0,0,150">
+                <cds:CdsBreadcrumb>
+                    <cds:CdsBreadcrumbItem Text="Dashboard" Href="https://example.com/" />
+                    <cds:CdsBreadcrumbItem x:Name="OverflowCrumb" IsOpen="True" IconDescription="Show 3 more levels" />
+                    <cds:CdsBreadcrumbItem Text="Worker pools" Href="https://example.com/pools" />
+                </cds:CdsBreadcrumb>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Choose a level in the overflow list, or activate a crumb: Clicked fires.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsBreadcrumb x:Name="InteractiveTrail" />
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" TypeStyle="Label01" Tone="Secondary" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same trail in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsBreadcrumb Size="Sm">
+                            <cds:CdsBreadcrumbItem Text="Dashboard" Href="https://example.com/" />
+                            <cds:CdsBreadcrumbItem Text="Clusters" Href="https://example.com/clusters" />
+                        </cds:CdsBreadcrumb>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
