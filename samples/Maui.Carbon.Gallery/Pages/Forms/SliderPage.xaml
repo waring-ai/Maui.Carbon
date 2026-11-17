@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Forms.SliderPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A 2px track, a filled part and a round thumb in layer-selected-inverse, min and max labels, and a number box. The track is 200 to 640 wide.">
+            <cds:CdsSlider Label="Size (GB)" Min="20" Max="2000" Step="10" Value="320" MinLabel="GB" MaxLabel="GB" HorizontalOptions="Start" WidthRequest="640" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Range" Description="Two handles choose a range. The lower box sits left of the min label, the upper box right of the max label. Handles cannot cross.">
+            <cds:CdsSlider Label="Autoscaling range (nodes)" IsRange="True" Min="0" Max="50" Value="3" UpperValue="24" InputLabel="Minimum nodes" InputLabelUpper="Maximum nodes" HorizontalOptions="Start" WidthRequest="760" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Without the number box" Description="HideTextInput removes the box. Use a formatter for unit-bearing labels.">
+            <cds:CdsSlider x:Name="Sampling" Label="Sampling rate" Min="0" Max="1" Step="0.05" Value="0.25" HideTextInput="True" HorizontalOptions="Start" WidthRequest="520" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid outlines the box in support-error with a text-error message; warning shows the support-warning icon. Read-only hides the thumb and keeps the value. Disabled uses border-disabled and text-disabled.">
+            <VerticalStackLayout Spacing="32" HorizontalOptions="Start" WidthRequest="640">
+                <cds:CdsSlider Label="Replicas" Min="1" Max="10" Value="14" IsInvalid="True" InvalidText="Value is out of range" />
+                <cds:CdsSlider Label="Replicas" Min="1" Max="10" Value="1" IsWarning="True" WarnText="One replica has no redundancy" />
+                <cds:CdsSlider Label="Read-only" Min="0" Max="100" Value="64" IsReadOnly="True" />
+                <cds:CdsSlider Label="Disabled" Min="0" Max="100" Value="40" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Drag the thumb, tap the track, or focus a thumb with Tab: arrows move by one step, Shift+arrow by 4, Home and End jump to the ends. Type a number in the box; a value out of range is flagged until the box loses focus.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="640">
+                <cds:CdsSlider Label="Memory (GB)" Min="0" Max="64" Step="2" Value="16" ValueChanged="OnValueChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="16 GB" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same slider in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSlider Label="Size (GB)" Min="0" Max="100" Value="40" HideTextInput="True" WidthRequest="240" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

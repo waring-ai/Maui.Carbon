@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Containers.RadioTilePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Tile group" Description="Exactly one tile can be chosen. The chosen tile shows a 16px check mark and a 1px layer-selected-inverse border. The tiles can sit in any layout inside the group.">
+            <cds:CdsTileGroup Legend="Plan" SelectedValue="std" HorizontalOptions="Start">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsRadioTile Value="dev" WidthRequest="240">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Development" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="1 zone, no SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                    <cds:CdsRadioTile Value="std" WidthRequest="240">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Standard" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="3 zones, 99.9% SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                    <cds:CdsRadioTile Value="pro" WidthRequest="240">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Premium" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="3 zones, 99.99% SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                </HorizontalStackLayout>
+            </cds:CdsTileGroup>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="A disabled tile uses text-disabled and icon-disabled, and border-disabled when chosen. A disabled group disables every tile.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsTileGroup Legend="Region (one unavailable)" SelectedValue="eu" HorizontalOptions="Start">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsRadioTile Value="eu" WidthRequest="200">
+                            <cds:CdsText Text="Frankfurt" TypeStyle="HeadingCompact01" />
+                        </cds:CdsRadioTile>
+                        <cds:CdsRadioTile Value="us" IsEnabled="False" WidthRequest="200">
+                            <cds:CdsText Text="Dallas" TypeStyle="HeadingCompact01" Tone="Disabled" />
+                        </cds:CdsRadioTile>
+                    </HorizontalStackLayout>
+                </cds:CdsTileGroup>
+                <cds:CdsTileGroup Legend="Whole group disabled" IsEnabled="False" SelectedValue="eu" HorizontalOptions="Start">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsRadioTile Value="eu" WidthRequest="200">
+                            <cds:CdsText Text="Frankfurt" TypeStyle="HeadingCompact01" Tone="Disabled" />
+                        </cds:CdsRadioTile>
+                        <cds:CdsRadioTile Value="us" WidthRequest="200">
+                            <cds:CdsText Text="Dallas" TypeStyle="HeadingCompact01" Tone="Disabled" />
+                        </cds:CdsRadioTile>
+                    </HorizontalStackLayout>
+                </cds:CdsTileGroup>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click a tile, or focus the group with Tab and use the arrow keys: they move and choose, wrapping at the ends.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <cds:CdsTileGroup x:Name="Sizes" Legend="Node size" SelectionChanged="OnSizeChanged">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsRadioTile Value="Small" WidthRequest="200">
+                            <VerticalStackLayout Spacing="4">
+                                <cds:CdsText Text="Small" TypeStyle="HeadingCompact01" />
+                                <cds:CdsText Text="2 vCPU, 8 GB" Tone="Secondary" />
+                            </VerticalStackLayout>
+                        </cds:CdsRadioTile>
+                        <cds:CdsRadioTile Value="Medium" WidthRequest="200">
+                            <VerticalStackLayout Spacing="4">
+                                <cds:CdsText Text="Medium" TypeStyle="HeadingCompact01" />
+                                <cds:CdsText Text="4 vCPU, 16 GB" Tone="Secondary" />
+                            </VerticalStackLayout>
+                        </cds:CdsRadioTile>
+                        <cds:CdsRadioTile Value="Large" WidthRequest="200">
+                            <VerticalStackLayout Spacing="4">
+                                <cds:CdsText Text="Large" TypeStyle="HeadingCompact01" />
+                                <cds:CdsText Text="8 vCPU, 32 GB" Tone="Secondary" />
+                            </VerticalStackLayout>
+                        </cds:CdsRadioTile>
+                    </HorizontalStackLayout>
+                </cds:CdsTileGroup>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing chosen" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="On a layer-01 panel the group sits inside a CdsLayer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTileGroup Legend="Plan" SelectedValue="std">
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsRadioTile Value="dev">
+                                    <cds:CdsText Text="Development" TypeStyle="HeadingCompact01" />
+                                </cds:CdsRadioTile>
+                                <cds:CdsRadioTile Value="std">
+                                    <cds:CdsText Text="Standard" TypeStyle="HeadingCompact01" />
+                                </cds:CdsRadioTile>
+                            </VerticalStackLayout>
+                        </cds:CdsTileGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same group in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTileGroup Legend="Plan" SelectedValue="std">
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsRadioTile Value="dev">
+                                    <cds:CdsText Text="Development" TypeStyle="HeadingCompact01" />
+                                </cds:CdsRadioTile>
+                                <cds:CdsRadioTile Value="std">
+                                    <cds:CdsText Text="Standard" TypeStyle="HeadingCompact01" />
+                                </cds:CdsRadioTile>
+                            </VerticalStackLayout>
+                        </cds:CdsTileGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

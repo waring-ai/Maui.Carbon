@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Containers.ExpandableTilePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Collapsed and expanded" Description="The non-interactive variant: the whole tile is one button with a chevron at the bottom end. Collapsed height is the above-the-fold content plus the padding; the chevron turns 180 degrees when expanded.">
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
+                <cds:CdsExpandableTile WidthRequest="320" CollapsedDescription="Show certificate details" ExpandedDescription="Hide certificate details">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Issued for api.example.com and *.example.com by Example CA. Renews automatically 30 days before it expires." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+                <cds:CdsExpandableTile WidthRequest="320" IsExpanded="True" CollapsedDescription="Show policy details" ExpandedDescription="Hide policy details">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Backup policy" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Daily at 02:00 UTC" Tone="Secondary" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Retention: 30 days" Tone="Secondary" />
+                            <cds:CdsText Text="Encrypted with the cluster key" Tone="Secondary" />
+                            <cds:CdsText Text="Last run: yesterday, 02:04 UTC" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Visible chevron labels" Description="Optional label-01 text beside the chevron in the non-interactive variant.">
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
+                <cds:CdsExpandableTile WidthRequest="320" CollapsedText="Show more" ExpandedText="Show less">
+                    <cds:CdsText Text="prod-eu-de-1" TypeStyle="HeadingCompact01" />
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="3 zones, 12 workers, Kubernetes 1.31." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+                <cds:CdsExpandableTile WidthRequest="320" IsExpanded="True" CollapsedText="Show more" ExpandedText="Show less">
+                    <cds:CdsText Text="prod-us-south-1" TypeStyle="HeadingCompact01" />
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="3 zones, 24 workers, Kubernetes 1.31." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive content" Description="When a fold holds a button, link or input the tile is the interactive variant: no hover on the tile, and a separate 48px chevron button toggles it. Tab reaches the content first, then the chevron.">
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
+                <cds:CdsExpandableTile WidthRequest="320" CollapsedDescription="Show renewal details" ExpandedDescription="Hide renewal details">
+                    <VerticalStackLayout Spacing="8">
+                        <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
+                        <cds:CdsButton Text="Renew now" Kind="Ghost" Size="Sm" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Renewal takes about two minutes and does not interrupt traffic." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+                <cds:CdsExpandableTile WidthRequest="320" IsExpanded="True" CollapsedDescription="Show renewal details" ExpandedDescription="Hide renewal details">
+                    <VerticalStackLayout Spacing="8">
+                        <cds:CdsText Text="Signing key" TypeStyle="HeadingCompact01" />
+                        <cds:CdsButton Text="Rotate key" Kind="Ghost" Size="Sm" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Last rotated 90 days ago." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click the tile (or focus it and press Space) to expand it; the height animates unless reduced motion is on.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsExpandableTile ExpandedChanged="OnExpandedChanged" CollapsedDescription="Show details for prod-eu-1" ExpandedDescription="Hide details for prod-eu-1">
+                    <cds:CdsText Text="prod-eu-1" TypeStyle="HeadingCompact01" />
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Created 3 March by the platform team." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Collapsed" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same tile in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsExpandableTile IsExpanded="True">
+                            <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                            <cds:CdsExpandableTile.ExpandedContent>
+                                <cds:CdsText Text="Issued for api.example.com." Tone="Secondary" />
+                            </cds:CdsExpandableTile.ExpandedContent>
+                        </cds:CdsExpandableTile>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
