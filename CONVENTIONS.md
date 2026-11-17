@@ -132,6 +132,16 @@ public CdsButtonKind Kind
   (`CdsMotion.AnimateAsync`, or `view.FadeToAsync/RotateToAsync/TranslateToAsync` guarded by
   `CdsMotion.IsReducedMotion`) with `CdsDuration.*` and `CdsEasing.*`.
 
+### MAUI layout traps (learned the hard way)
+- `HorizontalOptions=Fill` + `MaximumWidthRequest` **centers** the view once space exceeds the max. For "fill up to a
+  max, start-aligned" (notifications, code snippets, file rows) wrap the content in `CdsMaxWidthBox` (Foundation).
+- `HorizontalOptions=Start` shrinks a Grid to its content even with Star columns.
+- Star columns in an auto-sized parent can under-measure children and truncate labels. For "equal widths sized to the
+  widest child" (segmented controls, button sets) use `CdsEqualWidthRow` (Foundation).
+- `HorizontalStackLayout` measures children unconstrained: cap a label's `MaximumWidthRequest` to get an ellipsis.
+- A Label with `LineBreakMode.NoWrap` and no `MaxLines` draws one line: set `MaxLines` for multi-line monospace text.
+- In a row of items with different heights, set `VerticalOptions=Start` so a short item isn't stretched to its neighbour.
+
 ## 8. Overlays and keyboard
 
 - Anything that floats (menus, list boxes, popovers, tooltips, modals, toasts, calendars) goes through
