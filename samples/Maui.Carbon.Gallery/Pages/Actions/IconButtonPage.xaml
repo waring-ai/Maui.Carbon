@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.IconButtonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Kinds" Description="Primary (default), secondary, tertiary and ghost. Ghost is the usual choice in toolbars. Hover or focus a button for its tooltip label.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsIconButton Icon="Add" Label="Add node" Kind="Primary" />
+                <cds:CdsIconButton Icon="Download" Label="Download report" Kind="Secondary" />
+                <cds:CdsIconButton Icon="Copy" Label="Copy API key" Kind="Tertiary" />
+                <cds:CdsIconButton Icon="Settings" Label="Cluster settings" Kind="Ghost" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Square 24, 32, 40 and 48 (default).">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsIconButton Icon="Filter" Label="Filter" Kind="Ghost" Size="Xs" />
+                <cds:CdsIconButton Icon="Filter" Label="Filter" Kind="Ghost" Size="Sm" />
+                <cds:CdsIconButton Icon="Filter" Label="Filter" Kind="Ghost" Size="Md" />
+                <cds:CdsIconButton Icon="Filter" Label="Filter" Kind="Ghost" Size="Lg" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Selected (toggle)" Description="IsSelected makes a toggle: the fill is background-selected and screen readers hear it as pressed.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsIconButton Icon="Star" Label="Pin cluster" Kind="Ghost" IsSelected="True" />
+                <cds:CdsIconButton Icon="Star" Label="Pin cluster" Kind="Ghost" IsSelected="False" />
+                <cds:CdsIconButton Icon="Star" Label="Pin cluster" Kind="Primary" IsSelected="True" />
+                <cds:CdsIconButton Icon="Star" Label="Pin cluster" Kind="Tertiary" IsSelected="True" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Badge" Description="A count, or a dot at 0. Carbon allows it only on ghost buttons at size lg, and hides it when the button is disabled.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsIconButton Icon="Notification" Label="Notifications" Kind="Ghost" BadgeCount="3" />
+                <cds:CdsIconButton Icon="Notification" Label="Notifications, new activity" Kind="Ghost" BadgeCount="0" />
+                <cds:CdsIconButton Icon="Notification" Label="Notifications" Kind="Ghost" BadgeCount="12" />
+                <cds:CdsIconButton Icon="Notification" Label="Notifications" Kind="Ghost" BadgeCount="3" IsEnabled="False" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabled icon buttons use the button-disabled fills and icon-disabled glyphs.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsIconButton Icon="Add" Label="Add node" Kind="Primary" IsEnabled="False" />
+                <cds:CdsIconButton Icon="Download" Label="Download report" Kind="Secondary" IsEnabled="False" />
+                <cds:CdsIconButton Icon="Copy" Label="Copy API key" Kind="Tertiary" IsEnabled="False" />
+                <cds:CdsIconButton Icon="Settings" Label="Cluster settings" Kind="Ghost" IsEnabled="False" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Clicked fires on activation; the toggle flips on its own. Tab to focus, Enter or Space to activate.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsIconButton Icon="Renew" Label="Refresh logs" Kind="Ghost" Clicked="OnRefreshClicked" />
+                    <cds:CdsIconButton Icon="Star" Label="Pin cluster" Kind="Ghost" IsSelected="False" Clicked="OnPinClicked" x:Name="PinButton" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Nothing yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In a toolbar" Description="Ghost icon buttons at size lg next to a layer-01 title bar.">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" MaximumWidthRequest="560" HorizontalOptions="Start" WidthRequest="560">
+                <cds:CdsText Text="Worker pools" TypeStyle="HeadingCompact01" VerticalOptions="Center" Margin="16,0,0,0" />
+                <cds:CdsIconButton Grid.Column="1" Icon="Filter" Label="Filter pools" Kind="Ghost" />
+                <cds:CdsIconButton Grid.Column="2" Icon="Download" Label="Export as CSV" Kind="Ghost" />
+                <cds:CdsIconButton Grid.Column="3" Icon="Settings" Label="Table settings" Kind="Ghost" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same buttons in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsIconButton Icon="Add" Label="Add node" Kind="Primary" Size="Md" />
+                            <cds:CdsIconButton Icon="Download" Label="Download" Kind="Tertiary" Size="Md" />
+                            <cds:CdsIconButton Icon="Star" Label="Pin" Kind="Ghost" Size="Md" IsSelected="True" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

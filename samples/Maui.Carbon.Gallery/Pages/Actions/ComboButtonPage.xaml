@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Actions.ComboButtonPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Open" Description="A primary action beside a chevron that opens the alternatives. A 1px gap separates the halves; the chevron turns while open.">
+            <ContentView HeightRequest="240">
+                <cds:CdsComboButton Label="Deploy" IsOpen="True">
+                    <cds:CdsMenuItem Text="Deploy to staging" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Schedule deployment" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Roll back to v2.13.0" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsComboButton>
+            </ContentView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 32, md 40 and lg 48 (default); the chevron half is a square of that size.">
+            <FlexLayout Wrap="Wrap" AlignItems="End">
+                <cds:CdsComboButton Label="Deploy" Size="Sm" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
+                <cds:CdsComboButton Label="Deploy" Size="Md" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
+                <cds:CdsComboButton Label="Deploy" Size="Lg" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Long label" Description="The primary action is at most 239px wide; longer labels truncate with an ellipsis.">
+            <cds:CdsComboButton Label="Deploy all workloads to the production cluster" Size="Md">
+                <cds:CdsMenuItem Text="Deploy to staging" />
+            </cds:CdsComboButton>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="Disabling the control disables both halves.">
+            <cds:CdsComboButton Label="Deploy" IsEnabled="False"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Two tab stops: the action, then the chevron. Enter or Space runs the action or opens the menu; Escape returns focus to the chevron.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsComboButton Label="Deploy" Size="Md" Clicked="OnDeployClicked">
+                    <cds:CdsMenuItem Text="Deploy to staging" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItem Text="Schedule deployment" Clicked="OnItemClicked" />
+                    <cds:CdsMenuItemDivider />
+                    <cds:CdsMenuItem Text="Roll back to v2.13.0" Kind="Danger" Clicked="OnItemClicked" />
+                </cds:CdsComboButton>
+                <cds:CdsText x:Name="Status" Text="Nothing chosen yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same combo button in every theme zone.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsComboButton Label="Deploy" Size="Md"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
