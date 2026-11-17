@@ -96,9 +96,9 @@ public partial class CdsOverlayHost : Grid
         return page.Content as CdsOverlayHost;
     }
 
-    internal CdsOverlay Open(View content, CdsOverlayOptions options)
+    internal CdsOverlay Open(View content, CdsOverlayOptions options, Element? context = null)
     {
-        var overlay = new CdsOverlay(this, content, options);
+        var overlay = new CdsOverlay(this, content, options, context);
         _overlays.Add(overlay);
 
         overlay.Layer = options.IsModal ? CdsOverlayLayer.Modal : options.Anchor is null ? CdsOverlayLayer.Toast : CdsOverlayLayer.Popup;

@@ -16,7 +16,7 @@ public static class CdsOverlayService
             ?? throw new InvalidOperationException(
                 "No CdsOverlayHost found. Call UseCarbon() and add <cds:CdsResources /> to Application.Resources so pages get " +
                 "the Carbon page template, or make <cds:CdsOverlayHost> the root of the page.");
-        return host.Open(content, options);
+        return host.Open(content, options, context);
     }
 
     /// <summary>The host of the window's current page.</summary>

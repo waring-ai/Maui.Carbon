@@ -8,15 +8,18 @@ public sealed class CdsOverlay
     readonly CdsControl? _contextSource;
     bool _positioned;
 
-    internal CdsOverlay(CdsOverlayHost host, View content, CdsOverlayOptions options)
+    internal CdsOverlay(CdsOverlayHost host, View content, CdsOverlayOptions options, Element? context = null)
     {
         _host = host;
         Content = content;
         Options = options;
         Container = new CdsScopeView { Content = content, InputTransparent = options.InputTransparent };
-        _contextSource = FindContextSource(options.Anchor);
+        _contextElement = options.Anchor ?? context;
+        _contextSource = FindContextSource(_contextElement);
         ApplyContext();
     }
+
+    readonly Element? _contextElement;
 
     /// <summary>The overlay's content.</summary>
     public View Content { get; }
@@ -109,6 +112,7 @@ public sealed class CdsOverlay
             }
         }
         if (_contextSource is not null) _contextSource.PropertyChanged += OnContextPropertyChanged;
+        else CdsThemeManager.ThemeChanged += OnAppThemeChanged;
         Options.InitialFocus?.Focus();
     }
 
@@ -123,7 +127,10 @@ public sealed class CdsOverlay
         foreach (var sv in _scrollers) sv.Scrolled -= OnScrolled;
         _scrollers.Clear();
         if (_contextSource is not null) _contextSource.PropertyChanged -= OnContextPropertyChanged;
+        else CdsThemeManager.ThemeChanged -= OnAppThemeChanged;
     }
+
+    void OnAppThemeChanged(object? sender, EventArgs e) => ApplyContext();
 
     internal bool HandleKey(CdsKeyEventArgs e)
     {
@@ -150,8 +157,14 @@ public sealed class CdsOverlay
     void ApplyContext()
     {
         // The popup lives in the page-root host, outside the anchor's theme zone and layers: mirror them.
-        var theme = _contextSource?.ContextTheme ?? (Options.Anchor is { } a ? CdsTheme.GetEffectiveTheme(a) : CdsThemeManager.Current);
-        var level = _contextSource?.ContextLayerLevel ?? (Options.Anchor is { } b ? CdsLayer.GetLevel(b) : 1);
+        // With no anchor or context element it simply inherits the page (and so the live app theme).
+        if (_contextElement is null)
+        {
+            Container.Resources = new ResourceDictionary();
+            return;
+        }
+        var theme = _contextSource?.ContextTheme ?? CdsTheme.GetEffectiveTheme(_contextElement);
+        var level = _contextSource?.ContextLayerLevel ?? CdsLayer.GetLevel(_contextElement);
         Container.Resources = CdsPalettes.CreateContextDictionary(theme, level);
     }
 
