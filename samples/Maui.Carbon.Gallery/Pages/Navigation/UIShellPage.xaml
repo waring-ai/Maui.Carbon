@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Navigation.UIShellPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Complete shell" Description="A 48 high header (product name, navigation, a menu, global actions with the switcher active), a 256 side nav with groups and an active link, a header panel holding a switcher, and the page body. The frame is 480 high so the page still scrolls; the breakpoint is forced to lg.">
+            <Border StrokeThickness="1" HeightRequest="480" StrokeShape="Rectangle" Padding="0" x:Name="ShellFrame">
+                <cds:CdsUIShell x:Name="MainShell" Breakpoint="Lg">
+                    <cds:CdsUIShell.Header>
+                        <cds:CdsHeader Label="Platform">
+                            <cds:CdsSkipToContent x:Name="SkipLink" />
+                            <cds:CdsHeaderMenuButton IsCollapsible="True" />
+                            <cds:CdsHeaderName Prefix="IBM" Text="Platform" Clicked="OnHeaderNameClicked" />
+                            <cds:CdsHeaderNavigation Label="Platform">
+                                <cds:CdsHeaderMenuItem Text="Catalog" IsActive="True" />
+                                <cds:CdsHeaderMenuItem Text="Observability" />
+                                <cds:CdsHeaderMenu x:Name="ManageMenu" Label="Manage" MenuLabel="Manage">
+                                    <cds:CdsHeaderMenuItem Text="Users" />
+                                    <cds:CdsHeaderMenuItem Text="Access groups" IsActive="True" />
+                                    <cds:CdsHeaderMenuItem Text="Audit log" />
+                                </cds:CdsHeaderMenu>
+                                <cds:CdsHeaderMenu Label="Support" MenuLabel="Support">
+                                    <cds:CdsHeaderMenuItem Text="Cases" />
+                                    <cds:CdsHeaderMenuItem Text="Status" />
+                                </cds:CdsHeaderMenu>
+                            </cds:CdsHeaderNavigation>
+                            <cds:CdsHeaderGlobalBar>
+                                <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                                <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" />
+                                <cds:CdsHeaderGlobalAction x:Name="SwitcherAction" Icon="Switcher" Label="Switcher" IsActive="True" Clicked="OnSwitcherClicked" />
+                            </cds:CdsHeaderGlobalBar>
+                        </cds:CdsHeader>
+                    </cds:CdsUIShell.Header>
+                    <cds:CdsUIShell.SideNav>
+                        <cds:CdsSideNav x:Name="MainNav" Label="Side navigation">
+                            <cds:CdsSideNavItems>
+                                <cds:CdsSideNavLink x:Name="NavDashboard" Text="Dashboard" Icon="Dashboard" Clicked="OnNavClicked" />
+                                <cds:CdsSideNavMenu x:Name="NavInfra" Text="Infrastructure" Icon="Folder" IsExpanded="True">
+                                    <cds:CdsSideNavMenuItem x:Name="NavClusters" Text="Clusters" Clicked="OnNavClicked" />
+                                    <cds:CdsSideNavMenuItem x:Name="NavBuckets" Text="Buckets" IsActive="True" Clicked="OnNavClicked" />
+                                    <cds:CdsSideNavMenuItem x:Name="NavNetworks" Text="Networks" Clicked="OnNavClicked" />
+                                </cds:CdsSideNavMenu>
+                                <cds:CdsSideNavMenu Text="Manage" Icon="Settings">
+                                    <cds:CdsSideNavMenuItem Text="Users" Clicked="OnNavClicked" />
+                                    <cds:CdsSideNavMenuItem Text="API keys" Clicked="OnNavClicked" />
+                                </cds:CdsSideNavMenu>
+                                <cds:CdsSideNavDivider />
+                                <cds:CdsSideNavLink x:Name="NavBilling" Text="Billing and usage" Icon="Report" Clicked="OnNavClicked" />
+                            </cds:CdsSideNavItems>
+                        </cds:CdsSideNav>
+                    </cds:CdsUIShell.SideNav>
+                    <cds:CdsUIShell.HeaderPanel>
+                        <cds:CdsHeaderPanel x:Name="MainPanel" IsExpanded="True">
+                            <cds:CdsSwitcher Label="Switch product">
+                                <cds:CdsSwitcherItem Text="Platform" IsActive="True" />
+                                <cds:CdsSwitcherDivider />
+                                <cds:CdsSwitcherItem Text="Analytics" />
+                                <cds:CdsSwitcherItem Text="Storage" />
+                                <cds:CdsSwitcherItem Text="Security" />
+                                <cds:CdsSwitcherDivider />
+                                <cds:CdsSwitcherItem Text="All products" />
+                            </cds:CdsSwitcher>
+                        </cds:CdsHeaderPanel>
+                    </cds:CdsUIShell.HeaderPanel>
+                    <VerticalStackLayout Padding="32" Spacing="8">
+                        <cds:CdsText x:Name="BodyTitle" Text="Buckets" TypeStyle="Heading03" />
+                        <cds:CdsText x:Name="BodyText" Text="14 buckets in 3 regions. Page content sits beside the shell and shifts with the side nav." Tone="Secondary" TypeStyle="Body01" />
+                    </VerticalStackLayout>
+                </cds:CdsUIShell>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click side nav links to move the current page (Clicked sets IsActive and swaps the body), toggle the switcher action to open and close the header panel, open a header menu with Enter, Space or ArrowDown, and collapse the side nav with Escape or the header menu button.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle side nav" Kind="Tertiary" Size="Md" Clicked="OnToggleNavClicked" />
+                    <cds:CdsButton Text="Open Manage menu" Kind="Tertiary" Size="Md" Clicked="OnOpenMenuClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="Current page: Buckets" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Header menu" Description="Open, the trigger fills with layer-01 and a 200 wide layer-01 list drops below it: 48 high rows, hover layer-hover-01, the current row layer-selected-01 with a 3px border-interactive bar on the start edge. Row 1 shows keyboard highlight.">
+            <HorizontalStackLayout Spacing="32">
+                <ContentView x:Name="MenuPreviewHost" />
+                <ContentView x:Name="MenuTriggerHost" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Rail" Description="IsRail: 48 wide showing icons only. Hover, click or focus-in expands it to 256 over the page (the page keeps its 48 offset); pointer exit, blur or Escape collapses it.">
+            <Border StrokeThickness="1" HeightRequest="240" StrokeShape="Rectangle" Padding="0" x:Name="RailFrame">
+                <cds:CdsUIShell Breakpoint="Lg">
+                    <cds:CdsUIShell.Header>
+                        <cds:CdsHeader Label="Platform">
+                            <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                            <cds:CdsHeaderGlobalBar>
+                                <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                                <cds:CdsHeaderGlobalAction Icon="User" Label="User" />
+                            </cds:CdsHeaderGlobalBar>
+                        </cds:CdsHeader>
+                    </cds:CdsUIShell.Header>
+                    <cds:CdsUIShell.SideNav>
+                        <cds:CdsSideNav IsRail="True" Label="Rail navigation">
+                            <cds:CdsSideNavItems>
+                                <cds:CdsSideNavLink Text="Dashboard" Icon="Dashboard" IsActive="True" />
+                                <cds:CdsSideNavLink Text="Clusters" Icon="Folder" />
+                                <cds:CdsSideNavLink Text="Monitoring" Icon="Analytics" />
+                                <cds:CdsSideNavLink Text="Billing and usage" Icon="Report" />
+                            </cds:CdsSideNavItems>
+                        </cds:CdsSideNav>
+                    </cds:CdsUIShell.SideNav>
+                    <VerticalStackLayout Padding="32" Spacing="8">
+                        <cds:CdsText Text="Dashboard" TypeStyle="Heading03" />
+                        <cds:CdsText Text="6 clusters healthy, 1 warning. The rail leaves 48 for icons." Tone="Secondary" TypeStyle="Body01" />
+                    </VerticalStackLayout>
+                </cds:CdsUIShell>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Expanded rail" Description="The rail while hovered or focused: 256 wide with labels, floating over the page.">
+            <Border StrokeThickness="1" HeightRequest="240" StrokeShape="Rectangle" Padding="0" x:Name="RailOpenFrame">
+                <cds:CdsUIShell Breakpoint="Lg">
+                    <cds:CdsUIShell.Header>
+                        <cds:CdsHeader Label="Platform">
+                            <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                        </cds:CdsHeader>
+                    </cds:CdsUIShell.Header>
+                    <cds:CdsUIShell.SideNav>
+                        <cds:CdsSideNav IsRail="True" IsExpanded="True" Label="Expanded rail">
+                            <cds:CdsSideNavItems>
+                                <cds:CdsSideNavLink Text="Dashboard" Icon="Dashboard" IsActive="True" />
+                                <cds:CdsSideNavLink Text="Clusters" Icon="Folder" />
+                                <cds:CdsSideNavLink Text="Monitoring" Icon="Analytics" />
+                            </cds:CdsSideNavItems>
+                        </cds:CdsSideNav>
+                    </cds:CdsUIShell.SideNav>
+                    <cds:CdsText Text="Page content" Margin="80,32,0,0" TypeStyle="Body01" />
+                </cds:CdsUIShell>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Below lg" Description="Below 1056 the header navigation is hidden and the side nav is 0 wide until the menu button expands it, over a full-screen overlay scrim. The header links repeat as rows (HeaderSideNavItems, with a divider), with a side nav header and footer toggle.">
+            <Border StrokeThickness="1" HeightRequest="464" StrokeShape="Rectangle" Padding="0" x:Name="SmallFrame">
+                <cds:CdsUIShell Breakpoint="Md">
+                    <cds:CdsUIShell.Header>
+                        <cds:CdsHeader Label="Platform">
+                            <cds:CdsHeaderMenuButton />
+                            <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                            <cds:CdsHeaderNavigation Label="Platform">
+                                <cds:CdsHeaderMenuItem Text="Catalog" IsActive="True" />
+                            </cds:CdsHeaderNavigation>
+                            <cds:CdsHeaderGlobalBar>
+                                <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                                <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" />
+                            </cds:CdsHeaderGlobalBar>
+                        </cds:CdsHeader>
+                    </cds:CdsUIShell.Header>
+                    <cds:CdsUIShell.SideNav>
+                        <cds:CdsSideNav IsExpanded="True" Label="Side navigation">
+                            <cds:CdsSideNav.Header>
+                                <cds:CdsSideNavHeader Text="Platform" Icon="Catalog" />
+                            </cds:CdsSideNav.Header>
+                            <cds:CdsSideNavItems>
+                                <cds:CdsHeaderSideNavItems HasDivider="True">
+                                    <cds:CdsHeaderMenuItem Text="Catalog" IsActive="True" />
+                                    <cds:CdsHeaderMenuItem Text="Observability" />
+                                    <cds:CdsHeaderMenu Label="Manage" IsExpanded="True">
+                                        <cds:CdsHeaderMenuItem Text="Users" />
+                                        <cds:CdsHeaderMenuItem Text="Access groups" />
+                                    </cds:CdsHeaderMenu>
+                                </cds:CdsHeaderSideNavItems>
+                                <cds:CdsSideNavLink Text="Dashboard" Icon="Dashboard" />
+                                <cds:CdsSideNavLink Text="Billing and usage" Icon="Report" />
+                            </cds:CdsSideNavItems>
+                            <cds:CdsSideNav.Footer>
+                                <cds:CdsSideNavFooter />
+                            </cds:CdsSideNav.Footer>
+                        </cds:CdsSideNav>
+                    </cds:CdsUIShell.SideNav>
+                    <VerticalStackLayout Padding="32" Spacing="8">
+                        <cds:CdsText Text="Buckets" TypeStyle="Heading03" />
+                        <cds:CdsText Text="The side nav floats over this page; tap the scrim or press Escape to close it." Tone="Secondary" TypeStyle="Body01" />
+                    </VerticalStackLayout>
+                </cds:CdsUIShell>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Header actions" Description="48 x 48 icon buttons: icon-secondary going to icon-primary, 1px focus border on focus; the active action fills with layer-01 and gets border-subtle-00 side borders. Left to right: rest, active, disabled.">
+            <cds:CdsHeader Label="Header actions" HeightRequest="48">
+                <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                <cds:CdsHeaderGlobalBar>
+                    <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                    <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" IsActive="True" />
+                    <cds:CdsHeaderGlobalAction Icon="User" Label="User" IsEnabled="False" />
+                </cds:CdsHeaderGlobalBar>
+            </cds:CdsHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skip to content" Description="The first focusable element of the header: invisible until it gets keyboard focus (press Tab in the complete shell), then a 48 high bar with a 4px focus border over the header. Activating it focuses the page body. Desktop only (best effort).">
+            <cds:CdsHeader Label="Skip link" HeightRequest="48">
+                <cds:CdsSkipToContent />
+                <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+            </cds:CdsHeader>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The shell follows the theme: background, background-hover, text-secondary and border-subtle-00 in white and g10 (light) and in g90 and g100 (dark); there is no inverse bar.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="0">
+                            <cds:CdsHeader Label="Header">
+                                <cds:CdsHeaderName Prefix="IBM" Text="Platform" />
+                                <cds:CdsHeaderGlobalBar>
+                                    <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                                    <cds:CdsHeaderGlobalAction Icon="Switcher" Label="Switcher" IsActive="True" />
+                                </cds:CdsHeaderGlobalBar>
+                            </cds:CdsHeader>
+                            <cds:CdsSideNav IsFixed="True" HeightRequest="144" HorizontalOptions="Fill" Label="Side navigation">
+                                <cds:CdsSideNavItems>
+                                    <cds:CdsSideNavLink Text="Dashboard" Icon="Dashboard" IsActive="True" />
+                                    <cds:CdsSideNavLink Text="Clusters" Icon="Folder" />
+                                    <cds:CdsSideNavLink Text="Billing" Icon="Report" />
+                                </cds:CdsSideNavItems>
+                            </cds:CdsSideNav>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
