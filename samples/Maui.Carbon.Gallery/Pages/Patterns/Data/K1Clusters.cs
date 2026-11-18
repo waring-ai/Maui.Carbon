@@ -78,7 +78,7 @@ public static class K1Clusters
     public static void AddColumns(CdsDataTable table, bool created = true)
     {
         table.RowKeySelector = r => ((K1Cluster)r).Id;
-        table.Headers.Add(new CdsDataTableHeader { Key = "name", Header = "Name", Width = new GridLength(190), ValueSelector = r => ((K1Cluster)r).Name, CellTemplate = NameTemplate() });
+        table.Headers.Add(new CdsDataTableHeader { Key = "name", Header = "Name", Width = GridLength.Star, ValueSelector = r => ((K1Cluster)r).Name, CellTemplate = NameTemplate() });
         table.Headers.Add(new CdsDataTableHeader { Key = "status", Header = "Status", Width = new GridLength(140), ValueSelector = r => ((K1Cluster)r).StatusText, CellTemplate = StatusTemplate() });
         table.Headers.Add(new CdsDataTableHeader { Key = "region", Header = "Region", Width = new GridLength(140), ValueSelector = r => ((K1Cluster)r).Region });
         table.Headers.Add(new CdsDataTableHeader { Key = "version", Header = "Version", Width = new GridLength(100), ValueSelector = r => ((K1Cluster)r).Version });
