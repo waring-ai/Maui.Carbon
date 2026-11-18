@@ -92,7 +92,12 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [windows, macos]
     runs-on: ubuntu-latest
+    # Trusted publishing: nuget.org trusts this repo, workflow file (ci.yml) and environment (nuget) through a policy,
+    # and swaps the job's GitHub OIDC token for an API key that lasts an hour. No long-lived key is stored.
     environment: nuget
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -103,6 +108,13 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: NuGet login (OIDC to a short-lived API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          # The nuget.org profile name that owns the policy, not an email address.
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to nuget.org
         run: |
-          dotnet nuget push "out/*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          dotnet nuget push "out/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
