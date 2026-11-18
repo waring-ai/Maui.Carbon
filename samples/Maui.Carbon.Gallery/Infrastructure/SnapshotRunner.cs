@@ -67,7 +67,7 @@ public static class SnapshotRunner
                     CdsThemeManager.SetTheme(theme);
                     File.AppendAllText(Path.Combine(dir, "trace.txt"), $"{DateTime.Now:HH:mm:ss.fff} {entry.Info.Route} switch {theme} {watch.ElapsedMilliseconds}ms\n");
                     await Shell.Current.GoToAsync("//" + entry.Info.Route);
-                    await Task.Delay(700);
+                    await Task.Delay(int.TryParse(Environment.GetEnvironmentVariable("CARBON_SNAPSHOT_SETTLE_MS"), out var settle) ? settle : 1500);
                     var page = Shell.Current.CurrentPage;
                     var shot = await page.CaptureAsync();
                     if (shot is null)
@@ -79,6 +79,11 @@ public static class SnapshotRunner
                     await using var src = await shot.OpenReadAsync(ScreenshotFormat.Png);
                     await using var dst = File.Create(path);
                     await src.CopyToAsync(dst);
+                    var host = page is ContentPage hp ? CdsOverlayHost.Find(hp) : null;
+                    var overlays = host is null ? "no host" : string.Join("; ", host.Overlays.Select(o =>
+                        $"{o.Content.GetType().Name} open={o.IsOpen} placement={o.ActualPlacement} size={o.Content.Width:0}x{o.Content.Height:0} " +
+                        $"opacity={(o.Content.Parent as VisualElement)?.Opacity:0.##} bounds={(o.Content.Parent as VisualElement)?.Bounds}"));
+                    log.Add($"{entry.Info.Route} {theme}: overlays [{overlays}]");
                     log.Add($"{entry.Info.Route} {theme}: ok bg={page.BackgroundColor?.ToArgbHex()} template={(page as ContentPage)?.ControlTemplate is not null} host={(page is ContentPage cp ? CdsOverlayHost.Find(cp) is not null : false)} style={page.Style is not null}");
                     Console.WriteLine($"snapshot: {entry.Info.Route} {theme}");
                 }

@@ -85,23 +85,33 @@ public sealed class CdsOverlay
         var result = CdsPlacementResolver.Resolve(anchorBounds, new Size(width, height), hostSize, Options.Placement, Options.Offset, Options.AutoFlip);
         ActualPlacement = result.Placement;
         CaretOffset = result.CaretOffset;
+        // An explicit width (the measured one) lets wrapping content re-measure its height under that constraint;
+        // an auto-sized width measures it unconstrained, which clips multi-line text.
         AbsoluteLayout.SetLayoutBounds(Container, new Rect(result.Frame.X, result.Frame.Y,
-            Options.MatchAnchorWidth ? anchorBounds.Width : AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+            Options.MatchAnchorWidth ? anchorBounds.Width : Math.Ceiling(width), AbsoluteLayout.AutoSize));
 
         if (!_positioned)
         {
             _positioned = true;
-            if (Options.Animate && !CdsMotion.IsReducedMotion)
-            {
-                Container.Opacity = 0;
-                _ = Container.FadeToAsync(1, CdsDuration.Fast02, CdsEasing.EntranceProductive);
-            }
-            else
-            {
-                Container.Opacity = 1;
-            }
+            FadeIn();
         }
         Positioned?.Invoke(this, EventArgs.Empty);
+    }
+
+    void FadeIn()
+    {
+        if (!Options.Animate || CdsMotion.IsReducedMotion || Container.Handler is null)
+        {
+            Container.Opacity = 1;
+            return;
+        }
+        Container.Opacity = 0;
+        _ = CdsMotion.AnimateAsync(Container, "CdsOverlayFadeIn", v => Container.Opacity = v, 0, 1, CdsDuration.Fast02, CdsEasing.EntranceProductive);
+        // Whatever happens to the animation, an open overlay must never stay invisible.
+        Container.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(CdsDuration.Fast02 + 150), () =>
+        {
+            if (IsOpen) Container.Opacity = 1;
+        });
     }
 
     internal void Attach()
