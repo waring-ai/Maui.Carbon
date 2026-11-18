@@ -40,8 +40,9 @@ jobs:
       - name: Generator drift check
         run: dotnet run --project tools/Maui.Carbon.Generator -- --check
 
+      # The Relay sample (app, core and tests) stays out of CI; tools/verify.sh --samples covers it locally.
       - name: Build
-        run: dotnet build Maui.Carbon.slnx -c Release
+        run: dotnet build Maui.Carbon.CI.slnf -c Release
 
       - name: Test
         run: dotnet test tests/Maui.Carbon.Tests -c Release --no-build

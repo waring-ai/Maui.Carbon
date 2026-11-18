@@ -1,0 +1,11 @@
+{
+  "solution": {
+    "path": "Maui.Carbon.slnx",
+    "projects": [
+      "samples/Maui.Carbon.Gallery/Maui.Carbon.Gallery.csproj",
+      "src/Maui.Carbon/Maui.Carbon.csproj",
+      "tests/Maui.Carbon.Tests/Maui.Carbon.Tests.csproj",
+      "tools/Maui.Carbon.Generator/Maui.Carbon.Generator.csproj"
+    ]
+  }
+}
