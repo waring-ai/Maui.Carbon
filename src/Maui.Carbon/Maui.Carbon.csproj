@@ -18,8 +18,8 @@
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
     <!-- Package -->
-    <PackageId>Maui.Carbon</PackageId>
-    <Title>Maui.Carbon — Carbon Design System for .NET MAUI</Title>
+    <PackageId>Waring.Maui.Carbon</PackageId>
+    <Title>Waring.Maui.Carbon — Carbon Design System for .NET MAUI</Title>
     <Description>An unofficial .NET MAUI implementation of the Carbon Design System (v11): four themes, layering, IBM Plex type, Carbon icons and 92 components. Not affiliated with or endorsed by IBM.</Description>
     <PackageTags>maui;carbon;design-system;ui;controls;dotnet-maui</PackageTags>
     <PackageLicenseExpression>Apache-2.0 AND OFL-1.1</PackageLicenseExpression>

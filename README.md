@@ -9,8 +9,10 @@ scale, Carbon icons and the Carbon component set, for Android, iOS, Mac Catalyst
 ## Getting started
 
 ```bash
-dotnet add package Maui.Carbon
+dotnet add package Waring.Maui.Carbon
 ```
+
+The package ID is `Waring.Maui.Carbon`; the assembly and namespace are `Maui.Carbon`.
 
 `MauiProgram.cs`:
 
