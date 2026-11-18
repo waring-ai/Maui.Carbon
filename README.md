@@ -42,6 +42,41 @@ A page:
 </ContentPage>
 ```
 
+## Components
+
+Every public control is prefixed `Cds` (`CdsButton`, `CdsDataTable`) and lives in the `Maui.Carbon` namespace
+(XAML: `xmlns:cds="https://github.com/waring-ai/Maui.Carbon"`). The gallery has a page for each.
+
+| Category | Components |
+|---|---|
+| Foundations | `CdsResources`, `CdsThemeManager`, `CdsTheme`, `CdsLayer`, `CdsText`, `CdsIcon`, tokens (`CdsColorKeys`, `CdsSpacing`, `CdsSizing`, `CdsTypeStyle`, `CdsDuration`, `CdsEasing`) |
+| Actions | Button, ButtonSet, IconButton, CopyButton, Menu, OverflowMenu, MenuButton, ComboButton |
+| Forms | Form (FormGroup, FormItem, FormLabel), TextInput, PasswordInput, TextArea, NumberInput, Search, Select, Dropdown, ComboBox, MultiSelect, Checkbox, CheckboxGroup, RadioButtonGroup, Toggle, Slider, DatePicker, TimePicker, FileUploader |
+| Fluid forms | FluidForm and the Fluid variants of the text, number, search, select, time, dropdown, combo box, multi-select and date inputs |
+| Data | DataTable (+ Table primitives), DataTableSkeleton, Pagination, PaginationNav, TreeView, StructuredList, ContainedList, Accordion, CodeSnippet, OrderedList / UnorderedList |
+| Navigation | UIShell (Header, SideNav, Switcher...), HeaderPanel, PageHeader, Tabs, Breadcrumb, ContentSwitcher, Link |
+| Containers | Tile, ClickableTile, ExpandableTile, SelectableTile, RadioTile / TileGroup |
+| Overlays | Modal (+ ComposedModal), Dialog, Popover, Tooltip, Toggletip, DefinitionTooltip |
+| Feedback | InlineNotification, ActionableNotification, ToastNotification (`CdsToast.Show`), Callout, Tag, DismissibleTag, OperationalTag, SelectableTag, BadgeIndicator, IconIndicator, ShapeIndicator, Loading, InlineLoading, ProgressBar, ProgressIndicator, SkeletonText, SkeletonPlaceholder, SkeletonIcon |
+| AI | AILabel (+ content and actions, `CdsAiTreatment`), AISkeleton, ChatButton |
+| Layout | Grid (2x grid, breakpoints), Stack, AspectRatio, Heading / Section |
+
+The gallery's **Patterns** section composes them into Carbon's product patterns (create form, resource list,
+settings, filtering, empty states, loading, notifications, confirmation, read-only and disabled, overflow content,
+login).
+
+## How it works
+
+- **Theming**: color tokens are dynamic resources. `CdsResources` holds the app theme; `CdsTheme` zones and `CdsLayer`
+  scopes re-bind them for a subtree, so components only ever reference the `-01` tokens.
+- **Interaction**: each control draws its own visuals and lays an invisible native button (`CdsHitTarget`) over them,
+  which gives real keyboard focus, Tab order, Enter/Space and screen-reader roles on every platform.
+- **Overlays**: every `ContentPage` gets a `CdsOverlayHost` through an implicit page style; menus, list boxes,
+  popovers, tooltips, modals and toasts open there, mirror the theme and layer of their trigger, and route Escape and
+  arrow keys.
+- **Requirements**: .NET 10 with the MAUI workload (Microsoft.Maui.Controls 10.0.20 or later). On iOS/macOS 27 your
+  app must adopt the UIScene lifecycle (see the gallery's `Platforms/*/Info.plist` and `SceneDelegate.cs`).
+
 ## Themes and layers
 
 - Switch the app theme at runtime: `CdsThemeManager.SetTheme(CdsThemeName.G100)` (or `FollowSystem()`).
