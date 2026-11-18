@@ -57,7 +57,8 @@ public class CdsSwitcherItem : CdsShellItem
     protected override void ApplyVisuals()
     {
         var v = CdsUIShellTokens.SwitcherItem(State, IsActive);
-        SetColor(_fill, BoxView.ColorProperty, v.Background);
+        SetColor(_fill, BoxView.ColorProperty, v.Background ?? CdsColorKeys.Layer01);
+        _fill.IsVisible = v.Background is not null;
         SetColor(_label, Label.TextColorProperty, v.Foreground);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
     }

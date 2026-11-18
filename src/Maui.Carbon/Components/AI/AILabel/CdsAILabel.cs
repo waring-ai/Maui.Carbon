@@ -188,13 +188,13 @@ public class CdsAILabel : CdsControl
     protected override void ApplyVisuals()
     {
         var v = CdsAILabelTokens.Resolve(Kind, !string.IsNullOrEmpty(TextLabel), State);
-        SetColor(_box, BackgroundColorProperty, v.Background);
+        SetBrush(_box, BackgroundProperty, v.Background);
         SetBrush(_box, Border.StrokeProperty, v.Border);
         SetBrush(_ring, Border.StrokeProperty, v.InnerRing);
         _ring.IsVisible = v.InnerRing is not null;
         SetColor(_text, MauiLabel.TextColorProperty, v.Text);
         SetColor(_extra, MauiLabel.TextColorProperty, v.SecondaryText);
-        SetColor(_dot, BoxView.ColorProperty, v.Dot);
+        SetColor(_dot, BoxView.ColorProperty, v.Dot ?? CdsColorKeys.IconPrimary);
     }
 
     /// <summary>

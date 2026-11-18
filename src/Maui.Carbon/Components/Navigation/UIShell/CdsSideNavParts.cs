@@ -307,7 +307,8 @@ public class CdsSideNavFooter : CdsShellItem
     protected override void ApplyVisuals()
     {
         var v = CdsUIShellTokens.SideNavToggle(State);
-        SetColor(_fill, BoxView.ColorProperty, v.Background);
+        SetColor(_fill, BoxView.ColorProperty, v.Background ?? CdsColorKeys.Layer01);
+        _fill.IsVisible = v.Background is not null;
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
     }

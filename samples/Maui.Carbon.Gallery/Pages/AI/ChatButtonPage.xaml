@@ -17,7 +17,7 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes" Description="sm 32 (radius 16), md 40 (radius 20), lg 48 (radius 24, default). Without an icon the end padding is 15 so the label looks centered.">
-            <FlexLayout Wrap="Wrap" AlignItems="End">
+            <FlexLayout Wrap="Wrap" AlignItems="Center">
                 <cds:CdsChatButton Text="Send" Size="Sm" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Size="Md" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Margin="0,0,16,16" />

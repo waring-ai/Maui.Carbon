@@ -168,10 +168,11 @@ public class CdsHeaderMenu : CdsShellItem
         {
             v = CdsUIShellTokens.HeaderMenuTrigger(State, open, current && !open);
         }
-        SetColor(_fill, BoxView.ColorProperty, v.Background);
+        SetColor(_fill, BoxView.ColorProperty, v.Background ?? CdsColorKeys.Layer01);
+        _fill.IsVisible = v.Background is not null;
         SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.Foreground);
         SetColor(_chevron, CdsIcon.ColorProperty, CdsColorKeys.IconSecondary);
-        SetColor(_bar, BoxView.ColorProperty, sideNav ? null : v.Bar);
+        SetColor(_bar, BoxView.ColorProperty, v.Bar ?? CdsColorKeys.BorderInteractive);
         _bar.IsVisible = !sideNav && v.Bar is not null;
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
     }
@@ -181,7 +182,7 @@ public class CdsHeaderMenu : CdsShellItem
         _label.Text = Label;
         var sideNav = _presentation == CdsShellPresentation.SideNav;
         _label.TypeStyle = sideNav ? CdsTypeStyle.HeadingCompact01 : CdsTypeStyle.BodyCompact01;
-        _triggerRow.HeightRequest = sideNav ? UIShellModel.SideNavRowHeight : -1;
+        _triggerRow.HeightRequest = sideNav ? UIShellModel.SideNavRowHeight : UIShellModel.HeaderHeight;
         HorizontalOptions = sideNav ? LayoutOptions.Fill : LayoutOptions.Start;
         _inline.IsVisible = sideNav && IsExpanded;
         SemanticProperties.SetDescription(_hit, Label);

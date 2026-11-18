@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Text" Description="16 high lines (24 for a heading), fully rounded, tag-background-blue with a fast sliding interactive shimmer (1250ms), 8 between lines. A paragraph varies the line widths.">
-            <VerticalStackLayout Spacing="24" MaximumWidthRequest="560" HorizontalOptions="Start">
+            <VerticalStackLayout Spacing="24" WidthRequest="560" HorizontalOptions="Start">
                 <cds:CdsAISkeletonText />
                 <cds:CdsAISkeletonText IsHeading="True" WidthPercent="60" />
                 <cds:CdsAISkeletonText IsParagraph="True" LineCount="4" />

@@ -458,7 +458,7 @@ public class CdsTreeView : CdsControl
             if (v.NodeIcon is not null) SetColor(v.NodeIcon, CdsIcon.ColorProperty, iconKey);
             var active = ReferenceEquals(ActiveNode, node);
             v.ActiveBar.IsVisible = active;
-            SetColor(v.ActiveBar, BoxView.ColorProperty, active ? CdsTreeViewTokens.ActiveBar : null);
+            SetColor(v.ActiveBar, BoxView.ColorProperty, CdsTreeViewTokens.ActiveBar);
             v.Ring.IsActive = v.Hit.IsFocused && v.Hit.IsFocusFromKeyboard;
             v.Hit.IsSelected = selected;
         }

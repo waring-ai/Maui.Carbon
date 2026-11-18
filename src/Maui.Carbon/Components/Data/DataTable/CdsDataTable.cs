@@ -24,7 +24,7 @@ public partial class CdsDataTable : CdsControl
     readonly VerticalStackLayout _root = new() { Spacing = 0 };
     readonly VerticalStackLayout _titleBlock = new() { Spacing = 0, Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06) };
     readonly CdsText _title = new() { TypeStyle = CdsTypeStyle.Heading03 };
-    readonly CdsText _description = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.Secondary, MaximumWidthRequest = 640 };
+    readonly CdsText _description = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.Secondary, MaximumWidthRequest = 640, HorizontalOptions = LayoutOptions.Start };
     readonly Grid _toolbar = new();
     readonly Grid _toolbarRow = new() { ColumnSpacing = 0 };
     readonly ContentView _toolbarContentHost = new();

@@ -84,7 +84,7 @@ public class CdsSkipToContent : CdsControl
         var shown = Is(CdsInteractionState.FocusVisible);
         _bar.IsVisible = shown;
         var v = CdsUIShellTokens.SkipToContent();
-        SetColor(_bar, BackgroundColorProperty, v.Background);
+        SetBrush(_bar, BackgroundProperty, v.Background);
         SetBrush(_bar, Border.StrokeProperty, shown ? CdsColorKeys.Focus : null);
     }
 
