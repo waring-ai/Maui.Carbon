@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternSettingsPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Account settings" Description="Tabs split the setting areas. The details form saves on submit (the name is edited, so Save changes and Cancel are enabled); the toggles apply at once and report Saving then Saved underneath; the account ID is a read-only field; closing the account is last, in its own section, and only opens a confirmation. Turn on IP restriction to see a failed save revert the toggle.">
+            <VerticalStackLayout Spacing="0">
+                <cds:CdsBreadcrumb NoTrailingSlash="True">
+                    <cds:CdsBreadcrumbItem Text="Manage" />
+                    <cds:CdsBreadcrumbItem Text="Account settings" IsCurrentPage="True" />
+                </cds:CdsBreadcrumb>
+
+                <VerticalStackLayout Spacing="8" Margin="0,16,0,24">
+                    <cds:CdsText Text="Account settings" TypeStyle="Heading05" SemanticProperties.HeadingLevel="Level1" />
+                    <cds:CdsText Text="Settings for everyone in the Northwind production account. You need the Administrator role to change them."
+                                 TypeStyle="Body01" Tone="Secondary" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+
+                <cds:CdsTabs Label="Account settings">
+                    <cds:CdsTab Text="General">
+                        <VerticalStackLayout WidthRequest="640" HorizontalOptions="Start" Padding="0,32,0,0" Spacing="0">
+
+                            <VerticalStackLayout Spacing="0" SemanticProperties.Description="Account details">
+                                <cds:CdsText Text="Account details" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsText Text="Changes here apply after you save them." TypeStyle="Body01" Tone="Secondary" Margin="0,4,0,24" />
+                                <cds:CdsForm x:Name="DetailsForm" IsTight="True" SemanticProperties.Description="Account details" Submitted="OnDetailsSubmitted">
+                                    <cds:CdsTextInput x:Name="NameInput" Label="Account name" Text="Northwind prod (EU)" HelperText="Shown in the header and on invoices." TextChanged="OnDetailsChanged" />
+                                    <cds:CdsSelect x:Name="RegionSelect" Label="Default region" SelectedItem="eu-de" HelperText="New clusters and buckets start in this region." SelectedItemChanged="OnDetailsSelectChanged">
+                                        <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                                        <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                                        <cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" />
+                                        <cds:CdsSelectItem Value="jp-tok" Text="Tokyo (jp-tok)" />
+                                    </cds:CdsSelect>
+                                    <cds:CdsTextInput x:Name="ContactInput" Label="Technical contact" Text="platform-team@northwind.dev" Keyboard="Email" HelperText="Receives maintenance and security notices." TextChanged="OnDetailsChanged" />
+                                    <cds:CdsTextInput Label="Account ID" Text="a7f3c9e2b41d4e8f9a06c5d2e1b7f480" IsReadOnly="True" HelperText="Read-only. Quote it when you contact support." />
+                                    <HorizontalStackLayout Spacing="16" Margin="0,8,0,0">
+                                        <Grid WidthRequest="160" HeightRequest="48">
+                                            <cds:CdsButton x:Name="SaveButton" Text="Save changes" Clicked="OnSaveClicked" />
+                                            <cds:CdsInlineLoading x:Name="Saving" IsVisible="False" Status="Active" Description="Saving..." VerticalOptions="Center" Margin="16,0,0,0" />
+                                        </Grid>
+                                        <cds:CdsButton x:Name="CancelButton" Text="Cancel" Kind="Secondary" Clicked="OnCancelClicked" />
+                                        <cds:CdsInlineLoading x:Name="Saved" IsVisible="False" Status="Finished" Description="Changes saved" SuccessDelay="600000" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </cds:CdsForm>
+                            </VerticalStackLayout>
+
+                            <BoxView x:Name="Rule1" HeightRequest="1" Margin="0,32" />
+
+                            <VerticalStackLayout Spacing="0" SemanticProperties.Description="Security">
+                                <cds:CdsText Text="Security" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsText Text="Toggles take effect as soon as you change them." TypeStyle="Body01" Tone="Secondary" Margin="0,4,0,24" />
+                                <VerticalStackLayout x:Name="PrefsHost" Spacing="0" />
+                            </VerticalStackLayout>
+
+                            <BoxView x:Name="Rule2" HeightRequest="1" Margin="0,32" />
+
+                            <VerticalStackLayout Spacing="0" SemanticProperties.Description="Close account">
+                                <cds:CdsText Text="Close account" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsText Text="Closing is permanent and needs the account owner." TypeStyle="Body01" Tone="Secondary" Margin="0,4,0,24" />
+                                <cds:CdsTile>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+                                        <VerticalStackLayout Spacing="4">
+                                            <cds:CdsText Text="Close Northwind production" TypeStyle="HeadingCompact01" />
+                                            <cds:CdsText Text="Deletes 23 clusters, 14 buckets and all API keys after a 30-day grace period. The final invoice is sent to the billing contact."
+                                                         TypeStyle="Body01" Tone="Secondary" MaximumWidthRequest="380" HorizontalOptions="Start" />
+                                        </VerticalStackLayout>
+                                        <cds:CdsButton Grid.Column="1" Text="Close account" Kind="DangerTertiary" Size="Md" VerticalOptions="Start" Clicked="OnCloseAccountClicked" />
+                                    </Grid>
+                                </cds:CdsTile>
+                            </VerticalStackLayout>
+
+                            <cds:CdsText x:Name="Status" Text="No changes yet" TypeStyle="Label01" Tone="Secondary" Margin="0,24,0,0" />
+                        </VerticalStackLayout>
+                    </cds:CdsTab>
+                    <cds:CdsTab Text="Notifications">
+                        <cds:CdsText Text="Email and webhook notifications." TypeStyle="Body01" Padding="0,32,0,0" />
+                    </cds:CdsTab>
+                    <cds:CdsTab Text="Access">
+                        <cds:CdsText Text="Access groups and IAM policies." TypeStyle="Body01" Padding="0,32,0,0" />
+                    </cds:CdsTab>
+                    <cds:CdsTab Text="Billing">
+                        <cds:CdsText Text="Payment methods and invoices." TypeStyle="Body01" Padding="0,32,0,0" />
+                    </cds:CdsTab>
+                </cds:CdsTabs>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternResourceListPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Clusters page" Description="UI shell with the product links and system utilities, a side nav that marks Clusters as current, a page header with breadcrumb, description and an export action, then a searchable, sortable, selectable table. Two clusters are selected, so the batch bar replaces the toolbar. Pagination states the range. The frame is 640 high so the gallery page still scrolls.">
+            <VerticalStackLayout Spacing="12">
+                <Border x:Name="ShellFrame" StrokeThickness="1" HeightRequest="640" StrokeShape="Rectangle" Padding="0">
+                    <cds:CdsUIShell Breakpoint="Lg">
+                        <cds:CdsUIShell.Header>
+                            <cds:CdsHeader Label="Cloud console">
+                                <cds:CdsSkipToContent />
+                                <cds:CdsHeaderMenuButton IsCollapsible="True" />
+                                <cds:CdsHeaderName Text="Cloud console" />
+                                <cds:CdsHeaderNavigation Label="Cloud console">
+                                    <cds:CdsHeaderMenuItem Text="Catalog" />
+                                    <cds:CdsHeaderMenuItem Text="Resources" IsActive="True" />
+                                    <cds:CdsHeaderMenuItem Text="Billing" />
+                                </cds:CdsHeaderNavigation>
+                                <cds:CdsHeaderGlobalBar>
+                                    <cds:CdsHeaderGlobalAction Icon="Search" Label="Search" />
+                                    <cds:CdsHeaderGlobalAction Icon="Notification" Label="Notifications" />
+                                    <cds:CdsHeaderGlobalAction Icon="User" Label="Account" />
+                                </cds:CdsHeaderGlobalBar>
+                            </cds:CdsHeader>
+                        </cds:CdsUIShell.Header>
+                        <cds:CdsUIShell.SideNav>
+                            <cds:CdsSideNav Label="Kubernetes">
+                                <cds:CdsSideNavItems>
+                                    <cds:CdsSideNavLink Text="Overview" Icon="Dashboard" />
+                                    <cds:CdsSideNavMenu Text="Kubernetes" Icon="VirtualMachine" IsExpanded="True">
+                                        <cds:CdsSideNavMenuItem Text="Clusters" IsActive="True" />
+                                        <cds:CdsSideNavMenuItem Text="Worker pools" />
+                                        <cds:CdsSideNavMenuItem Text="Ingress" />
+                                    </cds:CdsSideNavMenu>
+                                    <cds:CdsSideNavMenu Text="Storage" Icon="Folder">
+                                        <cds:CdsSideNavMenuItem Text="Buckets" />
+                                    </cds:CdsSideNavMenu>
+                                    <cds:CdsSideNavLink Text="Monitoring" Icon="Analytics" />
+                                    <cds:CdsSideNavDivider />
+                                    <cds:CdsSideNavLink Text="Settings" Icon="Settings" />
+                                </cds:CdsSideNavItems>
+                            </cds:CdsSideNav>
+                        </cds:CdsUIShell.SideNav>
+                        <ScrollView>
+                            <VerticalStackLayout Spacing="0">
+                                <cds:CdsPageHeader>
+                                    <cds:CdsPageHeaderBreadcrumbBar>
+                                        <cds:CdsBreadcrumb Size="Sm" NoTrailingSlash="True">
+                                            <cds:CdsBreadcrumbItem Text="Resources" />
+                                            <cds:CdsBreadcrumbItem Text="Kubernetes" />
+                                        </cds:CdsBreadcrumb>
+                                    </cds:CdsPageHeaderBreadcrumbBar>
+                                    <cds:CdsPageHeaderContent Title="Clusters">
+                                        <cds:CdsPageHeaderContent.PageActions>
+                                            <cds:CdsPageHeaderActions>
+                                                <cds:CdsIconButton Icon="Download" Label="Export list" Kind="Ghost" Size="Md" Clicked="OnExportClicked" />
+                                            </cds:CdsPageHeaderActions>
+                                        </cds:CdsPageHeaderContent.PageActions>
+                                        <cds:CdsPageHeaderContentText Text="Managed Kubernetes clusters in this account. Select clusters to stop or delete them together." />
+                                    </cds:CdsPageHeaderContent>
+                                </cds:CdsPageHeader>
+                                <VerticalStackLayout Padding="32,24,32,32" Spacing="0">
+                                    <cds:CdsDataTable x:Name="MainTable"
+                                                      Label="Clusters"
+                                                      Size="Md"
+                                                      IsSortable="True"
+                                                      Selection="Multi"
+                                                      IsSearchable="True"
+                                                      SearchPlaceholder="Search clusters"
+                                                      OverflowMenuOnHover="False"
+                                                      SelectionChanged="OnSelectionChanged"
+                                                      SortChanged="OnSortChanged"
+                                                      SearchChanged="OnSearchChanged">
+                                        <cds:CdsDataTable.BatchActions>
+                                            <cds:CdsDataTableBatchAction Label="Stop" Icon="Stop" Invoked="OnBatchStop" />
+                                            <cds:CdsDataTableBatchAction Label="Export" Icon="Export" Invoked="OnBatchExport" />
+                                            <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" Invoked="OnBatchDelete" />
+                                        </cds:CdsDataTable.BatchActions>
+                                        <cds:CdsDataTable.ToolbarContent>
+                                            <cds:CdsButton Text="Create cluster" Icon="Add" Size="Md" Clicked="OnCreateClicked" />
+                                        </cds:CdsDataTable.ToolbarContent>
+                                    </cds:CdsDataTable>
+                                    <cds:CdsPagination x:Name="Pager" Size="Md" PageSizes="10, 25, 50" PageSize="10" TotalItems="23" PageChanged="OnPageChanged" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </cds:CdsUIShell>
+                </Border>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Two clusters selected." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Searching, nothing selected" Description="The same table with the toolbar showing the open search (filtered to prod) and the primary action; the batch bar is hidden because no row is selected. The last column is the row overflow menu: Update version is disabled for clusters already on the latest version and the destructive item comes last.">
+            <cds:CdsDataTable x:Name="SearchTable"
+                              Label="Clusters, filtered"
+                              Size="Md"
+                              IsSortable="True"
+                              Selection="Multi"
+                              IsSearchable="True"
+                              IsPersistentSearch="True"
+                              SearchText="prod"
+                              SearchPlaceholder="Search clusters"
+                              OverflowMenuOnHover="False">
+                <cds:CdsDataTable.BatchActions>
+                    <cds:CdsDataTableBatchAction Label="Stop" Icon="Stop" />
+                    <cds:CdsDataTableBatchAction Label="Export" Icon="Export" />
+                    <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" />
+                </cds:CdsDataTable.BatchActions>
+                <cds:CdsDataTable.ToolbarContent>
+                    <cds:CdsButton Text="Create cluster" Icon="Add" Size="Md" />
+                </cds:CdsDataTable.ToolbarContent>
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
