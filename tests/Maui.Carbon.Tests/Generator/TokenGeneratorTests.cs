@@ -16,6 +16,13 @@ public class TokenGeneratorTests
         Assert.Empty(drift);
     }
 
+    [Fact]
+    public void Generated_code_uses_LF_line_endings_on_every_OS()
+    {
+        var files = CarbonGenerator.Generate(Path.Combine(Root, "design", "carbon"));
+        Assert.All(files, f => Assert.DoesNotContain('\r', f.Value));
+    }
+
     [Theory]
     [InlineData("#0f62fe", 255, 15, 98, 254)]
     [InlineData("#fff", 255, 255, 255, 255)]

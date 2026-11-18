@@ -6,7 +6,10 @@ namespace Maui.Carbon.Generator;
 /// <summary>Entry point shared by the CLI and the tests.</summary>
 public static class CarbonGenerator
 {
-    /// <summary>Generates every <c>*.g.cs</c> file from a design folder. Keys are file names.</summary>
+    /// <summary>
+    /// Generates every <c>*.g.cs</c> file from a design folder. Keys are file names. The output always uses LF line
+    /// endings (the emitters' AppendLine writes CRLF on Windows), so it is identical on every OS.
+    /// </summary>
     public static IReadOnlyDictionary<string, string> Generate(string designDir)
     {
         var tokensPath = Path.Combine(designDir, "tokens.json");
@@ -15,14 +18,14 @@ public static class CarbonGenerator
 
         var files = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var (name, body) in TokenEmitter.Emit(tokens))
-            files[name] = Header($"tokens.json sha256 {tokenHash}") + body;
+            files[name] = Normalize(Header($"tokens.json sha256 {tokenHash}") + body);
 
         var iconsDir = Path.Combine(designDir, "icons");
         if (Directory.Exists(iconsDir) && IconEmitter.IsAvailable)
         {
             var iconHash = HashFolder(iconsDir, "*.svg");
             foreach (var (name, body) in IconEmitter.Emit(iconsDir))
-                files[name] = Header($"icons/*.svg sha256 {iconHash}") + body;
+                files[name] = Normalize(Header($"icons/*.svg sha256 {iconHash}") + body);
         }
         return files;
     }
@@ -81,7 +84,7 @@ public static class CarbonGenerator
         return Convert.ToHexStringLower(sha.GetHashAndReset())[..16];
     }
 
-    /// <summary>Line endings never count as drift (a checkout may convert them).</summary>
+    /// <summary>Folds CRLF to LF: generated output is always LF, and line endings never count as drift.</summary>
     static string Normalize(string text) => text.Replace("\r\n", "\n");
 }
 
