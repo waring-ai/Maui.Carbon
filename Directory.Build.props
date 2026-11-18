@@ -39,7 +39,8 @@
     <CarbonAppTargetFrameworks Condition="'$(CarbonIncludeAndroid)' == 'true'">$(CarbonNetVersion)-android</CarbonAppTargetFrameworks>
     <CarbonAppTargetFrameworks Condition="'$(CarbonIsMac)' == 'true'">$(CarbonAppTargetFrameworks);$(CarbonNetVersion)-ios;$(CarbonNetVersion)-maccatalyst</CarbonAppTargetFrameworks>
     <CarbonAppTargetFrameworks Condition="'$(CarbonIsWindows)' == 'true'">$(CarbonAppTargetFrameworks);$(CarbonNetVersion)-windows10.0.19041.0</CarbonAppTargetFrameworks>
-    <CarbonAppTargetFrameworks>$(CarbonAppTargetFrameworks.TrimStart(';'))</CarbonAppTargetFrameworks>
+    <!-- A leading ';' is harmless (empty entries are skipped). Do not trim it with a property function: MSBuild escapes
+         function results, so the ';' separators would become %3B and the list would reach the inner build as one value. -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
