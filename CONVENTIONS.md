@@ -200,7 +200,7 @@ This machine hangs MSBuild unless node reuse and shared compilation are off. Alw
 export MSBUILDDISABLENODEREUSE=1
 tools/verify.sh --fast          # inner loop: generator check, library net10.0, tests
 tools/verify.sh                 # before you finish: + maccatalyst, ios, android & windows compile checks
-tools/verify.sh --gallery       # + the gallery for Mac Catalyst
+tools/verify.sh --samples       # + the gallery and the Relay sample for Mac Catalyst (--gallery still works)
 ```
 Zero warnings (warnings are errors), zero test failures. If you started in a git worktree, first run
 `git merge --ff-only main` (worktrees can start from an old commit).
@@ -216,3 +216,32 @@ interaction (open states shown via properties, not clicks) so screenshots show t
 - Commit on your branch with a plain message (no `Co-Authored-By` or other attribution trailers).
 - Report: per component, what you left out versus its README and why (MAUI limitation, missing icon…), any
   deviation from these conventions, and any foundation change you need.
+
+## 14. The Relay sample app
+
+`samples/Maui.Carbon.Relay` is the library used the way a product team would use it: one `CdsUIShell` frame, MVVM
+with CommunityToolkit.Mvvm, DI and an in-memory backend. When a component changes in a way apps feel (a renamed
+property, a new required setup step), update Relay too.
+
+- **Core vs app.** `samples/Maui.Carbon.Relay.Core` is plain `net10.0` and holds the models, mock services, pure
+  logic and view models. It never references MAUI or Maui.Carbon, so `tests/Maui.Carbon.Relay.Tests` can test it.
+  The app maps domain enums to Carbon in `Presentation/CarbonMap.cs` and `Converters.cs`.
+- **Adding a screen.**
+  - Add `ViewModels/<Screen>ViewModel.cs` (derive `PageViewModel`, load in `OnActivatedAsync`, partial-property
+    `[ObservableProperty]` only) and a route in `Abstractions/Routes`.
+  - Add `Views/<Screen>View.xaml` (`x:DataType` on every XAML and template).
+  - Register both, and `Navigator.Map`, in `MauiProgram.cs`. Add the side-nav item and its route mapping in
+    `Pages/MainPage`, and a shot in `Hosting/RouteSnapshotRunner`.
+- **Navigation.** `CdsUIShell` has none of its own. `Hosting/Navigator` swaps the shell's `Body` and activates the
+  view model.
+- **Logging.** `Hosting/AppLog` sets up Serilog with a text file sink: `relay-<date>.log` in `RELAY_LOG_DIR` (or
+  `--log-dir`), the screenshot directory in screenshot mode, else `<AppData>/Logs/<app id>` (`~/Library/Logs/...` on Mac Catalyst). Log through an injected
+  `ILogger<T>` in the app (Core stays logging-free; its failures reach the log as error toasts through
+  `UserFeedback`). Unhandled and unobserved exceptions, failed screen loads and MAUI's own warnings are logged
+  already. A caught exception the user never sees as a toast should be logged at Error.
+- **Data-binding declarative item lists.** Lists like `CdsContainedList.Items` and `CdsStructuredList.Rows` take
+  child elements rather than an `ItemsSource`; bind them with `Presentation/ItemsBinding`.
+- **Verify.**
+  - `tools/verify.sh --samples` builds Relay and runs its tests.
+  - `APP=relay tools/snapshots.sh out/relay white,g100` signs in and captures every screen and open state, then
+    prints the log's warning count and any `[ERR]`/`[FTL]` entries.

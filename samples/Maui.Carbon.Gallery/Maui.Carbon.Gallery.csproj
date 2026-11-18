@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(CarbonAppTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Maui.Carbon.Gallery</RootNamespace>
     <UseMaui>true</UseMaui>

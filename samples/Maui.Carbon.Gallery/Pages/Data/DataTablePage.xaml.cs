@@ -58,6 +58,12 @@ public partial class DataTablePage : GalleryPage
         HDataSamples.AddClusterColumns(StickyTable);
         StickyTable.ItemsSource = HDataSamples.AllClusters;
 
+        // Large data set: virtualized by the sticky header.
+        HDataSamples.AddClusterColumns(LargeTable);
+        HDataSamples.AddRowActions(LargeTable);
+        LargeTable.ExpandedRowTemplate = HDataSamples.ExpandedTemplate();
+        LargeTable.ItemsSource = HDataSamples.Generated(10_000);
+
         // Empty states.
         HDataSamples.AddClusterColumns(EmptyTable);
         EmptyTable.ItemsSource = Array.Empty<HCluster>();

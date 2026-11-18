@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Sign-in, following Carbon's login pattern: step 1 asks for the email, step 2 for the password. On the lg breakpoint
+  a Gray 100 theme zone shows the product story beside the form (hidden below lg).
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Pages.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title="Sign in to Relay">
+    <Grid x:Name="Root" ColumnDefinitions="*,1.6*">
+            <ScrollView>
+                <Grid RowDefinitions="Auto,*,Auto" Padding="32,64,32,32" MaximumWidthRequest="440" HorizontalOptions="Start">
+                    <VerticalStackLayout>
+                        <cds:CdsText Text="Log in to Relay" TypeStyle="Heading05" Margin="0,0,0,8" />
+                        <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsEmailStep}">
+                            <cds:CdsText Text="Don't have an account?" TypeStyle="BodyCompact01" VerticalOptions="Center" />
+                            <cds:CdsLink Text="Ask your workspace admin" IsInline="True" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <FlexLayout Wrap="Wrap" AlignItems="Center" IsVisible="{Binding IsPasswordStep}">
+                            <cds:CdsText Text="{Binding Email, StringFormat='Logging in as {0}.'}" TypeStyle="BodyCompact01" Margin="0,0,4,0" />
+                            <cds:CdsLink Text="Not you?" IsInline="True" Command="{Binding ChangeEmailCommand}" />
+                        </FlexLayout>
+                        <BoxView x:Name="Rule1" HeightRequest="1" Margin="0,24" />
+
+                        <cds:CdsInlineNotification Kind="Error" Role="Alert" IsLowContrast="True" HideCloseButton="True"
+                                                   Title="Couldn't log in." Subtitle="{Binding FormError}"
+                                                   IsVisible="{Binding HasFormError}" Margin="0,0,0,24" />
+
+                        <!-- Step 1 -->
+                        <VerticalStackLayout IsVisible="{Binding IsEmailStep}">
+                            <cds:CdsTextInput Label="Email" Keyboard="Email" Text="{Binding Email}"
+                                              HelperText="Demo: maya.chen@relay.dev"
+                                              IsInvalid="{Binding IsEmailInvalid}" InvalidText="{Binding EmailError}" />
+                            <cds:CdsCheckbox Label="Remember my email" IsChecked="{Binding RememberMe}" Margin="0,16,0,24" />
+                            <Grid>
+                                <cds:CdsButton Text="Continue" Icon="ArrowRight" HorizontalOptions="Fill" Command="{Binding ContinueCommand}"
+                                               IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}" />
+                                <cds:CdsInlineLoading Description="Checking your account…" IsVisible="{Binding IsBusy}"
+                                                      Status="{Binding IsBusy, Converter={x:Static p:Converters.BusyLoading}}" />
+                            </Grid>
+                            <BoxView x:Name="Rule2" HeightRequest="1" Margin="0,24" />
+                            <cds:CdsText Text="Alternative login" TypeStyle="BodyCompact01" Tone="Secondary" Margin="0,0,0,16" />
+                            <cds:CdsButton Text="Log in with company SSO" Kind="Tertiary" HorizontalOptions="Fill" />
+                        </VerticalStackLayout>
+
+                        <!-- Step 2 -->
+                        <VerticalStackLayout IsVisible="{Binding IsPasswordStep}">
+                            <cds:CdsPasswordInput Label="Password" Text="{Binding Password}"
+                                                  HelperText="Demo: any password of 6 or more characters"
+                                                  IsInvalid="{Binding IsPasswordInvalid}" InvalidText="{Binding PasswordError}" />
+                            <cds:CdsLink Text="Forgot password?" Size="Sm" HorizontalOptions="Start" Margin="0,8,0,24" />
+                            <Grid>
+                                <cds:CdsButton Text="Log in" Icon="ArrowRight" HorizontalOptions="Fill" Command="{Binding SignInCommand}"
+                                               IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}" />
+                                <cds:CdsInlineLoading Description="Logging in…" IsVisible="{Binding IsBusy}"
+                                                      Status="{Binding IsBusy, Converter={x:Static p:Converters.BusyLoading}}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                    <HorizontalStackLayout Grid.Row="2" Spacing="4" Margin="0,48,0,0">
+                        <cds:CdsText Text="Need help?" TypeStyle="BodyCompact01" Tone="Secondary" VerticalOptions="Center" />
+                        <cds:CdsLink Text="Contact support" IsInline="True" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Grid>
+            </ScrollView>
+            <cds:CdsTheme x:Name="BrandZone" Grid.Column="1" Theme="G100">
+                <Grid x:Name="Brand" Padding="64" RowDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="24" VerticalOptions="Center" MaximumWidthRequest="560" HorizontalOptions="Start">
+                        <cds:CdsText Text="Relay" TypeStyle="Heading03" Tone="Secondary" />
+                        <cds:CdsText Text="Plan, track and ship work your whole team can see." TypeStyle="Heading06" />
+                        <cds:CdsText Text="Issues, boards, sprints and reports in one place, with an assistant that summarizes what changed while you were away."
+                                     TypeStyle="Body02" Tone="Secondary" />
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsTag Text="Boards" Type="Blue" />
+                            <cds:CdsTag Text="Sprints" Type="Purple" />
+                            <cds:CdsTag Text="Reports" Type="Teal" />
+                            <cds:CdsTag Text="AI summaries" Type="Magenta" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                    <cds:CdsText Grid.Row="1" Text="Sample app for Maui.Carbon. All data is fictional." TypeStyle="Label01" Tone="Helper" />
+                </Grid>
+            </cds:CdsTheme>
+    </Grid>
+</ContentPage>

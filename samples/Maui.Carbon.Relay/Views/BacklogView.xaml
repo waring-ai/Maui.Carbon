@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Backlog and sprints: the running sprint (progress, complete it) and the planned sprint (what starting does, start it)
+  as expandable tiles, the backlog as a tree of epics and their issues, and the history of completed sprints with
+  committed against completed points, paged three at a time.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Views.BacklogView"
+             x:DataType="vm:BacklogViewModel">
+    <ScrollView x:Name="Scroller">
+        <VerticalStackLayout>
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderContent Title="{Binding Title}">
+                    <cds:CdsPageHeaderContent.PageActions>
+                        <cds:CdsPageHeaderActions>
+                            <cds:CdsButton Text="View board" Kind="Tertiary" Size="Md" Command="{Binding OpenBoardCommand}" />
+                        </cds:CdsPageHeaderActions>
+                    </cds:CdsPageHeaderContent.PageActions>
+                    <cds:CdsPageHeaderContentText Text="{Binding HeaderText}" />
+                </cds:CdsPageHeaderContent>
+            </cds:CdsPageHeader>
+
+            <VerticalStackLayout Padding="32,24,32,48" Spacing="32">
+                <!-- Loading -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoading}">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <cds:CdsSkeletonPlaceholder HeightRequest="220" />
+                        <cds:CdsSkeletonPlaceholder Grid.Column="1" HeightRequest="220" />
+                    </Grid>
+                    <cds:CdsSkeletonPlaceholder HeightRequest="320" />
+                </VerticalStackLayout>
+
+                <!-- Sprints -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsReady}">
+                    <cds:CdsText Text="Sprints" TypeStyle="Heading03" />
+                    <cds:CdsInlineNotification Kind="Info" IsLowContrast="True" HideCloseButton="True" Title="No sprints yet"
+                                               Subtitle="{Binding NoSprintText}" IsVisible="{Binding HasNoSprints}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                        <!-- Running sprint -->
+                        <cds:CdsExpandableTile x:Name="ActiveTile" IsExpanded="True" VerticalOptions="Start" IsVisible="{Binding HasActiveSprint}"
+                                               CollapsedDescription="Show running sprint details" ExpandedDescription="Hide running sprint details">
+                            <VerticalStackLayout Spacing="12">
+                                <HorizontalStackLayout Spacing="8">
+                                    <cds:CdsText Text="{Binding ActiveSprint.Name}" TypeStyle="Heading02" VerticalOptions="Center" />
+                                    <cds:CdsTag Text="Active" Type="Green" Icon="InProgress" Size="Md" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                                <cds:CdsText Text="{Binding ActiveSprint.DatesText}" TypeStyle="BodyCompact01" Tone="Secondary" />
+                                <cds:CdsProgressBar Label="{Binding ActiveSprint.TimeText, StringFormat='Points done · {0}'}"
+                                                    Value="{Binding ActiveSprint.ProgressValue}" Max="{Binding ActiveSprint.ProgressMax}"
+                                                    HelperText="{Binding ActiveSprint.ProgressText}" />
+                            </VerticalStackLayout>
+                            <cds:CdsExpandableTile.ExpandedContent>
+                                <VerticalStackLayout Spacing="16" Padding="0,16,0,0">
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Goal" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding ActiveSprint.Goal}" TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Issues" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding ActiveSprint.DoneText}" TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                    <HorizontalStackLayout Spacing="16" HeightRequest="40">
+                                        <cds:CdsButton Text="Complete sprint" Kind="Secondary" Size="Md" Command="{Binding CompleteSprintCommand}"
+                                                       IsVisible="{Binding IsCompleting, Converter={x:Static p:Converters.Not}}" />
+                                        <cds:CdsInlineLoading Status="{Binding IsCompleting, Converter={x:Static p:Converters.BusyLoading}}"
+                                                              Description="Completing sprint..." IsVisible="{Binding IsCompleting}" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </cds:CdsExpandableTile.ExpandedContent>
+                        </cds:CdsExpandableTile>
+                        <cds:CdsTile VerticalOptions="Start" IsVisible="{Binding HasActiveSprint, Converter={x:Static p:Converters.Not}}">
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsText Text="No sprint is running" TypeStyle="Heading02" />
+                                <cds:CdsText Text="Start the planned sprint to put its work on the board." TypeStyle="Body01" Tone="Secondary" />
+                            </VerticalStackLayout>
+                        </cds:CdsTile>
+
+                        <!-- Planned sprint -->
+                        <cds:CdsExpandableTile x:Name="PlannedTile" Grid.Column="1" IsExpanded="True" VerticalOptions="Start" IsVisible="{Binding HasPlannedSprint}"
+                                               CollapsedDescription="Show planned sprint details" ExpandedDescription="Hide planned sprint details">
+                            <VerticalStackLayout Spacing="12">
+                                <HorizontalStackLayout Spacing="8">
+                                    <cds:CdsText Text="{Binding PlannedSprint.Name}" TypeStyle="Heading02" VerticalOptions="Center" />
+                                    <cds:CdsTag Text="Planned" Type="CoolGray" Icon="Calendar" Size="Md" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                                <cds:CdsText Text="{Binding PlannedSprint.DatesText, StringFormat='Planned for {0}'}" TypeStyle="BodyCompact01" Tone="Secondary" />
+                                <HorizontalStackLayout Spacing="24">
+                                    <VerticalStackLayout Spacing="2">
+                                        <cds:CdsText Text="Issues" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding PlannedSprint.IssueCount, StringFormat='{0}'}" TypeStyle="Heading03" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Spacing="2">
+                                        <cds:CdsText Text="Points" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding PlannedSprint.PointsTotal, StringFormat='{0}'}" TypeStyle="Heading03" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                            <cds:CdsExpandableTile.ExpandedContent>
+                                <VerticalStackLayout Spacing="16" Padding="0,16,0,0">
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Goal" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding PlannedSprint.Goal}" TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                    <cds:CdsCallout Kind="Info" Title="{Binding StartCalloutTitle}" Subtitle="{Binding StartCalloutText}" />
+                                    <cds:CdsInlineNotification Kind="Error" IsLowContrast="True" Title="Couldn't start the sprint"
+                                                               Subtitle="{Binding StartError}" IsVisible="{Binding HasStartError}"
+                                                               CloseRequested="OnStartErrorClosed" />
+                                    <HorizontalStackLayout Spacing="16" HeightRequest="40">
+                                        <cds:CdsButton Text="Start sprint" Icon="Play" Kind="Primary" Size="Md" Command="{Binding StartSprintCommand}"
+                                                       IsVisible="{Binding IsStarting, Converter={x:Static p:Converters.Not}}" />
+                                        <cds:CdsInlineLoading Status="{Binding IsStarting, Converter={x:Static p:Converters.BusyLoading}}"
+                                                              Description="Starting sprint..." IsVisible="{Binding IsStarting}" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </cds:CdsExpandableTile.ExpandedContent>
+                        </cds:CdsExpandableTile>
+                        <cds:CdsTile Grid.Column="1" VerticalOptions="Start" IsVisible="{Binding HasPlannedSprint, Converter={x:Static p:Converters.Not}}">
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsText Text="No sprint is planned" TypeStyle="Heading02" />
+                                <cds:CdsText Text="Issues wait in the backlog until the next sprint is planned." TypeStyle="Body01" Tone="Secondary" />
+                            </VerticalStackLayout>
+                        </cds:CdsTile>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Backlog and history -->
+                <Grid ColumnDefinitions="3*,2*" ColumnSpacing="32" IsVisible="{Binding IsReady}">
+                    <VerticalStackLayout Spacing="16">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Backlog" TypeStyle="Heading03" />
+                            <cds:CdsText Text="{Binding BacklogText}" TypeStyle="BodyCompact01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                        <cds:CdsTreeView x:Name="Tree" Label="Backlog by epic" HideLabel="True" Size="Sm"
+                                         NodeActivated="OnNodeActivated" NodeToggled="OnNodeToggled"
+                                         IsVisible="{Binding HasBacklog}" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="16">
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Sprint history" TypeStyle="Heading03" />
+                            <cds:CdsText Text="{Binding HistoryText}" TypeStyle="BodyCompact01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding HistoryItems}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SprintHistoryRow">
+                                    <cds:CdsTile>
+                                        <VerticalStackLayout Spacing="8">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <cds:CdsText Text="{Binding Name}" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
+                                                <cds:CdsTag Grid.Column="1" Text="{Binding OutcomeText}" Size="Sm" VerticalOptions="Center"
+                                                            Type="{Binding MetCommitment, Converter={x:Static p:BoardConverters.OutcomeTag}}" />
+                                            </Grid>
+                                            <cds:CdsText Text="{Binding DatesText}" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Text="{Binding Goal}" TypeStyle="BodyCompact01" MaxLines="2" />
+                                            <cds:CdsProgressBar Label="{Binding Name, StringFormat='{0} completed points'}" HideLabel="True" Size="Small"
+                                                                Value="{Binding ProgressValue}" Max="{Binding ProgressMax}"
+                                                                HelperText="{Binding CompletionText}" />
+                                        </VerticalStackLayout>
+                                    </cds:CdsTile>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <cds:CdsPaginationNav Label="Sprint history pages" Size="Md" ItemsShown="5"
+                                              TotalItems="{Binding HistoryPageCount}" Page="{Binding HistoryPage}"
+                                              IsVisible="{Binding HasHistoryPages}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

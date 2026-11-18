@@ -73,6 +73,10 @@
             <cds:CdsDataTable x:Name="StickyTable" Title="All clusters" StickyHeader="True" IsSortable="True" Size="Md" />
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Large data set" Description="With a sticky header the table owns its scrolling, so it only builds the rows in view and re-uses them as the body scrolls: 10,000 rows sort, search and select instantly. Without one, every row is a real view; page long data instead.">
+            <cds:CdsDataTable x:Name="LargeTable" Title="Fleet" Description="10,000 clusters" StickyHeader="True" IsSortable="True" IsSearchable="True" Selection="Multi" IsExpandable="True" Size="Md" />
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Empty state" Description="Under the header row: a short title, one sentence that says what to do and at most one action. The second table shows what a search with no matches looks like.">
             <VerticalStackLayout Spacing="32">
                 <cds:CdsDataTable x:Name="EmptyTable" Title="Clusters" IsSearchable="True" Size="Lg">

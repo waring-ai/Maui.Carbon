@@ -88,9 +88,12 @@ login).
 
 ## Differences from the web components
 
-- **Tables** render every row (they are not virtualized), so page large data sets with `CdsPagination`. Columns take
-  fixed or star widths rather than sizing to their content; a table whose columns need more than the available width
-  scrolls sideways, as Carbon's does.
+- **Tables**: a `CdsDataTable` with `StickyHeader="True"` owns its scrolling, so it is virtualized: it builds only the
+  rows in view and re-binds them as the body scrolls, and sorts, searches and selects 10,000+ rows instantly. Cell and
+  expanded-row templates are re-used for other rows, so bind everything they show to the item (state a template keeps
+  on its own is lost when its row scrolls away). Without a sticky header (the page scrolls the table) every row is a
+  real view, so page large data sets with `CdsPagination`. Columns take fixed or star widths rather than sizing to their
+  content; a table whose columns need more than the available width scrolls sideways, as Carbon's does.
 - **Modals** cover the page they open on. The scrim cannot cover native Shell chrome (navigation bar, flyout); use
   `CdsUIShell` for a fully Carbon-styled frame.
 - **Keyboard**: on Mac Catalyst, Tab focus follows the macOS *Keyboard navigation* setting.
@@ -103,14 +106,22 @@ login).
 |---|---|
 | `src/Maui.Carbon` | the library (NuGet package) |
 | `samples/Maui.Carbon.Gallery` | the gallery app: every component in every theme, plus Carbon's patterns |
+| `samples/Maui.Carbon.Relay` | Relay, a mock project and issue tracker: a whole app on `CdsUIShell` with MVVM (CommunityToolkit.Mvvm), DI and an in-memory backend |
+| `samples/Maui.Carbon.Relay.Core` | Relay's models, mock services and view models (plain `net10.0`, no MAUI) |
+| `tests/Maui.Carbon.Relay.Tests` | unit tests for Relay's logic and view models |
 | `tests/Maui.Carbon.Tests` | unit tests (tokens, theming, layers, component logic) |
 | `tools/Maui.Carbon.Generator` | regenerates `src/Maui.Carbon/Generated` from `design/carbon` |
 | `design/carbon` | the Carbon design-system snapshot this port is built from |
 | `CONVENTIONS.md` | how components are built |
 
-Build and test: `tools/verify.sh` (add `--gallery` to build the gallery; `--fast` for the inner loop).
+Build and test: `tools/verify.sh` (add `--samples` to build the gallery and Relay; `--fast` for the inner loop).
 Run the gallery: `dotnet build samples/Maui.Carbon.Gallery -t:Run -f net10.0-maccatalyst -r maccatalyst-arm64`.
-Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build).
+Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net10.0-maccatalyst -r maccatalyst-arm64` (sign in as
+`maya.chen@relay.dev` with any password of 6+ characters). Relay writes a Serilog text log, `relay-<date>.log`, to
+`Logs/<app id>` under its app data directory (on Mac Catalyst `~/Library/Logs/ai.waring.mauicarbon.relay`), or to
+`RELAY_LOG_DIR` when set; check it for `[ERR]` and `[FTL]` lines after a test session.
+Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build);
+every Relay screen: `APP=relay tools/snapshots.sh out/relay white,g100`.
 
 After updating `design/carbon/tokens.json` or the icons, regenerate with
 `dotnet run --project tools/Maui.Carbon.Generator`.

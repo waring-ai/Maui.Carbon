@@ -160,6 +160,19 @@ public abstract class CdsControl : ContentView
         CdsTokens.SetColor(target, colorProperty, key);
     }
 
+    /// <summary>
+    /// Forgets the remembered color keys (the next <see cref="SetColor"/> applies again). Controls that discard their views
+    /// call it so the cache does not keep the old views alive.
+    /// </summary>
+    protected void ForgetColors() => _tokens.Clear();
+
+    /// <summary>Forgets the remembered color keys of <paramref name="targets"/> (views the control removed).</summary>
+    protected void ForgetColors(IReadOnlySet<BindableObject> targets)
+    {
+        if (targets.Count == 0) return;
+        foreach (var key in _tokens.Keys.Where(k => targets.Contains(k.Target)).ToList()) _tokens.Remove(key);
+    }
+
     /// <summary>Binds a Brush property of <paramref name="target"/> to a color key; skips work when unchanged. <c>null</c> = transparent.</summary>
     protected void SetBrush(Element target, BindableProperty brushProperty, string? key)
     {

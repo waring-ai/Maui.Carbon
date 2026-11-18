@@ -1,11 +1,14 @@
 <Solution>
   <Folder Name="/samples/">
     <Project Path="samples/Maui.Carbon.Gallery/Maui.Carbon.Gallery.csproj" />
+    <Project Path="samples/Maui.Carbon.Relay.Core/Maui.Carbon.Relay.Core.csproj" />
+    <Project Path="samples/Maui.Carbon.Relay/Maui.Carbon.Relay.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Maui.Carbon/Maui.Carbon.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Maui.Carbon.Relay.Tests/Maui.Carbon.Relay.Tests.csproj" />
     <Project Path="tests/Maui.Carbon.Tests/Maui.Carbon.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">

@@ -11,7 +11,8 @@ namespace Maui.Carbon;
 /// dividers, <c>layer-hover-01</c> on hover and <c>layer-selected-01</c> when selected. Rows are 24, 32, 40, 48 or 64 high
 /// (<see cref="Size"/>); <see cref="UseZebraStyles"/> stripes every second row; <see cref="StickyHeader"/> pins the header
 /// above a body that scrolls inside a 300 high area. The table does not sort, filter or select by itself: use
-/// <see cref="CdsDataTable"/> when it should. Keep to about 200 rows and put a <see cref="CdsPagination"/> under longer data.
+/// <see cref="CdsDataTable"/> when it should. Hand-built rows are all real views: keep to about 200 and put a
+/// <see cref="CdsPagination"/> under longer data (a <see cref="CdsDataTable"/> with a sticky header only builds the rows in view).
 /// </summary>
 [ContentProperty(nameof(Rows))]
 public class CdsTable : CdsControl
@@ -65,6 +66,30 @@ public class CdsTable : CdsControl
     double _minimumWidth;
     readonly List<HeaderVisual> _headers = [];
     readonly List<RowVisual> _rowVisuals = [];
+    readonly HashSet<CdsTableRow> _attached = [];
+    readonly Dictionary<CdsTableRow, RowVisual> _visualByRow = [];
+    readonly Dictionary<CdsTableCell, CdsText> _cellLabels = [];
+    readonly HashSet<BindableObject> _forget = [];
+    readonly Stack<RowVisual> _parked = new();
+    readonly List<GridLength> _columns = [];
+    double _rowHeight;
+    double _padTop;
+    double _padBottom;
+    bool _topAligned;
+    int _nextGridRow;
+    bool _built;
+
+    // Virtualized body (a row source with a sticky header): a pool of row slots positioned in an absolute layout.
+    const int Overscan = 6;
+    readonly AbsoluteLayout _virtualBody = new();
+    readonly Dictionary<View, RowVisual> _slotByRoot = [];
+    readonly Dictionary<object, double> _childHeights = [];
+    ICdsTableRowSource? _source;
+    ICdsTableRowSource? _poolSource;
+    double[] _offsets = [0];
+    double _childEstimate;
+    bool _binding;
+    bool _relayoutQueued;
     int _suspend;
     bool _visualsDirty;
     bool _dirty;
@@ -79,6 +104,9 @@ public class CdsTable : CdsControl
         HorizontalOptions = LayoutOptions.Fill;
         VerticalOptions = LayoutOptions.Start;
         CdsTokens.SetColor(_bodyGrid, BackgroundColorProperty, CdsTableTokens.Background);
+        CdsTokens.SetColor(_virtualBody, BackgroundColorProperty, CdsTableTokens.Background);
+        _scroll.Scrolled += (_, _) => { if (IsVirtual) UpdateWindow(); };
+        _scroll.SizeChanged += (_, _) => { if (IsVirtual) UpdateWindow(); };
         _stickyRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _stickyRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _stickyRoot.Add(_headerGrid, 0, 0);
@@ -172,8 +200,58 @@ public class CdsTable : CdsControl
     /// <summary>The header cell host of a column (for tests and the data table).</summary>
     internal int HeaderCount => _headers.Count;
 
-    /// <summary>The rendered body row count.</summary>
-    internal int BodyRowCount => _rowVisuals.Count;
+    /// <summary>The body row count (with a row source, the source's count, whether or not the rows are realized).</summary>
+    internal int BodyRowCount => IsVirtual ? _source!.Count : _rowVisuals.Count;
+
+    /// <summary>The body rows that have views (all of them, unless the table is virtualized).</summary>
+    internal int RealizedRowCount => _rowVisuals.Count(v => v.Index >= 0);
+
+    /// <summary>The realized rows by data index (for tests).</summary>
+    internal IReadOnlyList<(int Index, CdsTableRow Row)> RealizedRows =>
+        _rowVisuals.Where(v => v.Index >= 0).OrderBy(v => v.Index).Select(v => (v.Index, v.Source)).ToList();
+
+    /// <summary>
+    /// Rows supplied on demand. With <see cref="StickyHeader"/> on, only the rows in (and near) view are realized, in a
+    /// pool of rows the source re-binds as the body scrolls; <see cref="Rows"/> is then ignored.
+    /// </summary>
+    internal ICdsTableRowSource? RowSource
+    {
+        get => _source;
+        set
+        {
+            if (ReferenceEquals(_source, value)) return;
+            _source = value;
+            _childHeights.Clear();
+            Rebuild();
+        }
+    }
+
+    /// <summary>Whether the body is virtualized: a row source and a sticky header (the table owns the scrolling).</summary>
+    internal bool IsVirtual => _source is not null && StickyHeader;
+
+    /// <summary>The source's rows changed (count, order or content): re-binds the realized rows.</summary>
+    internal void InvalidateRows()
+    {
+        if (!IsVirtual || !_built) return;
+        if (_dirty) return; // a pending rebuild re-binds everything
+        var count = _source!.Count;
+        _binding = true;
+        try
+        {
+            foreach (var v in _rowVisuals)
+            {
+                if (v.Index < 0) continue;
+                if (v.Index >= count) Unbind(v);
+                else Bind(v, v.Index);
+            }
+        }
+        finally
+        {
+            _binding = false;
+        }
+        ComputeOffsets();
+        UpdateWindow(force: true);
+    }
 
     void OnHeadChanged(CdsTableHead? oldHead, CdsTableHead? newHead)
     {
@@ -218,11 +296,55 @@ public class CdsTable : CdsControl
 
     void OnRowsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.OldItems is not null)
-            foreach (CdsTableRow r in e.OldItems) DetachRow(r);
-        if (e.NewItems is not null)
-            foreach (CdsTableRow r in e.NewItems) AttachRow(r);
+        if (e.Action == NotifyCollectionChangedAction.Reset)
+        {
+            // Reset (Clear) carries no old items: detach what was attached, by our own record of it.
+            foreach (var r in _attached) DetachRow(r);
+            _attached.Clear();
+            foreach (var r in _rows)
+                if (_attached.Add(r)) AttachRow(r);
+        }
+        else
+        {
+            if (e.OldItems is not null)
+                foreach (CdsTableRow r in e.OldItems)
+                    if (_attached.Remove(r)) DetachRow(r);
+            if (e.NewItems is not null)
+                foreach (CdsTableRow r in e.NewItems)
+                    if (_attached.Add(r)) AttachRow(r);
+        }
+
+        if (CanUpdateIncrementally(e))
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                for (var i = e.NewStartingIndex; i < _rows.Count; i++) AppendRowVisual(_rows[i], i);
+            }
+            else
+            {
+                while (_rowVisuals.Count > _rows.Count) ParkLastRowVisual();
+            }
+            UpdateAccessibility();
+            RequestVisuals();
+            return;
+        }
         Rebuild();
+    }
+
+    /// <summary>Rows added or removed at the end of a built, non-virtual table only add or remove their own views.</summary>
+    bool CanUpdateIncrementally(NotifyCollectionChangedEventArgs e)
+    {
+        if (!_built || _dirty || _building || IsVirtual) return false;
+        if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is { } added)
+        {
+            if (e.NewStartingIndex != _rowVisuals.Count || e.NewStartingIndex + added.Count != _rows.Count) return false;
+            foreach (CdsTableRow r in added)
+                if (r.CellList.Count > _columns.Count) return false; // the row adds columns
+            return _columns.Count > 0;
+        }
+        if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is { } removed)
+            return e.OldStartingIndex == _rows.Count && _rowVisuals.Count == _rows.Count + removed.Count;
+        return false;
     }
 
     void AttachRow(CdsTableRow row)
@@ -244,13 +366,28 @@ public class CdsTable : CdsControl
     void AttachCell(CdsTableCell cell)
     {
         cell.Changed += OnPartChanged;
+        cell.TextChanged += OnCellTextChanged;
         cell.KeepVisibleChanged += OnKeepVisibleChanged;
     }
 
     void DetachCell(CdsTableCell cell)
     {
         cell.Changed -= OnPartChanged;
+        cell.TextChanged -= OnCellTextChanged;
         cell.KeepVisibleChanged -= OnKeepVisibleChanged;
+    }
+
+    void OnCellTextChanged(object? sender, EventArgs e)
+    {
+        // A text cell's label is updated in place; a cell drawn without one (a body, or not built yet) rebuilds.
+        if (sender is CdsTableCell cell && _cellLabels.TryGetValue(cell, out var label))
+        {
+            var text = cell.Text ?? string.Empty;
+            if (label.Text != text) label.Text = text;
+            return;
+        }
+        if (_building || _binding) return;
+        Rebuild();
     }
 
     void OnCellsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -269,16 +406,24 @@ public class CdsTable : CdsControl
 
     void OnRowVisualChanged(object? sender, EventArgs e)
     {
-        if (sender is CdsTableRow row)
+        if (sender is CdsTableRow row && _visualByRow.TryGetValue(row, out var visual))
         {
-            var visual = _rowVisuals.FirstOrDefault(v => ReferenceEquals(v.Source, row));
-            if (visual is not null)
+            if (row.IsExpandable && visual.ChildHost is null) { Rebuild(); return; }
+            if (visual.ChildHost is not null && !ReferenceEquals(visual.ChildHost.Children.OfType<View>().FirstOrDefault(), row.ExpandedContent))
+                SetChildContent(visual, row);
+            if (visual.Root is not null && visual.Index >= 0 && visual.Expanded != row.IsExpanded)
             {
-                if (row.IsExpandable && visual.ChildHost is null) { Rebuild(); return; }
-                if (visual.ChildHost is not null && !ReferenceEquals(visual.ChildHost.Children.OfType<View>().FirstOrDefault(), row.ExpandedContent))
-                    SetChildContent(visual, row);
+                // An expanded or collapsed row moves the rows under it.
+                visual.Expanded = row.IsExpanded;
+                if (!_binding)
+                {
+                    ComputeOffsets();
+                    UpdateWindow(force: true);
+                    return;
+                }
             }
         }
+        if (_binding) return;
         RequestVisuals();
     }
 
@@ -286,6 +431,11 @@ public class CdsTable : CdsControl
     protected override void ApplyVisuals()
     {
         if (_building) return;
+        if (_forget.Count > 0)
+        {
+            ForgetColors(_forget);
+            _forget.Clear();
+        }
         var zebra = UseZebraStyles;
         for (var c = 0; c < _headers.Count; c++)
         {
@@ -317,12 +467,12 @@ public class CdsTable : CdsControl
             }
         }
 
-        for (var i = 0; i < _rowVisuals.Count; i++)
+        foreach (var v in _rowVisuals)
         {
-            var v = _rowVisuals[i];
+            if (v.Index < 0) continue;
             var selected = v.Source.IsSelected;
-            var hover = _hoverRow == i;
-            var stripe = zebra && i % 2 == 1;
+            var hover = _hoverRow == v.Index;
+            var stripe = zebra && v.Index % 2 == 1;
             var fill = CdsTableTokens.RowFill(selected, hover, stripe);
             SetColor(v.Fill, BoxView.ColorProperty, fill);
             SetColor(v.Rule, BoxView.ColorProperty, CdsTableTokens.RowRule(selected, hover, zebra, stripe));
@@ -363,7 +513,13 @@ public class CdsTable : CdsControl
         RefreshVisuals();
     }
 
-    void UpdateAccessibility() => SemanticProperties.SetDescription(_bodyGrid, Label);
+    void UpdateAccessibility()
+    {
+        SemanticProperties.SetDescription(_bodyGrid, Label);
+        SemanticProperties.SetDescription(_virtualBody, Label);
+        // Only the rows in view exist, so say how many there are.
+        SemanticProperties.SetHint(_virtualBody, IsVirtual ? (_source!.Count == 1 ? "1 row" : $"{_source.Count} rows") : null);
+    }
 
     /// <summary>Rebuilds the whole grid from the head and rows.</summary>
     void Rebuild()
@@ -393,136 +549,70 @@ public class CdsTable : CdsControl
     void BuildGrids()
     {
         var sticky = StickyHeader;
+        var virtualized = IsVirtual;
         var header = sticky ? _headerGrid : _bodyGrid;
+        ReleaseSlots();
         foreach (var grid in new[] { _bodyGrid, _headerGrid })
         {
             grid.Children.Clear();
             grid.RowDefinitions.Clear();
             grid.ColumnDefinitions.Clear();
         }
+        _virtualBody.Children.Clear();
         _headers.Clear();
         _rowVisuals.Clear();
+        _visualByRow.Clear();
+        _cellLabels.Clear();
+        _columns.Clear();
+        _forget.Clear();
+        _parked.Clear();
+        ForgetColors();
         _hoverRow = -1;
         _hoverHeader = -1;
 
         var head = Head?.HeaderList;
         var rows = _rows;
-        var columnCount = Math.Max(head?.Count ?? 0, rows.Count == 0 ? 0 : rows.Max(r => r.CellList.Count));
+        var rowColumns = virtualized || rows.Count == 0 ? 0 : rows.Max(r => r.CellList.Count);
+        var columnCount = Math.Max(head?.Count ?? 0, rowColumns);
         _minimumWidth = 0;
         for (var c = 0; c < columnCount; c++)
         {
             var width = head is not null && c < head.Count ? head[c].Width : GridLength.Star;
             if (sticky && width.IsAuto) width = GridLength.Star;
+            _columns.Add(width);
             _bodyGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
             if (sticky) _headerGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
             _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
         }
-        var span = Math.Max(1, columnCount);
-        var height = CdsTableTokens.RowHeight(Size);
-        var (padTop, padBottom) = CdsTableTokens.CellPaddingY(Size);
-        var topAligned = Size >= CdsSize.Xl;
+        _rowHeight = CdsTableTokens.RowHeight(Size);
+        (_padTop, _padBottom) = CdsTableTokens.CellPaddingY(Size);
+        _topAligned = Size >= CdsSize.Xl;
+        if (_childEstimate <= 0) _childEstimate = _rowHeight * 3;
 
         // Header row.
-        var bodyRow = 0;
+        _nextGridRow = 0;
         if (head is { Count: > 0 })
         {
             header.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             for (var c = 0; c < columnCount; c++)
-                BuildHeaderCell(header, c < head.Count ? head[c] : null, c, height, padTop, padBottom, topAligned);
-            if (!sticky) bodyRow = 1;
+                BuildHeaderCell(header, c < head.Count ? head[c] : null, c, _rowHeight, _padTop, _padBottom, _topAligned);
+            if (!sticky) _nextGridRow = 1;
         }
 
-        // Body rows: [fill] [rule] [cell hosts]; an expandable row adds a child row [fill] [rule] [content].
-        for (var r = 0; r < rows.Count; r++)
+        if (!virtualized)
         {
-            var source = rows[r];
-            var visual = new RowVisual { Source = source, Index = r };
-            _rowVisuals.Add(visual);
-
-            _bodyGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-            var gridRow = bodyRow++;
-
-            visual.Fill = new BoxView { MinimumHeightRequest = height };
-            Hide(visual.Fill);
-            _bodyGrid.Add(visual.Fill, 0, gridRow);
-            Grid.SetColumnSpan(visual.Fill, span);
-            WireRowHover(visual.Fill, r);
-
-            visual.Rule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true };
-            Hide(visual.Rule);
-            _bodyGrid.Add(visual.Rule, 0, gridRow);
-            Grid.SetColumnSpan(visual.Rule, span);
-
-            for (var c = 0; c < columnCount; c++)
-            {
-                var cell = c < source.CellList.Count ? source.CellList[c] : null;
-                var headerAlign = head is not null && c < head.Count ? head[c].Align : CdsTableAlignment.Start;
-                var align = cell?.Align ?? headerAlign;
-                var flush = cell?.IsFlush == true;
-                var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
-                View? content = null;
-                if (cell?.Body is { } body)
-                {
-                    content = body;
-                    body.VerticalOptions = flush ? body.VerticalOptions : topAligned ? LayoutOptions.Start : LayoutOptions.Center;
-                    if (!flush)
-                    {
-                        body.HorizontalOptions = align == CdsTableAlignment.End ? LayoutOptions.End : LayoutOptions.Start;
-                        host.Padding = new Thickness(CdsTableTokens.CellPaddingX, padTop, CdsTableTokens.CellPaddingX, padBottom);
-                    }
-                    if (cell.RevealOnHover) visual.RevealViews.Add((cell, body));
-                }
-                else if (!string.IsNullOrEmpty(cell?.Text))
-                {
-                    var label = new CdsText(cell!.Text!, CdsTypeStyle.BodyCompact01, CdsTextTone.Secondary)
-                    {
-                        HorizontalTextAlignment = align == CdsTableAlignment.End ? TextAlignment.End : TextAlignment.Start,
-                        VerticalOptions = topAligned ? LayoutOptions.Start : LayoutOptions.Center,
-                        InputTransparent = true,
-                    };
-                    visual.Labels.Add(label);
-                    content = label;
-                    host.Padding = new Thickness(CdsTableTokens.CellPaddingX, padTop, CdsTableTokens.CellPaddingX, padBottom);
-                }
-                if (content is not null)
-                {
-                    // A view that already lives elsewhere (rebuilt rows reuse cell views) is detached first.
-                    if (content.Parent is Layout old) old.Remove(content);
-                    host.Add(content);
-                }
-                WireRowHover(host, r);
-                _bodyGrid.Add(host, c, gridRow);
-            }
-
-            if (source.IsExpandable)
-            {
-                _bodyGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-                var childRow = bodyRow++;
-                visual.ChildFill = new BoxView { IsVisible = false };
-                Hide(visual.ChildFill);
-                _bodyGrid.Add(visual.ChildFill, 0, childRow);
-                Grid.SetColumnSpan(visual.ChildFill, span);
-                visual.ChildRule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
-                Hide(visual.ChildRule);
-                _bodyGrid.Add(visual.ChildRule, 0, childRow);
-                Grid.SetColumnSpan(visual.ChildRule, span);
-                visual.ChildHost = new Grid
-                {
-                    IsVisible = false,
-                    Padding = new Thickness(ChildInset, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
-                };
-                _bodyGrid.Add(visual.ChildHost, 0, childRow);
-                Grid.SetColumnSpan(visual.ChildHost, span);
-                SetChildContent(visual, source);
-                WireRowHover(visual.ChildFill, r);
-            }
+            // One change to the row definitions, not one per row (each change makes the grid walk all of them).
+            var gridRows = _nextGridRow + rows.Sum(r => r.IsExpandable ? 2 : 1);
+            if (gridRows > _bodyGrid.RowDefinitions.Count)
+                _bodyGrid.RowDefinitions = new RowDefinitionCollection(Enumerable.Range(0, gridRows).Select(_ => new RowDefinition(GridLength.Auto)).ToArray());
+            for (var r = 0; r < rows.Count; r++) AppendRowVisual(rows[r], r);
         }
 
         // The table scrolls sideways when its columns need more than the available width (Carbon's overflow-x: auto);
         // otherwise its content is exactly as wide as the table, so star columns share the space.
         if (sticky)
         {
-            _scroll.Content = _bodyGrid;
+            _scroll.Content = virtualized ? _virtualBody : _bodyGrid;
             _scroll.MaximumHeightRequest = MaximumBodyHeight;
             _hscroll.Content = _stickyRoot;
         }
@@ -533,6 +623,402 @@ public class CdsTable : CdsControl
         }
         if (Content != _hscroll) SetChrome(_hscroll);
         SyncContentWidth();
+        _built = true;
+
+        if (virtualized)
+        {
+            ComputeOffsets();
+            UpdateWindow(force: true, applyVisuals: false);
+        }
+    }
+
+    /// <summary>Adds a body row (and its child row, when expandable) at the end of the shared body grid.</summary>
+    void AppendRowVisual(CdsTableRow source, int index)
+    {
+        if (_parked.Count > 0)
+        {
+            var parked = _parked.Peek();
+            if (ReferenceEquals(parked.Source, source) && parked.FirstGridRow == _nextGridRow && parked.Matches(source))
+            {
+                _parked.Pop();
+                Revive(parked, index);
+                return;
+            }
+            DiscardParked();
+        }
+        var visual = new RowVisual { Source = source, Index = index, FirstGridRow = _nextGridRow, GridRows = source.IsExpandable ? 2 : 1 };
+        while (_bodyGrid.RowDefinitions.Count < _nextGridRow + visual.GridRows) _bodyGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _nextGridRow += visual.GridRows;
+        BuildRowVisual(_bodyGrid, visual.FirstGridRow, visual, fixedHeight: false);
+        visual.Snapshot();
+        _rowVisuals.Add(visual);
+        _visualByRow[source] = visual;
+    }
+
+    /// <summary>
+    /// Takes the last body row out of the table by hiding its views, not removing them: MAUI removes a child with a linear
+    /// search of the parent's children, so emptying a large grid row by row is quadratic. The row's views come back if
+    /// the same row is added at the same place again (the data table re-adds the rows it took off when a search widens).
+    /// </summary>
+    void ParkLastRowVisual()
+    {
+        var visual = _rowVisuals[^1];
+        _rowVisuals.RemoveAt(_rowVisuals.Count - 1);
+        _visualByRow.Remove(visual.Source);
+        foreach (var view in visual.Views) view.IsVisible = false;
+        _nextGridRow -= visual.GridRows;
+        _parked.Push(visual);
+        if (_hoverRow >= _rowVisuals.Count) _hoverRow = -1;
+    }
+
+    void Revive(RowVisual visual, int index)
+    {
+        visual.Index = index;
+        _nextGridRow += visual.GridRows;
+        foreach (var view in visual.Views)
+        {
+            // The child row's views are shown by ApplyVisuals when the row is expanded.
+            var child = view == visual.ChildHost || view == visual.ChildFill || view == visual.ChildRule;
+            view.IsVisible = !child;
+        }
+        // The cells were detached while parked: catch up with their text.
+        foreach (var cell in visual.TextCells)
+            if (_cellLabels.TryGetValue(cell, out var label)) label.Text = cell.Text ?? string.Empty;
+        if (visual.ChildHost is not null) SetChildContent(visual, visual.Source);
+        _rowVisuals.Add(visual);
+        _visualByRow[visual.Source] = visual;
+    }
+
+    /// <summary>Removes the parked rows' views (a different row was added where they would come back).</summary>
+    void DiscardParked()
+    {
+        while (_parked.Count > 0)
+        {
+            var visual = _parked.Pop();
+            foreach (var cell in visual.TextCells) _cellLabels.Remove(cell);
+            foreach (var view in visual.Views) _bodyGrid.Remove(view);
+            _forget.UnionWith(visual.Views);
+            _forget.UnionWith(visual.Labels);
+        }
+    }
+
+    /// <summary>
+    /// Builds a row's views into <paramref name="grid"/> at <paramref name="gridRow"/>: [fill] [rule] [cell hosts]; an
+    /// expandable row adds a child row [fill] [rule] [content] under it.
+    /// </summary>
+    void BuildRowVisual(Grid grid, int gridRow, RowVisual visual, bool fixedHeight)
+    {
+        var source = visual.Source;
+        var head = Head?.HeaderList;
+        var columnCount = _columns.Count;
+        var span = Math.Max(1, columnCount);
+        var height = _rowHeight;
+
+        void Add(View view, int column, int row, int columnSpan = 1)
+        {
+            grid.Add(view, column, row);
+            if (columnSpan > 1) Grid.SetColumnSpan(view, columnSpan);
+            visual.Views.Add(view);
+        }
+
+        visual.Fill = new BoxView { MinimumHeightRequest = height };
+        Hide(visual.Fill);
+        Add(visual.Fill, 0, gridRow, span);
+        WireRowHover(visual.Fill, visual);
+
+        visual.Rule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true };
+        Hide(visual.Rule);
+        Add(visual.Rule, 0, gridRow, span);
+
+        for (var c = 0; c < columnCount; c++)
+        {
+            var cell = c < source.CellList.Count ? source.CellList[c] : null;
+            var headerAlign = head is not null && c < head.Count ? head[c].Align : CdsTableAlignment.Start;
+            var align = cell?.Align ?? headerAlign;
+            var flush = cell?.IsFlush == true;
+            var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
+            View? content = null;
+            if (cell?.Body is { } body)
+            {
+                content = body;
+                body.VerticalOptions = flush ? body.VerticalOptions : _topAligned ? LayoutOptions.Start : LayoutOptions.Center;
+                if (!flush)
+                {
+                    body.HorizontalOptions = align == CdsTableAlignment.End ? LayoutOptions.End : LayoutOptions.Start;
+                    host.Padding = new Thickness(CdsTableTokens.CellPaddingX, _padTop, CdsTableTokens.CellPaddingX, _padBottom);
+                }
+                if (cell.RevealOnHover) visual.RevealViews.Add((cell, body));
+            }
+            else if (cell is not null)
+            {
+                // Every text cell gets a label, even an empty one, so a later text change updates it in place.
+                var label = new CdsText(cell.Text ?? string.Empty, CdsTypeStyle.BodyCompact01, CdsTextTone.Secondary)
+                {
+                    HorizontalTextAlignment = align == CdsTableAlignment.End ? TextAlignment.End : TextAlignment.Start,
+                    VerticalOptions = _topAligned ? LayoutOptions.Start : LayoutOptions.Center,
+                    InputTransparent = true,
+                };
+                if (fixedHeight) label.LineBreakMode = LineBreakMode.TailTruncation;
+                visual.Labels.Add(label);
+                visual.TextCells.Add(cell);
+                _cellLabels[cell] = label;
+                content = label;
+                host.Padding = new Thickness(CdsTableTokens.CellPaddingX, _padTop, CdsTableTokens.CellPaddingX, _padBottom);
+            }
+            if (content is not null)
+            {
+                // A view that already lives elsewhere (rebuilt rows reuse cell views) is detached first.
+                if (content.Parent is Layout old) old.Remove(content);
+                host.Add(content);
+            }
+            WireRowHover(host, visual);
+            Add(host, c, gridRow);
+        }
+
+        if (source.IsExpandable)
+        {
+            var childRow = gridRow + 1;
+            visual.ChildFill = new BoxView { IsVisible = false };
+            Hide(visual.ChildFill);
+            Add(visual.ChildFill, 0, childRow, span);
+            visual.ChildRule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
+            Hide(visual.ChildRule);
+            Add(visual.ChildRule, 0, childRow, span);
+            visual.ChildHost = new Grid
+            {
+                IsVisible = false,
+                Padding = new Thickness(ChildInset, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
+            };
+            Add(visual.ChildHost, 0, childRow, span);
+            SetChildContent(visual, source);
+            WireRowHover(visual.ChildFill, visual);
+        }
+    }
+
+    // ----- virtualized body -----
+
+    /// <summary>Hands every pooled row back to the source that made it.</summary>
+    void ReleaseSlots()
+    {
+        foreach (var v in _rowVisuals)
+        {
+            if (v.Root is null) continue;
+            DetachRow(v.Source);
+            _poolSource?.ReleaseRow(v.Source);
+        }
+        _slotByRoot.Clear();
+        _poolSource = null;
+    }
+
+    /// <summary>The top of every row (and the body height), from the row height and the expanded rows' child heights.</summary>
+    void ComputeOffsets()
+    {
+        if (_source is null) return;
+        var count = _source.Count;
+        if (_offsets.Length != count + 1) _offsets = new double[count + 1];
+        _offsets[0] = 0;
+        for (var i = 0; i < count; i++)
+            _offsets[i + 1] = _offsets[i] + _rowHeight + (_source.IsExpanded(i) ? ChildHeight(i) : 0);
+        var total = _offsets[count];
+        if (Math.Abs(_virtualBody.HeightRequest - total) > 0.5) _virtualBody.HeightRequest = total;
+    }
+
+    double ChildHeight(int index) => _childHeights.TryGetValue(_source!.KeyOf(index), out var h) ? h : _childEstimate;
+
+    /// <summary>The row at vertical position <paramref name="y"/> of the body.</summary>
+    internal static int IndexAt(double[] offsets, int count, double y)
+    {
+        if (count == 0) return -1;
+        int lo = 0, hi = count - 1;
+        while (lo < hi)
+        {
+            var mid = (lo + hi + 1) / 2;
+            if (offsets[mid] <= y) lo = mid;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+
+    /// <summary>The data rows to realize for a viewport: those it shows, plus <see cref="Overscan"/> on each side.</summary>
+    internal static (int First, int Last) RowWindow(double[] offsets, int count, double top, double viewport, int overscan)
+    {
+        if (count == 0) return (0, -1);
+        var first = Math.Max(0, IndexAt(offsets, count, top) - overscan);
+        var last = Math.Min(count - 1, IndexAt(offsets, count, top + Math.Max(viewport, 1)) + overscan);
+        return (first, last);
+    }
+
+    /// <summary>Realizes the rows in view: frees the slots that scrolled away, binds free (or new) slots to the rows that came in.</summary>
+    void UpdateWindow(bool force = false, bool applyVisuals = true, double? top = null)
+    {
+        if (!IsVirtual || !_built || _building && !force) return;
+        var source = _source!;
+        var count = source.Count;
+        var viewport = _scroll.Height > 0 ? _scroll.Height : MaximumBodyHeight;
+        var (first, last) = RowWindow(_offsets, count, Math.Max(0, top ?? _scroll.ScrollY), viewport, Overscan);
+        var changed = false;
+
+        var bound = new Dictionary<int, RowVisual>();
+        var free = new Stack<RowVisual>();
+        foreach (var v in _rowVisuals)
+        {
+            if (v.Index >= count || v.Index >= 0 && (v.Index < first || v.Index > last) && !IsBusy(v))
+            {
+                Unbind(v);
+                changed = true;
+            }
+            if (v.Index >= 0) bound[v.Index] = v;
+            else free.Push(v);
+        }
+
+        _binding = true;
+        try
+        {
+            for (var i = first; i <= last; i++)
+            {
+                if (bound.ContainsKey(i)) continue;
+                var slot = free.Count > 0 ? free.Pop() : CreateSlot();
+                Bind(slot, i);
+                Order(slot);
+                bound[i] = slot;
+                changed = true;
+            }
+        }
+        finally
+        {
+            _binding = false;
+        }
+
+        foreach (var (index, v) in bound) Place(v, _offsets[index]);
+        if (_hoverRow >= 0 && !bound.ContainsKey(_hoverRow)) _hoverRow = -1;
+        UpdateAccessibility();
+        if (changed && applyVisuals) RequestVisuals();
+    }
+
+    /// <summary>Realizes the rows for a body scrolled to <paramref name="top"/>, as scrolling there would (tests have no native scroll view).</summary>
+    internal void RealizeAt(double top) => UpdateWindow(force: true, top: top);
+
+    /// <summary>The top of data row <paramref name="index"/> in the virtualized body.</summary>
+    internal double RowTop(int index) => _offsets[index];
+
+    /// <summary>A row with focus, or an open or focused menu, is kept while it is out of view (recycling it would move focus).</summary>
+    static bool IsBusy(RowVisual v)
+    {
+        foreach (var cell in v.Source.CellList)
+            if (cell.KeepVisible) return true;
+        return v.Root!.GetVisualTreeDescendants().OfType<VisualElement>().Any(e => e.IsFocused);
+    }
+
+    RowVisual CreateSlot()
+    {
+        var source = _source!;
+        _poolSource = source;
+        var row = source.CreateRow();
+        AttachRow(row);
+        var root = new Grid { RowSpacing = 0, ColumnSpacing = 0 };
+        foreach (var width in _columns) root.ColumnDefinitions.Add(new ColumnDefinition(width));
+        root.RowDefinitions.Add(new RowDefinition(new GridLength(_rowHeight)));
+        root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        var visual = new RowVisual { Source = row, Index = -1, Root = root, GridRows = 2 };
+        BuildRowVisual(root, 0, visual, fixedHeight: true);
+        AbsoluteLayout.SetLayoutFlags(root, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.WidthProportional);
+        root.SizeChanged += (_, _) => OnSlotSized(visual);
+        _virtualBody.Add(root);
+        _rowVisuals.Add(visual);
+        _visualByRow[row] = visual;
+        _slotByRoot[root] = visual;
+        return visual;
+    }
+
+    void Bind(RowVisual slot, int index)
+    {
+        var wasBinding = _binding;
+        _binding = true;
+        try
+        {
+            slot.Index = index;
+            _source!.BindRow(slot.Source, index);
+            slot.Expanded = slot.Source.IsExpanded;
+        }
+        finally
+        {
+            _binding = wasBinding;
+        }
+        if (!slot.Root!.IsVisible) slot.Root.IsVisible = true;
+    }
+
+    static void Unbind(RowVisual slot)
+    {
+        slot.Index = -1;
+        slot.Top = double.NaN;
+        if (slot.Root!.IsVisible) slot.Root.IsVisible = false;
+    }
+
+    static void Place(RowVisual slot, double top)
+    {
+        if (slot.Top == top) return;
+        slot.Top = top;
+        AbsoluteLayout.SetLayoutBounds(slot.Root!, new Rect(0, top, 1, AbsoluteLayout.AutoSize));
+    }
+
+    /// <summary>Keeps the bound slots in row order among the body's children, so Tab and screen readers go top to bottom.</summary>
+    void Order(RowVisual slot)
+    {
+        var children = _virtualBody.Children;
+        var at = children.IndexOf(slot.Root!);
+        RowVisual? Bound(int k) => _slotByRoot.TryGetValue((View)children[k], out var v) && v.Index >= 0 && v != slot ? v : null;
+        int? Before()
+        {
+            for (var k = at - 1; k >= 0; k--) if (Bound(k) is { } v) return v.Index;
+            return null;
+        }
+        int? After()
+        {
+            for (var k = at + 1; k < children.Count; k++) if (Bound(k) is { } v) return v.Index;
+            return null;
+        }
+        if ((Before() is not { } b || b < slot.Index) && (After() is not { } a || a > slot.Index)) return;
+
+        _virtualBody.Children.Remove(slot.Root!);
+        var target = children.Count;
+        for (var k = 0; k < children.Count; k++)
+        {
+            if (Bound(k) is { } v && v.Index > slot.Index)
+            {
+                target = k;
+                break;
+            }
+        }
+        _virtualBody.Children.Insert(target, slot.Root!);
+    }
+
+    /// <summary>A realized expanded row reports its child row's real height; the rows under it move when it differs from the estimate.</summary>
+    void OnSlotSized(RowVisual slot)
+    {
+        if (!IsVirtual || slot.Index < 0 || slot.Root!.Height <= 0) return;
+        if (!_source!.IsExpanded(slot.Index) || !slot.Source.IsExpanded) return;
+        var child = Math.Max(0, slot.Root.Height - _rowHeight);
+        var key = _source.KeyOf(slot.Index);
+        var assumed = _childHeights.TryGetValue(key, out var known) ? known : _childEstimate;
+        _childHeights[key] = child;
+        if (Math.Abs(assumed - child) <= 0.5) return;
+        _childEstimate = child;
+        QueueRelayout();
+    }
+
+    void QueueRelayout()
+    {
+        if (_relayoutQueued) return;
+        _relayoutQueued = true;
+        void Run()
+        {
+            _relayoutQueued = false;
+            if (!IsVirtual) return;
+            ComputeOffsets();
+            UpdateWindow(force: true);
+        }
+        if (Dispatcher is { } dispatcher) dispatcher.Dispatch(Run);
+        else Run();
     }
 
     /// <summary>The content width: the table's width, or the columns' minimum when that is wider (it then scrolls).</summary>
@@ -662,20 +1148,21 @@ public class CdsTable : CdsControl
         if (header.Body is { } body) SemanticProperties.SetDescription(body, header.Description ?? header.Text);
     }
 
-    void WireRowHover(View view, int row)
+    void WireRowHover(View view, RowVisual visual)
     {
         var pointer = new PointerGestureRecognizer();
         pointer.PointerEntered += (_, _) =>
         {
             _hoverVersion++;
-            if (_hoverRow == row) return;
-            _hoverRow = row;
+            if (_hoverRow == visual.Index) return;
+            _hoverRow = visual.Index;
             RequestVisuals();
         };
         pointer.PointerExited += (_, _) =>
         {
             // Moving between cells fires an exit then an enter: only clear when no enter follows.
             var version = ++_hoverVersion;
+            var row = visual.Index;
             Dispatcher.Dispatch(() =>
             {
                 if (version != _hoverVersion || _hoverRow != row) return;
@@ -701,7 +1188,35 @@ public class CdsTable : CdsControl
     sealed class RowVisual
     {
         public CdsTableRow Source = null!;
+        /// <summary>The data row shown; -1 for a pooled slot that shows nothing.</summary>
         public int Index;
+        /// <summary>A virtualized slot's own grid (null for rows in the shared body grid).</summary>
+        public Grid? Root;
+        public double Top = double.NaN;
+        public bool Expanded;
+        public int FirstGridRow;
+        public int GridRows;
+        public readonly List<View> Views = [];
+        int _cellCount;
+        View?[] _bodies = [];
+        bool _expandable;
+
+        /// <summary>Remembers the row's structure, to tell whether parked views still fit it.</summary>
+        public void Snapshot()
+        {
+            _cellCount = Source.CellList.Count;
+            _bodies = Source.CellList.Select(c => c.Body).ToArray();
+            _expandable = Source.IsExpandable;
+        }
+
+        public bool Matches(CdsTableRow row)
+        {
+            if (row.CellList.Count != _cellCount || row.IsExpandable != _expandable) return false;
+            for (var i = 0; i < _cellCount; i++)
+                if (!ReferenceEquals(row.CellList[i].Body, _bodies[i])) return false;
+            return true;
+        }
+        public readonly List<CdsTableCell> TextCells = [];
         public BoxView Fill = null!;
         public BoxView Rule = null!;
         public BoxView? ChildFill;

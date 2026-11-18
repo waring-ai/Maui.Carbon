@@ -134,7 +134,7 @@ public class CdsTableCell : BindableObject
 {
     /// <summary>Bindable property for <see cref="Text"/>.</summary>
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
-        nameof(Text), typeof(string), typeof(CdsTableCell), null, propertyChanged: OnChanged);
+        nameof(Text), typeof(string), typeof(CdsTableCell), null, propertyChanged: OnTextChanged);
 
     /// <summary>Bindable property for <see cref="Body"/>.</summary>
     public static readonly BindableProperty BodyProperty = BindableProperty.Create(
@@ -197,7 +197,17 @@ public class CdsTableCell : BindableObject
 
     internal event EventHandler? KeepVisibleChanged;
 
+    /// <summary>Raised when only <see cref="Text"/> changed: the table updates the cell's label in place.</summary>
+    internal event EventHandler? TextChanged;
+
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsTableCell)b).Changed?.Invoke(b, EventArgs.Empty);
+
+    static void OnTextChanged(BindableObject b, object? o, object? n)
+    {
+        var cell = (CdsTableCell)b;
+        if (cell.TextChanged is { } handler) handler(cell, EventArgs.Empty);
+        else cell.Changed?.Invoke(cell, EventArgs.Empty);
+    }
 }
 
 /// <summary>

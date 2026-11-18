@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  The app frame: one ContentPage (so one Carbon overlay host for every menu, modal and toast) holding CdsUIShell.
+  The navigator swaps the shell's Body; this page keeps the header and side nav in step with the current route.
+-->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:models="clr-namespace:Maui.Carbon.Relay.Models;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             xmlns:views="clr-namespace:Maui.Carbon.Relay.Views"
+             x:Class="Maui.Carbon.Relay.Pages.MainPage"
+             x:DataType="vm:ShellViewModel"
+             Title="Relay">
+
+    <Grid>
+        <cds:CdsUIShell x:Name="Shell">
+            <cds:CdsUIShell.Header>
+                <cds:CdsHeader Label="Relay">
+                    <cds:CdsSkipToContent />
+                    <cds:CdsHeaderMenuButton IsCollapsible="True" />
+                    <cds:CdsHeaderName Prefix="Relay" Text="{Binding CurrentProject.Name}"
+                                       Command="{Binding NavigateCommand}" CommandParameter="dashboard" />
+                    <cds:CdsHeaderNavigation Label="Relay">
+                        <cds:CdsHeaderMenuItem x:Name="HeaderIssues" Text="Issues" Command="{Binding NavigateCommand}" CommandParameter="issues" />
+                        <cds:CdsHeaderMenuItem x:Name="HeaderReports" Text="Reports" Command="{Binding NavigateCommand}" CommandParameter="reports" />
+                        <cds:CdsHeaderMenu x:Name="HeaderWorkspace" Label="Workspace" MenuLabel="Workspace">
+                            <cds:CdsHeaderMenuItem x:Name="HeaderProjects" Text="Projects" Command="{Binding NavigateCommand}" CommandParameter="projects" />
+                            <cds:CdsHeaderMenuItem x:Name="HeaderTeam" Text="Team" Command="{Binding NavigateCommand}" CommandParameter="team" />
+                            <cds:CdsHeaderMenuItem x:Name="HeaderSettings" Text="Settings" Command="{Binding NavigateCommand}" CommandParameter="settings" />
+                        </cds:CdsHeaderMenu>
+                    </cds:CdsHeaderNavigation>
+                    <cds:CdsHeaderGlobalBar>
+                        <cds:CdsHeaderGlobalAction Icon="Add" Label="Create issue" Command="{Binding CreateIssueCommand}" />
+                        <cds:CdsHeaderGlobalAction x:Name="AssistantAction" Icon="AiGenerate" Label="Assistant"
+                                                   IsActive="{Binding IsAssistantOpen}"
+                                                   Command="{Binding TogglePanelCommand}" CommandParameter="{x:Static vm:ShellPanel.Assistant}" />
+                        <Grid>
+                            <cds:CdsHeaderGlobalAction x:Name="NotificationsAction" Icon="Notification" Label="{Binding UnreadText}"
+                                                       IsActive="{Binding IsNotificationsOpen}"
+                                                       Command="{Binding TogglePanelCommand}" CommandParameter="{x:Static vm:ShellPanel.Notifications}" />
+                            <cds:CdsBadgeIndicator Count="{Binding UnreadCount, Converter={x:Static p:Converters.BadgeCount}}"
+                                                   IsVisible="{Binding HasUnread}" InputTransparent="True" />
+                        </Grid>
+                        <cds:CdsHeaderGlobalAction x:Name="SwitcherAction" Icon="Switcher" Label="Switch project"
+                                                   IsActive="{Binding IsSwitcherOpen}"
+                                                   Command="{Binding TogglePanelCommand}" CommandParameter="{x:Static vm:ShellPanel.Switcher}" />
+                        <cds:CdsHeaderGlobalAction x:Name="AccountAction" Icon="UserAvatar" Label="Account"
+                                                   IsActive="{Binding IsAccountOpen}"
+                                                   Command="{Binding TogglePanelCommand}" CommandParameter="{x:Static vm:ShellPanel.Account}" />
+                    </cds:CdsHeaderGlobalBar>
+                </cds:CdsHeader>
+            </cds:CdsUIShell.Header>
+
+            <cds:CdsUIShell.SideNav>
+                <cds:CdsSideNav x:Name="SideNav" Label="Relay navigation">
+                    <cds:CdsSideNav.Header>
+                        <cds:CdsSideNavHeader Text="{Binding CurrentProject.Name}" Icon="Catalog" />
+                    </cds:CdsSideNav.Header>
+                    <cds:CdsSideNavItems>
+                        <cds:CdsSideNavLink x:Name="NavDashboard" Text="Dashboard" Icon="Dashboard" Command="{Binding NavigateCommand}" CommandParameter="dashboard" />
+                        <cds:CdsSideNavMenu x:Name="NavWork" Text="Work" Icon="Folders" IsExpanded="True">
+                            <cds:CdsSideNavMenuItem x:Name="NavIssues" Text="Issues" Command="{Binding NavigateCommand}" CommandParameter="issues" />
+                            <cds:CdsSideNavMenuItem x:Name="NavBoard" Text="Board" Command="{Binding NavigateCommand}" CommandParameter="board" />
+                            <cds:CdsSideNavMenuItem x:Name="NavBacklog" Text="Backlog and sprints" Command="{Binding NavigateCommand}" CommandParameter="backlog" />
+                        </cds:CdsSideNavMenu>
+                        <cds:CdsSideNavLink x:Name="NavProjects" Text="Projects" Icon="Folder" Command="{Binding NavigateCommand}" CommandParameter="projects" />
+                        <cds:CdsSideNavLink x:Name="NavTeam" Text="Team" Icon="User" Command="{Binding NavigateCommand}" CommandParameter="team" />
+                        <cds:CdsSideNavLink x:Name="NavReports" Text="Reports" Icon="Report" Command="{Binding NavigateCommand}" CommandParameter="reports" />
+                        <cds:CdsSideNavDivider />
+                        <cds:CdsSideNavLink x:Name="NavSettings" Text="Settings" Icon="Settings" Command="{Binding NavigateCommand}" CommandParameter="settings" />
+                    </cds:CdsSideNavItems>
+                    <cds:CdsSideNav.Footer>
+                        <cds:CdsSideNavFooter />
+                    </cds:CdsSideNav.Footer>
+                </cds:CdsSideNav>
+            </cds:CdsUIShell.SideNav>
+
+            <cds:CdsUIShell.HeaderPanel>
+                <cds:CdsHeaderPanel x:Name="Panel" IsExpanded="{Binding IsPanelOpen}" ClosesOnOutsideTap="True" Label="Panel">
+                    <Grid>
+                        <views:NotificationsPanel IsVisible="{Binding IsNotificationsOpen}" />
+                        <cds:CdsSwitcher x:Name="ProjectSwitcher" Label="Switch project" IsVisible="{Binding IsSwitcherOpen}" />
+                        <views:AccountPanel IsVisible="{Binding IsAccountOpen}" />
+                        <!-- The wrapper keeps IsVisible bound to the shell; the panel itself binds to the assistant. -->
+                        <ContentView IsVisible="{Binding IsAssistantOpen}">
+                            <views:AssistantPanel BindingContext="{Binding Assistant}" />
+                        </ContentView>
+                    </Grid>
+                </cds:CdsHeaderPanel>
+            </cds:CdsUIShell.HeaderPanel>
+        </cds:CdsUIShell>
+        <cds:CdsModal Size="Md" IsPassive="True" Label="About" Heading="Relay"
+                      IsOpen="{Binding IsAboutOpen}" RequestCloseCommand="{Binding CloseAboutCommand}">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsText TypeStyle="Body01" Text="Relay is a sample app for Maui.Carbon: a mock project and issue tracker built from Carbon components on .NET MAUI, with MVVM, dependency injection and an in-memory backend. All people, projects and issues are fictional." />
+                <cds:CdsStructuredList IsCondensed="True" IsFlush="True">
+                    <cds:CdsStructuredList.Columns>
+                        <cds:CdsStructuredListColumn Header="Area" />
+                        <cds:CdsStructuredListColumn Header="Carbon components" />
+                    </cds:CdsStructuredList.Columns>
+                    <cds:CdsStructuredListRow><x:String>Frame</x:String><x:String>UI shell, header panels, switcher, side nav, toasts</x:String></cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow><x:String>Dashboard and reports</x:String><x:String>Grid, clickable tiles, progress bar, structured and contained lists, static table, AI label</x:String></cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow><x:String>Issues</x:String><x:String>Data table, pagination, popover filters, dismissible tags, modal, actionable notification</x:String></cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow><x:String>Issue and wizard</x:String><x:String>Tabs, combo button, code snippet, file uploader, progress indicator, radio tiles, every form input</x:String></cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow><x:String>Board and backlog</x:String><x:String>Tiles, selectable tiles, operational tags, tree view, expandable tiles, pagination nav</x:String></cds:CdsStructuredListRow>
+                    <cds:CdsStructuredListRow><x:String>Projects, team, settings</x:String><x:String>Fluid form in a composed modal, radio-select table, checkbox groups, slider, password input</x:String></cds:CdsStructuredListRow>
+                </cds:CdsStructuredList>
+            </VerticalStackLayout>
+        </cds:CdsModal>
+    </Grid>
+</ContentPage>

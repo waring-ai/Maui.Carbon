@@ -34,6 +34,16 @@ public static class HDataSamples
     /// <summary>All sample clusters.</summary>
     public static IReadOnlyList<HCluster> AllClusters => s_clusters;
 
+    /// <summary><paramref name="count"/> generated clusters (the sample clusters again with numbered names), for large tables.</summary>
+    public static IReadOnlyList<HCluster> Generated(int count) =>
+        Enumerable.Range(0, count)
+            .Select(i =>
+            {
+                var c = s_clusters[i % s_clusters.Length];
+                return c with { Id = $"g{i:D5}", Name = $"{c.Name}-{i:D5}", Nodes = c.Nodes + i % 7 };
+            })
+            .ToList();
+
     /// <summary>
     /// Connects the XAML-declared columns (<c>name</c>, <c>region</c>, <c>status</c>, <c>nodes</c>, <c>version</c>) to
     /// <see cref="HCluster"/>: value selectors, the status indicator template and the row key.

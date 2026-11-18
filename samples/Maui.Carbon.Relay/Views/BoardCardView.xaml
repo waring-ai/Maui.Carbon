@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  The body of a board card, shared by the plain tile and the selectable tile: type icon and key, title, label tags,
+  priority (shape indicator with text) and the assignee's initials.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Views.BoardCardView"
+             x:DataType="vm:BoardCard">
+    <VerticalStackLayout Spacing="8">
+        <HorizontalStackLayout Spacing="6" HeightRequest="20">
+            <cds:CdsIcon Icon="{Binding Type, Converter={x:Static p:Converters.TypeIcon}}" Description="{Binding TypeText}"
+                         Size="16" VerticalOptions="Center" />
+            <cds:CdsText Text="{Binding Key}" TypeStyle="Label01" Tone="Secondary" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+        <cds:CdsText Text="{Binding Title}" TypeStyle="BodyCompact01" MaxLines="3" />
+
+        <FlexLayout BindableLayout.ItemsSource="{Binding Labels}" Wrap="Wrap" AlignItems="Center" IsVisible="{Binding HasLabels}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <cds:CdsTag Text="{Binding .}" Type="CoolGray" Size="Sm" Margin="0,0,4,4" />
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <cds:CdsShapeIndicator Kind="{Binding Priority, Converter={x:Static p:Converters.PriorityShape}}" Label="{Binding PriorityText}"
+                                   TextSize="12" VerticalOptions="Center" />
+            <cds:CdsText Grid.Column="1" Text="{Binding PointsText}" TypeStyle="Label01" Tone="Helper" VerticalOptions="Center" />
+            <Grid Grid.Column="2" WidthRequest="24" HeightRequest="24" VerticalOptions="Center"
+                  SemanticProperties.Description="{Binding AssigneeName, StringFormat='Assignee: {0}'}">
+                <Border x:Name="Avatar" StrokeThickness="0" StrokeShape="Ellipse" IsVisible="{Binding IsAssigned}"
+                        BackgroundColor="{DynamicResource CdsBackgroundBrand}">
+                    <cds:CdsText Text="{Binding AssigneeInitials}" TypeStyle="Label01" Tone="OnColor"
+                                 HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <cds:CdsIcon Icon="UserAvatar" Size="20" Description="Unassigned" HorizontalOptions="Center" VerticalOptions="Center"
+                             IsVisible="{Binding IsAssigned, Converter={x:Static p:Converters.Not}}" />
+            </Grid>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

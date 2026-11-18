@@ -276,7 +276,8 @@ public partial class CdsDataTable
 
     /// <summary>
     /// Pins the header while the body scrolls inside a 300 high area. Header and body are separate grids then, so give
-    /// columns fixed or star widths (<c>Auto</c> columns become star columns).
+    /// columns fixed or star widths (<c>Auto</c> columns become star columns). The body is virtualized: only the rows in
+    /// view are built, rows are one line high (longer text is truncated), and rows are re-bound to other data as it scrolls.
     /// </summary>
     public bool StickyHeader
     {
@@ -339,7 +340,7 @@ public partial class CdsDataTable
     /// <summary>The columns, in order (the content property).</summary>
     public IList<CdsDataTableHeader> Headers => _headers;
 
-    static void OnDataChanged(BindableObject b, object? o, object? n) => ((CdsDataTable)b).Reload();
+    static void OnDataChanged(BindableObject b, object? o, object? n) => ((CdsDataTable)b).Reload(structure: false);
 
     static void OnLayoutChanged(BindableObject b, object? o, object? n) => ((CdsDataTable)b).Render();
 

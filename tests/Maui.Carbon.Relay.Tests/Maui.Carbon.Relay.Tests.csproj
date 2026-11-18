@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tests for the Relay sample's Core: query and validation logic, mock services and view models (no MAUI). -->
+  <PropertyGroup>
+    <TargetFramework>$(CarbonNetVersion)</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\Maui.Carbon.Relay.Core\Maui.Carbon.Relay.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="Maui.Carbon.Relay.Models" />
+    <Using Include="Maui.Carbon.Relay.Services" />
+    <Using Include="Maui.Carbon.Relay.Logic" />
+    <Using Include="Maui.Carbon.Relay.ViewModels" />
+    <Using Include="Maui.Carbon.Relay.Abstractions" />
+  </ItemGroup>
+
+</Project>

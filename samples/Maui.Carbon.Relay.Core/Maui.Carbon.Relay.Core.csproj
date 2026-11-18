@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Relay's models, mock backend, logic and view models. Plain net10.0 with no MAUI or Carbon reference, so the
+       view models are unit-tested without a platform; the app maps them to Carbon controls. -->
+  <PropertyGroup>
+    <TargetFramework>$(CarbonNetVersion)</TargetFramework>
+    <RootNamespace>Maui.Carbon.Relay</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Maui.Carbon.Relay.Tests" />
+  </ItemGroup>
+
+</Project>

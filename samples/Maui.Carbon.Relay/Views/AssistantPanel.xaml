@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Header panel: the (mock) AI assistant. Quick actions as chat buttons; answers carry an AI label and link to issues. -->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Views.AssistantPanel"
+             x:DataType="vm:AssistantViewModel">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <cds:CdsText Text="Assistant" TypeStyle="Heading02" VerticalOptions="Center" />
+                <cds:CdsAILabel Grid.Column="1" Size="Xs" Label="About the assistant">
+                    <cds:CdsAILabelContent>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                            <cds:CdsText Text="Answers are generated from your workspace's issues and sprints. Check them before acting." TypeStyle="Body01" />
+                        </VerticalStackLayout>
+                    </cds:CdsAILabelContent>
+                </cds:CdsAILabel>
+            </Grid>
+            <cds:CdsText Text="Ask about your work. Try one of these:" Tone="Secondary" TypeStyle="BodyCompact01" />
+            <VerticalStackLayout Spacing="8">
+                <cds:CdsChatButton Text="Summarize the sprint" IsQuickAction="True" Size="Sm" Command="{Binding SummarizeSprintCommand}" HorizontalOptions="Start" />
+                <cds:CdsChatButton Text="Summarize my week" IsQuickAction="True" Size="Sm" Command="{Binding SummarizeWeekCommand}" HorizontalOptions="Start" />
+                <cds:CdsChatButton Text="Find duplicate issues" IsQuickAction="True" Size="Sm" Command="{Binding FindDuplicatesCommand}" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsThinking}">
+                <cds:CdsAISkeletonText IsHeading="True" WidthPercent="60" />
+                <cds:CdsAISkeletonText IsParagraph="True" LineCount="4" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="16" BindableLayout.ItemsSource="{Binding Answers}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AssistantAnswer">
+                        <Border Padding="12" StrokeShape="Rectangle" cds:CdsAiTreatment.IsActive="True">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <cds:CdsText Text="{Binding Prompt}" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsAILabel Grid.Column="1" Kind="Inline" Size="Sm" Label="Generated answer" />
+                                </Grid>
+                                <cds:CdsText Text="{Binding Text}" TypeStyle="BodyCompact01" />
+                                <cds:CdsUnorderedList p:ItemsBinding.Source="{Binding Highlights}">
+                                    <p:ItemsBinding.Template>
+                                        <DataTemplate x:DataType="x:String">
+                                            <cds:CdsListItem Text="{Binding .}" />
+                                        </DataTemplate>
+                                    </p:ItemsBinding.Template>
+                                </cds:CdsUnorderedList>
+                                <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Issues}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:IssueRow">
+                                            <cds:CdsLink Text="{Binding Key}" Size="Sm" Clicked="OnIssueClicked" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+            <cds:CdsButton Text="Clear answers" Kind="Ghost" Size="Sm" Command="{Binding ClearCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

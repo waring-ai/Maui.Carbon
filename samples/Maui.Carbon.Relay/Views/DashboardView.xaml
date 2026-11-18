@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Dashboard: the landing screen, scoped to the current project. A greeting header, KPI tiles that open the issue list,
+  sprint progress with velocity, a sprint-ends-soon notice, my open issues, recent activity and an AI sprint summary.
+  Skeletons stand in for the numbers and lists during the first load.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:m="clr-namespace:Maui.Carbon.Relay.Models;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+    <ScrollView x:Name="Root">
+        <VerticalStackLayout>
+            <cds:CdsPageHeader>
+                <cds:CdsPageHeaderContent Title="{Binding Title}">
+                    <cds:CdsPageHeaderContent.PageActions>
+                        <cds:CdsPageHeaderActions>
+                            <cds:CdsButton Text="Create issue" Icon="Add" Size="Md" Command="{Binding CreateIssueCommand}" />
+                        </cds:CdsPageHeaderActions>
+                    </cds:CdsPageHeaderContent.PageActions>
+                    <cds:CdsPageHeaderContentText Subtitle="{Binding ContextText}" Text="{Binding SprintGoalText}" />
+                </cds:CdsPageHeaderContent>
+            </cds:CdsPageHeader>
+
+            <VerticalStackLayout Padding="32,24,32,48" Spacing="24">
+                <!-- Kept under the notification's 576 "wide" threshold so the action sits under the text: at full width
+                     the library lays the same-row action out past the surface (see the work package report). -->
+                <Grid WidthRequest="560" HorizontalOptions="Start" IsVisible="{Binding IsSprintEndingSoon}">
+                    <cds:CdsActionableNotification Kind="Warning" IsInline="True" IsLowContrast="True" Role="Status" HasFocus="False"
+                                                   Title="{Binding SprintEndingTitle}" Subtitle="{Binding SprintEndingSubtitle}"
+                                                   ActionButtonLabel="Review sprint" ActionCommand="{Binding ReviewSprintCommand}"
+                                                   CloseRequested="OnNoticeClosed" />
+                </Grid>
+
+                <!-- KPI tiles. The grid hangs into the page padding so its column boxes line up with the header. -->
+                <cds:CdsGrid Margin="-32,0">
+                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                        <cds:CdsClickableTile AccessibleName="My open issues" Command="{Binding OpenIssuesCommand}"
+                                              CommandParameter="{x:Static m:IssueScope.AssignedToMe}">
+                            <Grid>
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsText Text="My open issues" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="{Binding MyOpenCount}" TypeStyle="Heading05" />
+                                    <cds:CdsText Text="{Binding MyOpenHelper}" TypeStyle="Label01" Tone="Helper" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoading}">
+                                    <cds:CdsSkeletonText WidthPercent="60" />
+                                    <cds:CdsSkeletonText IsHeading="True" WidthPercent="30" />
+                                    <cds:CdsSkeletonText WidthPercent="70" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </cds:CdsClickableTile>
+                    </cds:CdsColumn>
+                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                        <cds:CdsClickableTile AccessibleName="My issues due this week" Command="{Binding OpenIssuesCommand}"
+                                              CommandParameter="{x:Static m:IssueScope.AssignedToMe}">
+                            <Grid>
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsText Text="Due this week" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="{Binding DueThisWeekCount}" TypeStyle="Heading05" />
+                                    <cds:CdsText Text="{Binding DueThisWeekHelper}" TypeStyle="Label01" Tone="Helper" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoading}">
+                                    <cds:CdsSkeletonText WidthPercent="60" />
+                                    <cds:CdsSkeletonText IsHeading="True" WidthPercent="30" />
+                                    <cds:CdsSkeletonText WidthPercent="70" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </cds:CdsClickableTile>
+                    </cds:CdsColumn>
+                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                        <cds:CdsClickableTile AccessibleName="Issues in review" Command="{Binding OpenIssuesCommand}"
+                                              CommandParameter="{x:Static m:IssueScope.All}">
+                            <Grid>
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsText Text="In review" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="{Binding InReviewCount}" TypeStyle="Heading05" />
+                                    <cds:CdsText Text="{Binding InReviewHelper}" TypeStyle="Label01" Tone="Helper" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoading}">
+                                    <cds:CdsSkeletonText WidthPercent="60" />
+                                    <cds:CdsSkeletonText IsHeading="True" WidthPercent="30" />
+                                    <cds:CdsSkeletonText WidthPercent="70" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </cds:CdsClickableTile>
+                    </cds:CdsColumn>
+                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                        <cds:CdsClickableTile AccessibleName="Sprint points done" Command="{Binding OpenIssuesCommand}"
+                                              CommandParameter="{x:Static m:IssueScope.All}">
+                            <Grid>
+                                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsText Text="Sprint points done" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="{Binding PointsText}" TypeStyle="Heading05" />
+                                    <cds:CdsText Text="{Binding PointsHelper}" TypeStyle="Label01" Tone="Helper" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoading}">
+                                    <cds:CdsSkeletonText WidthPercent="60" />
+                                    <cds:CdsSkeletonText IsHeading="True" WidthPercent="30" />
+                                    <cds:CdsSkeletonText WidthPercent="70" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </cds:CdsClickableTile>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
+
+                <!-- Sprint progress and the AI summary. -->
+                <cds:CdsGrid Margin="-32,0">
+                    <cds:CdsColumn SpanSm="4" SpanMd="8" SpanLg="8">
+                        <cds:CdsTile>
+                            <Grid>
+                                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <VerticalStackLayout Spacing="2">
+                                            <cds:CdsText Text="Sprint progress" TypeStyle="Heading02" />
+                                            <cds:CdsText Text="{Binding SprintDatesText}" TypeStyle="BodyCompact01" Tone="Secondary"
+                                                         IsVisible="{Binding HasActiveSprint}" />
+                                        </VerticalStackLayout>
+                                        <cds:CdsTag Grid.Column="1" Text="{Binding DaysLeftText}" Type="Purple" Icon="Time"
+                                                    VerticalOptions="Start" IsVisible="{Binding HasActiveSprint}" />
+                                    </Grid>
+                                    <VerticalStackLayout Spacing="16" IsVisible="{Binding HasActiveSprint}">
+                                        <cds:CdsProgressBar Label="{Binding SprintName, StringFormat='{0} points done'}" Value="{Binding SprintPercent}" Max="100"
+                                                            HelperText="{Binding SprintProgressHelper}" />
+                                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="16">
+                                            <VerticalStackLayout Spacing="4">
+                                                <cds:CdsText Text="Days left" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="{Binding DaysLeft}" TypeStyle="Heading03" />
+                                                <cds:CdsText Text="{Binding SprintEndText}" TypeStyle="Label01" Tone="Helper" />
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                                <cds:CdsText Text="Still open" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="{Binding OpenInSprintText}" TypeStyle="Heading03" />
+                                                <cds:CdsText Text="{Binding OpenInSprintHelper}" TypeStyle="Label01" Tone="Helper" />
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                                <cds:CdsDefinitionTooltip Text="Velocity" Definition="{Binding VelocityDefinition}" TypeStyle="Label01"
+                                                                          OpenOnHover="True" HorizontalOptions="Start" />
+                                                <cds:CdsText Text="{Binding VelocityText}" TypeStyle="Heading03" />
+                                                <cds:CdsText Text="{Binding VelocityHelper}" TypeStyle="Label01" Tone="Helper" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                    <cds:CdsText Text="{Binding NoSprintText}" TypeStyle="Body01" Tone="Secondary"
+                                                 IsVisible="{Binding HasActiveSprint, Converter={x:Static p:Converters.Not}}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoading}">
+                                    <cds:CdsSkeletonText IsHeading="True" WidthPercent="40" />
+                                    <cds:CdsSkeletonPlaceholder HeightRequest="48" WidthRequest="-1" HorizontalOptions="Fill" />
+                                    <cds:CdsSkeletonText IsParagraph="True" LineCount="2" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </cds:CdsTile>
+                    </cds:CdsColumn>
+                    <cds:CdsColumn SpanSm="4" SpanMd="8" SpanLg="8">
+                        <Border StrokeShape="Rectangle" Padding="16" cds:CdsAiTreatment.IsActive="True">
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <cds:CdsText Text="Sprint summary" TypeStyle="Heading02" VerticalOptions="Center" />
+                                    <cds:CdsAILabel Grid.Column="1" Size="Xs" Label="About the sprint summary">
+                                        <cds:CdsAILabelContent>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="Relay's assistant wrote this summary from the sprint's issues: their status, priority, story points and labels. It doesn't read comments or code." TypeStyle="Body01" />
+                                                <cds:CdsText Text="Check the numbers before you share them." TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsAILabelContent>
+                                    </cds:CdsAILabel>
+                                </Grid>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSummarizing}">
+                                    <cds:CdsAISkeletonText IsParagraph="True" LineCount="3" />
+                                    <cds:CdsAISkeletonText WidthPercent="70" />
+                                    <cds:CdsAISkeletonText WidthPercent="50" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSummarizing, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsText Text="{Binding SummaryText}" TypeStyle="Body01" />
+                                    <cds:CdsUnorderedList p:ItemsBinding.Source="{Binding SummaryHighlights}">
+                                        <p:ItemsBinding.Template>
+                                            <DataTemplate x:DataType="x:String">
+                                                <cds:CdsListItem Text="{Binding .}" />
+                                            </DataTemplate>
+                                        </p:ItemsBinding.Template>
+                                    </cds:CdsUnorderedList>
+                                </VerticalStackLayout>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <cds:CdsText Text="{Binding SummaryCaption}" TypeStyle="Label01" Tone="Helper" VerticalOptions="Center"
+                                                 IsVisible="{Binding IsSummarizing, Converter={x:Static p:Converters.Not}}" />
+                                    <cds:CdsText Text="Writing a summary of the sprint…" TypeStyle="Label01" Tone="Helper" VerticalOptions="Center"
+                                                 IsVisible="{Binding IsSummarizing}" />
+                                    <cds:CdsButton Grid.Column="1" Text="Regenerate" Icon="Renew" Kind="Ghost" Size="Sm"
+                                                   Command="{Binding RegenerateSummaryCommand}" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
+
+                <!-- My work and recent activity. -->
+                <cds:CdsGrid Margin="-32,8,-32,0">
+                    <cds:CdsColumn SpanSm="4" SpanMd="8" SpanLg="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <cds:CdsText Text="My work" TypeStyle="Heading03" VerticalOptions="Center" />
+                                <cds:CdsButton Grid.Column="1" Text="View all my issues" Kind="Ghost" Size="Sm" Icon="ArrowRight"
+                                               Command="{Binding OpenIssuesCommand}" CommandParameter="{x:Static m:IssueScope.AssignedToMe}" />
+                            </Grid>
+                            <cds:CdsSkeletonPlaceholder HeightRequest="280" WidthRequest="-1" HorizontalOptions="Fill" IsVisible="{Binding IsLoading}" />
+                            <Grid IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                <cds:CdsStructuredList x:Name="MyWorkList" IsSelectable="True" Label="My open issues, highest priority first"
+                                                       IsVisible="{Binding HasMyWork}" SelectionChanged="OnMyWorkSelected">
+                                    <cds:CdsStructuredList.Columns>
+                                        <cds:CdsStructuredListColumn Header="Key" Width="Auto" IsNoWrap="True" />
+                                        <cds:CdsStructuredListColumn Header="Summary" />
+                                        <cds:CdsStructuredListColumn Header="Priority" Width="112" IsNoWrap="True" />
+                                        <cds:CdsStructuredListColumn Header="Due" Width="Auto" IsNoWrap="True" />
+                                    </cds:CdsStructuredList.Columns>
+                                </cds:CdsStructuredList>
+                                <cds:CdsTile IsVisible="{Binding HasMyWork, Converter={x:Static p:Converters.Not}}">
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="You're all caught up" TypeStyle="HeadingCompact01" />
+                                        <cds:CdsText Text="Nothing open is assigned to you in this project." TypeStyle="Body01" Tone="Secondary" />
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </cds:CdsColumn>
+                    <cds:CdsColumn SpanSm="4" SpanMd="8" SpanLg="6">
+                        <Grid>
+                            <cds:CdsContainedList Label="Recent activity" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}"
+                                                  p:ItemsBinding.Source="{Binding Activity}">
+                                <p:ItemsBinding.Template>
+                                    <DataTemplate x:DataType="vm:ActivityRow">
+                                        <cds:CdsContainedListItem IsClickable="True" Clicked="OnActivityClicked"
+                                                                  Icon="{Binding Kind, Converter={x:Static p:DashboardConverters.ActivityIcon}}">
+                                            <VerticalStackLayout Spacing="2" Padding="0,4">
+                                                <cds:CdsText Text="{Binding Text}" TypeStyle="BodyCompact01" MaxLines="2" />
+                                                <cds:CdsText Text="{Binding WhenText}" TypeStyle="Label01" Tone="Helper" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsContainedListItem>
+                                    </DataTemplate>
+                                </p:ItemsBinding.Template>
+                            </cds:CdsContainedList>
+                            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsLoading}">
+                                <cds:CdsSkeletonText IsHeading="True" WidthPercent="50" />
+                                <cds:CdsSkeletonText IsParagraph="True" LineCount="6" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

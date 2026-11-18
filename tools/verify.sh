@@ -2,18 +2,18 @@
 # Builds and tests Maui.Carbon the way CI does, on a Mac without Android SDK / Windows.
 #   tools/verify.sh               library (net10.0 + maccatalyst) + compile-only android/windows + tests
 #   tools/verify.sh --fast        library net10.0 + tests only (inner loop)
-#   tools/verify.sh --gallery     also build the gallery for Mac Catalyst
+#   tools/verify.sh --samples     also build the sample apps (gallery and Relay) for Mac Catalyst (--gallery is an alias)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 export MSBUILDDISABLENODEREUSE=1
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 FLAGS=(-nodeReuse:false -p:UseSharedCompilation=false -v:minimal -clp:NoSummary)
-FAST=0; GALLERY=0
+FAST=0; SAMPLES=0
 for a in "$@"; do
   case "$a" in
     --fast) FAST=1 ;;
-    --gallery) GALLERY=1 ;;
+    --samples|--gallery) SAMPLES=1 ;;
     *) echo "unknown option $a" >&2; exit 2 ;;
   esac
 done
@@ -57,9 +57,15 @@ fi
 step "tests"
 dotnet test tests/Maui.Carbon.Tests "${FLAGS[@]}"
 
-if [[ $GALLERY == 1 ]]; then
+step "Relay sample tests"
+dotnet test tests/Maui.Carbon.Relay.Tests "${FLAGS[@]}"
+
+if [[ $SAMPLES == 1 ]]; then
   step "gallery net10.0-maccatalyst"
   dotnet build samples/Maui.Carbon.Gallery -f net10.0-maccatalyst -r maccatalyst-arm64 "${FLAGS[@]}"
+
+  step "Relay net10.0-maccatalyst"
+  dotnet build samples/Maui.Carbon.Relay -f net10.0-maccatalyst -r maccatalyst-arm64 "${FLAGS[@]}"
 fi
 
 printf '\nverify: OK\n'

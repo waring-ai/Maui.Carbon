@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Settings: tabs over a copy of the user's settings. Save writes the copy back (with inline loading), Discard reloads
+  it; the theme and the API token apply at once. Deleting the workspace is last, behind a type-the-name modal.
+-->
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+             xmlns:vm="clr-namespace:Maui.Carbon.Relay.ViewModels;assembly=Maui.Carbon.Relay.Core"
+             xmlns:m="clr-namespace:Maui.Carbon.Relay.Models;assembly=Maui.Carbon.Relay.Core"
+             xmlns:p="clr-namespace:Maui.Carbon.Relay.Presentation"
+             x:Class="Maui.Carbon.Relay.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <Grid>
+        <ScrollView x:Name="Scroller">
+            <VerticalStackLayout>
+                <cds:CdsPageHeader>
+                    <cds:CdsPageHeaderContent Title="{Binding Title}">
+                        <cds:CdsPageHeaderContentText Text="Your profile, notifications and integrations for the Relay workspace. Changes apply after you save them; the theme applies right away." />
+                    </cds:CdsPageHeaderContent>
+                </cds:CdsPageHeader>
+
+                <VerticalStackLayout Padding="32,24,32,48" Spacing="24">
+                    <cds:CdsInlineNotification Kind="Warning" HideCloseButton="True" IsVisible="{Binding IsDirty}"
+                                               Title="You have unsaved changes"
+                                               Subtitle="Save them, or discard them to go back to your saved settings." />
+
+                    <cds:CdsTabs x:Name="Tabs" Label="Settings sections" PanelPadding="0">
+                        <!-- General -->
+                        <cds:CdsTab Text="General">
+                            <VerticalStackLayout WidthRequest="640" HorizontalOptions="Start" Padding="0,32,0,0" Spacing="32">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="Profile" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsTextInput Label="Display name" Text="{Binding DisplayName}"
+                                                      HelperText="Shown on your issues, comments and mentions."
+                                                      IsInvalid="{Binding IsDisplayNameInvalid}" InvalidText="{Binding DisplayNameError}" />
+                                    <cds:CdsTextInput Label="Email" Text="{Binding Email}" IsReadOnly="True"
+                                                      HelperText="Managed by your identity provider. Ask a workspace admin to change it." />
+                                    <cds:CdsSelect Label="Time zone" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding TimeZone}"
+                                                   HelperText="Due dates and the daily digest use this time zone." />
+                                    <cds:CdsRadioButtonGroup Legend="Date format" Orientation="Horizontal"
+                                                             SelectedValue="{Binding DateFormat}"
+                                                             p:ItemsBinding.Source="{Binding DateFormats}">
+                                        <p:ItemsBinding.Template>
+                                            <DataTemplate x:DataType="vm:DateFormatOption">
+                                                <cds:CdsRadioButton Label="{Binding Example}" Value="{Binding Format}" />
+                                            </DataTemplate>
+                                        </p:ItemsBinding.Template>
+                                    </cds:CdsRadioButtonGroup>
+                                    <cds:CdsDropdown Label="Default project" ItemsSource="{Binding ProjectOptions}" SelectedItem="{Binding DefaultProject}"
+                                                     HelperText="The dashboard, board and backlog open on this project." />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="Appearance" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsRadioButtonGroup Legend="Theme" Orientation="Horizontal" SelectedValue="{Binding Theme}"
+                                                             HelperText="Applies right away on this device.">
+                                        <cds:CdsRadioButton Label="White" Value="{x:Static m:ThemeChoice.White}" />
+                                        <cds:CdsRadioButton Label="Gray 10" Value="{x:Static m:ThemeChoice.G10}" />
+                                        <cds:CdsRadioButton Label="Gray 90" Value="{x:Static m:ThemeChoice.G90}" />
+                                        <cds:CdsRadioButton Label="Gray 100" Value="{x:Static m:ThemeChoice.G100}" />
+                                        <cds:CdsRadioButton Label="Follow system" Value="{x:Static m:ThemeChoice.System}" />
+                                    </cds:CdsRadioButtonGroup>
+                                    <cds:CdsToggle LabelText="Reduce motion" LabelA="Off" LabelB="On" IsToggled="{Binding ReduceMotion}" />
+                                    <cds:CdsToggle LabelText="Compact tables" LabelA="Off" LabelB="On" IsToggled="{Binding CompactTables}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </cds:CdsTab>
+
+                        <!-- Notifications -->
+                        <cds:CdsTab Text="Notifications">
+                            <VerticalStackLayout WidthRequest="640" HorizontalOptions="Start" Padding="0,32,0,0" Spacing="32">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="Email" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsCheckboxGroup Legend="Email me when" HelperText="In-app notifications are always on.">
+                                        <cds:CdsCheckbox Label="An issue is assigned to me" IsChecked="{Binding EmailOnAssign}" />
+                                        <cds:CdsCheckbox Label="Someone mentions me in a comment" IsChecked="{Binding EmailOnMention}" />
+                                        <cds:CdsCheckbox Label="An issue I watch changes status" IsChecked="{Binding EmailOnStatus}" />
+                                    </cds:CdsCheckboxGroup>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="Daily digest" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsToggle LabelText="Send me a daily digest" LabelA="Off" LabelB="On" IsToggled="{Binding DailyDigest}" />
+                                    <cds:CdsSlider Label="Digest time" Min="0" Max="23" Step="1" MinLabel="12:00 AM" MaxLabel="11:00 PM"
+                                                   Value="{Binding DigestHour}" ValueFormatter="{Binding HourFormatter}"
+                                                   IsEnabled="{Binding DailyDigest}" HideTextInput="True" />
+                                    <cds:CdsText Text="{Binding DigestHourText}" TypeStyle="HelperText01" Tone="Helper" IsVisible="{Binding DailyDigest}" />
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </cds:CdsTab>
+
+                        <!-- Integrations -->
+                        <cds:CdsTab Text="Integrations">
+                            <VerticalStackLayout WidthRequest="640" HorizontalOptions="Start" Padding="0,32,0,0" Spacing="32">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="Slack" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsToggle LabelText="Post issue updates to Slack" LabelA="Off" LabelB="On" IsToggled="{Binding SlackEnabled}" />
+                                    <cds:CdsTextInput Label="Channel" Placeholder="#atlas-dev" Text="{Binding SlackChannel}"
+                                                      IsEnabled="{Binding SlackEnabled}"
+                                                      HelperText="Relay posts status changes and new comments here."
+                                                      IsInvalid="{Binding IsSlackChannelInvalid}" InvalidText="{Binding SlackChannelError}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="GitHub" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <cds:CdsToggle LabelText="Link commits and pull requests that mention an issue key" LabelA="Off" LabelB="On"
+                                                   IsToggled="{Binding GitHubEnabled}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsText Text="API access" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                        <cds:CdsPasswordInput Label="API token" Text="{Binding ApiToken}" IsReadOnly="True"
+                                                              HelperText="Use it as a bearer token. Regenerating stops the old token at once." />
+                                        <Grid Grid.Column="1" VerticalOptions="Start" Margin="0,24,0,0">
+                                            <cds:CdsButton Text="Regenerate" Icon="Renew" Kind="Tertiary" Size="Md"
+                                                           Command="{Binding RegenerateTokenCommand}"
+                                                           IsVisible="{Binding IsRegenerating, Converter={x:Static p:Converters.Not}}" />
+                                            <cds:CdsInlineLoading Description="Issuing token..." VerticalOptions="Center"
+                                                                  Status="{Binding IsRegenerating, Converter={x:Static p:Converters.BusyLoading}}"
+                                                                  IsVisible="{Binding IsRegenerating}" />
+                                        </Grid>
+                                    </Grid>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsText Text="Webhook payload" TypeStyle="HeadingCompact01" />
+                                        <cds:CdsText Text="{Binding WebhookUrl, StringFormat='Relay posts JSON like this to {0} when an issue changes.'}"
+                                                     TypeStyle="Body01" Tone="Secondary" />
+                                        <cds:CdsCodeSnippet Type="Multi" Code="{Binding WebhookPayload}" Feedback="Copied to clipboard"
+                                                            SemanticProperties.Description="Sample webhook payload" Margin="0,8,0,0" />
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </cds:CdsTab>
+
+                        <!-- Danger zone -->
+                        <cds:CdsTab Text="Danger zone">
+                            <VerticalStackLayout WidthRequest="640" HorizontalOptions="Start" Padding="0,32,0,0" Spacing="24">
+                                <cds:CdsText Text="Delete workspace" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsCallout Kind="Warning" Title="Deleting a workspace cannot be undone"
+                                                Subtitle="Every project, issue, sprint and integration in Relay is removed for all members. Export what you need first." />
+                                <cds:CdsButton x:Name="DeleteButton" Text="Delete workspace" Kind="Danger" Icon="TrashCan" Size="Md"
+                                               HorizontalOptions="Start" Command="{Binding RequestDeleteCommand}" />
+                            </VerticalStackLayout>
+                        </cds:CdsTab>
+                    </cds:CdsTabs>
+
+                    <!-- Save bar: applies to every tab -->
+                    <BoxView x:Name="Rule" HeightRequest="1" />
+                    <HorizontalStackLayout Spacing="16">
+                        <Grid MinimumWidthRequest="160">
+                            <cds:CdsButton Text="Save settings" Size="Md" Command="{Binding SaveCommand}" IsVisible="{Binding IsIdle}" />
+                            <cds:CdsInlineLoading Description="Saving..." VerticalOptions="Center"
+                                                  Status="{Binding IsSaving, Converter={x:Static p:Converters.BusyLoading}}"
+                                                  IsVisible="{Binding IsSaving}" />
+                        </Grid>
+                        <cds:CdsButton Text="Discard changes" Kind="Secondary" Size="Md" Command="{Binding DiscardCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <cds:CdsModal Size="Sm" IsDanger="True" HasForm="True" Label="Relay workspace" Heading="Delete workspace?"
+                      PrimaryButtonText="Delete workspace" SecondaryButtonText="Cancel"
+                      PrimaryButtonDisabled="{Binding DeleteDisabled}"
+                      IsOpen="{Binding IsDeleteOpen}"
+                      LauncherElement="{x:Reference DeleteButton}"
+                      RequestSubmitCommand="{Binding ConfirmDeleteCommand}"
+                      RequestCloseCommand="{Binding CancelDeleteCommand}">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsText Text="This removes 6 projects, every issue and sprint, and all integrations for everyone in the workspace. It cannot be undone."
+                             TypeStyle="Body01" />
+                <cds:CdsTextInput Label="Type Relay to confirm" Placeholder="Relay" Text="{Binding DeleteConfirmText}" />
+            </VerticalStackLayout>
+        </cds:CdsModal>
+    </Grid>
+</ContentView>
