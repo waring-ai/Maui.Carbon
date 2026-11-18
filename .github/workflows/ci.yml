@@ -60,6 +60,9 @@ jobs:
   macos:
     name: Build Apple targets
     runs-on: macos-15
+    env:
+      # Only the Apple workloads are installed here; restore would otherwise evaluate the Android target too.
+      CarbonIncludeAndroid: false
     steps:
       - uses: actions/checkout@v4
 

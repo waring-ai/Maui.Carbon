@@ -11,7 +11,7 @@ public static class CarbonGenerator
     {
         var tokensPath = Path.Combine(designDir, "tokens.json");
         var tokens = CarbonTokens.Load(tokensPath);
-        var tokenHash = Hash(File.ReadAllBytes(tokensPath));
+        var tokenHash = Hash(ReadLf(tokensPath));
 
         var files = new SortedDictionary<string, string>(StringComparer.Ordinal);
         foreach (var (name, body) in TokenEmitter.Emit(tokens))
@@ -35,7 +35,7 @@ public static class CarbonGenerator
         {
             var path = Path.Combine(outputDir, name);
             if (!File.Exists(path)) drift.Add($"{name} is missing");
-            else if (File.ReadAllText(path) != content) drift.Add($"{name} differs");
+            else if (Normalize(File.ReadAllText(path)) != Normalize(content)) drift.Add($"{name} differs");
         }
         if (Directory.Exists(outputDir))
         {
@@ -60,19 +60,31 @@ public static class CarbonGenerator
 
     static string Hash(byte[] bytes) => Convert.ToHexStringLower(SHA256.HashData(bytes))[..16];
 
+    /// <summary>A text input's bytes with CRLF folded to LF, so the source hashes do not depend on the checkout.</summary>
+    static byte[] ReadLf(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        var result = new List<byte>(bytes.Length);
+        for (var i = 0; i < bytes.Length; i++)
+            if (!(bytes[i] == (byte)'\r' && i + 1 < bytes.Length && bytes[i + 1] == (byte)'\n')) result.Add(bytes[i]);
+        return [.. result];
+    }
+
     static string HashFolder(string dir, string pattern)
     {
         using var sha = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         foreach (var file in Directory.GetFiles(dir, pattern).Order(StringComparer.Ordinal))
         {
             sha.AppendData(Encoding.UTF8.GetBytes(Path.GetFileName(file)));
-            sha.AppendData(File.ReadAllBytes(file));
+            sha.AppendData(ReadLf(file));
         }
         return Convert.ToHexStringLower(sha.GetHashAndReset())[..16];
     }
+
+    /// <summary>Line endings never count as drift (a checkout may convert them).</summary>
+    static string Normalize(string text) => text.Replace("\r\n", "\n");
 }
 
-/// <summary>Locates the repository root (the folder holding Maui.Carbon.slnx).</summary>
 public static class RepoPaths
 {
     /// <summary>Walks up from <paramref name="start"/> to the folder containing <c>Maui.Carbon.slnx</c>.</summary>

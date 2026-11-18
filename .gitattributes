@@ -1,0 +1,13 @@
+# LF everywhere (the generator's drift check compares committed files byte for byte; Windows checkouts would
+# otherwise convert to CRLF).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.snk binary
