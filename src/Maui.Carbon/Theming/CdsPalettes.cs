@@ -43,6 +43,7 @@ internal static class CdsPalettes
         for (var i = 0; i < keys.Count; i++) rd.Add(keys[i], colors[i]);
         rd.Add(CdsContextKeys.ThemeId, theme);
         rd.Add(CdsContextKeys.LayerLevel, 1);
+        rd.Add(CdsContextKeys.Transparent, Colors.Transparent);
     }
 
     /// <summary>

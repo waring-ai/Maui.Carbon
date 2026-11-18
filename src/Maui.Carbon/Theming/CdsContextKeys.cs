@@ -23,4 +23,10 @@ public static class CdsContextKeys
 
     /// <summary>The heading level (1–6) inside nested <c>CdsSection</c>s.</summary>
     public const string HeadingLevel = "Cds.HeadingLevel";
+
+    /// <summary>
+    /// A transparent color resource. "No color" is bound dynamically like every token: a local value would outrank
+    /// any later <c>SetDynamicResource</c> on the same property under MAUI's value precedence.
+    /// </summary>
+    public const string Transparent = "Cds.Transparent";
 }

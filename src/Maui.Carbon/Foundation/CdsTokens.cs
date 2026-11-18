@@ -9,13 +9,16 @@ public static class CdsTokens
     static readonly Dictionary<BindableProperty, BindableProperty> s_brushProxies = [];
 
     /// <summary>
-    /// Binds a <see cref="Color"/> property to a color key. A <c>null</c> key sets the property to
-    /// <see cref="Colors.Transparent"/>.
+    /// Binds a <see cref="Color"/> property to a color key. A <c>null</c> key binds it to
+    /// <see cref="CdsContextKeys.Transparent"/>. Never mix this with plain assignments of the same property: a local
+    /// value outranks dynamic resources, so a later key would not show.
     /// </summary>
     public static void SetColor(Element target, BindableProperty colorProperty, string? key)
     {
-        if (key is null) target.SetValue(colorProperty, Colors.Transparent);
-        else target.SetDynamicResource(colorProperty, key);
+        // Clear any local value first (an initializer such as BackgroundColor = Colors.Transparent): it would
+        // outrank the dynamic resource and the token would never show.
+        target.ClearValue(colorProperty);
+        target.SetDynamicResource(colorProperty, key ?? CdsContextKeys.Transparent);
     }
 
     /// <summary>
@@ -25,22 +28,14 @@ public static class CdsTokens
     public static void SetBrush(Element target, BindableProperty brushProperty, string? key)
     {
         var proxy = GetBrushProxy(brushProperty);
-        if (key is null)
-        {
-            target.SetValue(proxy, null);
-            target.SetValue(brushProperty, Brush.Transparent);
-        }
-        else
-        {
-            target.SetDynamicResource(proxy, key);
-        }
+        target.SetDynamicResource(proxy, key ?? CdsContextKeys.Transparent);
     }
 
     static readonly BindableProperty ShadowColorProperty = BindableProperty.CreateAttached(
         "CdsShadowColor", typeof(Color), typeof(CdsTokens), null,
         propertyChanged: static (b, _, n) =>
         {
-            if (b is VisualElement ve && n is Color c && ve.GetValue(ShadowSpecProperty) is ShadowSpec spec)
+            if (b is VisualElement ve && n is Color { Alpha: > 0 } c && ve.GetValue(ShadowSpecProperty) is ShadowSpec spec)
                 ve.Shadow = new Shadow { Brush = new SolidColorBrush(c), Offset = spec.Offset, Radius = spec.Radius, Opacity = 1 };
         });
 
@@ -57,7 +52,7 @@ public static class CdsTokens
     {
         if (key is null)
         {
-            target.SetValue(ShadowColorProperty, null);
+            target.SetDynamicResource(ShadowColorProperty, CdsContextKeys.Transparent);
             target.Shadow = null!;
             return;
         }

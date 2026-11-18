@@ -85,7 +85,6 @@ public class CdsLayer : ContentView
 
     void ApplyBackground()
     {
-        if (WithBackground) _scope.SetDynamicResource(BackgroundColorProperty, CdsColorKeys.LayerBackground01);
-        else _scope.BackgroundColor = null;
+        CdsTokens.SetColor(_scope, BackgroundColorProperty, WithBackground ? CdsColorKeys.LayerBackground01 : null);
     }
 }
