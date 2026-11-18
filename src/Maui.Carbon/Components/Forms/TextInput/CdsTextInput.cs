@@ -17,12 +17,19 @@ public partial class CdsTextInput : CdsControl
     public CdsTextInput()
     {
         Chrome.Input = Entry;
+        Chrome.FluidLayoutChanged += (_, _) => UpdateChrome();
         Entry.TextChanged += OnEntryTextChanged;
         Entry.Completed += (_, _) => Completed?.Invoke(this, EventArgs.Empty);
         TrackFocus(Entry);
         SetChrome(Chrome);
         UpdateChrome();
     }
+
+    /// <summary>
+    /// Whether the input renders its fluid layout (inside a <see cref="CdsFluidForm"/>, or a fluid variant): label inside
+    /// the 64px field, no helper text, messages inside the field.
+    /// </summary>
+    protected bool IsFluidMode => Chrome.IsFluidLayout;
 
     /// <summary>Raised when the text changes (typing or <see cref="Text"/>).</summary>
     public event EventHandler<TextChangedEventArgs>? TextChanged;

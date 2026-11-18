@@ -142,7 +142,12 @@ public partial class CdsNumberInput : CdsFormField
     {
         _validity = NumberInputModel.Validate(Entry.Text, CultureInfo.CurrentCulture, Min, Max, AllowEmpty);
         base.UpdateChrome();
-        var height = Size.Height();
+        // Fluid: the steppers are 40 square at the bottom of the 64px field whatever the size.
+        var fluid = IsFluidMode;
+        var height = fluid ? CdsSize.Md.Height() : Size.Height();
+        Controls.VerticalOptions = fluid ? LayoutOptions.End : LayoutOptions.Fill;
+        Chrome.Trailing.VerticalOptions = fluid ? LayoutOptions.End : LayoutOptions.Center;
+        Chrome.Trailing.Margin = new Thickness(0);
         DownButton.SetSize(height, height);
         UpButton.SetSize(height, height);
         DownButton.Description = DecrementLabel;

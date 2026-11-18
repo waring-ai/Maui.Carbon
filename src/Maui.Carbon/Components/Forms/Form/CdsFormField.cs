@@ -11,6 +11,18 @@ public abstract partial class CdsFormField : CdsControl
     /// <summary>The field scaffold (label, field box, message).</summary>
     protected readonly CdsFieldChrome Chrome = new();
 
+    /// <summary>Creates the field and keeps it in step with the fluid context of <see cref="Chrome"/>.</summary>
+    protected CdsFormField()
+    {
+        Chrome.FluidLayoutChanged += (_, _) => UpdateChrome();
+    }
+
+    /// <summary>
+    /// Whether the field renders its fluid layout: it sits inside a <see cref="CdsFluidForm"/> or is a fluid variant
+    /// (see <see cref="CdsFieldChrome.IsFluid"/>). Fluid fields ignore <see cref="Size"/>, inline mode and helper text.
+    /// </summary>
+    protected bool IsFluidMode => Chrome.IsFluidLayout;
+
     /// <summary>The native input inside the field (it receives the accessible name and hint).</summary>
     protected abstract VisualElement InputElement { get; }
 

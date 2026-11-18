@@ -15,12 +15,12 @@ internal sealed class CdsListBoxList
     readonly bool _multi;
     int _hovered = -1;
 
-    public CdsListBoxList(CdsSize size, bool inline, bool multi, string? accessibleName)
+    public CdsListBoxList(CdsSize size, bool inline, bool multi, string? accessibleName, double? rowHeight = null)
     {
         _inline = inline;
         _multi = multi;
-        RowHeight = CdsListBoxTokens.RowHeight(size);
-        MaxHeight = CdsListBoxTokens.MaxListHeight(size);
+        RowHeight = rowHeight ?? CdsListBoxTokens.RowHeight(size);
+        MaxHeight = RowHeight * CdsListBoxTokens.VisibleRows;
 
         _scroll = new ScrollView { Content = _stack, MaximumHeightRequest = MaxHeight, VerticalScrollBarVisibility = ScrollBarVisibility.Never };
         Surface = new Border

@@ -32,6 +32,7 @@ public partial class CdsDatePicker : CdsFormField
     readonly CdsIcon _endIcon = new(CdsIconName.Calendar, 16);
     readonly Grid _startIconHost = new() { WidthRequest = 16, HeightRequest = 16, VerticalOptions = LayoutOptions.Center, BackgroundColor = Colors.Transparent };
     readonly Grid _endIconHost = new() { WidthRequest = 16, HeightRequest = 16, VerticalOptions = LayoutOptions.Center, BackgroundColor = Colors.Transparent };
+    Grid _root = null!;
     readonly Grid _fields = new() { ColumnSpacing = 1, HorizontalOptions = LayoutOptions.Start };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false, Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0) };
     CdsDateEntryError _startError;
@@ -81,7 +82,8 @@ public partial class CdsDatePicker : CdsFormField
         _fields.Add(Chrome, 0);
         _fields.Add(EndChrome, 1);
 
-        var root = new Grid { RowSpacing = 0, HorizontalOptions = LayoutOptions.Start };
+        _root = new Grid { RowSpacing = 0, HorizontalOptions = LayoutOptions.Start };
+        var root = _root;
         root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         root.Add(_fields, 0, 0);
@@ -142,7 +144,7 @@ public partial class CdsDatePicker : CdsFormField
     }
 
     /// <inheritdoc/>
-    protected override string? HintText() => _message.IsVisible ? _message.Text : null;
+    protected override string? HintText() => IsFluidMode ? Chrome.CurrentMessage : _message.IsVisible ? _message.Text : null;
 
     // ---- construction helpers ----
 
@@ -209,12 +211,15 @@ public partial class CdsDatePicker : CdsFormField
     protected override void UpdateChrome()
     {
         base.UpdateChrome();
+        var fluid = IsFluidMode;
+        EndChrome.IsFluid = Chrome.IsFluid;
         // The picker draws one message under both fields; the field chromes only show the outline and status icon.
+        // Fluid: the first field shows the message inside itself (a range outlines both, one message under the first).
         foreach (var c in new[] { Chrome, EndChrome })
         {
             c.HelperText = null;
-            c.InvalidText = null;
-            c.WarnText = null;
+            c.InvalidText = fluid && c == Chrome ? EffectiveInvalidText : null;
+            c.WarnText = fluid && c == Chrome ? WarnText : null;
             c.IsInline = false;
             c.Size = CdsListBoxTokens.Coerce(Size);
             c.HideLabel = HideLabel;
@@ -231,9 +236,17 @@ public partial class CdsDatePicker : CdsFormField
         SemanticProperties.SetDescription(EndEntry, EndLabel);
 
         var hasStatus = (EffectiveInvalid || IsWarning) && IsEnabled && !IsReadOnly;
-        var width = CdsCalendarTokens.FieldWidth(Type, IsShort, hasStatus);
+        var width = fluid ? -1 : CdsCalendarTokens.FieldWidth(Type, IsShort, hasStatus);
         Chrome.WidthRequest = width;
         EndChrome.WidthRequest = width;
+        _fields.ColumnDefinitions.Clear();
+        var columns = IsRange ? 2 : 1;
+        for (var i = 0; i < 2; i++)
+            _fields.ColumnDefinitions.Add(new ColumnDefinition(fluid && i < columns ? GridLength.Star : GridLength.Auto));
+        _fields.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
+        _root.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
+        HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
+        CdsTokens.SetColor(_fields, BackgroundColorProperty, fluid ? CdsColorKeys.BorderStrong01 : null);
         var hasCalendar = Type != CdsDatePickerType.Simple;
         _startIconHost.IsVisible = hasCalendar;
         _endIconHost.IsVisible = hasCalendar;
@@ -252,6 +265,7 @@ public partial class CdsDatePicker : CdsFormField
         if (invalid && !string.IsNullOrEmpty(EffectiveInvalidText)) (text, key) = (EffectiveInvalidText, CdsColorKeys.TextError);
         else if (warn && !string.IsNullOrEmpty(WarnText)) (text, key) = (WarnText, CdsColorKeys.TextPrimary);
         else (text, key) = (HelperText, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextHelper);
+        if (IsFluidMode) text = null; // fluid: the first field shows the message inside itself
         _message.Text = text;
         _message.IsVisible = !string.IsNullOrEmpty(text);
         SetColor(_message, Microsoft.Maui.Controls.Label.TextColorProperty, key);

@@ -54,9 +54,22 @@ public partial class CdsTextArea : CdsFormField
         var limit = EnableCounter ? MaxCount : 0;
         // Multi-line: the field grows with the editor; the status icon sits 12 from the top, not centered.
         Chrome.FieldHeight = -1;
-        Chrome.Trailing.VerticalOptions = LayoutOptions.Start;
-        Chrome.Trailing.Margin = new Thickness(0, CdsSpacing.Spacing04, 0, 0);
-        Editor.HeightRequest = TextAreaModel.Height(Rows, CdsTypeSpec.Of(CdsTypeStyle.Body01).LineBoxHeight);
+        var lineHeight = CdsTypeSpec.Of(CdsTypeStyle.Body01).LineBoxHeight;
+        if (IsFluidMode)
+        {
+            // Fluid: the label floats above the editor, which has no padding of its own; the status icon sits in the message row.
+            EditorHost.Padding = new Thickness(0);
+            Chrome.Trailing.VerticalOptions = LayoutOptions.Start;
+            Chrome.Trailing.Margin = new Thickness(0);
+            Editor.HeightRequest = TextAreaModel.Height(Rows, lineHeight);
+        }
+        else
+        {
+            EditorHost.Padding = new Thickness(0, 11);
+            Chrome.Trailing.VerticalOptions = LayoutOptions.Start;
+            Chrome.Trailing.Margin = new Thickness(0, CdsSpacing.Spacing04, 0, 0);
+            Editor.HeightRequest = TextAreaModel.Height(Rows, lineHeight);
+        }
         Editor.Placeholder = Placeholder;
         Editor.IsReadOnly = IsReadOnly;
         Editor.MaxLength = CounterMode == CdsCounterMode.Character && limit > 0 ? limit : int.MaxValue;

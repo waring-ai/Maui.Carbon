@@ -94,7 +94,7 @@ public abstract partial class CdsListBox : CdsFormField
     protected virtual bool IsMultiple => false;
 
     /// <summary>Whether the field is drawn as the inline type (no fill, label to the start).</summary>
-    protected bool UsesInlineType => AllowsInline && (Type == CdsListBoxType.Inline || IsInline);
+    protected bool UsesInlineType => AllowsInline && !IsFluidMode && (Type == CdsListBoxType.Inline || IsInline);
 
     /// <summary>Whether this control has an inline variant (the combo box does not).</summary>
     protected virtual bool AllowsInline => true;
@@ -294,7 +294,7 @@ public abstract partial class CdsListBox : CdsFormField
         _hidingForEmpty = false;
         OnListOpening();
         var rows = _model.Rows;
-        var list = new CdsListBoxList(CdsListBoxTokens.Coerce(Size), UsesInlineType, IsMultiple, Label ?? Placeholder);
+        var list = new CdsListBoxList(CdsListBoxTokens.Coerce(Size), UsesInlineType, IsMultiple, Label ?? Placeholder, IsFluidMode ? CdsFieldChrome.FluidFieldHeight : null);
         list.Build(rows, i => IsRowChosen(rows[i]), CreateRowContent);
         list.RowChosen += (_, i) => OnRowChosen(i);
         list.RowHovered += (_, i) =>
@@ -510,6 +510,9 @@ public abstract partial class CdsListBox : CdsFormField
         Chrome.IsFlat = inline;
         Chrome.Size = CdsListBoxTokens.Coerce(Size);
         if (Chrome.Input is { } input) input.Margin = new Thickness(inline ? -CdsSpacing.Spacing03 : 0, 0, 0, 0);
+        // Fluid: the chevron's 24px box ends 10 above the field bottom so the glyph sits 14 up, as in Carbon.
+        Chrome.Trailing.VerticalOptions = IsFluidMode ? LayoutOptions.End : LayoutOptions.Center;
+        Chrome.Trailing.Margin = IsFluidMode ? new Thickness(0, 0, 0, 10) : new Thickness(0);
         if (IsOpen && !CanOpen) IsOpen = false;
         OnChromeUpdated();
         RefreshVisuals();

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.FluidForms.FluidFormPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Create deployment" Description="Fields stack flush with no gaps. Side-by-side fields share a 1px border-strong line, and each field keeps its own bottom rule. The buttons here use two 50% columns.">
+            <cds:CdsFluidForm x:Name="Form" WidthRequest="560" HorizontalOptions="Start" Submitted="OnSubmitted">
+                <cds:CdsFluidFormRow>
+                    <cds:CdsFluidTextInput Label="Deployment name" Placeholder="e.g. payments-api" />
+                    <cds:CdsFluidSelect Label="Region" SelectedItem="us-south">
+                        <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                        <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                    </cds:CdsFluidSelect>
+                </cds:CdsFluidFormRow>
+                <cds:CdsFluidFormRow>
+                    <cds:CdsFluidNumberInput Label="Replicas" Min="1" Max="10" Value="2" />
+                    <cds:CdsFluidDropdown Label="Environment" ItemsSource="{x:Static data:GListData.Environments}" SelectedItem="Staging" />
+                </cds:CdsFluidFormRow>
+                <cds:CdsFluidTextInput Label="Image tag" Text="latest" IsWarning="True" WarnText="Pin a version for repeatable rollouts." />
+                <cds:CdsFluidTextArea Label="Description (optional)" Rows="2" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="0">
+                    <cds:CdsButton Text="Cancel" Kind="Secondary" Size="Xl" HorizontalOptions="Fill" />
+                    <cds:CdsButton Grid.Column="1" Text="Create deployment" Size="Xl" HorizontalOptions="Fill" Clicked="OnCreate" />
+                </Grid>
+            </cds:CdsFluidForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Context" Description="CdsFluidForm publishes the fluid context: a plain TextInput inside it renders fluid too, so default and fluid inputs never mix in one form.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput Label="Cluster name" Placeholder="e.g. prod-eu-de-1" HelperText="Not shown in a fluid form." />
+                <cds:CdsSelect Label="Region" SelectedItem="eu-de">
+                    <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                    <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                </cds:CdsSelect>
+            </cds:CdsFluidForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Status" Description="Press Create deployment to submit.">
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="Not submitted" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The form in all four themes.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsFluidForm WidthRequest="320">
+                            <cds:CdsFluidTextInput Label="Deployment name" Text="payments-api" />
+                            <cds:CdsFluidTextInput Label="Image tag" Text="latest" IsInvalid="True" InvalidText="Tag not found." />
+                        </cds:CdsFluidForm>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

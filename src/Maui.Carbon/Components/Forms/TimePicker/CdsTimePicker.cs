@@ -28,8 +28,16 @@ public partial class CdsTimePicker : CdsControl
     readonly CdsText _label = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, Margin = new Thickness(0, 0, 0, CdsSpacing.Spacing03) };
     readonly HorizontalStackLayout _row = new() { Spacing = 1 };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false, Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0) };
+    readonly Grid _fluidRow = new() { ColumnSpacing = 1 };
+    readonly Grid _fluidGroup = new();
+    readonly Grid _fluidMessageBlock = new() { IsVisible = false };
+    readonly BoxView _fluidDivider = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(CdsSpacing.Spacing05, 0), InputTransparent = true };
+    readonly CdsText _fluidMessage = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, Margin = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing03 + 1, 48, CdsSpacing.Spacing03) };
+    readonly CdsIcon _fluidIcon = new() { VerticalOptions = LayoutOptions.Start, HorizontalOptions = LayoutOptions.End, Margin = new Thickness(0, CdsSpacing.Spacing03 + 1, CdsSpacing.Spacing05, 0), IsVisible = false };
+    readonly CdsFocusRing _fluidRing = new(CdsFocusRingStyle.Inset);
     bool _autoInvalid;
     bool _syncing;
+    bool _fluidBuilt;
 
     /// <summary>Creates a 12-hour time picker.</summary>
     public CdsTimePicker()
@@ -65,10 +73,27 @@ public partial class CdsTimePicker : CdsControl
             Completed?.Invoke(this, EventArgs.Empty);
         };
         TrackFocus(Entry);
+        Chrome.FluidLayoutChanged += (_, _) => UpdateChrome();
+        _fluidGroup.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _fluidGroup.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _fluidMessageBlock.Add(_fluidDivider);
+        _fluidMessageBlock.Add(_fluidMessage);
+        _fluidMessageBlock.Add(_fluidIcon);
+        _fluidGroup.Add(_fluidRow, 0, 0);
+        _fluidGroup.Add(_fluidMessageBlock, 0, 1);
+        _fluidGroup.Add(_fluidRing, 0, 0);
+        Grid.SetRowSpan(_fluidRing, 2);
+        CdsTokens.SetColor(_fluidRow, BackgroundColorProperty, CdsColorKeys.BorderStrong01);
         HorizontalOptions = LayoutOptions.Start;
         SetChrome(_root);
         UpdateChrome();
     }
+
+    /// <summary>
+    /// Whether the picker renders its fluid layout (inside a <see cref="CdsFluidForm"/>, or a fluid variant): the time field
+    /// and its selects become 64px parts of one row with 1px dividers, and one message sits under all of them.
+    /// </summary>
+    protected bool IsFluidMode => Chrome.IsFluidLayout;
 
     /// <summary>Raised when the time text changes.</summary>
     public event EventHandler<TextChangedEventArgs>? TextChanged;
@@ -104,7 +129,9 @@ public partial class CdsTimePicker : CdsControl
         if (invalid) state |= CdsInteractionState.Invalid;
         if (warn) state |= CdsInteractionState.Warn;
         if (IsReadOnly) state |= CdsInteractionState.ReadOnly;
-        Chrome.Apply(state);
+        var fluid = IsFluidMode;
+        // Fluid: the group draws the outline and message, so the time part shows only its own focus.
+        Chrome.Apply(fluid ? state & ~(CdsInteractionState.Invalid | CdsInteractionState.Warn) : state);
 
         SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         SetColor(Entry, Microsoft.Maui.Controls.Entry.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary);
@@ -127,8 +154,26 @@ public partial class CdsTimePicker : CdsControl
         SetColor(_message, Microsoft.Maui.Controls.Label.TextColorProperty, key);
         SemanticProperties.SetHint(Entry, _message.IsVisible ? text : null);
 
-        // 4.875rem wide; 6.175rem when the error or warning icon shows.
-        Chrome.WidthRequest = invalid || warn ? 98.8 : 78;
+        if (fluid)
+        {
+            Chrome.WidthRequest = -1;
+            _fluidMessageBlock.IsVisible = invalid || warn;
+            _fluidMessage.Text = text;
+            _fluidMessage.IsVisible = !string.IsNullOrEmpty(text);
+            SetColor(_fluidMessage, Microsoft.Maui.Controls.Label.TextColorProperty, key);
+            SetColor(_fluidDivider, BoxView.ColorProperty, CdsColorKeys.BorderSubtle01);
+            SetColor(_fluidMessageBlock, BackgroundColorProperty, CdsColorKeys.Field01);
+            _fluidIcon.IsVisible = invalid || warn;
+            _fluidIcon.Icon = invalid ? CdsIconName.WarningFilled : CdsIconName.WarningAltFilled;
+            SetColor(_fluidIcon, CdsIcon.ColorProperty, invalid ? CdsColorKeys.SupportError : CdsColorKeys.SupportWarning);
+            _fluidRing.IsActive = invalid || (Is(CdsInteractionState.Focused) && !disabled);
+            _fluidRing.SetColorKey(Is(CdsInteractionState.Focused) ? CdsColorKeys.Focus : CdsColorKeys.SupportError);
+        }
+        else
+        {
+            // 4.875rem wide; 6.175rem when the error or warning icon shows.
+            Chrome.WidthRequest = invalid || warn ? 98.8 : 78;
+        }
         foreach (var select in new[] { PeriodSelect, ZoneSelect })
         {
             select.IsReadOnly = IsReadOnly;
@@ -139,8 +184,12 @@ public partial class CdsTimePicker : CdsControl
     /// <summary>Re-applies texts, sizes and accessibility after a property change.</summary>
     protected virtual void UpdateChrome()
     {
+        var fluid = IsFluidMode;
         _label.Text = Label;
-        _label.IsVisible = !HideLabel && !string.IsNullOrEmpty(Label);
+        _label.IsVisible = !fluid && !HideLabel && !string.IsNullOrEmpty(Label);
+        Chrome.Label = fluid ? Label : null;
+        PeriodSelect.SetFluid(fluid);
+        ZoneSelect.SetFluid(fluid);
         Chrome.Size = Size;
         Entry.Placeholder = Placeholder;
         Entry.IsReadOnly = IsReadOnly;
@@ -149,7 +198,51 @@ public partial class CdsTimePicker : CdsControl
         PeriodSelect.IsVisible = !Is24Hour;
         ZoneSelect.IsVisible = TimeZones.Count > 0;
         SemanticProperties.SetDescription(Entry, Label);
+        LayoutParts(fluid);
         RefreshVisuals();
+    }
+
+    // Fluid: [time | period | zone] share one 64px row on a border-strong background (1px dividers); otherwise the
+    // default stacked row with the label above.
+    void LayoutParts(bool fluid)
+    {
+        if (fluid)
+        {
+            _fluidRow.Children.Clear();
+            _fluidRow.ColumnDefinitions.Clear();
+            _row.Remove(Chrome);
+            _row.Remove(PeriodSelect);
+            _row.Remove(ZoneSelect);
+            var parts = new List<View> { Chrome };
+            if (PeriodSelect.IsVisible) parts.Add(PeriodSelect);
+            if (ZoneSelect.IsVisible) parts.Add(ZoneSelect);
+            for (var i = 0; i < parts.Count; i++)
+            {
+                // 25% / 25% / rest, as the web's flex-basis does; a lone part fills the row.
+                _fluidRow.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(i == 2 ? 2 : 1, GridUnitType.Star)));
+                _fluidRow.Add(parts[i], i);
+            }
+            if (!_fluidBuilt)
+            {
+                _fluidBuilt = true;
+                _root.Clear();
+                _root.Add(_fluidGroup);
+            }
+            HorizontalOptions = LayoutOptions.Fill;
+        }
+        else if (_fluidBuilt)
+        {
+            _fluidBuilt = false;
+            _fluidRow.Children.Clear();
+            _root.Clear();
+            _row.Add(Chrome);
+            _row.Add(PeriodSelect);
+            _row.Add(ZoneSelect);
+            _root.Add(_label);
+            _root.Add(_row);
+            _root.Add(_message);
+            HorizontalOptions = LayoutOptions.Start;
+        }
     }
 
     void OnEntryTextChanged(object? sender, TextChangedEventArgs e)

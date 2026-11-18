@@ -20,6 +20,7 @@ public partial class CdsSearch : CdsControl
     /// <summary>The magnifier at the start of the field.</summary>
     protected readonly CdsIcon Magnifier = new(CdsIconName.Search, 16);
 
+    readonly CdsIcon _fluidMagnifier = new(CdsIconName.Search, 16) { IsVisible = false, VerticalOptions = LayoutOptions.End, Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 13), InputTransparent = true };
     readonly Grid _root = new();
     readonly Grid _input = new() { ColumnSpacing = 0 };
     readonly CdsFieldIconButton _clear = new(CdsIconName.Close, CdsFieldButtonKind.Search) { IsVisible = false };
@@ -35,6 +36,8 @@ public partial class CdsSearch : CdsControl
         Magnifier.InputTransparent = true;
         Chrome.Input = _input;
         Chrome.Trailing.Add(_clear);
+        Chrome.Trailing.Add(_fluidMagnifier);
+        Chrome.FluidLayoutChanged += (_, _) => UpdateLayout();
 
         Entry.TextChanged += OnEntryTextChanged;
         Entry.Completed += (_, _) => RaiseSearch();
@@ -66,6 +69,13 @@ public partial class CdsSearch : CdsControl
 
     /// <summary>The native entry's accessible target, for tests and subclasses.</summary>
     protected VisualElement InputElement => Entry;
+
+    /// <summary>
+    /// Whether the search renders its fluid layout (inside a <see cref="CdsFluidForm"/>, or a fluid variant): the label sits
+    /// inside the 64px field and the magnifier moves to the bottom end, next to the clear button. Fluid search is never
+    /// expandable.
+    /// </summary>
+    protected bool IsFluidMode => Chrome.IsFluidLayout;
 
     /// <summary>Empties the field, raises <see cref="Cleared"/> and returns focus to the input.</summary>
     public void Clear()
@@ -106,6 +116,7 @@ public partial class CdsSearch : CdsControl
         // Disabled hides the placeholder: it takes the field color.
         SetColor(Entry, Microsoft.Maui.Controls.Entry.PlaceholderColorProperty, disabled ? CdsColorKeys.Field01 : CdsColorKeys.TextPlaceholder);
         SetColor(Magnifier, CdsIcon.ColorProperty, disabled ? CdsColorKeys.IconOnColorDisabled : CdsColorKeys.IconSecondary);
+        SetColor(_fluidMagnifier, CdsIcon.ColorProperty, disabled ? CdsColorKeys.IconDisabled : CdsColorKeys.IconSecondary);
         _clear.IsEnabled = IsEnabled;
         _collapsed.IsEnabled = IsEnabled;
     }
@@ -113,8 +124,9 @@ public partial class CdsSearch : CdsControl
     /// <summary>Re-applies sizes, texts and accessibility after a property change.</summary>
     protected virtual void UpdateLayout()
     {
-        var height = Size.Height();
-        var expanded = !IsExpandable || IsExpanded;
+        var fluid = IsFluidMode;
+        var height = fluid ? CdsSize.Md.Height() : Size.Height();
+        var expanded = fluid || !IsExpandable || IsExpanded;
         Chrome.Size = Size;
         Chrome.IsVisible = expanded;
         _collapsed.IsVisible = !expanded;
@@ -126,14 +138,19 @@ public partial class CdsSearch : CdsControl
         _clear.IsVisible = expanded && !string.IsNullOrEmpty(Text);
 
         // The field pads its content by 16; the magnifier column and the clear button take their own square.
-        _input.Margin = new Thickness(-CdsSpacing.Spacing05, 0, 0, 0);
-        _input.ColumnDefinitions[0].Width = new GridLength(height);
-        Chrome.Trailing.Margin = new Thickness(0, 0, -CdsSpacing.Spacing05, 0);
-        Chrome.Trailing.VerticalOptions = LayoutOptions.Fill;
+        // Fluid: no leading magnifier; the label floats in the field and the magnifier ends the row.
+        _input.Margin = new Thickness(fluid ? 0 : -CdsSpacing.Spacing05, 0, 0, 0);
+        _input.ColumnDefinitions[0].Width = new GridLength(fluid ? 0 : height);
+        Magnifier.IsVisible = !fluid;
+        _fluidMagnifier.IsVisible = fluid;
+        _fluidMagnifier.Icon = Icon;
+        Chrome.Label = fluid ? Label : null;
+        Chrome.Trailing.Margin = fluid ? new Thickness(0) : new Thickness(0, 0, -CdsSpacing.Spacing05, 0);
+        Chrome.Trailing.VerticalOptions = fluid ? LayoutOptions.End : LayoutOptions.Fill;
         Magnifier.Icon = Icon;
         Entry.Placeholder = Placeholder;
 
-        if (IsExpandable)
+        if (IsExpandable && !fluid)
         {
             HorizontalOptions = expanded ? LayoutOptions.Fill : LayoutOptions.Start;
             _root.WidthRequest = expanded ? -1 : height;
