@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.FluidForms.TextAreaPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="The label sits inside the 64px field at the top start with the value below it; there is no helper text. Fluid fields live inside a FluidForm.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description (optional)" Rows="3" Placeholder="What is this cluster for?" /></cds:CdsFluidForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production" IsInvalid="True" InvalidText="Add at least 20 characters." /></cds:CdsFluidForm>
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Shared by two teams" IsWarning="True" WarnText="Shared clusters are billed to the owner." /></cds:CdsFluidForm>
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Notes" Rows="2" Text="Managed by the platform team" IsReadOnly="True" /></cds:CdsFluidForm>
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Notes" Rows="2" IsEnabled="False" /></cds:CdsFluidForm>
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Release notes" Rows="2" EnableCounter="True" MaxCount="120" Text="Upgrades the control plane." /></cds:CdsFluidForm>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Change the value and watch the status line.">
+            <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidTextArea x:Name="Input" Label="Description (optional)" Rows="3" TextChanged="OnChanged" /></cds:CdsFluidForm>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Fluid fields on a layer-01 surface step to field-02 inside a CdsLayer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

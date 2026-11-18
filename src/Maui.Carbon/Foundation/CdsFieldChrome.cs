@@ -5,9 +5,31 @@ namespace Maui.Carbon;
 /// 1px <c>border-strong-01</c> bottom rule, 2px focus / error outline, trailing status icon and action slot), and the
 /// message row (helper, invalid or warning text). Inputs put their native control in <see cref="Input"/>, set the
 /// text properties, and call <see cref="Apply"/> from <see cref="CdsControl.ApplyVisuals"/>.
+/// <para>
+/// <b>Fluid layout</b> (<see cref="IsFluid"/>, or the <c>Cds.IsFluid</c> context of a <see cref="CdsFluidForm"/>): the
+/// label sits inside the 64px field at the top start, the input below it, helper text is not shown, and an invalid or
+/// warning message sits inside the field under a 1px <c>border-subtle-01</c> divider with the status icon at its end. The
+/// focus and error outlines wrap the field and its message; the size and inline settings are ignored.
+/// </para>
 /// </summary>
 public sealed class CdsFieldChrome : Grid
 {
+    /// <summary>Height of a fluid field: 4rem.</summary>
+    public const double FluidFieldHeight = 64;
+
+    static readonly BindableProperty ContextFluidProperty = BindableProperty.Create(
+        "ContextFluid", typeof(bool), typeof(CdsFieldChrome), false,
+        propertyChanged: static (b, _, _) => ((CdsFieldChrome)b).OnFluidChanged());
+
+    readonly Grid _shell = new();
+    readonly Grid _messageBlock = new();
+    readonly BoxView _divider = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(CdsSpacing.Spacing05, 0), InputTransparent = true };
+    readonly BoxView _shellRule = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
+    readonly CdsFocusRing _fluidOutline = new(CdsFocusRingStyle.Inset);
+    bool _fluid;
+    bool _layoutFluid;
+    double _fieldHeight;
+    CdsInteractionState _lastState;
     readonly CdsText _label = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary };
     readonly CdsText _counter = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, HorizontalOptions = LayoutOptions.End };
     readonly Grid _labelRow = new() { ColumnSpacing = CdsSpacing.Spacing03 };
@@ -51,6 +73,14 @@ public sealed class CdsFieldChrome : Grid
         SetColumnSpan((BindableObject)_overlayGrid, 2);
 
         _message.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
+
+        _messageBlock.IsVisible = false;
+        SetDynamicResource(ContextFluidProperty, CdsContextKeys.IsFluid);
+        // A dynamic resource keeps its last value when the control leaves a fluid form, so re-check on attach.
+        Loaded += (_, _) =>
+        {
+            if (_layoutFluid != IsFluidLayout) OnFluidChanged();
+        };
 
         FieldHeight = CdsSize.Md.Height();
         Layout();
@@ -111,12 +141,38 @@ public sealed class CdsFieldChrome : Grid
         }
     }
 
-    /// <summary>Explicit field height (-1 lets the input size it, for text areas).</summary>
+    /// <summary>
+    /// Explicit field height (-1 lets the input size it, for text areas). In fluid layout the field is at least
+    /// <see cref="FluidFieldHeight"/> and a fixed height becomes exactly that.
+    /// </summary>
     public double FieldHeight
     {
-        get => _field.HeightRequest;
-        set => _field.HeightRequest = value;
+        get => _fieldHeight;
+        set
+        {
+            _fieldHeight = value;
+            ApplyFieldHeight();
+        }
     }
+
+    /// <summary>Forces the fluid layout. It also turns on by itself inside a <see cref="CdsFluidForm"/>.</summary>
+    public bool IsFluid
+    {
+        get => _fluid;
+        set
+        {
+            if (_fluid == value) return;
+            var before = IsFluidLayout;
+            _fluid = value;
+            if (before != IsFluidLayout) OnFluidChanged();
+        }
+    }
+
+    /// <summary>Whether the fluid layout is in effect (<see cref="IsFluid"/> or the fluid form context).</summary>
+    public bool IsFluidLayout => _fluid || ((bool)GetValue(ContextFluidProperty) && CdsContext.Find(this, CdsContextKeys.IsFluid) is true);
+
+    /// <summary>Raised after the fluid layout turned on or off, so the owner can re-apply its sizes and decorations.</summary>
+    public event EventHandler? FluidLayoutChanged;
 
     /// <summary>Label (and helper) to the start of the field, for dense settings rows.</summary>
     public bool IsInline
@@ -162,6 +218,13 @@ public sealed class CdsFieldChrome : Grid
     /// <summary>Re-applies colors and texts for a state. Call it from the owner's <c>ApplyVisuals</c>.</summary>
     public void Apply(CdsInteractionState state)
     {
+        _lastState = state;
+        if (_layoutFluid != IsFluidLayout)
+        {
+            // The field left (or entered) a fluid form since the last layout.
+            OnFluidChanged();
+            return;
+        }
         var disabled = state.HasFlag(CdsInteractionState.Disabled);
         var readOnly = state.HasFlag(CdsInteractionState.ReadOnly);
         var invalid = state.HasFlag(CdsInteractionState.Invalid) && !disabled && !readOnly;
@@ -176,8 +239,11 @@ public sealed class CdsFieldChrome : Grid
         Set(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         Set(_counter, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
 
-        _outline.IsActive = focused || invalid;
+        var fluid = IsFluidLayout;
+        _outline.IsActive = !fluid && (focused || invalid);
         _outline.SetColorKey(focused ? CdsColorKeys.Focus : CdsColorKeys.SupportError);
+        _fluidOutline.IsActive = fluid && (focused || invalid);
+        _fluidOutline.SetColorKey(focused ? CdsColorKeys.Focus : CdsColorKeys.SupportError);
 
         if (invalid)
         {
@@ -200,12 +266,43 @@ public sealed class CdsFieldChrome : Grid
         string key;
         if (invalid && !string.IsNullOrEmpty(InvalidText)) (text, key) = (InvalidText, CdsColorKeys.TextError);
         else if (warn && !string.IsNullOrEmpty(WarnText)) (text, key) = (WarnText, CdsColorKeys.TextPrimary);
-        else (text, key) = (HelperText, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextHelper);
+        else (text, key) = (fluid ? null : HelperText, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextHelper);
         _message.Text = text;
         _message.IsVisible = !string.IsNullOrEmpty(text);
         Set(_message, Microsoft.Maui.Controls.Label.TextColorProperty, key);
 
-        _labelRow.IsVisible = !HideLabel && (!string.IsNullOrEmpty(Label) || _counter.IsVisible);
+        // Fluid: the message row (divider, text, status icon) belongs to the field and shows for invalid and warning
+        // states; the outline replaces the bottom rule, and a warning keeps a strong rule under the message.
+        _messageBlock.IsVisible = fluid && (invalid || warn);
+        _shellRule.IsVisible = fluid && warn;
+        _rule.Opacity = fluid && (invalid || warn) ? 0 : 1;
+        Set(_divider, BoxView.ColorProperty, CdsColorKeys.BorderSubtle01);
+        Set(_shellRule, BoxView.ColorProperty, CdsColorKeys.BorderStrong01);
+        Set(_messageBlock, VisualElement.BackgroundColorProperty, readOnly ? null : CdsColorKeys.Field01);
+
+        _labelRow.IsVisible = (fluid || !HideLabel) && (!string.IsNullOrEmpty(Label) || _counter.IsVisible);
+    }
+
+    void OnFluidChanged()
+    {
+        Layout();
+        ApplyFieldHeight();
+        Apply(_lastState);
+        FluidLayoutChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    void ApplyFieldHeight()
+    {
+        if (IsFluidLayout)
+        {
+            _field.MinimumHeightRequest = FluidFieldHeight;
+            _field.HeightRequest = _fieldHeight < 0 ? -1 : FluidFieldHeight;
+        }
+        else
+        {
+            _field.MinimumHeightRequest = -1;
+            _field.HeightRequest = _fieldHeight;
+        }
     }
 
     void Set(Element target, BindableProperty property, string? key)
@@ -220,6 +317,28 @@ public sealed class CdsFieldChrome : Grid
         Children.Clear();
         RowDefinitions.Clear();
         ColumnDefinitions.Clear();
+        _shell.Children.Clear();
+        _shell.RowDefinitions.Clear();
+        _messageBlock.Children.Clear();
+        _field.Children.Remove(_labelRow);
+        Trailing.Remove(_statusIcon);
+
+        _layoutFluid = IsFluidLayout;
+        if (_layoutFluid)
+        {
+            LayoutFluid();
+            return;
+        }
+
+        Trailing.Insert(0, _statusIcon);
+        _statusIcon.Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0);
+        _statusIcon.VerticalOptions = LayoutOptions.Fill;
+        _statusIcon.HorizontalOptions = LayoutOptions.Fill;
+        _inputSlot.Margin = new Thickness(0);
+        Trailing.VerticalOptions = LayoutOptions.Center;
+        Trailing.Margin = new Thickness(0);
+        _labelRow.InputTransparent = false;
+        _message.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
         if (_inline)
         {
             // [label | field] with the message under the field.
@@ -244,5 +363,38 @@ public sealed class CdsFieldChrome : Grid
             this.Add(_field, 0, 1);
             this.Add(_message, 0, 2);
         }
+    }
+
+    void LayoutFluid()
+    {
+        // The label floats over the top of the field (13 from the top); the input sits below it.
+        _labelRow.Margin = new Thickness(0, 13, 0, 0);
+        _labelRow.VerticalOptions = LayoutOptions.Start;
+        _labelRow.InputTransparent = true;
+        _field.Add(_labelRow, 0);
+        SetColumnSpan((BindableObject)_labelRow, 2);
+        _inputSlot.Margin = _fieldHeight < 0 ? new Thickness(0, 32, 0, 13) : new Thickness(0, 29, 0, 10);
+        Trailing.VerticalOptions = LayoutOptions.End;
+        Trailing.Margin = new Thickness(0, 0, 0, 13);
+
+        // Message row: divider, text, and the status icon at its end, inside the field's outline.
+        _statusIcon.Margin = new Thickness(0, CdsSpacing.Spacing03 + 1, CdsSpacing.Spacing05, 0);
+        _statusIcon.VerticalOptions = LayoutOptions.Start;
+        _statusIcon.HorizontalOptions = LayoutOptions.End;
+        _message.Margin = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing03 + 1, 48, CdsSpacing.Spacing03);
+        _messageBlock.MinimumHeightRequest = 33;
+        _messageBlock.Add(_divider);
+        _messageBlock.Add(_message);
+        _messageBlock.Add(_statusIcon);
+
+        RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _shell.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _shell.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _shell.Add(_field, 0, 0);
+        _shell.Add(_messageBlock, 0, 1);
+        _shell.Add(_shellRule, 0, 1);
+        _shell.Add(_fluidOutline, 0, 0);
+        SetRowSpan((BindableObject)_fluidOutline, 2);
+        this.Add(_shell, 0, 0);
     }
 }
