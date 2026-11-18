@@ -122,6 +122,9 @@ Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net10.0-maccatalyst
 `RELAY_LOG_DIR` when set; check it for `[ERR]` and `[FTL]` lines after a test session.
 Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build);
 every Relay screen: `APP=relay tools/snapshots.sh out/relay white,g100`.
+Exercise Relay to catch framework faults (every screen, state, theme and window size; layout overflow, contrast, leaks,
+UI hangs, crashes, and every logged warning attributed to the step that caused it):
+`tools/relay-exercise.sh out/exercise` after a `-c Release` build (`QUICK=1` for 2 themes x 2 sizes, ~8 minutes).
 
 After updating `design/carbon/tokens.json` or the icons, regenerate with
 `dotnet run --project tools/Maui.Carbon.Generator`.

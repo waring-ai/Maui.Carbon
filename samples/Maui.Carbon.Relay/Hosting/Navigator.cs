@@ -22,6 +22,9 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
 
     public bool CanGoBack => _stack.Count > 1;
 
+    /// <summary>The view shown in the shell body.</summary>
+    public View? CurrentView => _stack.TryPeek(out var top) ? top.View : null;
+
     public event EventHandler<string>? Navigated;
 
     /// <summary>Registers a route. Register views and view models in DI too (singletons keep their state between visits).</summary>

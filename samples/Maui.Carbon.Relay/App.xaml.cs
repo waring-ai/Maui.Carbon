@@ -27,6 +27,7 @@ public partial class App : Application
             window.Height = 900;
         }
         RouteSnapshotRunner.AttachIfRequested(window, _services);
+        ExerciseRunner.AttachIfRequested(window, _services);
         return window;
     }
 }

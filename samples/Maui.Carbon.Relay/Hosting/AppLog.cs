@@ -13,7 +13,7 @@ namespace Maui.Carbon.Relay.Hosting;
 /// <c>[ERR]</c>, <c>[FTL]</c>, <c>[WRN]</c>, so <c>grep -E '\[(ERR|FTL)\]'</c> finds the failures.
 /// <para>
 /// The file is <c>relay-&lt;yyyyMMdd&gt;.log</c> (a new one each day, the last 7 kept) in <c>RELAY_LOG_DIR</c> or the
-/// <c>--log-dir</c> argument, else the screenshot directory in screenshot mode, else <c>Logs/&lt;app id&gt;</c> under the
+/// <c>--log-dir</c> argument, else the screenshot or exercise directory in those modes, else <c>Logs/&lt;app id&gt;</c> under the
 /// app data directory (<c>~/Library/Logs/ai.waring.mauicarbon.relay</c> on Mac Catalyst). <see cref="Directory"/> says which, and the first line of each launch repeats it.
 /// </para>
 /// </summary>
@@ -28,6 +28,7 @@ public static class AppLog
     {
         Directory = LaunchArgs.Get("--log-dir", "RELAY_LOG_DIR")
             ?? LaunchArgs.Get("--snapshot", "CARBON_SNAPSHOT_DIR")
+            ?? LaunchArgs.Get("--exercise", "RELAY_EXERCISE_DIR")
             // Unsandboxed Mac Catalyst's app data directory is ~/Library itself, so this is ~/Library/Logs/<app id>
             // there (where Console.app looks); a folder of the app's own on iOS, Android and Windows.
             ?? Path.Combine(FileSystem.AppDataDirectory, "Logs", AppInfo.PackageName);
@@ -43,6 +44,8 @@ public static class AppLog
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("System", LogEventLevel.Warning)
             .Enrich.FromLogContext()
+            // Exercise mode: warnings and errors are also collected, tagged with the step that was running.
+            .WriteTo.Sink(ExerciseLog.Instance, LogEventLevel.Warning)
             .WriteTo.File(
                 Path.Combine(Directory, FilePrefix + ".log"),
                 rollingInterval: RollingInterval.Day,

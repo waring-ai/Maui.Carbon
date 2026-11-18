@@ -22,6 +22,9 @@
     <CarbonNetVersion>net10.0</CarbonNetVersion>
     <!-- The .NET 10 Apple packs pin an older Xcode than the one installed on dev machines/CI images. -->
     <ValidateXcodeVersion Condition="'$(ValidateXcodeVersion)' == ''">false</ValidateXcodeVersion>
+    <!-- Since .NET 10 the Mac Catalyst bundle is named after ApplicationTitle ("Relay.app"), but Rider launches
+         <AssemblyName>.app. Pin it to the project name (the menu bar still shows ApplicationTitle via Info.plist). -->
+    <_AppBundleName Condition="'$(_AppBundleName)' == ''">$(MSBuildProjectName)</_AppBundleName>
 
     <!-- Android needs the Android SDK + JDK 17: on in CI, or when ANDROID_HOME is set, or opt-in. -->
     <CarbonIncludeAndroid Condition="'$(CarbonIncludeAndroid)' == '' and ('$(GITHUB_ACTIONS)' == 'true' or '$(ANDROID_HOME)' != '')">true</CarbonIncludeAndroid>

@@ -20,7 +20,7 @@ public static class RouteSnapshotRunner
 
     public static bool IsRequested => Arg("--snapshot", "CARBON_SNAPSHOT_DIR") is not null;
 
-    sealed record Shot(string Name, Func<IServiceProvider, Task> Setup, Func<IServiceProvider, Page> Page);
+    internal sealed record Shot(string Name, Func<IServiceProvider, Task> Setup, Func<IServiceProvider, Page> Page);
 
     static Page MainPageOf(IServiceProvider s) => s.GetRequiredService<MainPage>();
 
@@ -43,7 +43,7 @@ public static class RouteSnapshotRunner
     static string DetailKey(IServiceProvider s) =>
         s.GetRequiredService<IIssueService>().All.First(i => i.StackTrace is not null && i.IsOpen).Key;
 
-    static IReadOnlyList<Shot> Shots() =>
+    internal static IReadOnlyList<Shot> Shots() =>
     [
         Route("dashboard", Routes.Dashboard),
         Route("issues", Routes.Issues),

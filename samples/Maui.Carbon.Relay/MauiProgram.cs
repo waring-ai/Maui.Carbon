@@ -22,8 +22,8 @@ public static class MauiProgram
 
         var services = builder.Services;
 
-        // Mock backend: one in-memory database, services over it. Screenshot mode turns latency off.
-        services.AddSingleton(new MockLatency { Scale = RouteSnapshotRunner.IsRequested ? 0 : 1 });
+        // Mock backend: one in-memory database, services over it. Screenshot and exercise modes turn latency off.
+        services.AddSingleton(new MockLatency { Scale = RouteSnapshotRunner.IsRequested || ExerciseRunner.IsRequested ? 0 : 1 });
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton(sp => MockDataSeed.Create(sp.GetRequiredService<IClock>().Now));
         services.AddSingleton<IPeopleService, InMemoryPeopleService>();
