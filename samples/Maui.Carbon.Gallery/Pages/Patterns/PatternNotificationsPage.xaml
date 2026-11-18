@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternNotificationsPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Which one to use" Description="Inline for a section, toast for an outcome, actionable for one follow-up, banner for the account, callout for guidance, modal only when the person must respond.">
+            <cds:CdsStructuredList Label="Which notification to use" IsCondensed="True">
+                <cds:CdsStructuredList.Columns>
+                    <cds:CdsStructuredListColumn Header="Component" Width="190" />
+                    <cds:CdsStructuredListColumn Header="Use when" Width="*" />
+                    <cds:CdsStructuredListColumn Header="Where" Width="*" />
+                    <cds:CdsStructuredListColumn Header="Examples" Width="180" />
+                </cds:CdsStructuredList.Columns>
+                <cds:CdsStructuredListRow>
+                    <x:String>InlineNotification</x:String>
+                    <x:String>The message is about one section or form and stays until the issue is fixed.</x:String>
+                    <x:String>Top of the form or section it is about</x:String>
+                    <x:String>Form errors, quota warnings</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>ToastNotification</x:String>
+                    <x:String>The system reports an outcome or event that does not need a response.</x:String>
+                    <x:String>Top-right of the page, stacked, newest first</x:String>
+                    <x:String>Cluster created, export ready</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>ActionableNotification</x:String>
+                    <x:String>The person can act on the message with one action, such as undo or retry.</x:String>
+                    <x:String>Inline next to the content, or as a toast</x:String>
+                    <x:String>Undo delete, retry a failed sync</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>Banner</x:String>
+                    <x:String>A product or account message not tied to the current task. An inline actionable notification; one at a time, stays until dismissed.</x:String>
+                    <x:String>Top of the content area, under the header; scrolls with the page</x:String>
+                    <x:String>Payment method expiring, planned maintenance</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>Callout</x:String>
+                    <x:String>You are giving guidance that is part of the content, before they act. Not dismissible.</x:String>
+                    <x:String>Next to the content it explains</x:String>
+                    <x:String>Key is shown once, region limits</x:String>
+                </cds:CdsStructuredListRow>
+                <cds:CdsStructuredListRow>
+                    <x:String>Modal</x:String>
+                    <x:String>The person must decide or acknowledge before they can continue.</x:String>
+                    <x:String>Centered over the page, blocks it</x:String>
+                    <x:String>Session expiring, delete confirmation</x:String>
+                </cds:CdsStructuredListRow>
+            </cds:CdsStructuredList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline notification and callout" Description="The inline notification sits at the top of the form it is about, 24 above the first field. The callout is guidance inside the content, before the person acts.">
+            <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Start">
+                <VerticalStackLayout WidthRequest="520" Margin="0,0,24,24" Spacing="24" BackgroundColor="{DynamicResource CdsLayer01}" Padding="16">
+                    <cds:CdsText Text="Invite users" TypeStyle="Heading03" />
+                    <cds:CdsInlineNotification Kind="Warning" IsLowContrast="True" HideCloseButton="True" Title="You can invite 2 more users."
+                                               Subtitle="Your plan includes 25 seats and 23 are in use. Remove inactive users or upgrade the plan to add more." />
+                    <cds:CdsLayer>
+                        <VerticalStackLayout Spacing="24">
+                            <cds:CdsTextInput Label="Email addresses" Text="ana.silva@northwind.dev, raj.patel@northwind.dev" HelperText="Separate addresses with commas." />
+                            <cds:CdsSelect Label="Access group" SelectedItem="dev">
+                                <cds:CdsSelectItem Value="dev" Text="Developers" />
+                                <cds:CdsSelectItem Value="ops" Text="Operators" />
+                                <cds:CdsSelectItem Value="billing" Text="Billing viewers" />
+                            </cds:CdsSelect>
+                        </VerticalStackLayout>
+                    </cds:CdsLayer>
+                    <cds:CdsButtonSet HorizontalOptions="Start">
+                        <cds:CdsButton Text="Send invites" />
+                        <cds:CdsButton Text="Cancel" Kind="Secondary" />
+                    </cds:CdsButtonSet>
+                </VerticalStackLayout>
+                <VerticalStackLayout WidthRequest="520" Margin="0,0,24,24" Spacing="16" Padding="16">
+                    <cds:CdsText Text="Create an API key" TypeStyle="Heading03" />
+                    <cds:CdsText Text="API keys let scripts and CI pipelines call the console API as you. Each key has the same access as your user." TypeStyle="Body01" Tone="Secondary" />
+                    <cds:CdsCallout Kind="Info" Title="The key is shown once." Subtitle="Copy it or download it when you create it. You can't view it again later." />
+                    <cds:CdsCallout Kind="Warning" Title="Keys don't expire." Subtitle="Rotate keys every 90 days and delete keys you no longer use."
+                                    ActionButtonLabel="Set a rotation policy" />
+                </VerticalStackLayout>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="System and task messages on one page" Description="A banner under the header for the account, toasts stacked top-right (newest first), the newest with an Undo action.">
+            <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" HeightRequest="600">
+                <Grid RowDefinitions="48,Auto,*">
+                    <Grid Padding="16,0">
+                        <cds:CdsText Text="Cloud console" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView Grid.Row="0" HeightRequest="1" VerticalOptions="End" Color="{DynamicResource CdsBorderSubtle01}" />
+                    <cds:CdsActionableNotification Grid.Row="1" IsInline="True" IsLowContrast="True" Kind="Warning" Role="Status" HasFocus="False"
+                                                   Title="Payment method expires soon." Subtitle="The card ending 4242 expires on Nov 30, 2026."
+                                                   ActionButtonLabel="Update card" />
+                    <VerticalStackLayout Grid.Row="2" Padding="24" Spacing="16" HorizontalOptions="Start" WidthRequest="560">
+                        <cds:CdsText Text="Buckets" TypeStyle="Heading04" />
+                        <cds:CdsDataTable x:Name="BucketTable" Size="Md" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Row="1" Grid.RowSpan="2" Spacing="8" Margin="0,9,8,0" HorizontalOptions="End" VerticalOptions="Start"
+                                         InputTransparent="True" CascadeInputTransparent="True">
+                        <cds:CdsActionableNotification Kind="Info" Role="Status" HasFocus="False" IsLowContrast="True" Title="Bucket deleted" Subtitle="1,204 objects removed."
+                                                       Caption="Just now" ActionButtonLabel="Undo" WidthRequest="320" />
+                        <cds:CdsToastNotification Kind="Success" Title="Export ready" Subtitle="usage-oct-2026.csv is ready." Caption="2 minutes ago" />
+                        <cds:CdsToastNotification Kind="Error" Title="Deployment failed" Subtitle="checkout-api 4.2.0 failed its health check." Caption="5 minutes ago" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Try each one" Description="Each button triggers the message that fits. The toast comes from CdsToast.Show; errors never time out, success toasts close after 5 seconds.">
+            <VerticalStackLayout Spacing="16">
+                <FlexLayout Wrap="Wrap">
+                    <cds:CdsButton Text="Save with a form error" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnInlineClicked" />
+                    <cds:CdsButton Text="Export report" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnToastClicked" />
+                    <cds:CdsButton Text="Delete bucket" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnActionableClicked" />
+                    <cds:CdsButton Text="Simulate failure" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnErrorToastClicked" />
+                    <cds:CdsButton Text="Expire session" Kind="DangerTertiary" Size="Md" Margin="0,0,16,16" Clicked="OnModalClicked" />
+                </FlexLayout>
+                <cds:CdsInlineNotification x:Name="TrialInline" IsVisible="False" Kind="Error" IsLowContrast="True" Title="The cluster name is already taken."
+                                           Subtitle="Choose another name for the cluster and save again." HorizontalOptions="Start" WidthRequest="560" />
+                <cds:CdsActionableNotification x:Name="TrialUndo" IsVisible="False" IsInline="True" IsLowContrast="True" Kind="Info" Role="Status" HasFocus="False"
+                                               Title="Bucket deleted" Subtitle="web-assets-eu and its 1,204 objects were removed."
+                                               ActionButtonLabel="Undo" ActionClicked="OnUndoClicked" HorizontalOptions="Start" WidthRequest="560" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing triggered yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Modal" Description="Only when the person must respond before continuing. The safe action is on the left, the primary on the right. Never more than one. Expire session above opens the real modal.">
+            <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="420" HorizontalOptions="Start">
+                <VerticalStackLayout BackgroundColor="{DynamicResource CdsLayer01}">
+                    <cds:CdsModalHeader Title="Your session is about to expire" />
+                    <cds:CdsModalBody>
+                        <cds:CdsText Text="You'll be logged out in 2 minutes because of inactivity. Unsaved changes will be lost." TypeStyle="Body01" />
+                    </cds:CdsModalBody>
+                    <cds:CdsModalFooter PrimaryButtonText="Stay logged in" SecondaryButtonText="Log out" />
+                </VerticalStackLayout>
+            </ContentView>
+        </g:GalleryExample>
+
+        <cds:CdsModal x:Name="SessionModal" Size="Sm" Heading="Your session is about to expire" PrimaryButtonText="Stay logged in" SecondaryButtonText="Log out"
+                      PreventCloseOnClickOutside="True" RequestSubmit="OnSessionStay" RequestClose="OnSessionLogOut">
+            <cds:CdsText Text="You'll be logged out in 2 minutes because of inactivity. Unsaved changes will be lost." TypeStyle="Body01" />
+        </cds:CdsModal>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

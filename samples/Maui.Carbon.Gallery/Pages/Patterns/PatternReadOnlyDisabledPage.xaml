@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternReadOnlyDisabledPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Enabled, read-only and disabled" Description="The same field in each state. Read-only keeps the value at full contrast and drops the fill and stays focusable; disabled dims everything and leaves the tab order.">
+            <Grid ColumnDefinitions="140,*,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                <cds:CdsText Grid.Row="0" Grid.Column="1" Text="Enabled" TypeStyle="HeadingCompact01" Margin="0,0,0,16" />
+                <cds:CdsText Grid.Row="0" Grid.Column="2" Text="Read-only" TypeStyle="HeadingCompact01" Margin="0,0,0,16" />
+                <cds:CdsText Grid.Row="0" Grid.Column="3" Text="Disabled" TypeStyle="HeadingCompact01" Margin="0,0,0,16" />
+                <cds:CdsText Grid.Row="1" Grid.Column="0" Text="TextInput" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsTextInput Grid.Row="1" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Cluster name" Text="prod-eu-01" HelperText="Lowercase letters, numbers and hyphens."  />
+                <cds:CdsTextInput Grid.Row="1" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Cluster name" Text="prod-eu-01" HelperText="Lowercase letters, numbers and hyphens." IsReadOnly="True" />
+                <cds:CdsTextInput Grid.Row="1" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Cluster name" Text="prod-eu-01" HelperText="Lowercase letters, numbers and hyphens." IsEnabled="False" />
+                <cds:CdsText Grid.Row="2" Grid.Column="0" Text="TextArea" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsTextArea Grid.Row="2" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Description" Rows="2" Text="Production workloads for the EU storefront."  />
+                <cds:CdsTextArea Grid.Row="2" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Description" Rows="2" Text="Production workloads for the EU storefront." IsReadOnly="True" />
+                <cds:CdsTextArea Grid.Row="2" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Description" Rows="2" Text="Production workloads for the EU storefront." IsEnabled="False" />
+                <cds:CdsText Grid.Row="3" Grid.Column="0" Text="NumberInput" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsNumberInput Grid.Row="3" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Worker nodes" Min="1" Max="50" Value="12"  />
+                <cds:CdsNumberInput Grid.Row="3" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Worker nodes" Min="1" Max="50" Value="12" IsReadOnly="True" />
+                <cds:CdsNumberInput Grid.Row="3" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Worker nodes" Min="1" Max="50" Value="12" IsEnabled="False" />
+                <cds:CdsText Grid.Row="4" Grid.Column="0" Text="Select" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsSelect Grid.Row="4" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Region" SelectedItem="eu-de" ><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsSelect>
+                <cds:CdsSelect Grid.Row="4" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Region" SelectedItem="eu-de" IsReadOnly="True"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsSelect>
+                <cds:CdsSelect Grid.Row="4" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Region" SelectedItem="eu-de" IsEnabled="False"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsSelect>
+                <cds:CdsText Grid.Row="5" Grid.Column="0" Text="Dropdown" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsDropdown Grid.Row="5" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Kubernetes version" Placeholder="Choose a version" SelectedItem="1.31.2" ><cds:CdsDropdown.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>1.31.2</x:String><x:String>1.30.6</x:String><x:String>1.29.10</x:String></x:Array></cds:CdsDropdown.ItemsSource></cds:CdsDropdown>
+                <cds:CdsDropdown Grid.Row="5" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Kubernetes version" Placeholder="Choose a version" SelectedItem="1.31.2" IsReadOnly="True"><cds:CdsDropdown.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>1.31.2</x:String><x:String>1.30.6</x:String><x:String>1.29.10</x:String></x:Array></cds:CdsDropdown.ItemsSource></cds:CdsDropdown>
+                <cds:CdsDropdown Grid.Row="5" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Kubernetes version" Placeholder="Choose a version" SelectedItem="1.31.2" IsEnabled="False"><cds:CdsDropdown.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>1.31.2</x:String><x:String>1.30.6</x:String><x:String>1.29.10</x:String></x:Array></cds:CdsDropdown.ItemsSource></cds:CdsDropdown>
+                <cds:CdsText Grid.Row="6" Grid.Column="0" Text="ComboBox" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsComboBox Grid.Row="6" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Owner" Placeholder="Search people" SelectedItem="Ana Silva" ><cds:CdsComboBox.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>Ana Silva</x:String><x:String>Raj Patel</x:String><x:String>Mei Chen</x:String></x:Array></cds:CdsComboBox.ItemsSource></cds:CdsComboBox>
+                <cds:CdsComboBox Grid.Row="6" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Owner" Placeholder="Search people" SelectedItem="Ana Silva" IsReadOnly="True"><cds:CdsComboBox.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>Ana Silva</x:String><x:String>Raj Patel</x:String><x:String>Mei Chen</x:String></x:Array></cds:CdsComboBox.ItemsSource></cds:CdsComboBox>
+                <cds:CdsComboBox Grid.Row="6" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Owner" Placeholder="Search people" SelectedItem="Ana Silva" IsEnabled="False"><cds:CdsComboBox.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>Ana Silva</x:String><x:String>Raj Patel</x:String><x:String>Mei Chen</x:String></x:Array></cds:CdsComboBox.ItemsSource></cds:CdsComboBox>
+                <cds:CdsText Grid.Row="7" Grid.Column="0" Text="DatePicker" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsDatePicker Grid.Row="7" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Maintenance date" Value="2026-12-06"  />
+                <cds:CdsDatePicker Grid.Row="7" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Maintenance date" Value="2026-12-06" IsReadOnly="True" />
+                <cds:CdsDatePicker Grid.Row="7" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Maintenance date" Value="2026-12-06" IsEnabled="False" />
+                <cds:CdsText Grid.Row="8" Grid.Column="0" Text="Slider" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsSlider Grid.Row="8" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Label="Log retention (days)" Min="1" Max="365" Value="90"  />
+                <cds:CdsSlider Grid.Row="8" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Label="Log retention (days)" Min="1" Max="365" Value="90" IsReadOnly="True" />
+                <cds:CdsSlider Grid.Row="8" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Label="Log retention (days)" Min="1" Max="365" Value="90" IsEnabled="False" />
+                <cds:CdsText Grid.Row="9" Grid.Column="0" Text="CheckboxGroup" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsCheckboxGroup Grid.Row="9" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Legend="Send alerts by" ><cds:CdsCheckbox Label="Email" IsChecked="True" /><cds:CdsCheckbox Label="Webhook" /></cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Grid.Row="9" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Legend="Send alerts by" IsReadOnly="True"><cds:CdsCheckbox Label="Email" IsChecked="True" /><cds:CdsCheckbox Label="Webhook" /></cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Grid.Row="9" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Legend="Send alerts by" IsEnabled="False"><cds:CdsCheckbox Label="Email" IsChecked="True" /><cds:CdsCheckbox Label="Webhook" /></cds:CdsCheckboxGroup>
+                <cds:CdsText Grid.Row="10" Grid.Column="0" Text="RadioButtonGroup" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsRadioButtonGroup Grid.Row="10" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" Legend="Plan" Orientation="Vertical" SelectedValue="standard" ><cds:CdsRadioButton Label="Standard" Value="standard" /><cds:CdsRadioButton Label="Dedicated" Value="dedicated" /></cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Grid.Row="10" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" Legend="Plan" Orientation="Vertical" SelectedValue="standard" IsReadOnly="True"><cds:CdsRadioButton Label="Standard" Value="standard" /><cds:CdsRadioButton Label="Dedicated" Value="dedicated" /></cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Grid.Row="10" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" Legend="Plan" Orientation="Vertical" SelectedValue="standard" IsEnabled="False"><cds:CdsRadioButton Label="Standard" Value="standard" /><cds:CdsRadioButton Label="Dedicated" Value="dedicated" /></cds:CdsRadioButtonGroup>
+                <cds:CdsText Grid.Row="11" Grid.Column="0" Text="Toggle" TypeStyle="HeadingCompact01" VerticalOptions="Start" Margin="0,8,0,0" />
+                <cds:CdsToggle Grid.Row="11" Grid.Column="1" VerticalOptions="Start" Margin="0,0,24,24" LabelText="Autoscaling" IsToggled="True"  />
+                <cds:CdsToggle Grid.Row="11" Grid.Column="2" VerticalOptions="Start" Margin="0,0,24,24" LabelText="Autoscaling" IsToggled="True" IsReadOnly="True" />
+                <cds:CdsToggle Grid.Row="11" Grid.Column="3" VerticalOptions="Start" Margin="0,0,24,24" LabelText="Autoscaling" IsToggled="True" IsEnabled="False" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="In context: a Viewer" Description="A Viewer sees the settings read-only, with the reason stated once at the top. An action blocked by a temporary condition is disabled, with a notification saying when it comes back. Delete is hidden, because Viewers can never use it.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <VerticalStackLayout Spacing="24" WidthRequest="560" Margin="0,0,48,24">
+                    <cds:CdsText Text="Cluster details" TypeStyle="Heading03" />
+                    <cds:CdsInlineNotification Kind="Info" IsLowContrast="True" HideCloseButton="True" Title="You have Viewer access to prod-eu-01."
+                                               Subtitle="You can read and copy these settings. To change them, ask an account administrator for the Editor role." />
+                    <cds:CdsTextInput Label="Cluster name" Text="prod-eu-01" IsReadOnly="True" />
+                    <cds:CdsSelect Label="Region" SelectedItem="eu-de" IsReadOnly="True">
+                        <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                    </cds:CdsSelect>
+                    <cds:CdsNumberInput Label="Worker nodes" Value="12" IsReadOnly="True" />
+                    <cds:CdsDropdown Label="Kubernetes version" Placeholder="Choose a version" SelectedItem="1.31.2" IsReadOnly="True">
+                        <cds:CdsDropdown.ItemsSource><x:Array Type="{x:Type x:String}"><x:String>1.31.2</x:String></x:Array></cds:CdsDropdown.ItemsSource>
+                    </cds:CdsDropdown>
+                    <cds:CdsTextInput Label="Cluster ID" Text="c7k2m9d40f8e1a3b6c55" IsReadOnly="True" />
+                    <cds:CdsToggle LabelText="Autoscaling" IsToggled="True" IsReadOnly="True" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="16" WidthRequest="360" Margin="0,0,0,24">
+                    <cds:CdsText Text="Update Kubernetes" TypeStyle="HeadingCompact02" />
+                    <cds:CdsText Text="Version 1.32.0 is available for this cluster." TypeStyle="BodyCompact01" Tone="Secondary" />
+                    <cds:CdsButton Text="Update to 1.32.0" Size="Md" IsEnabled="False" HorizontalOptions="Start" />
+                    <cds:CdsInlineNotification Kind="Warning" IsLowContrast="True" HideCloseButton="True" Title="Update is paused."
+                                               Subtitle="A worker pool is still resizing. You can update when it finishes, in about 10 minutes." />
+                </VerticalStackLayout>
+            </FlexLayout>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

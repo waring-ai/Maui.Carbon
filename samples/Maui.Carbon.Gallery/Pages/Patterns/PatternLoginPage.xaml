@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternLoginPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Step 1: user ID" Description="Continue routes to SSO for company domains, or to the password step. Remember sits under the field; alternative logins come after the primary button. Leave the field to validate it, or press Continue.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
+                    <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
+                        <VerticalStackLayout>
+                            <cds:CdsText Text="Log in to Cloud console" TypeStyle="Heading04" Margin="0,0,0,8" />
+                            <HorizontalStackLayout Spacing="4">
+                                <cds:CdsText Text="Don't have an account?" TypeStyle="BodyCompact01" VerticalOptions="Center" />
+                                <cds:CdsLink Text="Create an account" Href="https://example.com/signup" IsInline="True" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
+                            <cds:CdsTextInput x:Name="FirstId" Label="Email" Keyboard="Email" />
+                            <cds:CdsCheckbox x:Name="FirstRemember" Label="Remember my user ID" IsChecked="True" Margin="0,16,0,24" />
+                            <cds:CdsButton x:Name="FirstContinue" Text="Continue" Icon="ArrowRight" HorizontalOptions="Fill" Clicked="OnFirstContinue" />
+                            <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
+                            <cds:CdsText Text="Alternative login" TypeStyle="BodyCompact01" Tone="Secondary" Margin="0,0,0,16" />
+                            <cds:CdsButton Text="Log in with company SSO" Kind="Tertiary" HorizontalOptions="Fill" />
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="4">
+                            <cds:CdsText Text="Need help?" TypeStyle="BodyCompact01" Tone="Secondary" VerticalOptions="Center" />
+                            <cds:CdsLink Text="Contact support" Href="https://example.com/support" IsInline="True" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Step 2: password" Description="The ID is confirmed with a way back. An empty field shows its error when it loses focus. Log in with a password to see the failed-attempt flow.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
+                    <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
+                        <VerticalStackLayout>
+                            <cds:CdsText Text="Log in" TypeStyle="Heading04" Margin="0,0,0,8" />
+                            <FlexLayout Wrap="Wrap" AlignItems="Center">
+                                <cds:CdsText Text="Logging in as ana.silva@northwind.dev." TypeStyle="BodyCompact01" Margin="0,0,4,0" />
+                                <cds:CdsLink Text="Not you?" IsInline="True" Clicked="OnNotYouClicked" />
+                            </FlexLayout>
+                            <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
+                            <cds:CdsPasswordInput x:Name="PasswordInput" Label="Password" IsInvalid="True" InvalidText="Enter your password." />
+                            <cds:CdsLink Text="Forgot password?" Size="Sm" HorizontalOptions="Start" Margin="0,8,0,24" />
+                            <cds:CdsButton x:Name="LogInButton" Text="Log in" Icon="ArrowRight" HorizontalOptions="Fill" Clicked="OnLogInClicked" />
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="4">
+                            <cds:CdsText Text="Need help?" TypeStyle="BodyCompact01" Tone="Secondary" VerticalOptions="Center" />
+                            <cds:CdsLink Text="Contact support" Href="https://example.com/support" IsInline="True" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="After a failed login" Description="The page returns to step 1 with the ID kept, the password cleared and one generic error that doesn't reveal which part was wrong. Focus goes to the ID field.">
+            <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
+                    <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
+                        <VerticalStackLayout>
+                            <cds:CdsText Text="Log in to Cloud console" TypeStyle="Heading04" Margin="0,0,0,8" />
+                            <HorizontalStackLayout Spacing="4">
+                                <cds:CdsText Text="Don't have an account?" TypeStyle="BodyCompact01" VerticalOptions="Center" />
+                                <cds:CdsLink Text="Create an account" Href="https://example.com/signup" IsInline="True" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
+                    <cds:CdsInlineNotification Kind="Error" Role="Alert" IsLowContrast="True" HideCloseButton="True" Title="Your user ID or password is incorrect."
+                                               Subtitle="Check both and log in again. After 5 failed attempts your account is locked for 15 minutes." Margin="0,0,0,24" />
+                            <cds:CdsTextInput x:Name="FailedId" Label="Email" Keyboard="Email" Text="ana.silva@northwind.dev" />
+                            <cds:CdsCheckbox x:Name="FailedRemember" Label="Remember my user ID" IsChecked="True" Margin="0,16,0,24" />
+                            <cds:CdsButton x:Name="FailedContinue" Text="Continue" Icon="ArrowRight" HorizontalOptions="Fill" Clicked="OnFailedContinue" />
+                            <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
+                            <cds:CdsText Text="Alternative login" TypeStyle="BodyCompact01" Tone="Secondary" Margin="0,0,0,16" />
+                            <cds:CdsButton Text="Log in with company SSO" Kind="Tertiary" HorizontalOptions="Fill" />
+                        </VerticalStackLayout>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="4">
+                            <cds:CdsText Text="Need help?" TypeStyle="BodyCompact01" Tone="Secondary" VerticalOptions="Center" />
+                            <cds:CdsLink Text="Contact support" Href="https://example.com/support" IsInline="True" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                </Border>
+            </FlexLayout>
+        </g:GalleryExample>
+
+        <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
+
+    </VerticalStackLayout>
+</g:GalleryPage>
