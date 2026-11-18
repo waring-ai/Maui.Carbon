@@ -44,7 +44,7 @@ internal sealed class CdsAppleHostView : LayoutView
 {
     const string ActionName = "cdsKeyCommand:";
     static readonly Selector s_action = new(ActionName);
-    static readonly Dictionary<(bool, bool, bool), UIKeyCommand[]> s_sets = [];
+    static readonly Dictionary<CdsWantedKeys, UIKeyCommand[]> s_sets = [];
 
     public WeakReference<CdsOverlayHost>? Owner { get; set; }
 
@@ -58,8 +58,8 @@ internal sealed class CdsAppleHostView : LayoutView
         {
             if (Host is not { } host) return [];
             var w = host.WantedKeys;
-            if (!w.Escape && !w.Navigation && !w.Activation) return [];
-            if (!s_sets.TryGetValue(w, out var set)) s_sets[w] = set = Build(w.Escape, w.Navigation, w.Activation);
+            if (!w.Escape && !w.Vertical && !w.Horizontal && !w.Activation) return [];
+            if (!s_sets.TryGetValue(w, out var set)) s_sets[w] = set = Build(w);
             return set;
         }
     }
@@ -71,17 +71,22 @@ internal sealed class CdsAppleHostView : LayoutView
             CdsOverlayHostHandler.Route(Host, key, command.ModifierFlags.HasFlag(UIKeyModifierFlags.Shift));
     }
 
-    static UIKeyCommand[] Build(bool escape, bool navigation, bool activation)
+    static UIKeyCommand[] Build(CdsWantedKeys w)
     {
         var inputs = new List<NSString>();
-        if (escape) inputs.Add(UIKeyCommand.Escape);
-        if (navigation)
+        var modernKeys = OperatingSystem.IsIOSVersionAtLeast(13, 4) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 4);
+        if (w.Escape) inputs.Add(UIKeyCommand.Escape);
+        if (w.Vertical)
         {
-            inputs.AddRange([UIKeyCommand.UpArrow, UIKeyCommand.DownArrow, UIKeyCommand.LeftArrow, UIKeyCommand.RightArrow]);
-            if (OperatingSystem.IsIOSVersionAtLeast(13, 4) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 4))
-                inputs.AddRange([UIKeyCommand.Home, UIKeyCommand.End, UIKeyCommand.PageUp, UIKeyCommand.PageDown]);
+            inputs.AddRange([UIKeyCommand.UpArrow, UIKeyCommand.DownArrow]);
+            if (modernKeys) inputs.AddRange([UIKeyCommand.PageUp, UIKeyCommand.PageDown]);
         }
-        if (activation) inputs.AddRange([new NSString("\r"), new NSString(" ")]);
+        if (w.Horizontal)
+        {
+            inputs.AddRange([UIKeyCommand.LeftArrow, UIKeyCommand.RightArrow]);
+            if (modernKeys) inputs.AddRange([UIKeyCommand.Home, UIKeyCommand.End]);
+        }
+        if (w.Activation) inputs.AddRange([new NSString("\r"), new NSString(" ")]);
 
         return inputs.Select(input =>
         {

@@ -59,6 +59,17 @@ public sealed class CdsOverlay
         Closed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Changes which keys the overlay captures while it is open (for example a date picker switching from typing in
+    /// the field to moving through the calendar).
+    /// </summary>
+    public void SetKeys(CdsOverlayKeys keys)
+    {
+        if (Options.Keys == keys) return;
+        Options.Keys = keys;
+        _host.OnKeyStateChanged();
+    }
+
     /// <summary>Recomputes the position next to the anchor (after the anchor moved or the content resized).</summary>
     public void Reposition()
     {

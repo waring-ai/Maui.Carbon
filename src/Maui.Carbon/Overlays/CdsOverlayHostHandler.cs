@@ -13,10 +13,10 @@ public partial class CdsOverlayHostHandler : LayoutHandler
         var allowed = key switch
         {
             CdsKey.Escape => true,
-            CdsKey.PageUp or CdsKey.PageDown or CdsKey.Delete => wanted.Navigation,
+            CdsKey.Up or CdsKey.Down or CdsKey.PageUp or CdsKey.PageDown => wanted.Vertical,
             CdsKey.Enter or CdsKey.Space => wanted.Activation,
             CdsKey.Tab => false,
-            _ => wanted.Navigation,
+            _ => wanted.Horizontal,
         };
         return allowed && host.RouteKey(new CdsKeyEventArgs(key, shift));
     }

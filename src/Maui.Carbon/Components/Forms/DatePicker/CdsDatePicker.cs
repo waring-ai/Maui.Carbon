@@ -355,6 +355,7 @@ public partial class CdsDatePicker : CdsFormField
     {
         if (_syncing) return;
         _inCalendar = false;
+        _overlay?.SetKeys(CdsOverlayKeys.VerticalNavigation);
         // Typing clears a stale error; it is judged again when the date is applied.
         var cleared = false;
         if (field == 0 && _startError != CdsDateEntryError.None) { _startError = CdsDateEntryError.None; cleared = true; }
@@ -474,7 +475,8 @@ public partial class CdsDatePicker : CdsFormField
             Offset = -2,
             LightDismiss = true,
             ReturnFocusTo = _activeField == 1 ? EndEntry : StartEntry,
-            Keys = CdsOverlayKeys.Navigation,
+            // Typing in the field keeps Left/Right/Home/End; once Down moves into the calendar they move the day.
+            Keys = _inCalendar ? CdsOverlayKeys.Navigation : CdsOverlayKeys.VerticalNavigation,
             KeyHandler = OnCalendarKey,
         });
         _overlay = overlay;
@@ -548,8 +550,9 @@ public partial class CdsDatePicker : CdsFormField
         switch (e.Key)
         {
             case CdsKey.Down when !_inCalendar:
-                // Down moves from the field into the calendar.
+                // Down moves from the field into the calendar, which then takes every navigation key.
                 _inCalendar = true;
+                _overlay?.SetKeys(CdsOverlayKeys.Navigation);
                 RenderCalendar();
                 return true;
             case CdsKey.PageUp or CdsKey.PageDown:

@@ -181,14 +181,19 @@ public partial class CdsOverlayHost : Grid
     }
 
     /// <summary>Keys the platform layer should capture right now.</summary>
-    internal (bool Escape, bool Navigation, bool Activation) WantedKeys
+    internal CdsWantedKeys WantedKeys
     {
         get
         {
             if (TopOverlay is { } top)
-                return (true, top.Options.Keys.HasFlag(CdsOverlayKeys.Navigation), top.Options.Keys.HasFlag(CdsOverlayKeys.Activation));
+            {
+                var k = top.Options.Keys;
+                var full = k.HasFlag(CdsOverlayKeys.Navigation);
+                return new(true, full || k.HasFlag(CdsOverlayKeys.VerticalNavigation), full, k.HasFlag(CdsOverlayKeys.Activation));
+            }
             var chain = CdsFocusTracker.FocusChain().ToList();
-            return (chain.Any(c => c.WantsEscapeKey), chain.Any(c => c.WantsNavigationKeys), false);
+            var nav = chain.Any(c => c.WantsNavigationKeys);
+            return new(chain.Any(c => c.WantsEscapeKey), nav, nav, false);
         }
     }
 
@@ -240,3 +245,6 @@ internal enum CdsOverlayLayer
     Modal,
     Toast,
 }
+
+/// <summary>Keys the platform layer should capture right now.</summary>
+internal readonly record struct CdsWantedKeys(bool Escape, bool Vertical, bool Horizontal, bool Activation);

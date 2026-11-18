@@ -15,6 +15,7 @@ public sealed class CdsFieldChrome : Grid
     readonly ContentView _inputSlot = new() { VerticalOptions = LayoutOptions.Fill };
     readonly BoxView _rule = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true };
     readonly CdsFocusRing _outline = new(CdsFocusRingStyle.Inset);
+    readonly Grid _overlayGrid = new() { Margin = new Thickness(-CdsSpacing.Spacing05, 0), InputTransparent = true };
     readonly CdsIcon _statusIcon = new() { IsVisible = false, Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0) };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false };
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
@@ -44,11 +45,10 @@ public sealed class CdsFieldChrome : Grid
         _field.Add(_inputSlot, 0);
         _field.Add(Trailing, 1);
         // Rule and outline span the full field width, including the padding.
-        var overlay = new Grid { Margin = new Thickness(-CdsSpacing.Spacing05, 0), InputTransparent = true };
-        overlay.Add(_rule);
-        overlay.Add(_outline);
-        _field.Add(overlay, 0);
-        SetColumnSpan((BindableObject)overlay, 2);
+        _overlayGrid.Add(_rule);
+        _overlayGrid.Add(_outline);
+        _field.Add(_overlayGrid, 0);
+        SetColumnSpan((BindableObject)_overlayGrid, 2);
 
         _message.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
 
@@ -131,6 +131,26 @@ public sealed class CdsFieldChrome : Grid
     }
 
     /// <summary>
+    /// Overrides the bottom rule's color key in every state (list boxes use <c>border-subtle-01</c> while open);
+    /// <c>null</c> restores the Carbon defaults.
+    /// </summary>
+    public string? RuleColorKeyOverride { get; set; }
+
+    /// <summary>The 1px bottom rule (for controls that animate or hide it).</summary>
+    public BoxView Rule => _rule;
+
+    /// <summary>Horizontal padding inside the field box. Default 16 (<c>spacing-05</c>).</summary>
+    public double FieldPadding
+    {
+        get => _field.Padding.Left;
+        set
+        {
+            _field.Padding = new Thickness(value, 0);
+            _overlayGrid.Margin = new Thickness(-value, 0);
+        }
+    }
+
+    /// <summary>
     /// Flat field: no fill and no bottom rule (inline Select and Dropdown, toolbar fields). Focus and error outlines
     /// still show.
     /// </summary>
@@ -152,7 +172,7 @@ public sealed class CdsFieldChrome : Grid
         Set(_field, VisualElement.BackgroundColorProperty,
             readOnly ? null : hover ? CdsColorKeys.FieldHover01 : IsFlat ? null : CdsColorKeys.Field01);
         Set(_rule, BoxView.ColorProperty,
-            disabled || IsFlat ? null : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01);
+            RuleColorKeyOverride ?? (disabled || IsFlat ? null : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01));
         Set(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         Set(_counter, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
 

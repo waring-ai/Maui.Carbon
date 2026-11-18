@@ -315,7 +315,7 @@ public abstract partial class CdsListBox : CdsFormField
             MatchAnchorWidth = true,
             LightDismiss = true,
             ReturnFocusTo = _trigger,
-            Keys = CdsOverlayKeys.Navigation | (HasTextField ? CdsOverlayKeys.None : CdsOverlayKeys.Activation),
+            Keys = HasTextField ? CdsOverlayKeys.VerticalNavigation : CdsOverlayKeys.Navigation | CdsOverlayKeys.Activation,
             KeyHandler = OnListKey,
         });
         _overlay = overlay;

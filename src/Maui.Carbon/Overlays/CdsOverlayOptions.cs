@@ -6,10 +6,15 @@ public enum CdsOverlayKeys
 {
     /// <summary>Only Escape.</summary>
     None = 0,
-    /// <summary>Up/Down/Left/Right, Home and End.</summary>
+    /// <summary>Up/Down/Left/Right, Home, End, Page Up and Page Down.</summary>
     Navigation = 1,
     /// <summary>Enter and Space (only for overlays without a focused text field).</summary>
     Activation = 2,
+    /// <summary>
+    /// Only Up/Down and Page Up/Page Down: for overlays opened from a focused text field (combo box, date input), so
+    /// Left/Right/Home/End keep moving the caret.
+    /// </summary>
+    VerticalNavigation = 4,
 }
 
 /// <summary>How an overlay is shown by <see cref="CdsOverlayService"/>.</summary>
