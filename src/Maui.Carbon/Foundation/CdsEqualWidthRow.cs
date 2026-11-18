@@ -31,24 +31,29 @@ internal static class EqualWidthModel
 /// there is room), at most <see cref="MaxCellWidth"/>; when arranged wider, the cells share the width equally. Children
 /// with <see cref="SeparatorForProperty"/> set are not cells: they are overlaid on the leading edge of that cell.
 /// </summary>
-internal sealed class CdsEqualWidthRow : Layout
+public sealed class CdsEqualWidthRow : Layout
 {
     /// <summary>Marks a child as the separator of the cell with that index.</summary>
     public static readonly BindableProperty SeparatorForProperty = BindableProperty.CreateAttached(
         "SeparatorFor", typeof(int), typeof(CdsEqualWidthRow), -1);
 
+    /// <summary>Bindable property for <see cref="MaxCellWidth"/>.</summary>
     public static readonly BindableProperty MaxCellWidthProperty = BindableProperty.Create(
         nameof(MaxCellWidth), typeof(double), typeof(CdsEqualWidthRow), double.PositiveInfinity,
         propertyChanged: static (b, _, _) => ((CdsEqualWidthRow)b).InvalidateMeasure());
 
+    /// <summary>Bindable property for <see cref="FixedCellWidth"/>.</summary>
     public static readonly BindableProperty FixedCellWidthProperty = BindableProperty.Create(
         nameof(FixedCellWidth), typeof(double), typeof(CdsEqualWidthRow), -1d,
         propertyChanged: static (b, _, _) => ((CdsEqualWidthRow)b).InvalidateMeasure());
 
+    /// <summary>The cell index a separator child belongs to (-1: not a separator).</summary>
     public static int GetSeparatorFor(BindableObject view) => (int)view.GetValue(SeparatorForProperty);
 
+    /// <summary>Marks <paramref name="view"/> as the separator drawn on the leading edge of cell <paramref name="value"/>.</summary>
     public static void SetSeparatorFor(BindableObject view, int value) => view.SetValue(SeparatorForProperty, value);
 
+    /// <summary>The widest a cell gets (Carbon button sets: 196).</summary>
     public double MaxCellWidth
     {
         get => (double)GetValue(MaxCellWidthProperty);
@@ -62,6 +67,7 @@ internal sealed class CdsEqualWidthRow : Layout
         set => SetValue(FixedCellWidthProperty, value);
     }
 
+    /// <inheritdoc/>
     protected override ILayoutManager CreateLayoutManager() => new Manager(this);
 
     sealed class Manager(CdsEqualWidthRow row) : LayoutManager(row)

@@ -43,6 +43,12 @@ public abstract class CdsControl : ContentView
     /// <summary>Raised after <see cref="State"/> changes.</summary>
     public event EventHandler? StateChanged;
 
+    /// <summary>Raised when the control's input or hit target gains focus.</summary>
+    public event EventHandler? FocusGained;
+
+    /// <summary>Raised when the control's input or hit target loses focus (validate fields here: Carbon validates on blur).</summary>
+    public event EventHandler? FocusLost;
+
     /// <summary>The current interaction and validation state.</summary>
     public CdsInteractionState State => _state;
 
@@ -175,11 +181,13 @@ public abstract class CdsControl : ContentView
             SetState(CdsInteractionState.FocusVisible, isKeyboardFocus?.Invoke() ?? true);
             SetState(CdsInteractionState.Focused, true);
             CdsFocusTracker.SetFocused(this);
+            FocusGained?.Invoke(this, EventArgs.Empty);
         };
         focusable.Unfocused += (_, _) =>
         {
             SetState(CdsInteractionState.Focused | CdsInteractionState.FocusVisible, false);
             CdsFocusTracker.ClearFocused(this);
+            FocusLost?.Invoke(this, EventArgs.Empty);
         };
     }
 
