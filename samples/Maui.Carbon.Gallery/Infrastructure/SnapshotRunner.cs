@@ -69,6 +69,7 @@ public static class SnapshotRunner
                     await Shell.Current.GoToAsync("//" + entry.Info.Route);
                     await Task.Delay(int.TryParse(Environment.GetEnvironmentVariable("CARBON_SNAPSHOT_SETTLE_MS"), out var settle) ? settle : 1500);
                     var page = Shell.Current.CurrentPage;
+                    await WaitForOverlaysAsync(page);
                     var shot = await page.CaptureAsync();
                     if (shot is null)
                     {
@@ -95,5 +96,19 @@ public static class SnapshotRunner
         }
         await File.AppendAllLinesAsync(Path.Combine(dir, "snapshot-log.txt"), log);
         Application.Current?.Quit();
+    }
+
+    /// <summary>
+    /// Waits (up to 4s) until every open overlay on the page has faded in: in Debug builds a slow theme switch can block
+    /// the main thread long enough that a capture would catch an overlay mid fade.
+    /// </summary>
+    static async Task WaitForOverlaysAsync(Page page)
+    {
+        if (page is not ContentPage content || CdsOverlayHost.Find(content) is not { } host) return;
+        for (var i = 0; i < 20; i++)
+        {
+            if (host.Overlays.All(o => (o.Content.Parent as VisualElement)?.Opacity is null or >= 0.99)) return;
+            await Task.Delay(200);
+        }
     }
 }
