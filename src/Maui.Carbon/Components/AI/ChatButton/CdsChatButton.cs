@@ -159,7 +159,7 @@ public class CdsChatButton : CdsControl
     {
         var (kind, _) = CdsChatButtonTokens.Effective(Kind, Size, IsQuickAction);
         var v = CdsChatButtonTokens.Resolve(kind, State, IsQuickAction, IsSelected);
-        SetColor(_box, BackgroundColorProperty, v.Background);
+        SetBrush(_box, BackgroundProperty, v.Background);
         SetBrush(_box, Border.StrokeProperty, v.Border);
         SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);

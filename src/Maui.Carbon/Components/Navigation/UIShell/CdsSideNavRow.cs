@@ -118,8 +118,9 @@ public abstract class CdsSideNavRow : CdsShellItem
     protected override void ApplyVisuals()
     {
         var v = Resolve();
-        SetColor(_fill, BoxView.ColorProperty, v.Background);
-        SetColor(_bar, BoxView.ColorProperty, v.Bar);
+        SetColor(_fill, BoxView.ColorProperty, v.Background ?? CdsColorKeys.Layer01);
+        _fill.IsVisible = v.Background is not null;
+        SetColor(_bar, BoxView.ColorProperty, v.Bar ?? CdsColorKeys.BorderInteractive);
         _bar.IsVisible = v.Bar is not null;
         SetColor(_label, Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);

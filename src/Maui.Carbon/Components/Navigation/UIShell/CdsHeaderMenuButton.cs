@@ -75,11 +75,12 @@ public class CdsHeaderMenuButton : CdsShellItem
     protected override void ApplyVisuals()
     {
         var v = CdsUIShellTokens.HeaderAction(State, IsActive);
-        SetColor(_box, BackgroundColorProperty, v.Background);
+        SetBrush(_box, BackgroundProperty, v.Background);
         SetBrush(_box, Border.StrokeProperty, CdsUIShellTokens.HeaderActionBorder(State));
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);
-        SetColor(_left, BoxView.ColorProperty, v.SideBorder);
-        SetColor(_right, BoxView.ColorProperty, v.SideBorder);
+        // A null key would set a local Transparent value that a later dynamic resource cannot override, so keep a key and hide the view.
+        SetColor(_left, BoxView.ColorProperty, v.SideBorder ?? CdsColorKeys.BorderSubtle01);
+        SetColor(_right, BoxView.ColorProperty, v.SideBorder ?? CdsColorKeys.BorderSubtle01);
         _left.IsVisible = _right.IsVisible = v.SideBorder is not null && !Is(CdsInteractionState.FocusVisible);
     }
 

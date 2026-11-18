@@ -8,23 +8,23 @@
 
         <g:GalleryExample Title="Sizes" Description="mini 16, 2xs 20, xs 24 (default), sm 32, md 40, lg 48, xl 64. The button is a square with a 1px border-inverse border and semibold text-primary text; hover fills it with border-inverse. Use mini on tiles, xs beside fields and table headers.">
             <HorizontalStackLayout Spacing="24" x:Name="SizesRow" VerticalOptions="End">
-                <cds:CdsAILabel Size="Mini" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="TwoXs" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="Xs" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="Sm" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="Md" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="Lg" Label="Why this is suggested" />
-                <cds:CdsAILabel Size="Xl" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Mini" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="TwoXs" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Xs" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Sm" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Md" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Lg" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Size="Xl" Label="Why this is suggested" />
             </HorizontalStackLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Inline" Description="A 4px (8px at lg and xl) icon-primary square before AI, no box; hover shows an icon-secondary border and text-secondary text. With TextLabel it gets the bordered inline-with-content look. Use sm, md or lg matched to the adjacent text.">
             <HorizontalStackLayout Spacing="32" VerticalOptions="End" x:Name="InlineRow">
-                <cds:CdsAILabel Kind="Inline" Size="Sm" Label="Why this is suggested" />
-                <cds:CdsAILabel Kind="Inline" Size="Md" Label="Why this is suggested" />
-                <cds:CdsAILabel Kind="Inline" Size="Lg" Label="Why this is suggested" />
-                <cds:CdsAILabel Kind="Inline" Size="Md" TextLabel="Generated" />
-                <cds:CdsAILabel Kind="Inline" Size="Lg" TextLabel="Generated" />
+                <cds:CdsAILabel VerticalOptions="Center" Kind="Inline" Size="Sm" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Kind="Inline" Size="Md" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Kind="Inline" Size="Lg" Label="Why this is suggested" />
+                <cds:CdsAILabel VerticalOptions="Center" Kind="Inline" Size="Md" TextLabel="Generated" />
+                <cds:CdsAILabel VerticalOptions="Center" Kind="Inline" Size="Lg" TextLabel="Generated" />
             </HorizontalStackLayout>
         </g:GalleryExample>
 

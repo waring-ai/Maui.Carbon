@@ -133,9 +133,10 @@ public class CdsHeaderMenuItem : CdsShellItem
             CdsShellPresentation.SideNav => CdsUIShellTokens.SideNavRow(State, false) with { Bar = IsActive ? CdsColorKeys.BorderInteractive : null, Foreground = IsActive ? CdsColorKeys.TextPrimary : CdsUIShellTokens.SideNavRow(State, false).Foreground },
             _ => CdsUIShellTokens.HeaderMenuItem(State, IsActive),
         };
-        SetColor(_fill, BoxView.ColorProperty, v.Background);
+        SetColor(_fill, BoxView.ColorProperty, v.Background ?? CdsColorKeys.Layer01);
+        _fill.IsVisible = v.Background is not null;
         SetColor(_label, Label.TextColorProperty, v.Foreground);
-        SetColor(_bar, BoxView.ColorProperty, v.Bar);
+        SetColor(_bar, BoxView.ColorProperty, v.Bar ?? CdsColorKeys.BorderInteractive);
         _bar.IsVisible = v.Bar is not null;
         _ring.IsActive = Is(CdsInteractionState.FocusVisible) || (dropdown && _highlighted && ShowHighlightRing);
     }

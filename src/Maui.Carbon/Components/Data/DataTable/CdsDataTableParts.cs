@@ -406,7 +406,8 @@ internal sealed class CdsBatchBarButton : CdsControl
     {
         var pressed = Is(CdsInteractionState.Pressed);
         var hover = Is(CdsInteractionState.Hover);
-        SetColor(_fill, BoxView.ColorProperty, pressed ? CdsColorKeys.ButtonPrimaryActive : hover ? CdsColorKeys.ButtonPrimaryHover : null);
+        SetColor(_fill, BoxView.ColorProperty, pressed ? CdsColorKeys.ButtonPrimaryActive : CdsColorKeys.ButtonPrimaryHover);
+        _fill.IsVisible = pressed || hover;
         SetColor(_label, CdsText.TextColorProperty, CdsTableTokens.BatchText);
         SetColor(_icon, CdsIcon.ColorProperty, CdsColorKeys.IconOnColor);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
