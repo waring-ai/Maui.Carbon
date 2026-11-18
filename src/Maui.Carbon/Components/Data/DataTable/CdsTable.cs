@@ -61,6 +61,8 @@ public class CdsTable : CdsControl
     readonly Grid _headerGrid = new() { RowSpacing = 0, ColumnSpacing = 0 };
     readonly Grid _stickyRoot = new() { RowSpacing = 0 };
     readonly ScrollView _scroll = new() { Orientation = ScrollOrientation.Vertical };
+    readonly ScrollView _hscroll = new() { Orientation = ScrollOrientation.Horizontal, HorizontalScrollBarVisibility = ScrollBarVisibility.Default };
+    double _minimumWidth;
     readonly List<HeaderVisual> _headers = [];
     readonly List<RowVisual> _rowVisuals = [];
     int _suspend;
@@ -82,6 +84,7 @@ public class CdsTable : CdsControl
         _stickyRoot.Add(_headerGrid, 0, 0);
         _stickyRoot.Add(_scroll, 0, 1);
         _rows.CollectionChanged += OnRowsChanged;
+        _hscroll.SizeChanged += (_, _) => SyncContentWidth();
         Rebuild();
     }
 
@@ -405,12 +408,14 @@ public class CdsTable : CdsControl
         var head = Head?.HeaderList;
         var rows = _rows;
         var columnCount = Math.Max(head?.Count ?? 0, rows.Count == 0 ? 0 : rows.Max(r => r.CellList.Count));
+        _minimumWidth = 0;
         for (var c = 0; c < columnCount; c++)
         {
             var width = head is not null && c < head.Count ? head[c].Width : GridLength.Star;
             if (sticky && width.IsAuto) width = GridLength.Star;
             _bodyGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
             if (sticky) _headerGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
+            _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
         }
         var span = Math.Max(1, columnCount);
         var height = CdsTableTokens.RowHeight(Size);
@@ -513,17 +518,32 @@ public class CdsTable : CdsControl
             }
         }
 
+        // The table scrolls sideways when its columns need more than the available width (Carbon's overflow-x: auto);
+        // otherwise its content is exactly as wide as the table, so star columns share the space.
         if (sticky)
         {
-            SetChrome(_stickyRoot);
             _scroll.Content = _bodyGrid;
             _scroll.MaximumHeightRequest = MaximumBodyHeight;
+            _hscroll.Content = _stickyRoot;
         }
         else
         {
             _scroll.Content = null;
-            SetChrome(_bodyGrid);
+            _hscroll.Content = _bodyGrid;
         }
+        if (Content != _hscroll) SetChrome(_hscroll);
+        SyncContentWidth();
+    }
+
+    /// <summary>The content width: the table's width, or the columns' minimum when that is wider (it then scrolls).</summary>
+    internal static double ContentWidth(double viewport, double minimum) =>
+        viewport > 0 ? Math.Max(viewport, minimum) : minimum > 0 ? minimum : -1;
+
+    void SyncContentWidth()
+    {
+        if (_hscroll.Content is not View content) return;
+        var width = ContentWidth(_hscroll.Width, _minimumWidth);
+        if (Math.Abs(content.WidthRequest - width) > 0.5) content.WidthRequest = width;
     }
 
     static void Hide(View view)

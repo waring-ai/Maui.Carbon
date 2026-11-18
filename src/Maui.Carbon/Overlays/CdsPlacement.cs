@@ -44,10 +44,19 @@ public static class CdsPlacementResolver
     /// <summary>
     /// Places a popup of <paramref name="popup"/> size next to <paramref name="anchor"/> inside a host of
     /// <paramref name="host"/> size, flipping to the opposite side when the preferred side does not fit and the
-    /// opposite side fits better, then clamping into the host.
+    /// opposite side fits better, then clamping into the host. An anchor entirely outside the host is not clamped.
     /// </summary>
     public static CdsPlacementResult Resolve(Rect anchor, Size popup, Size host, CdsPlacement preferred, double offset = 0, bool autoFlip = true)
     {
+        // An anchor scrolled out of view takes its popup with it (as a web popover scrolls away with its trigger):
+        // clamping it into the host would float it over unrelated content.
+        if (!anchor.IntersectsWith(new Rect(0, 0, host.Width, host.Height)))
+        {
+            var away = Place(anchor, popup, preferred, offset);
+            var awayCaret = Side(preferred) is 'T' or 'B' ? anchor.Center.X - away.X : anchor.Center.Y - away.Y;
+            return new CdsPlacementResult(away, preferred, awayCaret);
+        }
+
         var placement = preferred;
         if (autoFlip)
         {

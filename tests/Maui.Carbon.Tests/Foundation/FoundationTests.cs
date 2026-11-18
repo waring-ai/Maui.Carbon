@@ -36,6 +36,29 @@ public class PlacementResolverTests
         Assert.Equal(970 - r.Frame.X, r.CaretOffset);
     }
 
+    [Fact]
+    public void An_anchor_scrolled_below_the_host_takes_its_popup_with_it()
+    {
+        var r = CdsPlacementResolver.Resolve(new Rect(100, 1200, 80, 40), new Size(200, 120), Host, CdsPlacement.BottomEnd, 4);
+        Assert.Equal(CdsPlacement.BottomEnd, r.Placement);
+        Assert.Equal(new Rect(180 - 200, 1244, 200, 120), r.Frame);
+    }
+
+    [Fact]
+    public void An_anchor_scrolled_above_the_host_is_not_clamped_into_view()
+    {
+        var r = CdsPlacementResolver.Resolve(new Rect(100, -300, 80, 40), new Size(200, 120), Host, CdsPlacement.BottomStart, 4);
+        Assert.Equal(-256, r.Frame.Y);
+    }
+
+    [Fact]
+    public void A_partly_visible_anchor_is_still_flipped_and_clamped()
+    {
+        var r = CdsPlacementResolver.Resolve(new Rect(100, 780, 80, 40), new Size(200, 120), Host, CdsPlacement.BottomStart, 4);
+        Assert.Equal(CdsPlacement.TopStart, r.Placement);
+        Assert.Equal(780 - 4 - 120, r.Frame.Y);
+    }
+
     [Theory]
     [InlineData(CdsPlacement.Top, CdsPlacement.Bottom)]
     [InlineData(CdsPlacement.LeftBottom, CdsPlacement.RightBottom)]

@@ -103,6 +103,12 @@ public static class CdsTableTokens
     /// <summary>The overflow menu column width: 52.</summary>
     public const double MenuColumnWidth = 52;
 
+    /// <summary>
+    /// The width a star or auto column is assumed to need at least when deciding whether the table scrolls sideways
+    /// (fixed columns count at their width).
+    /// </summary>
+    public const double MinimumFlexibleColumnWidth = 96;
+
     /// <summary>Horizontal cell padding: 16.</summary>
     public const double CellPaddingX = CdsSpacing.Spacing05;
 
