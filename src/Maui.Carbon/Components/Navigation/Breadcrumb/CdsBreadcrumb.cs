@@ -36,12 +36,14 @@ public class CdsBreadcrumb : CdsControl
         nameof(Label), typeof(string), typeof(CdsBreadcrumb), "Breadcrumb",
         propertyChanged: static (b, _, _) => ((CdsBreadcrumb)b).Rebuild());
 
-    readonly ObservableCollection<CdsBreadcrumbItem> _items = [];
+    readonly CdsItemCollection<CdsBreadcrumbItem> _items = [];
+    readonly CdsCoalescedAction _rebuild;
     readonly HorizontalStackLayout _row = new() { Spacing = 0 };
 
     /// <summary>Creates an empty breadcrumb.</summary>
     public CdsBreadcrumb()
     {
+        _rebuild = new CdsCoalescedAction(this, Rebuild);
         HorizontalOptions = LayoutOptions.Start;
         SetChrome(_row);
         _items.CollectionChanged += OnItemsChanged;
@@ -82,10 +84,11 @@ public class CdsBreadcrumb : CdsControl
         set => SetValue(LabelProperty, value);
     }
 
-    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Rebuild();
+    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => _rebuild.Request();
 
     void Rebuild()
     {
+        _rebuild.Cancel();
         _row.Children.Clear();
         var (start, count) = BreadcrumbModel.Collapse(_items.Count, MaxVisibleItems);
         var shown = new List<CdsBreadcrumbItem>();

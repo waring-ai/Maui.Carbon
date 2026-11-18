@@ -127,7 +127,7 @@ internal abstract class CdsGlyphView : GraphicsView, IDrawable
 {
     protected CdsGlyphView()
     {
-        Drawable = this;
+        Drawable = new CdsWeakDrawable(this);
         InputTransparent = true;
         BackgroundColor = Colors.Transparent;
         AutomationProperties.SetIsInAccessibleTree(this, false);

@@ -45,7 +45,7 @@ internal sealed class CdsSpinnerView : GraphicsView, IDrawable
 
     public CdsSpinnerView()
     {
-        Drawable = this;
+        Drawable = new CdsWeakDrawable(this);
         InputTransparent = true;
         BackgroundColor = Colors.Transparent;
         HorizontalOptions = LayoutOptions.Center;

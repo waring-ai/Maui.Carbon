@@ -18,7 +18,7 @@ namespace Maui.Carbon;
 [ContentProperty(nameof(Items))]
 public class CdsPageHeader : CdsControl
 {
-    readonly ObservableCollection<View> _items = [];
+    readonly CdsItemCollection<View> _items = [];
     readonly VerticalStackLayout _stack = new() { Spacing = 0 };
 
     /// <summary>Creates an empty page header.</summary>
@@ -412,7 +412,7 @@ public class CdsPageHeaderTabBar : CdsControl
         propertyChanged: static (b, _, n) => ((CdsPageHeaderTabBar)b)._tabs.Label = (string)n);
 
     readonly CdsTabs _tabs = new() { PanelPadding = new Thickness(0), HorizontalOptions = LayoutOptions.Start };
-    readonly ObservableCollection<CdsTag> _tags = [];
+    readonly CdsItemCollection<CdsTag> _tags = [];
     readonly HorizontalStackLayout _tagRow = new() { Spacing = CdsSpacing.Spacing03, HorizontalOptions = LayoutOptions.End, VerticalOptions = LayoutOptions.Center };
     readonly Grid _row = new() { ColumnSpacing = PageHeaderModel.TabTagGap };
     readonly CdsBreakpointWatcher _watcher;

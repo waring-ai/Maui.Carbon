@@ -98,5 +98,5 @@ public sealed class CdsSelectItemGroup : CdsSelectOption
     }
 
     /// <summary>The items of the group.</summary>
-    public System.Collections.ObjectModel.ObservableCollection<CdsSelectItem> Items { get; } = [];
+    public System.Collections.ObjectModel.ObservableCollection<CdsSelectItem> Items { get; } = new CdsItemCollection<CdsSelectItem>();
 }

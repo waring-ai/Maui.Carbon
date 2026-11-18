@@ -11,6 +11,7 @@ internal sealed class CdsProgressStepView : CdsControl
     readonly CdsText _label = new() { TypeStyle = CdsTypeStyle.BodyCompact01, InputTransparent = true };
     readonly CdsText _secondary = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, InputTransparent = true };
     readonly Border _focus = new() { StrokeThickness = 1, BackgroundColor = Colors.Transparent, StrokeShape = new Rectangle(), InputTransparent = true, IsVisible = false };
+    readonly VerticalStackLayout _text = new() { Spacing = 0 };
     readonly Grid _layout = new();
     readonly CdsHitTarget _hit;
     CdsProgressStepState _state;
@@ -21,6 +22,8 @@ internal sealed class CdsProgressStepView : CdsControl
     {
         _hit = CreateHitTarget();
         _hit.IsVisible = false;
+        _text.Add(_label);
+        _text.Add(_secondary);
         AutomationProperties.SetExcludedWithChildren(_layout, true);
         _root.Add(_layout);
         _root.Add(_focus);
@@ -54,7 +57,8 @@ internal sealed class CdsProgressStepView : CdsControl
         _layout.ColumnDefinitions.Clear();
         _layout.ColumnSpacing = 0;
         _layout.RowSpacing = 0;
-        var text = new VerticalStackLayout { Spacing = 0, Children = { _label, _secondary } };
+        // The label stack is built once: a new stack per update would add the labels while the old stack still holds them.
+        var text = _text;
         _icon.VerticalOptions = LayoutOptions.Start;
         _icon.HorizontalOptions = LayoutOptions.Start;
         if (vertical)

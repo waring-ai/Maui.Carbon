@@ -32,7 +32,7 @@ public class CdsMenu : BindableObject
     public static readonly BindableProperty HasBorderProperty = BindableProperty.Create(
         nameof(HasBorder), typeof(bool), typeof(CdsMenu), false);
 
-    readonly ObservableCollection<CdsMenuItemBase> _items = [];
+    readonly CdsItemCollection<CdsMenuItemBase> _items = [];
     Level? _root;
 
     /// <summary>Creates an empty menu.</summary>

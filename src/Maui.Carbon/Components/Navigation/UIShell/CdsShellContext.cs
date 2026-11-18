@@ -21,6 +21,7 @@ internal sealed class CdsBreakpointWatcher
     readonly VisualElement _owner;
     readonly Action _changed;
     CdsUIShell? _shell;
+    CdsWeakSubscription<CdsBreakpointWatcher>? _subscription;
 
     public CdsBreakpointWatcher(VisualElement owner, Action changed)
     {
@@ -30,6 +31,9 @@ internal sealed class CdsBreakpointWatcher
         owner.SetDynamicResource(ContextProperty, CdsContextKeys.Breakpoint);
         owner.ParentChanged += (_, _) => Relink();
         owner.Loaded += (_, _) => Relink();
+        // Removing a whole screen from the shell changes the parent of the screen only, not of the parts deep inside it,
+        // so ParentChanged alone would leave them subscribed to the shell. Unloaded reaches every part.
+        owner.Unloaded += (_, _) => Link(null);
         owner.SizeChanged += (_, _) => Raise();
     }
 
@@ -65,13 +69,16 @@ internal sealed class CdsBreakpointWatcher
     bool Link(CdsUIShell? found)
     {
         if (ReferenceEquals(found, _shell)) return false;
-        if (_shell is not null) _shell.ShellChanged -= OnShellChanged;
+        _subscription?.Dispose();
+        _subscription = null;
         _shell = found;
-        if (_shell is not null) _shell.ShellChanged += OnShellChanged;
+        // Weak as well: the shell outlives the screens in it, and a part that is dropped without ever being unloaded (built
+        // but never shown) must not be kept alive by the shell.
+        if (found is not null)
+            _subscription = new CdsWeakSubscription<CdsBreakpointWatcher>(
+                this, static w => w.Raise(), h => found.ShellChanged += h, h => found.ShellChanged -= h);
         return true;
     }
-
-    void OnShellChanged(object? sender, EventArgs e) => Raise();
 
     void Raise() => _changed();
 }

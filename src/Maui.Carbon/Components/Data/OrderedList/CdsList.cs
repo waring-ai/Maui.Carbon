@@ -17,7 +17,8 @@ public abstract class CdsList : ContentView
         nameof(IsExpressive), typeof(bool), typeof(CdsList), false,
         propertyChanged: static (b, _, _) => ((CdsList)b).Rebuild());
 
-    readonly ObservableCollection<CdsListItem> _items = [];
+    readonly CdsItemCollection<CdsListItem> _items = [];
+    readonly CdsCoalescedAction _rebuild;
     readonly VerticalStackLayout _stack = new() { Spacing = 0 };
     int _depth;
     bool _parentExpressive;
@@ -25,6 +26,7 @@ public abstract class CdsList : ContentView
     /// <summary>Initializes the list.</summary>
     protected CdsList()
     {
+        _rebuild = new CdsCoalescedAction(this, Rebuild);
         Content = _stack;
         _items.CollectionChanged += OnItemsChanged;
     }
@@ -56,10 +58,11 @@ public abstract class CdsList : ContentView
         Rebuild();
     }
 
-    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Rebuild();
+    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => _rebuild.Request();
 
     void Rebuild()
     {
+        _rebuild.Cancel();
         _stack.Children.Clear();
         var nested = IsNested;
         _stack.Margin = new Thickness(CdsListMarkers.LeftMargin(IsOrdered, nested), 0, 0, 0);

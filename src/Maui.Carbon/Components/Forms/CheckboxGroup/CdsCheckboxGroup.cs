@@ -15,7 +15,7 @@ public partial class CdsCheckboxGroup : CdsControl
     readonly CdsText _legend = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary };
     readonly ContentView _itemsHost = new();
     readonly CdsFormMessage _message = new();
-    readonly ObservableCollection<CdsCheckbox> _items = [];
+    readonly CdsItemCollection<CdsCheckbox> _items = [];
 
     /// <summary>Creates an empty group.</summary>
     public CdsCheckboxGroup()

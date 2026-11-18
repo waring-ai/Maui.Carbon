@@ -13,7 +13,7 @@ public class CdsMenuItemGroup : CdsMenuItemBase
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsMenuItemGroup), null);
 
-    readonly ObservableCollection<CdsMenuItemBase> _items;
+    readonly CdsItemCollection<CdsMenuItemBase> _items;
 
     /// <summary>Creates an empty group.</summary>
     public CdsMenuItemGroup() => _items = CreateChildren<CdsMenuItemBase>();

@@ -11,9 +11,9 @@ public abstract class CdsMenuItemBase : BindableObject
     }
 
     /// <summary>Creates a collection that hands this item's binding context down to its children.</summary>
-    internal ObservableCollection<T> CreateChildren<T>() where T : BindableObject
+    internal CdsItemCollection<T> CreateChildren<T>() where T : BindableObject
     {
-        var list = new ObservableCollection<T>();
+        var list = new CdsItemCollection<T>();
         list.CollectionChanged += (_, e) =>
         {
             if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)

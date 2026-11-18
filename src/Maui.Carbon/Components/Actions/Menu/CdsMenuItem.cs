@@ -39,7 +39,7 @@ public class CdsMenuItem : CdsMenuItemBase
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
         nameof(CommandParameter), typeof(object), typeof(CdsMenuItem), null);
 
-    readonly ObservableCollection<CdsMenuItemBase> _items;
+    readonly CdsItemCollection<CdsMenuItemBase> _items;
 
     /// <summary>Creates an empty item.</summary>
     public CdsMenuItem() => _items = CreateChildren<CdsMenuItemBase>();

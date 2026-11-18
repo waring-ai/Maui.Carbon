@@ -46,7 +46,7 @@ public class CdsContentSwitcher : CdsControl
         nameof(Label), typeof(string), typeof(CdsContentSwitcher), null,
         propertyChanged: static (b, _, _) => ((CdsContentSwitcher)b).Rebuild());
 
-    readonly ObservableCollection<CdsSwitch> _items = [];
+    readonly CdsItemCollection<CdsSwitch> _items = [];
     readonly List<CdsSwitchView> _views = [];
     readonly Border _frame = new() { StrokeThickness = 1, StrokeShape = new RoundRectangle { CornerRadius = 4 }, Padding = 0 };
     readonly CdsEqualWidthRow _grid = new();

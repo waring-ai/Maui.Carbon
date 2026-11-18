@@ -19,7 +19,7 @@ public partial class CdsTabs : CdsControl
 {
     const double ScrollButtonWidth = CdsSpacing.Spacing07;
 
-    readonly ObservableCollection<CdsTab> _items = [];
+    readonly CdsItemCollection<CdsTab> _items = [];
     readonly List<CdsTabItemView> _views = [];
     readonly Grid _row = new() { HorizontalOptions = LayoutOptions.Start };
     readonly ScrollView _scroll;

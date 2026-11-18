@@ -383,13 +383,15 @@ public sealed partial class DashboardViewModel : PageViewModel
             .Select(i => IssueRow.From(i, _people, _projects, now))
             .ToList();
 
-        Activity = inProject
+        var activity = inProject
             .SelectMany(i => i.Activity)
             .OrderByDescending(e => e.When)
             .ThenBy(e => e.Id, StringComparer.Ordinal)
             .Take(ActivityCount)
             .Select(e => ActivityRow.From(e, _people, now))
             .ToList();
+        // Rows are values: an unchanged stream keeps its list, so the view does not rebuild it on every visit.
+        if (!Activity.SequenceEqual(activity)) Activity = activity;
     }
 
     /// <summary>True when the points tile shows a running sprint (false shows "No active sprint").</summary>

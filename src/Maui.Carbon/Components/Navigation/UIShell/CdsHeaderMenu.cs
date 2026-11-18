@@ -35,7 +35,7 @@ public class CdsHeaderMenu : CdsShellItem
         nameof(IsExpanded), typeof(bool), typeof(CdsHeaderMenu), false, BindingMode.TwoWay,
         propertyChanged: static (b, _, n) => ((CdsHeaderMenu)b).OnExpandedChanged((bool)n));
 
-    readonly ObservableCollection<CdsHeaderMenuItem> _items = [];
+    readonly CdsItemCollection<CdsHeaderMenuItem> _items = [];
     readonly Grid _root = new();
     readonly BoxView _fill = new() { InputTransparent = true };
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1, InputTransparent = true };

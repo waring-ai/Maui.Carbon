@@ -49,7 +49,7 @@ public class CdsProgressIndicator : CdsControl
     public static readonly BindableProperty IsClickableProperty = BindableProperty.Create(
         nameof(IsClickable), typeof(bool), typeof(CdsProgressIndicator), false, propertyChanged: OnLayoutChanged);
 
-    readonly ObservableCollection<CdsProgressStep> _steps = [];
+    readonly CdsItemCollection<CdsProgressStep> _steps = [];
     readonly List<CdsProgressStepView> _views = [];
     readonly ContentView _host = new();
 

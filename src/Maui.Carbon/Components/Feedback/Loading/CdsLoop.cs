@@ -21,7 +21,20 @@ internal static class CdsLoop
             callback(restPhase);
             return false;
         }
-        new Animation(callback, 0, 1, Easing.Linear).Commit(owner, name, 16, duration, Easing.Linear, repeat: static () => true);
+        // A loading indicator often stays loaded but hidden (a skeleton bound to IsLoading, a screen kept in the window
+        // while another is shown): skip the frame's work then, or every hidden loop keeps the UI thread busy.
+        new Animation(phase =>
+        {
+            if (IsShown(owner)) callback(phase);
+        }, 0, 1, Easing.Linear).Commit(owner, name, 16, duration, Easing.Linear, repeat: static () => true);
+        return true;
+    }
+
+    /// <summary>Whether the element and all its ancestors are visible.</summary>
+    internal static bool IsShown(Element element)
+    {
+        for (Element? e = element; e is not null; e = e.Parent)
+            if (e is VisualElement { IsVisible: false }) return false;
         return true;
     }
 

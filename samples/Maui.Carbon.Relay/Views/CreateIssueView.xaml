@@ -88,69 +88,73 @@
                     </VerticalStackLayout>
 
                     <!-- Step 2: details -->
-                    <cds:CdsForm IsVisible="{Binding IsDetailsStep}" MaximumWidthRequest="640" HorizontalOptions="Start" WidthRequest="640">
-                        <cds:CdsFormGroup Legend="Summary and description">
-                            <VerticalStackLayout Spacing="24">
-                                <cds:CdsTextInput x:Name="SummaryInput" Label="Summary"
-                                                  Placeholder="Sync stalls when the device switches networks"
-                                                  EnableCounter="True" MaxCount="{Binding SummaryMaxLength}"
-                                                  Text="{Binding Summary}"
-                                                  IsInvalid="{Binding IsSummaryInvalid}" InvalidText="{Binding SummaryInvalidText}" />
-                                <cds:CdsTextArea x:Name="DescriptionInput" Label="Description" Rows="5"
-                                                 Placeholder="What happened, what you expected, and the steps to reproduce it"
-                                                 HelperText="For bugs, list the steps to reproduce, one per line."
-                                                 Text="{Binding Description}"
-                                                 IsWarning="{Binding IsDescriptionWarning}" WarnText="{Binding DescriptionWarnText}" />
-                            </VerticalStackLayout>
-                        </cds:CdsFormGroup>
-                        <cds:CdsFormGroup Legend="Classification">
-                            <VerticalStackLayout Spacing="24">
-                                <cds:CdsComboBox Label="Component" AllowCustomValue="True" Placeholder="Choose or type a component"
-                                                 HelperText="Pick one of the project's components or type a new one."
-                                                 ItemsSource="{Binding ComponentOptions}" InputText="{Binding ComponentText}" />
-                                <cds:CdsMultiSelect x:Name="LabelsSelect" Label="Labels" Placeholder="Choose labels" IsFilterable="True"
-                                                    HelperText="Up to 5 labels."
-                                                    ItemsSource="{Binding AllLabels}" SelectionChanged="OnLabelsChanged"
-                                                    IsInvalid="{Binding IsLabelsInvalid}" InvalidText="{Binding LabelsInvalidText}" />
-                                <cds:CdsRadioButtonGroup Legend="Priority" Orientation="Horizontal" SelectedValue="{Binding Priority}">
-                                    <cds:CdsRadioButton Label="Critical" Value="{x:Static m:IssuePriority.Critical}" />
-                                    <cds:CdsRadioButton Label="High" Value="{x:Static m:IssuePriority.High}" />
-                                    <cds:CdsRadioButton Label="Medium" Value="{x:Static m:IssuePriority.Medium}" />
-                                    <cds:CdsRadioButton Label="Low" Value="{x:Static m:IssuePriority.Low}" />
-                                    <cds:CdsRadioButton Label="Lowest" Value="{x:Static m:IssuePriority.Lowest}" />
-                                </cds:CdsRadioButtonGroup>
-                                <cds:CdsDropdown Label="Assignee" ItemsSource="{Binding AssigneeOptions}" SelectedItem="{Binding SelectedAssignee}" />
-                            </VerticalStackLayout>
-                        </cds:CdsFormGroup>
-                    </cds:CdsForm>
+                    <cds:CdsMaxWidthBox IsVisible="{Binding IsDetailsStep}" MaxContentWidth="640">
+                        <cds:CdsForm>
+                            <cds:CdsFormGroup Legend="Summary and description">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsTextInput x:Name="SummaryInput" Label="Summary"
+                                                      Placeholder="Sync stalls when the device switches networks"
+                                                      EnableCounter="True" MaxCount="{Binding SummaryMaxLength}"
+                                                      Text="{Binding Summary}"
+                                                      IsInvalid="{Binding IsSummaryInvalid}" InvalidText="{Binding SummaryInvalidText}" />
+                                    <cds:CdsTextArea x:Name="DescriptionInput" Label="Description" Rows="5"
+                                                     Placeholder="What happened, what you expected, and the steps to reproduce it"
+                                                     HelperText="For bugs, list the steps to reproduce, one per line."
+                                                     Text="{Binding Description}"
+                                                     IsWarning="{Binding IsDescriptionWarning}" WarnText="{Binding DescriptionWarnText}" />
+                                </VerticalStackLayout>
+                            </cds:CdsFormGroup>
+                            <cds:CdsFormGroup Legend="Classification">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsComboBox Label="Component" AllowCustomValue="True" Placeholder="Choose or type a component"
+                                                     HelperText="Pick one of the project's components or type a new one."
+                                                     ItemsSource="{Binding ComponentOptions}" InputText="{Binding ComponentText}" />
+                                    <cds:CdsMultiSelect x:Name="LabelsSelect" Label="Labels" Placeholder="Choose labels" IsFilterable="True"
+                                                        HelperText="Up to 5 labels."
+                                                        ItemsSource="{Binding AllLabels}" SelectionChanged="OnLabelsChanged"
+                                                        IsInvalid="{Binding IsLabelsInvalid}" InvalidText="{Binding LabelsInvalidText}" />
+                                    <cds:CdsRadioButtonGroup Legend="Priority" Orientation="Horizontal" SelectedValue="{Binding Priority}">
+                                        <cds:CdsRadioButton Label="Critical" Value="{x:Static m:IssuePriority.Critical}" />
+                                        <cds:CdsRadioButton Label="High" Value="{x:Static m:IssuePriority.High}" />
+                                        <cds:CdsRadioButton Label="Medium" Value="{x:Static m:IssuePriority.Medium}" />
+                                        <cds:CdsRadioButton Label="Low" Value="{x:Static m:IssuePriority.Low}" />
+                                        <cds:CdsRadioButton Label="Lowest" Value="{x:Static m:IssuePriority.Lowest}" />
+                                    </cds:CdsRadioButtonGroup>
+                                    <cds:CdsDropdown Label="Assignee" ItemsSource="{Binding AssigneeOptions}" SelectedItem="{Binding SelectedAssignee}" />
+                                </VerticalStackLayout>
+                            </cds:CdsFormGroup>
+                        </cds:CdsForm>
+                    </cds:CdsMaxWidthBox>
 
                     <!-- Step 3: schedule -->
-                    <cds:CdsForm IsVisible="{Binding IsScheduleStep}" MaximumWidthRequest="640" HorizontalOptions="Start" WidthRequest="640">
-                        <cds:CdsFormGroup Legend="Estimate and dates">
-                            <VerticalStackLayout Spacing="24">
-                                <cds:CdsSlider Label="Story points" Min="{Binding MinPoints}" Max="{Binding MaxPoints}" Step="1"
-                                               InputLabel="Story points"
-                                               Value="{Binding StoryPoints}" IsEnabled="{Binding ArePointsEnabled}"
-                                               IsWarning="{Binding IsPointsWarning}" WarnText="{Binding PointsWarnText}" />
-                                <cds:CdsDatePicker Type="Range" Label="Start date" EndLabel="Due date"
-                                                   StartDate="{Binding StartDate}" EndDate="{Binding DueDate}"
-                                                   IsInvalid="{Binding IsDatesInvalid}" InvalidText="{Binding DatesInvalidText}"
-                                                   IsWarning="{Binding IsDatesWarning}" WarnText="{Binding DatesWarnText}" />
-                                <cds:CdsTimePicker x:Name="ReminderPicker" Label="Reminder on the due date"
-                                                   Time="{Binding ReminderTime}" SelectedTimeZone="{Binding ReminderTimeZone}"
-                                                   IsInvalid="{Binding IsReminderInvalid}" InvalidText="{Binding ReminderInvalidText}" />
-                            </VerticalStackLayout>
-                        </cds:CdsFormGroup>
-                        <cds:CdsFormGroup Legend="Notifications">
-                            <VerticalStackLayout Spacing="24">
-                                <cds:CdsCheckboxGroup Legend="Notify when the issue is created">
-                                    <cds:CdsCheckbox Label="The assignee" IsChecked="{Binding NotifyAssignee}" />
-                                    <cds:CdsCheckbox Label="Everyone watching the project" IsChecked="{Binding NotifyWatchers}" />
-                                </cds:CdsCheckboxGroup>
-                                <cds:CdsToggle LabelText="Watch this issue" LabelA="Off" LabelB="On" IsToggled="{Binding Watch}" />
-                            </VerticalStackLayout>
-                        </cds:CdsFormGroup>
-                    </cds:CdsForm>
+                    <cds:CdsMaxWidthBox IsVisible="{Binding IsScheduleStep}" MaxContentWidth="640">
+                        <cds:CdsForm>
+                            <cds:CdsFormGroup Legend="Estimate and dates">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsSlider Label="Story points" Min="{Binding MinPoints}" Max="{Binding MaxPoints}" Step="1"
+                                                   InputLabel="Story points"
+                                                   Value="{Binding StoryPoints}" IsEnabled="{Binding ArePointsEnabled}"
+                                                   IsWarning="{Binding IsPointsWarning}" WarnText="{Binding PointsWarnText}" />
+                                    <cds:CdsDatePicker Type="Range" Label="Start date" EndLabel="Due date"
+                                                       StartDate="{Binding StartDate}" EndDate="{Binding DueDate}"
+                                                       IsInvalid="{Binding IsDatesInvalid}" InvalidText="{Binding DatesInvalidText}"
+                                                       IsWarning="{Binding IsDatesWarning}" WarnText="{Binding DatesWarnText}" />
+                                    <cds:CdsTimePicker x:Name="ReminderPicker" Label="Reminder on the due date"
+                                                       Time="{Binding ReminderTime}" SelectedTimeZone="{Binding ReminderTimeZone}"
+                                                       IsInvalid="{Binding IsReminderInvalid}" InvalidText="{Binding ReminderInvalidText}" />
+                                </VerticalStackLayout>
+                            </cds:CdsFormGroup>
+                            <cds:CdsFormGroup Legend="Notifications">
+                                <VerticalStackLayout Spacing="24">
+                                    <cds:CdsCheckboxGroup Legend="Notify when the issue is created">
+                                        <cds:CdsCheckbox Label="The assignee" IsChecked="{Binding NotifyAssignee}" />
+                                        <cds:CdsCheckbox Label="Everyone watching the project" IsChecked="{Binding NotifyWatchers}" />
+                                    </cds:CdsCheckboxGroup>
+                                    <cds:CdsToggle LabelText="Watch this issue" LabelA="Off" LabelB="On" IsToggled="{Binding Watch}" />
+                                </VerticalStackLayout>
+                            </cds:CdsFormGroup>
+                        </cds:CdsForm>
+                    </cds:CdsMaxWidthBox>
 
                     <!-- Step 4: review -->
                     <cds:CdsStructuredList x:Name="ReviewList" Label="Issue summary" IsVisible="{Binding IsReviewStep}" MaximumWidthRequest="880" HorizontalOptions="Start">

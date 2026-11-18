@@ -30,7 +30,7 @@ public class CdsMenuItemRadioGroup : CdsMenuItemBase
     }
 
     /// <summary>The choices: strings, or objects shown with <see cref="ItemToString"/>.</summary>
-    public IList<object> Items { get; } = new ObservableCollection<object>();
+    public IList<object> Items { get; } = new CdsItemCollection<object>();
 
     /// <summary>The selected choice. Two-way.</summary>
     public object? SelectedItem

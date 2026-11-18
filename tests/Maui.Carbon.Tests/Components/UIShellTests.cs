@@ -399,4 +399,21 @@ public class UIShellControlTests
         Assert.True(item.IsActive);
         Assert.Equal(3, switcher.Items.Count);
     }
+
+    [Fact]
+    public void The_shell_tells_its_parts_about_side_nav_state_but_not_about_every_width_change()
+    {
+        var nav = new CdsSideNav { Body = new CdsSideNavItems() };
+        var shell = new CdsUIShell { SideNav = nav };
+        var raised = 0;
+        shell.ShellChanged += (_, _) => raised++;
+        // The width animates frame by frame; parts that re-evaluated on each frame restarted the side nav's own animation.
+        nav.IsPersistent = false;
+        Assert.Equal(0, nav.CurrentWidth);
+        Assert.Equal(0, raised);
+        nav.IsExpanded = true;
+        Assert.Equal(1, raised);
+        nav.IsExpanded = true;
+        Assert.Equal(1, raised);
+    }
 }

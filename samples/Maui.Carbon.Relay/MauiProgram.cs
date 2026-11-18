@@ -38,19 +38,20 @@ public static class MauiProgram
 
         // App services behind Core's abstractions.
         services.AddSingleton(sp => new Navigator(sp, sp.GetRequiredService<ILogger<Navigator>>())
-            .Map<DashboardView, DashboardViewModel>(Routes.Dashboard)
-            .Map<IssuesView, IssuesViewModel>(Routes.Issues)
+            .Map<DashboardView, DashboardViewModel>(Routes.Dashboard, keepAttached: true)
+            .Map<IssuesView, IssuesViewModel>(Routes.Issues, keepAttached: true)
             .Map<IssueDetailView, IssueDetailViewModel>(Routes.IssueDetail)
             .Map<CreateIssueView, CreateIssueViewModel>(Routes.CreateIssue)
-            .Map<BoardView, BoardViewModel>(Routes.Board)
-            .Map<BacklogView, BacklogViewModel>(Routes.Backlog)
-            .Map<ProjectsView, ProjectsViewModel>(Routes.Projects)
-            .Map<TeamView, TeamViewModel>(Routes.Team)
-            .Map<ReportsView, ReportsViewModel>(Routes.Reports)
-            .Map<SettingsView, SettingsViewModel>(Routes.Settings));
+            .Map<BoardView, BoardViewModel>(Routes.Board, keepAttached: true)
+            .Map<BacklogView, BacklogViewModel>(Routes.Backlog, keepAttached: true)
+            .Map<ProjectsView, ProjectsViewModel>(Routes.Projects, keepAttached: true)
+            .Map<TeamView, TeamViewModel>(Routes.Team, keepAttached: true)
+            .Map<ReportsView, ReportsViewModel>(Routes.Reports, keepAttached: true)
+            .Map<SettingsView, SettingsViewModel>(Routes.Settings, keepAttached: true));
         services.AddSingleton<INavigator>(sp => sp.GetRequiredService<Navigator>());
         services.AddSingleton<IUserFeedback, UserFeedback>();
         services.AddSingleton<IThemeService, ThemeService>();
+        services.AddSingleton<DisplayPreferences>();
         services.AddSingleton<ISessionHost, SessionHost>();
         services.AddSingleton<LiveFeedTimer>();
 

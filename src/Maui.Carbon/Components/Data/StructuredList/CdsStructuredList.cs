@@ -52,16 +52,19 @@ public class CdsStructuredList : CdsControl
         nameof(SelectedItem), typeof(CdsStructuredListRow), typeof(CdsStructuredList), null, BindingMode.TwoWay,
         propertyChanged: static (b, _, n) => ((CdsStructuredList)b).OnSelectedItemChanged((CdsStructuredListRow?)n));
 
-    readonly ObservableCollection<CdsStructuredListColumn> _columns = [];
-    readonly ObservableCollection<CdsStructuredListRow> _rows = [];
+    readonly CdsItemCollection<CdsStructuredListColumn> _columns = [];
+    readonly CdsItemCollection<CdsStructuredListRow> _rows = [];
     readonly Grid _grid = new() { RowSpacing = 0, ColumnSpacing = 0 };
     readonly List<RowVisual> _visuals = [];
     readonly List<BoxView> _rules = [];
+    readonly List<ContentView> _wrappers = [];
+    readonly CdsCoalescedAction _rebuild;
     bool _syncing;
 
     /// <summary>Creates an empty list.</summary>
     public CdsStructuredList()
     {
+        _rebuild = new CdsCoalescedAction(this, RebuildNow);
         HorizontalOptions = LayoutOptions.Fill;
         VerticalOptions = LayoutOptions.Start;
         CdsTokens.SetColor(_grid, BackgroundColorProperty, CdsStructuredListTokens.Background);
@@ -135,6 +138,7 @@ public class CdsStructuredList : CdsControl
     protected internal override bool OnKeyDown(CdsKeyEventArgs e)
     {
         if (!IsSelectable) return false;
+        _rebuild.Flush();
         var delta = e.Key is CdsKey.Down or CdsKey.Right ? 1 : e.Key is CdsKey.Up or CdsKey.Left ? -1 : 0;
         if (delta == 0) return false;
         var focused = _visuals.FindIndex(v => v.Hit?.IsFocused == true);
@@ -149,6 +153,8 @@ public class CdsStructuredList : CdsControl
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
+        // The visuals still describe the old rows; the rebuild re-applies them.
+        if (_rebuild.IsPending) return;
         for (var i = 0; i < _visuals.Count && i < _rows.Count; i++)
         {
             var v = _visuals[i];
@@ -234,8 +240,16 @@ public class CdsStructuredList : CdsControl
         SelectedIndex = index;
     }
 
-    void Rebuild()
+    /// <summary>Rebuilds the grid; on screen, once after the current batch of changes.</summary>
+    void Rebuild() => _rebuild.Request();
+
+    void RebuildNow()
     {
+        _rebuild.Cancel();
+        // Custom cells are the consumer's views and come back in the new grid: take them out of their old wrappers first, or
+        // they would be added while still a child there.
+        foreach (var wrapper in _wrappers) wrapper.Content = null;
+        _wrappers.Clear();
         _grid.Children.Clear();
         _grid.RowDefinitions.Clear();
         _grid.ColumnDefinitions.Clear();
@@ -316,7 +330,9 @@ public class CdsStructuredList : CdsControl
                 View view;
                 if (cell is View custom)
                 {
-                    view = new ContentView { Padding = padding, Content = custom };
+                    var wrapper = new ContentView { Padding = padding, Content = custom };
+                    _wrappers.Add(wrapper);
+                    view = wrapper;
                 }
                 else
                 {

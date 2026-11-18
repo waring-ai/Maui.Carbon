@@ -17,7 +17,7 @@ public class CdsHeaderNavigation : CdsControl
         nameof(Label), typeof(string), typeof(CdsHeaderNavigation), "Navigation",
         propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsHeaderNavigation)b, (string?)n));
 
-    readonly ObservableCollection<View> _items = [];
+    readonly CdsItemCollection<View> _items = [];
     readonly HorizontalStackLayout _row = new() { Spacing = 0 };
     readonly Grid _root = new();
     readonly CdsBreakpointWatcher _watcher;
@@ -86,7 +86,7 @@ public class CdsHeaderSideNavItems : CdsControl
         nameof(HasDivider), typeof(bool), typeof(CdsHeaderSideNavItems), false,
         propertyChanged: static (b, _, _) => ((CdsHeaderSideNavItems)b).Sync());
 
-    readonly ObservableCollection<View> _items = [];
+    readonly CdsItemCollection<View> _items = [];
     readonly VerticalStackLayout _column = new() { Spacing = 0 };
     readonly BoxView _divider = new() { HeightRequest = 1, Margin = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05, 0), IsVisible = false, InputTransparent = true };
     readonly VerticalStackLayout _root = new() { Spacing = 0 };

@@ -113,7 +113,7 @@ public class CdsTableHeader : BindableObject
 [ContentProperty(nameof(Headers))]
 public class CdsTableHead : BindableObject
 {
-    readonly ObservableCollection<CdsTableHeader> _headers = [];
+    readonly CdsItemCollection<CdsTableHeader> _headers = [];
 
     /// <summary>Creates an empty head.</summary>
     public CdsTableHead() => _headers.CollectionChanged += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
@@ -230,7 +230,7 @@ public class CdsTableRow : BindableObject
     public static readonly BindableProperty ExpandedContentProperty = BindableProperty.Create(
         nameof(ExpandedContent), typeof(View), typeof(CdsTableRow), null, propertyChanged: OnVisualChanged);
 
-    readonly ObservableCollection<CdsTableCell> _cells = [];
+    readonly CdsItemCollection<CdsTableCell> _cells = [];
     bool _isExpandable;
 
     /// <summary>Creates an empty row.</summary>

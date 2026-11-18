@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Maui.Carbon.Relay.Hosting;
 using Maui.Carbon.Relay.Presentation;
 using Maui.Carbon.Relay.ViewModels;
 
@@ -14,9 +15,11 @@ public partial class TeamView : ContentView
     TeamViewModel? _vm;
     bool _syncing;
 
-    public TeamView()
+    public TeamView(DisplayPreferences preferences)
     {
         InitializeComponent();
+        Table.Size = preferences.TableSize(CdsSize.Lg);
+        preferences.Changed += (_, _) => Table.Size = preferences.TableSize(CdsSize.Lg);
         CdsTokens.SetColor(Scroller, VisualElement.BackgroundColorProperty, CdsColorKeys.Background);
         TeamColumns.Add(Table);
     }

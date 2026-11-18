@@ -31,7 +31,7 @@ public class CdsButtonSet : CdsControl
             SemanticProperties.SetDescription(set._row, (string?)n);
         });
 
-    readonly ObservableCollection<CdsButton> _items = [];
+    readonly CdsItemCollection<CdsButton> _items = [];
     readonly Grid _grid = new() { ColumnSpacing = 0, RowSpacing = 0 };
     readonly CdsEqualWidthRow _row = new();
     readonly List<(BoxView Line, int Index)> _separators = [];

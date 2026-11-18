@@ -115,7 +115,7 @@ public class CdsSwitcher : CdsControl
         nameof(IsExpanded), typeof(bool), typeof(CdsSwitcher), true,
         propertyChanged: static (b, _, _) => ((CdsSwitcher)b).SyncTabStops());
 
-    readonly ObservableCollection<View> _items = [];
+    readonly CdsItemCollection<View> _items = [];
     readonly VerticalStackLayout _stack = new() { Spacing = 0, Padding = new Thickness(0, CdsSpacing.Spacing05, 0, 0) };
 
     /// <summary>Creates an empty switcher.</summary>

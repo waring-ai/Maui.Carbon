@@ -66,7 +66,7 @@ public class CdsStructuredListRow : BindableObject
         nameof(IsEnabled), typeof(bool), typeof(CdsStructuredListRow), true,
         propertyChanged: static (b, _, _) => ((CdsStructuredListRow)b).Changed?.Invoke(b, EventArgs.Empty));
 
-    readonly ObservableCollection<object?> _cells = [];
+    readonly CdsItemCollection<object?> _cells = [];
 
     /// <summary>Creates an empty row.</summary>
     public CdsStructuredListRow()

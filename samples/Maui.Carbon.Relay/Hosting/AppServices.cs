@@ -56,6 +56,34 @@ public sealed class ThemeService(ISettingsService settings) : IThemeService
     }
 }
 
+/// <summary>
+/// Applies the saved display settings other than the theme: <see cref="AppSettings.ReduceMotion"/> turns Carbon's motion off
+/// (else it follows the OS) and <see cref="AppSettings.CompactTables"/> gives tables short rows. Views with tables read
+/// <see cref="TableSize"/> and listen to <see cref="Changed"/>.
+/// </summary>
+public sealed class DisplayPreferences
+{
+    readonly ISettingsService _settings;
+
+    public DisplayPreferences(ISettingsService settings)
+    {
+        _settings = settings;
+        settings.Changed += (_, _) =>
+        {
+            Apply();
+            Changed?.Invoke(this, EventArgs.Empty);
+        };
+        Apply();
+    }
+
+    public event EventHandler? Changed;
+
+    /// <summary>The row size for a table that is <paramref name="regular"/> by default: sm (32) when tables are compact.</summary>
+    public CdsSize TableSize(CdsSize regular) => _settings.Current.CompactTables ? CdsSize.Sm : regular;
+
+    void Apply() => CdsMotion.ReducedMotionOverride = _settings.Current.ReduceMotion ? true : null;
+}
+
 /// <summary>Swaps the window between the login page and the app frame.</summary>
 public sealed class SessionHost(IServiceProvider services) : ISessionHost
 {

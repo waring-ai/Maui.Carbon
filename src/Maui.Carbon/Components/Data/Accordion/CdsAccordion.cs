@@ -30,7 +30,7 @@ public class CdsAccordion : ContentView
         propertyChanged: static (b, _, _) => ((CdsAccordion)b).Configure());
 
     readonly VerticalStackLayout _stack = new() { Spacing = 0 };
-    readonly ObservableCollection<CdsAccordionItem> _items = [];
+    readonly CdsItemCollection<CdsAccordionItem> _items = [];
 
     /// <summary>Creates an accordion.</summary>
     public CdsAccordion()

@@ -35,7 +35,7 @@ public class CdsIcon : GraphicsView, IDrawable
     /// <summary>Creates a 16-unit icon in <c>icon-primary</c>.</summary>
     public CdsIcon()
     {
-        Drawable = this;
+        Drawable = new CdsWeakDrawable(this);
         InputTransparent = true;
         BackgroundColor = Colors.Transparent;
         HorizontalOptions = LayoutOptions.Center;

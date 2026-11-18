@@ -91,10 +91,14 @@ public static class ExerciseRunner
 
         readonly Dictionary<string, Group> _groups = [];
         readonly List<(string Step, double Ms)> _hangs = [];
+#if IOS || MACCATALYST
+        Foundation.NSObject? _activity;
+#endif
         readonly List<(string Step, double Ms)> _slow = [];
         readonly List<(string Scenario, string Type, int Before, int After)> _leaks = [];
         readonly List<(string Scenario, string Type, string Roots)> _leakRoots = [];
         readonly List<(string Scenario, string Subscription, int Before, int After)> _retainers = [];
+        readonly List<(string Scenario, string Held, string Path)> _leakPaths = [];
         readonly List<string> _notes = [];
         readonly List<(string Requested, string Actual)> _sizes = [];
         readonly Stopwatch _clock = Stopwatch.StartNew();
@@ -208,6 +212,30 @@ public static class ExerciseRunner
             if (Phase("leaks")) await LeakChecksAsync();
 
             WriteReport();
+
+            // Profiling aid (phase "visit", not in the default run): RELAY_EXERCISE_VISIT=<route> shows that route 30 times
+            // from the dashboard, timing each visit, so a sampler attached meanwhile sees mostly that screen's work.
+            if (phases?.Contains("visit") == true && LaunchArgs.Get("--visit", "RELAY_EXERCISE_VISIT") is { } visit)
+            {
+                var nav = Get<INavigator>();
+                // VISIT=panel opens and closes the notifications panel instead.
+                for (var i = 0; i < 30 && visit == "panel"; i++)
+                {
+                    Step($"visit panel #{i}");
+                    Get<ShellViewModel>().ActivePanel = ShellPanel.Notifications;
+                    await Task.Delay(900);
+                    Get<ShellViewModel>().ActivePanel = ShellPanel.None;
+                    await Task.Delay(500);
+                }
+                for (var i = 0; i < 30 && visit != "panel"; i++)
+                {
+                    await nav.NavigateAsync(Routes.Dashboard);
+                    await Task.Delay(400);
+                    Step($"visit {visit} #{i}");
+                    await nav.NavigateAsync(visit);
+                    await Task.Delay(1200);
+                }
+            }
 
             // 5. Stress. Resizing with motion on goes last: it is the step most likely to take the app down.
             if (Phase("stress")) await StressAsync();
@@ -521,6 +549,15 @@ public static class ExerciseRunner
                     _leaks.Add((scenario, type, was, count));
                     _leakRoots.Add((scenario, type, string.Join(", ", VisualAudit.Roots(type).OrderByDescending(r => r.Value).Take(8).Select(r => $"{r.Value} {r.Key}"))));
                 }
+                // What holds it: the reference chain to the top of one leaked subtree (one per distinct top type).
+                var traced = new HashSet<Type>();
+                foreach (var (type, _) in after.Where(a => a.Value - before.GetValueOrDefault(a.Key) >= LeakCycles - 1).OrderByDescending(a => a.Value - before.GetValueOrDefault(a.Key)))
+                {
+                    // Screens registered as singletons are meant to live while off screen: trace what else is held.
+                    if (traced.Count >= 3 || VisualAudit.DetachedTop(type, t => ReferenceEquals(services.GetService(t.GetType()), t)) is not { } top
+                        || !traced.Add(top.GetType())) continue;
+                    _leakPaths.Add((scenario, $"{top.GetType().Name} (holding {type})", HeapPath.Find(top)));
+                }
             });
         }
 
@@ -685,24 +722,6 @@ public static class ExerciseRunner
             var actual = page is null ? "?" : $"{page.Width:0}x{page.Height:0}";
             _sizes.Add(($"{size.Width:0}x{size.Height:0}", actual));
             _sizeName = page is { Width: > 0 } p ? SizeFor(p.Width).Name : size.Name;
-            await HeaderMeasureProbeAsync();
-        }
-
-        /// <summary>
-        /// Experiment for the header overflow below lg: is the header navigation's column still sized for links it no
-        /// longer shows, and does forcing a measure pass fix it (a stale measure) or not (a layout rule)?
-        /// </summary>
-        async Task HeaderMeasureProbeAsync()
-        {
-            if (window.Page is not MainPage main) return;
-            var nav = Descendants(main).OfType<CdsHeaderNavigation>().FirstOrDefault();
-            if (nav is null) return;
-            var inner = (nav as IVisualTreeElement).GetVisualChildren().OfType<VisualElement>().FirstOrDefault();
-            var before = $"{nav.Width:0} (content visible: {inner?.IsVisible})";
-            ((IView)nav).InvalidateMeasure();
-            if (nav.Parent is IView parent) parent.InvalidateMeasure();
-            await Task.Delay(400);
-            _notes.Add($"header nav at {_sizeName}: width {before} -> {nav.Width:0} after re-measure");
         }
 
         static IEnumerable<Element> Descendants(Element e)
@@ -777,6 +796,11 @@ public static class ExerciseRunner
 
         void StartHeartbeat()
         {
+#if IOS || MACCATALYST
+            // An idle app's timers are throttled by App Nap, which shows up here as false hangs of about 500 ms.
+            _activity = Foundation.NSProcessInfo.ProcessInfo.BeginActivity(
+                Foundation.NSActivityOptions.UserInitiated | Foundation.NSActivityOptions.LatencyCritical, "Relay exercise timing");
+#endif
             var timer = Application.Current!.Dispatcher.CreateTimer();
             timer.Interval = TimeSpan.FromMilliseconds(50);
             timer.Tick += (_, _) =>
@@ -867,6 +891,11 @@ public static class ExerciseRunner
             sb.AppendLine().AppendLine("### Growing subscriptions (who holds them)").AppendLine();
             if (_retainers.Count == 0) sb.AppendLine("None.");
             foreach (var r in _retainers) sb.AppendLine(CultureInfo.InvariantCulture, $"- {r.Scenario}: `{r.Subscription}` {r.Before}->{r.After}");
+
+            sb.AppendLine().AppendLine("### What holds them (shortest reference chain from a static field)").AppendLine();
+            if (_leakPaths.Count == 0) sb.AppendLine("None.");
+            foreach (var p in _leakPaths)
+                sb.AppendLine(CultureInfo.InvariantCulture, $"- {p.Scenario}: {p.Held}").AppendLine("  ```").AppendLine("  " + p.Path).AppendLine("  ```");
 
             sb.AppendLine().AppendLine("## UI thread hangs over 300 ms").AppendLine();
             if (_hangs.Count == 0) sb.AppendLine("None.");

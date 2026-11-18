@@ -50,6 +50,7 @@ public partial class CdsTooltip : CdsContainer
     /// <summary>Creates a tooltip.</summary>
     public CdsTooltip()
     {
+        TrackHover();
         HorizontalOptions = LayoutOptions.Start;
         VerticalOptions = LayoutOptions.Start;
         SetChrome(_slot);

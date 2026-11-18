@@ -49,6 +49,7 @@ public class CdsUIShell : CdsContainer
     readonly ContentView _headerHost = new() { VerticalOptions = LayoutOptions.Start, HorizontalOptions = LayoutOptions.Fill };
     CdsSideNav? _sideNav;
     CdsHeaderPanel? _panel;
+    (CdsBreakpoint, CdsSideNav?, bool?, bool?, bool?)? _raised;
 
     /// <summary>Creates an empty shell.</summary>
     public CdsUIShell()
@@ -151,7 +152,9 @@ public class CdsUIShell : CdsContainer
         UpdateCatcher();
     }
 
-    void OnSideNavWidthChanged(object? sender, EventArgs e) => Refresh();
+    // Every animation frame: move the body only. Raising ShellChanged here would have the side nav re-evaluate its width
+    // from inside its own animation tick.
+    void OnSideNavWidthChanged(object? sender, EventArgs e) => UpdateBody();
 
     void OnSideNavPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -167,7 +170,18 @@ public class CdsUIShell : CdsContainer
     void UpdateCatcher() =>
         _panelCatcher.IsVisible = _panel is { IsExpanded: true } panel && panel.ClosesOnOutsideTapEffective;
 
+    /// <summary>Re-applies the offsets and tells the shell parts, when what they depend on changed.</summary>
     void Refresh()
+    {
+        UpdateBody();
+        // Parts re-evaluate on the breakpoint and the side nav's state, not on every resize within a breakpoint.
+        var state = (EffectiveBreakpoint, _sideNav, _sideNav?.IsExpanded, _sideNav?.IsRail, _sideNav?.IsFixed);
+        if (_raised is { } raised && raised.Equals(state)) return;
+        _raised = state;
+        ShellChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    void UpdateBody()
     {
         if (_sideNav is { } nav)
         {
@@ -179,6 +193,5 @@ public class CdsUIShell : CdsContainer
             _bodyHost.Margin = new Thickness(0, UIShellModel.HeaderHeight, 0, 0);
             _scrim.IsVisible = false;
         }
-        ShellChanged?.Invoke(this, EventArgs.Empty);
     }
 }

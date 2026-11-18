@@ -51,7 +51,11 @@ public class CdsSideNav : CdsContainer
     readonly Grid _panel = new() { WidthRequest = UIShellModel.SideNavWidth, HorizontalOptions = LayoutOptions.Start, RowSpacing = 0 };
     readonly ScrollView _scroll = new() { VerticalScrollBarVisibility = ScrollBarVisibility.Default };
     readonly CdsBreakpointWatcher _watcher;
+    const string WidthAnimation = "CdsSideNavWidth";
+
     double _width;
+    double _animatingTo = double.NaN;
+    int _widthRun;
     int _focusCount;
     bool _transient;
     bool _initialized;
@@ -59,6 +63,7 @@ public class CdsSideNav : CdsContainer
     /// <summary>Creates a collapsed side nav (it expands from its <see cref="IsExpanded"/>, rail and persistence settings).</summary>
     public CdsSideNav()
     {
+        TrackHover();
         HorizontalOptions = LayoutOptions.Start;
         VerticalOptions = LayoutOptions.Fill;
         var fill = new BoxView { InputTransparent = true };
@@ -207,14 +212,30 @@ public class CdsSideNav : CdsContainer
     {
         if (_watcher is null) return;
         var target = UIShellModel.SideNavTargetWidth(Mode, _watcher.Current, IsExpanded, IsPersistent, _transient);
+        // Already on its way there. A re-evaluation caused by the animation itself (its first frame runs synchronously, and
+        // every frame resizes the nav) must not restart it: each restart's first frame would re-evaluate again, without end.
+        if (target.Equals(_animatingTo)) return;
+        if (!double.IsNaN(_animatingTo))
+        {
+            _widthRun++;
+            _animatingTo = double.NaN;
+            this.AbortAnimation(WidthAnimation);
+        }
         if (Math.Abs(target - _width) < 0.1) return;
         if (!animate || Handler is null)
         {
-            this.AbortAnimation("CdsSideNavWidth");
             SetWidth(target);
             return;
         }
-        _ = CdsMotion.AnimateAsync(this, "CdsSideNavWidth", SetWidth, _width, target, CdsDuration.Fast02, CdsEasing.ExitProductive);
+        _ = AnimateWidthAsync(target);
+    }
+
+    async Task AnimateWidthAsync(double target)
+    {
+        var run = ++_widthRun;
+        _animatingTo = target;
+        await CdsMotion.AnimateAsync(this, WidthAnimation, SetWidth, _width, target, CdsDuration.Fast02, CdsEasing.ExitProductive);
+        if (run == _widthRun) _animatingTo = double.NaN;
     }
 
     void SetWidth(double width)

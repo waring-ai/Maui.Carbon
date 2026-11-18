@@ -12,6 +12,7 @@ namespace Maui.Carbon.Relay.Views;
 public partial class DashboardView : ContentView
 {
     DashboardViewModel? _vm;
+    string? _shownMyWork;
     bool _building;
 
     public DashboardView()
@@ -39,6 +40,10 @@ public partial class DashboardView : ContentView
     void BuildMyWork()
     {
         if (_vm is null) return;
+        // Rebuilding the list costs a few hundred milliseconds: skip it when every visible value is the same.
+        var shown = string.Join("\n", _vm.MyWork.Select(i => $"{i.Key}\t{i.Title}\t{i.Priority}\t{i.DueText}\t{i.IsOverdue}"));
+        if (shown == _shownMyWork) return;
+        _shownMyWork = shown;
         _building = true;
         try
         {

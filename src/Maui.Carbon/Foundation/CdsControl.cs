@@ -16,21 +16,42 @@ public abstract class CdsControl : ContentView
         "ContextLevel", typeof(int), typeof(CdsControl), 1,
         propertyChanged: static (b, _, _) => ((CdsControl)b).OnContextChanged());
 
-    readonly Dictionary<(BindableObject Target, BindableProperty Property), string?> _tokens = [];
+    // The color keys applied through SetColor/SetBrush live on each target, not in the control: a cache in the control
+    // keyed by its views would keep every view it ever colored alive, including rows and cells it has since discarded.
+    static readonly BindableProperty AppliedTokensProperty = BindableProperty.CreateAttached(
+        "CdsAppliedTokens", typeof(Dictionary<BindableProperty, AppliedToken>), typeof(CdsControl), null);
+
+    static int s_nextColorOwner;
+    // An id rather than a reference, so a long-lived view a short-lived control colored does not keep the control alive.
+    readonly int _colorOwner = Interlocked.Increment(ref s_nextColorOwner);
+    int _tokenGeneration;
     System.Windows.Input.ICommand? _command;
     object? _commandParameter;
+    CdsWeakSubscription<CdsControl>? _commandSubscription;
+    bool _tracksLoading;
     CdsInteractionState _state;
     bool _settingChrome;
     bool _visualsPending;
     bool _visualsApplied;
     VisualElement? _focusTarget;
+    bool _tracksHover;
 
-    /// <summary>Initializes the control: context tracking and pointer hover.</summary>
+    /// <summary>Initializes the control: context tracking.</summary>
     protected CdsControl()
     {
         SetDynamicResource(ContextThemeProperty, CdsContextKeys.ThemeId);
         SetDynamicResource(ContextLevelProperty, CdsContextKeys.LayerLevel);
+    }
 
+    /// <summary>
+    /// Tracks pointer hover (<see cref="CdsInteractionState.Hover"/>). <see cref="CreateHitTarget"/> and <see cref="TrackFocus"/>
+    /// turn it on; call it in the constructor of a control that reacts to hover without either. Only interactive controls
+    /// carry the recognizer: each one costs platform gesture setup whenever its page is shown or hidden.
+    /// </summary>
+    protected void TrackHover()
+    {
+        if (_tracksHover) return;
+        _tracksHover = true;
         var pointer = new PointerGestureRecognizer();
         pointer.PointerEntered += (_, _) => SetState(CdsInteractionState.Hover, true);
         pointer.PointerExited += (_, _) =>
@@ -100,6 +121,15 @@ public abstract class CdsControl : ContentView
     {
     }
 
+    /// <inheritdoc/>
+    protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
+    {
+        var size = base.MeasureOverride(widthConstraint, heightConstraint);
+        // ContentView measures its content even when that content is hidden, so a control that hides its chrome (the header
+        // navigation below lg) would keep its old size in an Auto row or column. Hidden chrome takes no space.
+        return Content is { IsVisible: false } ? Size.Zero : size;
+    }
+
     /// <summary>Re-applies token colors and other state-driven visuals. Called on every state change.</summary>
     protected virtual void ApplyVisuals()
     {
@@ -124,6 +154,9 @@ public abstract class CdsControl : ContentView
         // Construction is complete by the time a parent is set (never true inside a base constructor), so this is the
         // safe place to guarantee one ApplyVisuals for controls whose state never changes after construction.
         if (Parent is not null && !_visualsApplied) ApplyVisualsOnce();
+        // Taken out of its parent (an items list cleared): stop listening to the command until it is placed again.
+        if (Parent is null) UnsubscribeCommand();
+        else if (_command is not null && _commandSubscription is null) SubscribeCommand();
     }
 
     void ApplyVisualsOnce()
@@ -135,6 +168,8 @@ public abstract class CdsControl : ContentView
     /// <summary>Sets the control's visual tree. Controls never let consumers assign <c>Content</c> directly.</summary>
     protected void SetChrome(View chrome)
     {
+        if (Content is View previous) previous.PropertyChanged -= OnChromePropertyChanged;
+        chrome.PropertyChanged += OnChromePropertyChanged;
         _settingChrome = true;
         try
         {
@@ -152,34 +187,52 @@ public abstract class CdsControl : ContentView
         }
     }
 
+    // Hiding or showing the chrome changes this control's size (see MeasureOverride), but MAUI does not re-measure the
+    // control for it: an Auto column kept the header navigation's old width, and after a window resize the header's
+    // global actions were laid out from a measure taken while the navigation was hidden, past the window edge.
+    void OnChromePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != IsVisibleProperty.PropertyName) return;
+        ((IView)this).InvalidateMeasure();
+        (Parent as IView)?.InvalidateMeasure();
+    }
+
     /// <summary>Binds a Color property of <paramref name="target"/> to a color key; skips work when unchanged. <c>null</c> = transparent.</summary>
     protected void SetColor(Element target, BindableProperty colorProperty, string? key)
     {
-        if (_tokens.TryGetValue((target, colorProperty), out var current) && current == key) return;
-        _tokens[(target, colorProperty)] = key;
-        CdsTokens.SetColor(target, colorProperty, key);
+        if (Remember(target, colorProperty, key)) CdsTokens.SetColor(target, colorProperty, key);
     }
 
-    /// <summary>
-    /// Forgets the remembered color keys (the next <see cref="SetColor"/> applies again). Controls that discard their views
-    /// call it so the cache does not keep the old views alive.
-    /// </summary>
-    protected void ForgetColors() => _tokens.Clear();
+    /// <summary>Forgets the color keys this control applied (the next <see cref="SetColor"/> or <see cref="SetBrush"/> applies again).</summary>
+    protected void ForgetColors() => _tokenGeneration++;
 
-    /// <summary>Forgets the remembered color keys of <paramref name="targets"/> (views the control removed).</summary>
+    /// <summary>Forgets the color keys applied to <paramref name="targets"/>.</summary>
     protected void ForgetColors(IReadOnlySet<BindableObject> targets)
     {
-        if (targets.Count == 0) return;
-        foreach (var key in _tokens.Keys.Where(k => targets.Contains(k.Target)).ToList()) _tokens.Remove(key);
+        foreach (var target in targets) target.ClearValue(AppliedTokensProperty);
     }
 
     /// <summary>Binds a Brush property of <paramref name="target"/> to a color key; skips work when unchanged. <c>null</c> = transparent.</summary>
     protected void SetBrush(Element target, BindableProperty brushProperty, string? key)
     {
-        if (_tokens.TryGetValue((target, brushProperty), out var current) && current == key) return;
-        _tokens[(target, brushProperty)] = key;
-        CdsTokens.SetBrush(target, brushProperty, key);
+        if (Remember(target, brushProperty, key)) CdsTokens.SetBrush(target, brushProperty, key);
     }
+
+    /// <summary>Records <paramref name="key"/> as applied to the target's property; false when this control already applied it.</summary>
+    bool Remember(BindableObject target, BindableProperty property, string? key)
+    {
+        if (target.GetValue(AppliedTokensProperty) is not Dictionary<BindableProperty, AppliedToken> applied)
+        {
+            applied = [];
+            target.SetValue(AppliedTokensProperty, applied);
+        }
+        var token = new AppliedToken(_colorOwner, _tokenGeneration, key);
+        if (applied.TryGetValue(property, out var current) && current == token) return false;
+        applied[property] = token;
+        return true;
+    }
+
+    readonly record struct AppliedToken(int Owner, int Generation, string? Key);
 
     /// <summary>
     /// Creates a hit target wired to this control: press, focus and activation update <see cref="State"/> and call
@@ -206,6 +259,7 @@ public abstract class CdsControl : ContentView
     /// </summary>
     protected void TrackFocus(VisualElement focusable, Func<bool>? isKeyboardFocus = null)
     {
+        TrackHover();
         _focusTarget = focusable;
         focusable.Focused += (_, _) =>
         {
@@ -230,12 +284,39 @@ public abstract class CdsControl : ContentView
     {
         if (!ReferenceEquals(_command, command))
         {
-            if (_command is not null) _command.CanExecuteChanged -= OnCanExecuteChanged;
             _command = command;
-            if (_command is not null) _command.CanExecuteChanged += OnCanExecuteChanged;
+            if (command is not null && !_tracksLoading)
+            {
+                // While off screen the control needs no CanExecuteChanged (IsEnabled is re-read when it comes back).
+                _tracksLoading = true;
+                Loaded += (_, _) =>
+                {
+                    SubscribeCommand();
+                    RefreshIsEnabledProperty();
+                };
+                Unloaded += (_, _) => UnsubscribeCommand();
+            }
+            SubscribeCommand();
         }
         _commandParameter = parameter;
         RefreshIsEnabledProperty();
+    }
+
+    // Weak, like MAUI's Button: a command usually lives in a view model that outlives the control, and a strong
+    // CanExecuteChanged handler would keep every control ever bound to it alive.
+    void SubscribeCommand()
+    {
+        UnsubscribeCommand();
+        if (_command is not { } command) return;
+        _commandSubscription = new CdsWeakSubscription<CdsControl>(
+            this, static c => c.RefreshIsEnabledProperty(),
+            h => command.CanExecuteChanged += h, h => command.CanExecuteChanged -= h);
+    }
+
+    void UnsubscribeCommand()
+    {
+        _commandSubscription?.Dispose();
+        _commandSubscription = null;
     }
 
     /// <summary>Executes the command set with <see cref="SetCommand"/> when it can execute.</summary>
@@ -246,8 +327,6 @@ public abstract class CdsControl : ContentView
 
     /// <inheritdoc/>
     protected override bool IsEnabledCore => base.IsEnabledCore && (_command?.CanExecute(_commandParameter) ?? true);
-
-    void OnCanExecuteChanged(object? sender, EventArgs e) => RefreshIsEnabledProperty();
 
     /// <summary>Called when the hit target is activated (click, tap, Enter or Space) while enabled.</summary>
     protected virtual void OnActivated()

@@ -19,6 +19,7 @@ public partial class App : Application
     protected override Window CreateWindow(IActivationState? activationState)
     {
         _services.GetRequiredService<IThemeService>().Apply(_services.GetRequiredService<ISettingsService>().Current.Theme);
+        _services.GetRequiredService<DisplayPreferences>();
         var window = new Window(_services.GetRequiredService<LoginPage>()) { Title = "Relay" };
         if (DeviceInfo.Idiom == DeviceIdiom.Desktop)
         {

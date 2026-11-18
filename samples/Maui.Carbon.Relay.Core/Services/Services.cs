@@ -218,6 +218,9 @@ public interface ISettingsService
 {
     AppSettings Current { get; }
 
+    /// <summary>Raised after <see cref="SaveAsync"/> replaced <see cref="Current"/>.</summary>
+    event EventHandler? Changed;
+
     Task SaveAsync(AppSettings settings, CancellationToken ct = default);
 
     /// <summary>Issues a new API token and returns it.</summary>

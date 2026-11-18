@@ -52,7 +52,7 @@ public partial class CdsSelect : CdsFormField
     public event EventHandler<SelectedItemChangedEventArgs>? SelectedItemChanged;
 
     /// <summary>The declarative options and groups (the content property).</summary>
-    public ObservableCollection<CdsSelectOption> Items { get; } = [];
+    public ObservableCollection<CdsSelectOption> Items { get; } = new CdsItemCollection<CdsSelectOption>();
 
     /// <inheritdoc/>
     protected override VisualElement InputElement => Picker;

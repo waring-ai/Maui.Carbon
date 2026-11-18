@@ -18,7 +18,7 @@ internal sealed class CdsFileSpinner : GraphicsView, IDrawable
 
     public CdsFileSpinner()
     {
-        Drawable = this;
+        Drawable = new CdsWeakDrawable(this);
         WidthRequest = 16;
         HeightRequest = 16;
         InputTransparent = true;

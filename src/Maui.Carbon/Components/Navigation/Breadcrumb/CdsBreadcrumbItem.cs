@@ -43,7 +43,7 @@ public class CdsBreadcrumbItem : CdsControl
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
         nameof(CommandParameter), typeof(object), typeof(CdsBreadcrumbItem), null, propertyChanged: OnCommandChanged);
 
-    readonly ObservableCollection<CdsBreadcrumbItem> _overflowItems = [];
+    readonly CdsItemCollection<CdsBreadcrumbItem> _overflowItems = [];
     readonly Grid _root = new() { HorizontalOptions = LayoutOptions.Start };
     readonly Grid _crumb = new() { VerticalOptions = LayoutOptions.Center };
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.NoWrap, InputTransparent = true };

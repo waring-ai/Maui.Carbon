@@ -63,7 +63,7 @@ public class CdsSideNavMenu : CdsSideNavRow
         nameof(IsExpanded), typeof(bool), typeof(CdsSideNavMenu), false, BindingMode.TwoWay,
         propertyChanged: static (b, _, n) => ((CdsSideNavMenu)b).OnExpandedChanged((bool)n));
 
-    readonly ObservableCollection<CdsSideNavMenuItem> _items = [];
+    readonly CdsItemCollection<CdsSideNavMenuItem> _items = [];
     readonly VerticalStackLayout _children = new() { Spacing = 0, IsVisible = false };
     readonly CdsIcon _chevron = new(CdsIconName.ChevronDown, 16) { VerticalOptions = LayoutOptions.Center, InputTransparent = true };
 

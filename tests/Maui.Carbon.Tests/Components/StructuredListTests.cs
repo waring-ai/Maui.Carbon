@@ -168,4 +168,20 @@ public class StructuredListTests
         list.Columns.Clear();
         Assert.Equal(3, list.Rows.Count);
     }
+
+    [Fact]
+    public void A_custom_cell_leaves_its_old_wrapper_when_the_list_is_rebuilt()
+    {
+        var cell = new Label { Text = "Open" };
+        var row = new CdsStructuredListRow("PRJ-1");
+        row.Cells.Add(cell);
+        var list = new CdsStructuredList();
+        list.Rows.Add(row);
+        var first = Assert.IsType<ContentView>(cell.Parent);
+        list.IsCondensed = true;
+        Assert.Null(first.Content);
+        var second = Assert.IsType<ContentView>(cell.Parent);
+        Assert.NotSame(first, second);
+        Assert.Same(cell, second.Content);
+    }
 }

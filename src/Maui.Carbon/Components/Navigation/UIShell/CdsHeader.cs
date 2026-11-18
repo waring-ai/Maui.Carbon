@@ -18,10 +18,11 @@ public class CdsHeader : CdsControl
         nameof(Label), typeof(string), typeof(CdsHeader), null,
         propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsHeader)b, (string?)n));
 
-    readonly ObservableCollection<View> _items = [];
+    readonly CdsItemCollection<View> _items = [];
     readonly Grid _row = new() { ColumnSpacing = 0 };
     readonly Grid _layers = new() { HeightRequest = UIShellModel.HeaderHeight };
     readonly CdsBreakpointWatcher _watcher;
+    double _measuredFor = -1;
 
     /// <summary>Creates an empty header.</summary>
     public CdsHeader()
@@ -38,6 +39,15 @@ public class CdsHeader : CdsControl
         SetChrome(_layers);
         _items.CollectionChanged += (_, _) => Rebuild();
         _watcher = new CdsBreakpointWatcher(this, Sync);
+        // While a window is resized live, MAUI can arrange the row at the new width from a measure taken at an earlier
+        // one: the star column then holds the global bar at its old, narrow measure, right-aligned, with its actions past
+        // the window edge. A new width re-measures the row.
+        SizeChanged += (_, _) =>
+        {
+            if (Math.Abs(Width - _measuredFor) < 0.5) return;
+            _measuredFor = Width;
+            ((IView)_row).InvalidateMeasure();
+        };
     }
 
     /// <summary>The accessible name of the banner landmark.</summary>

@@ -313,6 +313,23 @@ public static class VisualAudit
         return roots;
     }
 
+    /// <summary>
+    /// The top of a detached subtree that holds a live element of <paramref name="typeName"/> (the element itself when it is an
+    /// orphan): the object something outside the visual tree keeps alive. Prefers the most common top type.
+    /// </summary>
+    public static Element? DetachedTop(string typeName, Func<Element, bool>? expected = null)
+    {
+        var tops = new List<Element>();
+        foreach (var w in s_tracked)
+        {
+            if (!w.TryGetTarget(out var e) || e.GetType().Name != typeName) continue;
+            var top = e;
+            while (top.Parent is { } p) top = p;
+            if (top is not (Application or Window) && expected?.Invoke(top) != true) tops.Add(top);
+        }
+        return tops.GroupBy(t => t.GetType()).OrderByDescending(g => g.Count()).FirstOrDefault()?.First();
+    }
+
     /// <summary>What an orphan shows, to tell which UI it came from.</summary>
     static string Sample(Element e) => e switch
     {

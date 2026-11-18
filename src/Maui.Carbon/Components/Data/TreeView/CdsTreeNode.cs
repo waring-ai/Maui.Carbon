@@ -36,7 +36,7 @@ public class CdsTreeNode : BindableObject, ITreeNodeData
         nameof(IsExpanded), typeof(bool), typeof(CdsTreeNode), false, BindingMode.TwoWay,
         propertyChanged: static (b, _, n) => ((CdsTreeNode)b).OnExpandedChanged((bool)n));
 
-    readonly ObservableCollection<CdsTreeNode> _children = [];
+    readonly CdsItemCollection<CdsTreeNode> _children = [];
 
     /// <summary>Creates an empty node.</summary>
     public CdsTreeNode() => _children.CollectionChanged += OnChildrenChanged;

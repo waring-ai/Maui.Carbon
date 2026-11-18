@@ -60,7 +60,7 @@ public class CdsTreeView : CdsControl
         nameof(SelectedNode), typeof(CdsTreeNode), typeof(CdsTreeView), null, BindingMode.TwoWay,
         propertyChanged: static (b, _, n) => ((CdsTreeView)b).OnSelectedNodeChanged((CdsTreeNode?)n));
 
-    readonly ObservableCollection<CdsTreeNode> _nodes = [];
+    readonly CdsItemCollection<CdsTreeNode> _nodes = [];
     readonly VerticalStackLayout _root = new() { Spacing = 0 };
     readonly CdsText _label = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, Margin = new Thickness(0, 0, 0, CdsSpacing.Spacing03) };
     readonly VerticalStackLayout _rowsHost = new() { Spacing = 0 };

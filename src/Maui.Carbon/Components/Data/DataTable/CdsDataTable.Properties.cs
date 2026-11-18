@@ -348,7 +348,7 @@ public partial class CdsDataTable
 
     static void OnToolbarChanged(BindableObject b, object? o, object? n) => ((CdsDataTable)b).UpdateToolbar();
 
-    readonly ObservableCollection<CdsDataTableHeader> _headers = [];
-    readonly ObservableCollection<CdsDataTableBatchAction> _batchActions = [];
-    readonly ObservableCollection<CdsDataTableRowAction> _rowActions = [];
+    readonly CdsItemCollection<CdsDataTableHeader> _headers = [];
+    readonly CdsItemCollection<CdsDataTableBatchAction> _batchActions = [];
+    readonly CdsItemCollection<CdsDataTableRowAction> _rowActions = [];
 }

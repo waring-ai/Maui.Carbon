@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Maui.Carbon.Relay.Models;
+using Maui.Carbon.Relay.Hosting;
 using Maui.Carbon.Relay.Presentation;
 using Maui.Carbon.Relay.ViewModels;
 
@@ -16,9 +17,11 @@ public partial class IssuesView : ContentView
     IssuesViewModel? _vm;
     bool _syncing;
 
-    public IssuesView()
+    public IssuesView(DisplayPreferences preferences)
     {
         InitializeComponent();
+        Table.Size = preferences.TableSize(CdsSize.Md);
+        preferences.Changed += (_, _) => Table.Size = preferences.TableSize(CdsSize.Md);
         CdsTokens.SetColor(Scroller, VisualElement.BackgroundColorProperty, CdsColorKeys.Background);
         IssueColumns.Add(Table, OpenRow);
         Table.RowActionsProvider = RowActions;

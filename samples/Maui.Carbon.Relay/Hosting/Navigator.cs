@@ -5,14 +5,23 @@ namespace Maui.Carbon.Relay.Hosting;
 
 /// <summary>
 /// Navigation inside <see cref="CdsUIShell"/>: the shell has no navigation of its own (its links only raise
-/// <c>Clicked</c>), so this swaps <see cref="CdsContainer.Body"/>. A route maps to a view and a view model from DI.
-/// Top-level routes reset the back stack; detail routes push onto it. The view model is told when its screen is shown
-/// (<see cref="IActivatable.ActivateAsync"/>, with the parameter) and left.
+/// <c>Clicked</c>), so this changes what its <see cref="CdsContainer.Body"/> shows. A route maps to a view and a view model
+/// from DI. Top-level routes reset the back stack; detail routes push onto it. The view model is told when its screen is
+/// shown (<see cref="IActivatable.ActivateAsync"/>, with the parameter) and left.
+/// <para>
+/// The body is a deck of screens with one visible. Screens mapped with <c>keepAttached</c> (the singleton top-level ones)
+/// stay in it, hidden while not shown: taking a large screen out of the window and putting it back costs MAUI hundreds of
+/// milliseconds each time (every element re-propagates the window and resources, and re-creates its native gestures and
+/// subviews), where hiding it costs nothing. Other screens leave the deck when they leave the back stack, so they can be
+/// collected.
+/// </para>
 /// </summary>
 public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logger) : INavigator
 {
-    readonly Dictionary<string, (Type View, Type ViewModel)> _routes = [];
+    readonly Dictionary<string, (Type View, Type ViewModel, bool Keep)> _routes = [];
     readonly Stack<Entry> _stack = new();
+    readonly Grid _deck = new();
+    readonly HashSet<View> _kept = [];
     CdsUIShell? _shell;
     Entry? _pending;
 
@@ -27,12 +36,15 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
 
     public event EventHandler<string>? Navigated;
 
-    /// <summary>Registers a route. Register views and view models in DI too (singletons keep their state between visits).</summary>
-    public Navigator Map<TView, TViewModel>(string route)
+    /// <summary>
+    /// Registers a route. Register views and view models in DI too (singletons keep their state between visits). Pass
+    /// <paramref name="keepAttached"/> for a singleton view: it then stays in the window, hidden, between visits.
+    /// </summary>
+    public Navigator Map<TView, TViewModel>(string route, bool keepAttached = false)
         where TView : View
         where TViewModel : class, IActivatable
     {
-        _routes[route] = (typeof(TView), typeof(TViewModel));
+        _routes[route] = (typeof(TView), typeof(TViewModel), keepAttached);
         return this;
     }
 
@@ -40,14 +52,15 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
     public void Attach(CdsUIShell shell)
     {
         _shell = shell;
-        if (_stack.TryPeek(out var top)) shell.Body = top.View;
+        shell.Body = _deck;
     }
 
     /// <summary>Forgets the stack (sign out) so the next sign-in starts fresh.</summary>
     public void Reset()
     {
         while (_stack.TryPop(out var e)) e.ViewModel.Deactivate();
-        if (_shell is not null) _shell.Body = null;
+        _deck.Children.Clear();
+        _kept.Clear();
     }
 
     public async Task NavigateAsync(string route, object? parameter = null)
@@ -72,6 +85,7 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
         var view = (View)services.GetRequiredService(target.View);
         var viewModel = (IActivatable)services.GetRequiredService(target.ViewModel);
         view.BindingContext = viewModel;
+        if (target.Keep) _kept.Add(view);
         var entry = new Entry(route, parameter, view, viewModel);
         _stack.Push(entry);
         await ShowAsync(entry);
@@ -87,7 +101,7 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
     async Task ShowAsync(Entry entry)
     {
         _pending = entry;
-        if (_shell is not null) _shell.Body = entry.View;
+        Present(entry.View);
         Navigated?.Invoke(this, entry.Route);
         logger.LogInformation("Showing {Route} {Parameter}", entry.Route, entry.Parameter);
         try
@@ -101,5 +115,18 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
             throw;
         }
         if (ReferenceEquals(_pending, entry)) _pending = null;
+    }
+
+    /// <summary>Shows <paramref name="view"/> in the deck, hides the rest, and drops screens nothing needs any more.</summary>
+    void Present(View view)
+    {
+        if (view.Parent != _deck) _deck.Add(view);
+        foreach (var child in _deck.Children.OfType<View>().ToList())
+        {
+            if (ReferenceEquals(child, view)) continue;
+            if (_kept.Contains(child) || _stack.Any(e => ReferenceEquals(e.View, child))) child.IsVisible = false;
+            else _deck.Remove(child);
+        }
+        view.IsVisible = true;
     }
 }

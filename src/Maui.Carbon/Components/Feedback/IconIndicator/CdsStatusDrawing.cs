@@ -337,7 +337,7 @@ internal sealed class CdsStatusGlyphView : GraphicsView, IDrawable
 
     public CdsStatusGlyphView()
     {
-        Drawable = this;
+        Drawable = new CdsWeakDrawable(this);
         InputTransparent = true;
         BackgroundColor = Colors.Transparent;
         VerticalOptions = LayoutOptions.Center;

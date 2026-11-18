@@ -45,7 +45,8 @@ public class CdsContainedList : CdsControl
         nameof(IsInset), typeof(bool), typeof(CdsContainedList), false,
         propertyChanged: static (b, _, _) => ((CdsContainedList)b).Rebuild());
 
-    readonly ObservableCollection<CdsContainedListItem> _items = [];
+    readonly CdsItemCollection<CdsContainedListItem> _items = [];
+    readonly CdsCoalescedAction _rebuild;
     readonly VerticalStackLayout _stack = new() { Spacing = 0 };
     readonly Grid _header = new();
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.TailTruncation, VerticalOptions = LayoutOptions.Center };
@@ -59,6 +60,7 @@ public class CdsContainedList : CdsControl
     /// <summary>Creates an empty on-page list.</summary>
     public CdsContainedList()
     {
+        _rebuild = new CdsCoalescedAction(this, Rebuild);
         HorizontalOptions = LayoutOptions.Fill;
         VerticalOptions = LayoutOptions.Start;
         AutomationProperties.SetIsInAccessibleTree(_headerRule, false);
@@ -130,10 +132,11 @@ public class CdsContainedList : CdsControl
         SetColor(_searchRule, BoxView.ColorProperty, CdsContainedListTokens.Divider);
     }
 
-    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => Rebuild();
+    void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => _rebuild.Request();
 
     void Rebuild()
     {
+        _rebuild.Cancel();
         var kind = Kind;
         var disclosed = kind == CdsContainedListKind.Disclosed;
         var headerHeight = CdsContainedListMetrics.HeaderHeight(kind, Size);

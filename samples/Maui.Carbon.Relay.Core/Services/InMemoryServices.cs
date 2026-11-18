@@ -465,10 +465,13 @@ public sealed class InMemorySettingsService(MockLatency latency) : ISettingsServ
 {
     public AppSettings Current { get; private set; } = new();
 
+    public event EventHandler? Changed;
+
     public async Task SaveAsync(AppSettings settings, CancellationToken ct = default)
     {
         await latency.WaitAsync(900, ct);
         Current = settings;
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task<string> RegenerateTokenAsync(CancellationToken ct = default)

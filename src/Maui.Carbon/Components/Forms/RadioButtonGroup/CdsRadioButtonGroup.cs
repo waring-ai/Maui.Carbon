@@ -71,7 +71,7 @@ public class CdsRadioButtonGroup : CdsControl
     readonly CdsText _legend = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, Margin = new Thickness(0, 0, 0, CdsSpacing.Spacing03) };
     readonly ContentView _itemsHost = new();
     readonly CdsFormMessage _message = new() { Margin = new Thickness(0, 6, 0, 0) };
-    readonly ObservableCollection<CdsRadioButton> _items = [];
+    readonly CdsItemCollection<CdsRadioButton> _items = [];
     bool _syncing;
 
     /// <summary>Creates an empty group.</summary>

@@ -108,7 +108,7 @@ public class CdsDataTableSkeleton : CdsControl
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsDataTableSkeleton), "Table (loading)", propertyChanged: OnChanged);
 
-    readonly ObservableCollection<string> _headers = [];
+    readonly CdsItemCollection<string> _headers = [];
     readonly VerticalStackLayout _root = new() { Spacing = 0 };
 
     /// <summary>Creates a 5 by 5 skeleton with a title block and toolbar.</summary>
