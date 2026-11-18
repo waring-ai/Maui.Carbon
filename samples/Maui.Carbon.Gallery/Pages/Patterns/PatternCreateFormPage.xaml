@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternCreateFormPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Create cluster" Description="The page opens after a failed submit: the error summary sits above the form and the cluster name shows its inline error. Fields validate when they lose focus; fix the name and the summary and the error go away. The worker node count warns below 3 and the cost panel follows every change.">
+            <Grid ColumnDefinitions="*,272" ColumnSpacing="32" RowDefinitions="Auto">
+                <VerticalStackLayout Grid.Column="0" Spacing="0">
+                    <cds:CdsBreadcrumb NoTrailingSlash="True">
+                        <cds:CdsBreadcrumbItem Text="Kubernetes" />
+                        <cds:CdsBreadcrumbItem Text="Clusters" />
+                        <cds:CdsBreadcrumbItem Text="Create cluster" IsCurrentPage="True" />
+                    </cds:CdsBreadcrumb>
+
+                    <VerticalStackLayout Spacing="8" Margin="0,16,0,32">
+                        <cds:CdsText Text="Create cluster" TypeStyle="Heading05" SemanticProperties.HeadingLevel="Level1" />
+                        <cds:CdsText Text="Provision a managed Kubernetes cluster. You can add worker pools and change the node count after the cluster is created."
+                                     TypeStyle="Body01" Tone="Secondary" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                    </VerticalStackLayout>
+
+                    <cds:CdsForm x:Name="Form" WidthRequest="576" HorizontalOptions="Start" SemanticProperties.Description="Create cluster" Submitted="OnFormSubmitted">
+                        <cds:CdsInlineNotification x:Name="ErrorSummary" Kind="Error" IsLowContrast="True" HideCloseButton="True"
+                                                   Title="Fix 1 error before you continue."
+                                                   Subtitle="Cluster name: use lowercase letters, numbers and hyphens, starting with a letter." />
+
+                        <cds:CdsFormGroup>
+                            <VerticalStackLayout Spacing="16">
+                                <cds:CdsText Text="Cluster details" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsStack Gap="6">
+                                    <cds:CdsTextInput x:Name="NameInput" Label="Cluster name" Text="Prod_EU 01" TextChanged="OnNameTextChanged" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                                        <cds:CdsSelect x:Name="RegionSelect" Grid.Column="0" Label="Region" SelectedItem="eu-de" VerticalOptions="Start"
+                                                       HelperText="Choose the region closest to your users." SelectedItemChanged="OnFieldChanged">
+                                            <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                                            <cds:CdsSelectItem Value="us-east" Text="Washington DC (us-east)" />
+                                            <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                                            <cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" />
+                                            <cds:CdsSelectItem Value="jp-tok" Text="Tokyo (jp-tok)" />
+                                        </cds:CdsSelect>
+                                        <cds:CdsDropdown x:Name="VersionDropdown" Grid.Column="1" Label="Kubernetes version" Placeholder="Choose a version" VerticalOptions="Start"
+                                                         HelperText="Supported until June 2027." />
+                                    </Grid>
+                                    <cds:CdsTextArea x:Name="DescriptionInput" Label="Description (optional)" Rows="3" EnableCounter="True" MaxCount="200"
+                                                     Text="Production workloads for the EU storefront." HelperText="Shown in the cluster list and in billing reports." />
+                                </cds:CdsStack>
+                            </VerticalStackLayout>
+                        </cds:CdsFormGroup>
+
+                        <cds:CdsFormGroup>
+                            <VerticalStackLayout Spacing="16">
+                                <cds:CdsText Text="Capacity" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsStack Gap="6">
+                                    <cds:CdsRadioButtonGroup x:Name="PlanGroup" Legend="Plan" Orientation="Vertical" SelectedValue="standard" SelectionChanged="OnPlanChanged">
+                                        <cds:CdsRadioButton Label="Free: 1 node, 2 vCPU, 4 GB, deleted after 30 days" Value="free" />
+                                        <cds:CdsRadioButton Label="Standard: 4 vCPU, 16 GB per node" Value="standard" />
+                                        <cds:CdsRadioButton Label="Dedicated: 16 vCPU, 64 GB per node, single tenant" Value="dedicated" />
+                                    </cds:CdsRadioButtonGroup>
+                                    <cds:CdsNumberInput x:Name="NodesInput" Label="Worker nodes" Min="1" Max="50" Value="2" HelperText="1 to 50 nodes per zone."
+                                                        InvalidText="Enter a number from 1 to 50. For example, 3." WarnText="Clusters with fewer than 3 worker nodes are not highly available."
+                                                        ValueChanged="OnNodesChanged" />
+                                </cds:CdsStack>
+                            </VerticalStackLayout>
+                        </cds:CdsFormGroup>
+
+                        <cds:CdsFormGroup>
+                            <VerticalStackLayout Spacing="16">
+                                <cds:CdsText Text="Options" TypeStyle="Heading03" SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsStack Gap="6">
+                                    <cds:CdsToggle x:Name="AutoscaleToggle" LabelText="Autoscale worker nodes" LabelA="Off" LabelB="On" IsToggled="True" Toggled="OnAutoscaleToggled" />
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsCheckbox Label="Encrypt boot volumes with my own key" IsChecked="True" />
+                                        <cds:CdsCheckbox Label="Send cluster logs to Log Analysis" />
+                                    </VerticalStackLayout>
+                                </cds:CdsStack>
+                            </VerticalStackLayout>
+                        </cds:CdsFormGroup>
+
+                        <VerticalStackLayout Spacing="12" Margin="0,16,0,0">
+                            <cds:CdsButtonSet>
+                                <cds:CdsButton x:Name="CreateButton" Text="Create cluster" Clicked="OnCreateClicked" />
+                                <cds:CdsButton Text="Cancel" Kind="Secondary" Clicked="OnCancelClicked" />
+                            </cds:CdsButtonSet>
+                            <cds:CdsText x:Name="Status" Text="Not submitted" Tone="Secondary" TypeStyle="Label01" />
+                        </VerticalStackLayout>
+                    </cds:CdsForm>
+                </VerticalStackLayout>
+
+                <cds:CdsTile Grid.Column="1" VerticalOptions="Start" SemanticProperties.Description="Cost estimate">
+                    <VerticalStackLayout Spacing="16">
+                        <cds:CdsText Text="Estimated cost" TypeStyle="HeadingCompact02" SemanticProperties.HeadingLevel="Level2" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" RowSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <cds:CdsText Grid.Row="0" Text="Plan" Tone="Secondary" />
+                            <cds:CdsText x:Name="PlanValue" Grid.Row="0" Grid.Column="1" HorizontalTextAlignment="End" />
+                            <cds:CdsText Grid.Row="1" Text="Region" Tone="Secondary" />
+                            <cds:CdsText x:Name="RegionValue" Grid.Row="1" Grid.Column="1" HorizontalTextAlignment="End" />
+                            <cds:CdsText Grid.Row="2" Text="Worker nodes" Tone="Secondary" />
+                            <cds:CdsText x:Name="NodesValue" Grid.Row="2" Grid.Column="1" HorizontalTextAlignment="End" />
+                            <cds:CdsText Grid.Row="3" Text="Autoscaling" Tone="Secondary" />
+                            <cds:CdsText x:Name="AutoscaleValue" Grid.Row="3" Grid.Column="1" HorizontalTextAlignment="End" />
+                        </Grid>
+                        <BoxView x:Name="Rule" HeightRequest="1" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <cds:CdsText Text="Per month" Tone="Secondary" VerticalOptions="End" />
+                            <cds:CdsText x:Name="TotalValue" Grid.Column="1" TypeStyle="Heading04" HorizontalTextAlignment="End" />
+                        </Grid>
+                        <cds:CdsText Text="Estimate based on 730 hours. Storage and egress are billed separately." TypeStyle="HelperText01" Tone="Helper" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+            </Grid>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

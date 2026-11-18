@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternEmptyStatesPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="No data yet: first use" Description="In the table area, with the single primary action of the page. The block is left-aligned: icon, heading-03 title, body-01 text, then the button and a link 24 apart. The table has no rows, so its empty slot takes the block.">
+            <cds:CdsDataTable x:Name="BucketTable" Title="Buckets" Description="Object storage buckets in this account." Size="Md" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="No search results" Description="The toolbar stays so people can change the query. The title names the query and the tertiary button clears the search, which brings the clusters back.">
+            <cds:CdsDataTable x:Name="SearchTable" Label="Clusters" Size="Md" IsSearchable="True" IsPersistentSearch="True" SearchText="staging-ap" SearchPlaceholder="Search clusters">
+                <cds:CdsDataTable.ToolbarContent>
+                    <cds:CdsButton Text="Create cluster" Icon="Add" Size="Md" />
+                </cds:CdsDataTable.ToolbarContent>
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Error loading and no permission" Description="In tiles, when several empty states can show at once, the buttons are tertiary or secondary so they do not compete. The error says what failed and offers a retry; the permission state names the missing role and who grants it.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
+                <cds:CdsTile Grid.Column="0" VerticalOptions="Fill">
+                    <VerticalStackLayout Spacing="0">
+                        <cds:CdsText Text="Usage this month" TypeStyle="HeadingCompact02" SemanticProperties.HeadingLevel="Level2" />
+                        <ContentView x:Name="ErrorHost" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+                <cds:CdsTile Grid.Column="1" VerticalOptions="Fill">
+                    <VerticalStackLayout Spacing="0">
+                        <cds:CdsText Text="API keys" TypeStyle="HeadingCompact02" SemanticProperties.HeadingLevel="Level2" />
+                        <ContentView x:Name="PermissionHost" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+            </Grid>
+        </g:GalleryExample>
+
+        <cds:CdsText x:Name="Status" Text="Choose an action in an empty state." Tone="Secondary" TypeStyle="Label01" />
+
+    </VerticalStackLayout>
+</g:GalleryPage>

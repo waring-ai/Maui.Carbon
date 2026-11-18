@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternLoadingPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Skeleton first, then content" Description="The page layout renders at once with skeletons the same size as the content (left); the content replaces them in place when it arrives (right). Reload shows the skeletons again for two seconds.">
+            <VerticalStackLayout Spacing="16">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="24">
+                    <cds:CdsTile Grid.Column="0" VerticalOptions="Start">
+                        <ContentView x:Name="SkeletonHost" />
+                    </cds:CdsTile>
+                    <cds:CdsTile Grid.Column="1" VerticalOptions="Start">
+                        <ContentView x:Name="LoadedHost" />
+                    </cds:CdsTile>
+                </Grid>
+                <cds:CdsButton Text="Reload" Kind="Tertiary" Size="Md" Icon="Restart" Clicked="OnReloadClicked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inline loading on a button action" Description="InlineLoading takes the primary button's slot (same width, inset 16 like the button label) and moves from active to finished or error. Cancel is disabled while the action runs. The first row is live: press Create cluster.">
+            <VerticalStackLayout x:Name="ButtonRows" Spacing="16" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Progress bar for measurable work" Description="The label names the item and the helper text gives the amount done and the time left, then the outcome. A failed upload says how to retry. Upload again restarts the first bar.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTile>
+                    <cds:CdsLayer>
+                        <VerticalStackLayout Spacing="24">
+                            <cds:CdsProgressBar x:Name="UploadBar" Label="Uploading backup-2026-11-17.tar.gz" Value="412" Max="640" HelperText="412 MB of 640 MB, about 1 minute left" />
+                            <cds:CdsProgressBar Label="Uploading media-assets.zip" Value="100" Status="Finished" HelperText="Upload complete. 1.2 GB added to bucket web-assets-eu." />
+                            <cds:CdsProgressBar Label="Uploading logs-archive-q3.tar.gz" Value="30" Status="Error" HelperText="Upload failed: the connection was reset. Choose the file again to retry." />
+                        </VerticalStackLayout>
+                    </cds:CdsLayer>
+                </cds:CdsTile>
+                <cds:CdsButton Text="Upload again" Kind="Tertiary" Size="Md" Icon="Restart" Clicked="OnUploadAgainClicked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Blocking loading" Description="A blocking Loading covers only the region that is blocked, with a description. The frame below shows that state; the button blocks the whole page for three seconds with the overlay Loading.">
+            <VerticalStackLayout Spacing="16">
+                <Border x:Name="RegionFrame" StrokeThickness="1" StrokeShape="Rectangle" HeightRequest="240" Padding="0">
+                    <Grid>
+                        <VerticalStackLayout Padding="24" Spacing="16" SemanticProperties.Description="Restore snapshot (busy)">
+                            <cds:CdsText Text="Restore snapshot" TypeStyle="Heading04" SemanticProperties.HeadingLevel="Level2" />
+                            <cds:CdsText Text="Restoring snap-2026-11-16-0200 to cluster prod-eu-01 replaces its persistent volumes. Workloads restart when the restore finishes."
+                                         TypeStyle="Body01" Tone="Secondary" MaximumWidthRequest="480" HorizontalOptions="Start" />
+                            <cds:CdsButton Text="Restore" IsEnabled="False" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                        <Grid x:Name="Scrim" InputTransparent="False">
+                            <cds:CdsLoading WithOverlay="False" Description="Restoring snapshot" />
+                        </Grid>
+                    </Grid>
+                </Border>
+                <cds:CdsButton Text="Restore snapshot" Kind="Tertiary" Size="Md" Clicked="OnRestoreClicked" />
+                <cds:CdsLoading x:Name="PageLoading" IsActive="False" Description="Restoring snapshot" />
+                <cds:CdsText x:Name="Status" Text="Idle" Tone="Secondary" TypeStyle="Label01" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

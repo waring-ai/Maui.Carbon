@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternFilteringPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Instant filters in a left panel" Description="Results update on every change. The panel has one accordion item per category with its own count and clear; the count, the applied-filter tags and Clear filters sit above the results. Clear every filter to see the empty state for no matches.">
+            <VerticalStackLayout Spacing="0">
+                <cds:CdsBreadcrumb NoTrailingSlash="True">
+                    <cds:CdsBreadcrumbItem Text="Kubernetes" />
+                    <cds:CdsBreadcrumbItem Text="Clusters" IsCurrentPage="True" />
+                </cds:CdsBreadcrumb>
+                <cds:CdsText Text="Clusters" TypeStyle="Heading05" SemanticProperties.HeadingLevel="Level1" Margin="0,16,0,24" />
+
+                <Grid ColumnDefinitions="256,*" ColumnSpacing="32">
+                    <VerticalStackLayout x:Name="FilterPanel" Grid.Column="0" Spacing="0" VerticalOptions="Start" SemanticProperties.Description="Filters">
+                        <Grid x:Name="PanelHead" HeightRequest="48" ColumnDefinitions="*,Auto" Padding="16,0,0,0">
+                            <cds:CdsText Text="Filters" TypeStyle="HeadingCompact01" VerticalOptions="Center" SemanticProperties.HeadingLevel="Level2" />
+                            <cds:CdsButton x:Name="ClearAllButton" Grid.Column="1" Text="Clear all" Kind="Ghost" Size="Md" Clicked="OnClearAllClicked" />
+                        </Grid>
+                        <BoxView x:Name="PanelRule" HeightRequest="1" />
+                        <cds:CdsAccordion Align="End" Size="Md">
+                            <cds:CdsAccordionItem x:Name="StatusItem" Title="Status" IsOpen="True">
+                                <VerticalStackLayout x:Name="StatusHost" Spacing="4" />
+                            </cds:CdsAccordionItem>
+                            <cds:CdsAccordionItem x:Name="RegionItem" Title="Region" IsOpen="True">
+                                <VerticalStackLayout x:Name="RegionHost" Spacing="4" />
+                            </cds:CdsAccordionItem>
+                            <cds:CdsAccordionItem x:Name="VersionItem" Title="Kubernetes version" IsOpen="True">
+                                <cds:CdsRadioButtonGroup x:Name="VersionGroup" Legend="Kubernetes version" Orientation="Vertical" SelectedValue="any" SelectionChanged="OnVersionChanged">
+                                    <cds:CdsRadioButton Label="Any version" Value="any" />
+                                    <cds:CdsRadioButton Label="1.31" Value="1.31" />
+                                    <cds:CdsRadioButton Label="1.30" Value="1.30" />
+                                    <cds:CdsRadioButton Label="1.29 (end of support)" Value="1.29" />
+                                </cds:CdsRadioButtonGroup>
+                            </cds:CdsAccordionItem>
+                        </cds:CdsAccordion>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="0">
+                        <cds:CdsSearch x:Name="Search" Label="Search clusters" Placeholder="Search clusters by name" Size="Lg" TextChanged="OnSearchTextChanged" />
+                        <FlexLayout x:Name="AppliedRow" Wrap="Wrap" AlignItems="Center" Margin="0,16,0,8" MinimumHeightRequest="40" />
+                        <cds:CdsDataTable x:Name="ResultsTable" Label="Clusters, filtered" Size="Md" IsSortable="True" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Batch filters in a toolbar flyout" Description="Choices apply together with Apply filters. When the flyout is closed, a tag beside the filter button shows how many filters are on and clears them without reopening. The flyout is open here: the draft adds Tokyo, which is not applied until you press Apply filters.">
+            <VerticalStackLayout Spacing="0">
+                <Grid x:Name="BatchToolbar" ColumnDefinitions="*,Auto,Auto,Auto" HeightRequest="48">
+                    <cds:CdsSearch x:Name="BatchSearch" Label="Search clusters" Placeholder="Search clusters by name" Size="Lg" TextChanged="OnBatchSearchChanged" />
+                    <cds:CdsDismissibleTag x:Name="BatchTag" Grid.Column="1" Type="HighContrast" VerticalOptions="Center" Margin="8,0" Dismissed="OnBatchTagDismissed" />
+                    <cds:CdsPopover x:Name="FlyoutPopover" Grid.Column="2" Placement="BottomEnd" IsOpen="True" VerticalOptions="Fill" Closed="OnFlyoutClosed">
+                        <cds:CdsIconButton x:Name="FilterButton" Icon="Filter" Label="Filter" Kind="Ghost" Size="Lg" Clicked="OnFilterClicked" />
+                        <cds:CdsPopover.PopoverContent>
+                            <VerticalStackLayout Spacing="0" WidthRequest="368">
+                                <VerticalStackLayout Padding="16" Spacing="16">
+                                    <VerticalStackLayout x:Name="FlyoutStatus" Spacing="4" />
+                                    <VerticalStackLayout x:Name="FlyoutRegion" Spacing="4" />
+                                </VerticalStackLayout>
+                                <Grid ColumnDefinitions="*,*">
+                                    <cds:CdsButton Text="Reset" Kind="Secondary" Size="Lg" HorizontalOptions="Fill" Clicked="OnResetClicked" />
+                                    <cds:CdsButton Grid.Column="1" Text="Apply filters" Size="Lg" HorizontalOptions="Fill" Clicked="OnApplyClicked" />
+                                </Grid>
+                            </VerticalStackLayout>
+                        </cds:CdsPopover.PopoverContent>
+                    </cds:CdsPopover>
+                    <cds:CdsButton Grid.Column="3" Text="Create cluster" Icon="Add" Size="Lg" />
+                </Grid>
+                <cds:CdsText x:Name="BatchCount" Padding="16,12" TypeStyle="BodyCompact01" Tone="Secondary" />
+                <cds:CdsDataTable x:Name="BatchTable" Label="Clusters, batch filtered" Size="Md" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
