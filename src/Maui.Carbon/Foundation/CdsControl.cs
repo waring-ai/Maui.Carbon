@@ -22,6 +22,7 @@ public abstract class CdsControl : ContentView
     CdsInteractionState _state;
     bool _settingChrome;
     bool _visualsPending;
+    bool _visualsApplied;
     VisualElement? _focusTarget;
 
     /// <summary>Initializes the control: context tracking and pointer hover.</summary>
@@ -112,6 +113,22 @@ public abstract class CdsControl : ContentView
             _visualsPending = true;
             return;
         }
+        _visualsApplied = true;
+        ApplyVisuals();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParentSet()
+    {
+        base.OnParentSet();
+        // Construction is complete by the time a parent is set (never true inside a base constructor), so this is the
+        // safe place to guarantee one ApplyVisuals for controls whose state never changes after construction.
+        if (Parent is not null && !_visualsApplied) ApplyVisualsOnce();
+    }
+
+    void ApplyVisualsOnce()
+    {
+        _visualsApplied = true;
         ApplyVisuals();
     }
 
@@ -130,6 +147,7 @@ public abstract class CdsControl : ContentView
         if (_visualsPending)
         {
             _visualsPending = false;
+            _visualsApplied = true;
             ApplyVisuals();
         }
     }

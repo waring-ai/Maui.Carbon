@@ -267,6 +267,8 @@ public abstract partial class CdsListBox : CdsFormField
         }
         if (_overlay is not null) return;
 
+        // Before the rows are built: a multi-select snapshots its selection here to sort it first.
+        if (!_waitingForSize) OnListOpening();
         _model.SetRows(BuildRows());
         if (_model.Rows.Count == 0) return;
 
@@ -292,7 +294,6 @@ public abstract partial class CdsListBox : CdsFormField
     void ShowOverlay()
     {
         _hidingForEmpty = false;
-        OnListOpening();
         var rows = _model.Rows;
         var list = new CdsListBoxList(CdsListBoxTokens.Coerce(Size), UsesInlineType, IsMultiple, Label ?? Placeholder, IsFluidMode ? CdsFieldChrome.FluidFieldHeight : null);
         list.Build(rows, i => IsRowChosen(rows[i]), CreateRowContent);
