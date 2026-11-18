@@ -86,6 +86,17 @@ login).
 - Use tokens, never hex values: `BackgroundColor="{DynamicResource CdsLayer01}"`,
   `Padding="{x:Static cds:CdsSpacing.Spacing05}"`, `<cds:CdsText TypeStyle="BodyCompact01" />`.
 
+## Differences from the web components
+
+- **Tables** render every row (they are not virtualized), so page large data sets with `CdsPagination`. Columns take
+  fixed or star widths rather than sizing to their content; a table whose columns need more than the available width
+  scrolls sideways, as Carbon's does.
+- **Modals** cover the page they open on. The scrim cannot cover native Shell chrome (navigation bar, flyout); use
+  `CdsUIShell` for a fully Carbon-styled frame.
+- **Keyboard**: on Mac Catalyst, Tab focus follows the macOS *Keyboard navigation* setting.
+- **Verification**: the gallery is run and screenshot-reviewed on Mac Catalyst in all four themes. iOS, Android and
+  Windows are compiled (CI builds them) but have not yet been reviewed on a device.
+
 ## Repository
 
 | Path | What |
@@ -99,6 +110,7 @@ login).
 
 Build and test: `tools/verify.sh` (add `--gallery` to build the gallery; `--fast` for the inner loop).
 Run the gallery: `dotnet build samples/Maui.Carbon.Gallery -t:Run -f net10.0-maccatalyst -r maccatalyst-arm64`.
+Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build).
 
 After updating `design/carbon/tokens.json` or the icons, regenerate with
 `dotnet run --project tools/Maui.Carbon.Generator`.
