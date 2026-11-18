@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.PaginationPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Items per page, the range, a page select with 'of N pages' and previous and next buttons. Changing the page size keeps the first visible item on screen.">
+            <VerticalStackLayout Spacing="12">
+                <cds:CdsPagination x:Name="Interactive" TotalItems="103" PageSizes="10, 20, 50" PageSize="10" Page="2" PageChanged="OnChanged" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Showing items 11 to 20 (page 2, 10 per page)." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Small (32), medium (40, default) and large (48); use the size of the table above.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsPagination Size="Sm" TotalItems="103" PageSizes="10, 20, 50" />
+                <cds:CdsPagination Size="Md" TotalItems="103" PageSizes="10, 20, 50" />
+                <cds:CdsPagination Size="Lg" TotalItems="103" PageSizes="10, 20, 50" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="First and last page disable the matching arrow; locked page size and page selects; everything disabled.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" Page="1" />
+                <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" Page="11" />
+                <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" Page="4" IsPageInputDisabled="True" IsPageSizeInputDisabled="True" />
+                <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" Page="4" IsEnabled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Unknown number of pages" Description="Shows 'page N' instead of the page select and keeps next enabled; the second one has reached the end.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsPagination IsPagesUnknown="True" PageSizes="10, 25" Page="3" />
+                <cds:CdsPagination IsPagesUnknown="True" IsLastPage="True" PageSizes="10, 25" Page="5" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom text" Description="Name the items in the range text, and translate or rename the labels and buttons.">
+            <cds:CdsPagination x:Name="Custom" TotalItems="268" PageSizes="25, 50, 100" ItemsPerPageText="Buckets per page:" BackwardText="Previous buckets" ForwardText="Next buckets" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Many pages" Description="Above 100 pages the page select would be unwieldy, so a numeric field takes its place: type a page and press Return.">
+            <cds:CdsPagination TotalItems="25000" PageSizes="10, 20, 50" Page="37" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Narrow" Description="Below 672 wide only the item range and the arrow buttons remain.">
+            <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" WidthRequest="420" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The bar in every theme zone, layered on a surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsPagination TotalItems="103" PageSizes="10, 20, 50" Page="2" Size="Sm" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

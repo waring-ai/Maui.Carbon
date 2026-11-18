@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Data.TreeViewPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Folders" Description="Clicking the chevron only expands or collapses; clicking anywhere else on the row selects it and makes it the active node (the 4px bar). Up and Down move through visible nodes, Right opens a parent and then enters it, Left closes it or goes to the parent, Home and End jump.">
+            <VerticalStackLayout Spacing="12" MaximumWidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsTreeView x:Name="Folders" Label="Folders in logs-archive" SelectionChanged="OnFolderSelected" NodeToggled="OnFolderToggled">
+                    <cds:CdsTreeNode Id="y2026" Label="2026" Icon="Folder" IsExpanded="True">
+                        <cds:CdsTreeNode Id="m03" Label="03 (March)" Icon="Folder" IsExpanded="True">
+                            <cds:CdsTreeNode Id="m03-api" Label="api-gateway.log" Icon="Document" />
+                            <cds:CdsTreeNode Id="m03-auth" Label="auth-service.log" Icon="Document" />
+                        </cds:CdsTreeNode>
+                        <cds:CdsTreeNode Id="m02" Label="02 (February)" Icon="Folder" />
+                        <cds:CdsTreeNode Id="m01" Label="01 (January, archived)" Icon="Folder" IsDisabled="True" />
+                    </cds:CdsTreeNode>
+                    <cds:CdsTreeNode Id="y2025" Label="2025" Icon="Folder">
+                        <cds:CdsTreeNode Id="m12" Label="12 (December)" Icon="Folder" />
+                    </cds:CdsTreeNode>
+                    <cds:CdsTreeNode Id="readme" Label="README.txt" Icon="Document" />
+                </cds:CdsTreeView>
+                <cds:CdsText x:Name="FolderStatus" Tone="Secondary" Text="Selected: 03 (March)" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Without icons" Description="Use icons on every node or on none. Nested nodes indent by 16 (24 with icons).">
+            <cds:CdsTreeView x:Name="Plain" Label="Resource groups" MaximumWidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsTreeNode Label="production" IsExpanded="True">
+                    <cds:CdsTreeNode Label="eu-de" IsExpanded="True">
+                        <cds:CdsTreeNode Label="cluster prod-eu-de-1" />
+                        <cds:CdsTreeNode Label="cluster prod-eu-de-2" />
+                    </cds:CdsTreeNode>
+                    <cds:CdsTreeNode Label="us-east">
+                        <cds:CdsTreeNode Label="cluster prod-us-east-1" />
+                    </cds:CdsTreeNode>
+                </cds:CdsTreeNode>
+                <cds:CdsTreeNode Label="staging" />
+            </cds:CdsTreeView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="Rows are 32 (sm, default) or 24 (xs) high.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsTreeView x:Name="SizeSm" Label="Small" Size="Sm" WidthRequest="260" />
+                <cds:CdsTreeView x:Name="SizeXs" Label="Extra small" Size="Xs" WidthRequest="260" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Multiselect" Description="With multiselect a click toggles a node in the selection (the web version uses Ctrl or Cmd with the click). Two nodes are selected.">
+            <VerticalStackLayout Spacing="12" MaximumWidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsTreeView x:Name="Multi" Label="Pick folders to archive" IsMultiselect="True" SelectionChanged="OnMultiSelected">
+                    <cds:CdsTreeNode Id="a" Label="builds" Icon="Folder" IsExpanded="True">
+                        <cds:CdsTreeNode Id="a1" Label="main" Icon="Folder" />
+                        <cds:CdsTreeNode Id="a2" Label="release-1.4" Icon="Folder" />
+                        <cds:CdsTreeNode Id="a3" Label="hotfix" Icon="Folder" />
+                    </cds:CdsTreeNode>
+                    <cds:CdsTreeNode Id="b" Label="coverage" Icon="Folder" />
+                </cds:CdsTreeView>
+                <cds:CdsText x:Name="MultiStatus" Tone="Secondary" Text="2 folders selected" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Hidden label" Description="HideLabel keeps the name for screen readers when the context makes it obvious.">
+            <cds:CdsTreeView Label="Pages of this guide" HideLabel="True" MaximumWidthRequest="360" HorizontalOptions="Start">
+                <cds:CdsTreeNode Label="Getting started" IsExpanded="True">
+                    <cds:CdsTreeNode Label="Install the CLI" />
+                    <cds:CdsTreeNode Label="Create your first cluster" />
+                </cds:CdsTreeNode>
+                <cds:CdsTreeNode Label="Concepts" />
+            </cds:CdsTreeView>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The tree in every theme zone, layered on a surface; a selected node, the active bar and a disabled node.">
+            <g:ThemeStrip x:Name="Strip" Layered="True" />
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
