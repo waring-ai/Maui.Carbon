@@ -67,7 +67,9 @@ internal sealed class CdsAppleHitTargetView : UIButton
 {
     static int s_next;
 
-    public CdsAppleHitTargetView() : base(UIButtonType.Custom)
+    // The default initializer is a custom-type button. UIKit rejects UIButton(UIButtonType) from a subclass, and
+    // logs it with a stack trace for every instance.
+    public CdsAppleHitTargetView() : base()
     {
         BackgroundColor = UIColor.Clear;
         if (OperatingSystem.IsIOSVersionAtLeast(15) || OperatingSystem.IsMacCatalystVersionAtLeast(15))
