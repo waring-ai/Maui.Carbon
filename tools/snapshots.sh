@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 OUT="${1:-$PWD/out/shots}"; THEMES="${2:-white,g100}"; CONFIG="${3:-Debug}"
 rm -rf "$OUT"; mkdir -p "$OUT"
 if [[ "${APP:-gallery}" == "relay" ]]; then
-  RELAY="samples/Maui.Carbon.Relay/bin/$CONFIG/net10.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Relay.app"
+  RELAY="samples/Maui.Carbon.Relay/bin/$CONFIG/net11.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Relay.app"
   open -n -W --env CARBON_SNAPSHOT_DIR="$OUT" --env CARBON_SNAPSHOT_THEMES="$THEMES" "$RELAY"
   echo "$(ls "$OUT"/*.png 2>/dev/null | wc -l | tr -d ' ') screenshots"
   grep -v ': ok' "$OUT/snapshot-log.txt" || echo "all captured"
@@ -17,7 +17,7 @@ if [[ "${APP:-gallery}" == "relay" ]]; then
   grep -hE '\[(ERR|FTL)\]' -A20 "$OUT"/relay-*.log 2>/dev/null || echo "log: no errors"
   exit 0
 fi
-APP="samples/Maui.Carbon.Gallery/bin/$CONFIG/net10.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Gallery.app"
+APP="samples/Maui.Carbon.Gallery/bin/$CONFIG/net11.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Gallery.app"
 for c in Foundations Actions Forms FluidForms Data Navigation Containers Overlays Feedback AI Layout Patterns; do
   before=$(ls "$OUT"/*.png 2>/dev/null | wc -l)
   open -n -W --env CARBON_SNAPSHOT_DIR="$OUT" --env CARBON_SNAPSHOT_CATEGORY="$c" --env CARBON_SNAPSHOT_THEMES="$THEMES" "$APP"

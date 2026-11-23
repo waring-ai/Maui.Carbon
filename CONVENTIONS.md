@@ -198,7 +198,7 @@ This machine hangs MSBuild unless node reuse and shared compilation are off. Alw
 
 ```bash
 export MSBUILDDISABLENODEREUSE=1
-tools/verify.sh --fast          # inner loop: generator check, library net10.0, tests
+tools/verify.sh --fast          # inner loop: generator check, library net11.0, tests
 tools/verify.sh                 # before you finish: + maccatalyst, ios, android & windows compile checks
 tools/verify.sh --samples       # + the gallery and the Relay sample for Mac Catalyst (--gallery still works)
 ```
@@ -223,7 +223,7 @@ interaction (open states shown via properties, not clicks) so screenshots show t
 with CommunityToolkit.Mvvm, DI and an in-memory backend. When a component changes in a way apps feel (a renamed
 property, a new required setup step), update Relay too.
 
-- **Core vs app.** `samples/Maui.Carbon.Relay.Core` is plain `net10.0` and holds the models, mock services, pure
+- **Core vs app.** `samples/Maui.Carbon.Relay.Core` is plain `net11.0` and holds the models, mock services, pure
   logic and view models. It never references MAUI or Maui.Carbon, so `tests/Maui.Carbon.Relay.Tests` can test it.
   The app maps domain enums to Carbon in `Presentation/CarbonMap.cs` and `Converters.cs`.
 - **Adding a screen.**

@@ -111,19 +111,12 @@ internal sealed class CdsFileDropContainer : CdsControl
             {
                 foreach (var item in session.Items)
                 {
-                    var tcs = new TaskCompletionSource<string?>();
-                    item.ItemProvider.LoadItem("public.file-url", null, (data, _) =>
-                    {
-                        var url = data switch
-                        {
-                            Foundation.NSUrl u => u,
-                            Foundation.NSData d => Foundation.NSUrl.FromString(new Foundation.NSString(d, Foundation.NSStringEncoding.UTF8)),
-                            _ => null,
-                        };
-                        tcs.TrySetResult(url?.Path);
-                    });
-                    var path = await tcs.Task;
-                    if (!string.IsNullOrEmpty(path)) paths.Add(path);
+                    // NSUrl reads a dropped file as its file URL (LoadItem("public.file-url"), which did the same by
+                    // type identifier, is obsolete from the iOS/Mac Catalyst 27 SDK).
+                    if (!item.ItemProvider.CanLoadObject(typeof(Foundation.NSUrl))) continue;
+
+                    var url = await item.ItemProvider.LoadObjectAsync<Foundation.NSUrl>();
+                    if (url is { IsFileUrl: true, Path: { Length: > 0 } path }) paths.Add(path);
                 }
             }
         }

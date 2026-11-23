@@ -76,7 +76,7 @@ login).
 - **Overlays**: every `ContentPage` gets a `CdsOverlayHost` through an implicit page style; menus, list boxes,
   popovers, tooltips, modals and toasts open there, mirror the theme and layer of their trigger, and route Escape and
   arrow keys.
-- **Requirements**: .NET 10 with the MAUI workload (Microsoft.Maui.Controls 10.0.20 or later). On iOS/macOS 27 your
+- **Requirements**: .NET 11 with the MAUI workload (Microsoft.Maui.Controls 11.0.10 or later). On iOS/macOS 27 your
   app must adopt the UIScene lifecycle (see the gallery's `Platforms/*/Info.plist` and `SceneDelegate.cs`).
 
 ## Themes and layers
@@ -109,7 +109,7 @@ login).
 | `src/Maui.Carbon` | the library (NuGet package) |
 | `samples/Maui.Carbon.Gallery` | the gallery app: every component in every theme, plus Carbon's patterns |
 | `samples/Maui.Carbon.Relay` | Relay, a mock project and issue tracker: a whole app on `CdsUIShell` with MVVM (CommunityToolkit.Mvvm), DI and an in-memory backend |
-| `samples/Maui.Carbon.Relay.Core` | Relay's models, mock services and view models (plain `net10.0`, no MAUI) |
+| `samples/Maui.Carbon.Relay.Core` | Relay's models, mock services and view models (plain `net11.0`, no MAUI) |
 | `tests/Maui.Carbon.Relay.Tests` | unit tests for Relay's logic and view models |
 | `tests/Maui.Carbon.Tests` | unit tests (tokens, theming, layers, component logic) |
 | `tools/Maui.Carbon.Generator` | regenerates `src/Maui.Carbon/Generated` from `design/carbon` |
@@ -117,8 +117,8 @@ login).
 | `CONVENTIONS.md` | how components are built |
 
 Build and test: `tools/verify.sh` (add `--samples` to build the gallery and Relay; `--fast` for the inner loop).
-Run the gallery: `dotnet build samples/Maui.Carbon.Gallery -t:Run -f net10.0-maccatalyst -r maccatalyst-arm64`.
-Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net10.0-maccatalyst -r maccatalyst-arm64` (sign in as
+Run the gallery: `dotnet build samples/Maui.Carbon.Gallery -t:Run -f net11.0-maccatalyst -r maccatalyst-arm64`.
+Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net11.0-maccatalyst -r maccatalyst-arm64` (sign in as
 `maya.chen@relay.dev` with any password of 6+ characters). Relay writes a Serilog text log, `relay-<date>.log`, to
 `Logs/<app id>` under its app data directory (on Mac Catalyst `~/Library/Logs/ai.waring.mauicarbon.relay`), or to
 `RELAY_LOG_DIR` when set; check it for `[ERR]` and `[FTL]` lines after a test session.

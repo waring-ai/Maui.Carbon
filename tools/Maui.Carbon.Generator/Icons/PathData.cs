@@ -72,9 +72,16 @@ public sealed class PathData
     }
 
     /// <summary>Formats a number: invariant culture, at most 3 decimals, no trailing zeros, no exponent.</summary>
+    /// <remarks>
+    /// Rounds the shortest round-trip decimal form of the value, not the double itself. The SVG sources are written
+    /// in decimal, and a midpoint such as 11.6665 has no exact double: the nearest one sits just below it. .NET 10's
+    /// Math.Round and (decimal) conversion were inexact enough to round it up (11.667); .NET 11 made both exact, so
+    /// they round it down (11.666). The round-trip string is "11.6665" on every runtime, so this answers the same.
+    /// </remarks>
     public static string FormatNumber(double v)
     {
-        var r = Math.Round(v, 3, MidpointRounding.AwayFromZero);
+        var written = decimal.Parse(v.ToString("R", CultureInfo.InvariantCulture), NumberStyles.Float, CultureInfo.InvariantCulture);
+        var r = (double)Math.Round(written, 3, MidpointRounding.AwayFromZero);
         if (r == 0) r = 0; // drops negative zero
         return r.ToString("0.###", CultureInfo.InvariantCulture);
     }

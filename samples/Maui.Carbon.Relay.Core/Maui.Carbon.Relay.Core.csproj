@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Relay's models, mock backend, logic and view models. Plain net10.0 with no MAUI or Carbon reference, so the
+  <!-- Relay's models, mock backend, logic and view models. Plain net11.0 with no MAUI or Carbon reference, so the
        view models are unit-tested without a platform; the app maps them to Carbon controls. -->
   <PropertyGroup>
     <TargetFramework>$(CarbonNetVersion)</TargetFramework>

@@ -18,9 +18,9 @@
     <Version Condition="'$(Version)' == ''">0.1.0-dev</Version>
 
     <!-- MAUI -->
-    <MauiVersion>10.0.20</MauiVersion>
-    <CarbonNetVersion>net10.0</CarbonNetVersion>
-    <!-- The .NET 10 Apple packs pin an older Xcode than the one installed on dev machines/CI images. -->
+    <MauiVersion>11.0.10</MauiVersion>
+    <CarbonNetVersion>net11.0</CarbonNetVersion>
+    <!-- The .NET 11 Apple packs pin Xcode 27.2; dev machines may run an earlier Xcode 27. -->
     <ValidateXcodeVersion Condition="'$(ValidateXcodeVersion)' == ''">false</ValidateXcodeVersion>
     <!-- Since .NET 10 the Mac Catalyst bundle is named after ApplicationTitle ("Relay.app"), but Rider launches
          <AssemblyName>.app. Pin it to the project name (the menu bar still shows ApplicationTitle via Info.plist). -->
@@ -31,7 +31,7 @@
     <CarbonIsWindows>$([MSBuild]::IsOSPlatform('windows'))</CarbonIsWindows>
     <CarbonIsMac>$([MSBuild]::IsOSPlatform('osx'))</CarbonIsMac>
 
-    <!-- Library: net10.0 (unit tests) + every platform this host can compile. -->
+    <!-- Library: net11.0 (unit tests) + every platform this host can compile. -->
     <CarbonLibraryTargetFrameworks>$(CarbonNetVersion)</CarbonLibraryTargetFrameworks>
     <CarbonLibraryTargetFrameworks Condition="'$(CarbonIncludeAndroid)' == 'true'">$(CarbonLibraryTargetFrameworks);$(CarbonNetVersion)-android</CarbonLibraryTargetFrameworks>
     <CarbonLibraryTargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(CarbonLibraryTargetFrameworks);$(CarbonNetVersion)-ios;$(CarbonNetVersion)-maccatalyst</CarbonLibraryTargetFrameworks>
