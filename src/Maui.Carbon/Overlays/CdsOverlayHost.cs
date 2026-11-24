@@ -78,6 +78,29 @@ public partial class CdsOverlayHost : Grid
     /// <summary>The overlay on top, if any.</summary>
     public CdsOverlay? TopOverlay => _overlays.Count > 0 ? _overlays[^1] : null;
 
+    /// <summary>
+    /// The overlay keys go to: the topmost one that takes keys (<see cref="CdsOverlay.TakesKeys"/>). A toast that opens
+    /// while a modal or menu is open sits on top but never takes Escape or the arrows from it.
+    /// </summary>
+    internal CdsOverlay? KeyOverlay
+    {
+        get
+        {
+            for (var i = _overlays.Count - 1; i >= 0; i--)
+                if (_overlays[i].TakesKeys) return _overlays[i];
+            return null;
+        }
+    }
+
+    /// <summary>The easing of the modal and dialog entrance (Carbon: <c>ease-entrance-expressive</c>, 240ms, 24px slide down).</summary>
+    internal static Easing EntranceEasing => CdsEasing.EntranceExpressive;
+
+    /// <summary>The easing of the modal and dialog exit (Carbon: <c>ease-exit-expressive</c>, 240ms, back up 24px).</summary>
+    internal static Easing ExitEasing => CdsEasing.ExitExpressive;
+
+    /// <summary>How far the modal and dialog container slides: it enters from 24px above its place and leaves the same way.</summary>
+    internal const double SlideDistance = -24;
+
     /// <summary>Finds the host of the page that contains <paramref name="element"/>.</summary>
     public static CdsOverlayHost? Find(Element? element)
     {
@@ -108,20 +131,26 @@ public partial class CdsOverlayHost : Grid
             overlay.Container.VerticalOptions = content.VerticalOptions;
             _modalLayer.Children.Add(overlay.Container);
             _modalLayer.IsVisible = true;
+            _modalLayer.InputTransparent = false;
             SetPageBlocked(true);
-            if (options.Animate && !CdsMotion.IsReducedMotion)
+            // A scrim still fading out after the last modal closed must not finish that fade under this one.
+            if (_scrim.Handler is not null) _scrim.CancelAnimations();
+            if (ShouldAnimate(overlay))
             {
                 _scrim.Opacity = 0;
-                _ = _scrim.FadeToAsync(1, CdsDuration.Moderate02, CdsEasing.EntranceProductive);
-                overlay.Container.Opacity = 0;
-                overlay.Container.TranslationY = 24;
-                _ = overlay.Container.FadeToAsync(1, CdsDuration.Moderate02, CdsEasing.EntranceProductive);
-                _ = overlay.Container.TranslateToAsync(0, 0, CdsDuration.Moderate02, CdsEasing.EntranceProductive);
+                _ = _scrim.FadeToAsync(1, CdsDuration.Moderate02, EntranceEasing);
+                AnimateIn(overlay.Container);
+            }
+            else
+            {
+                _scrim.Opacity = 1;
             }
         }
         else if (options.Anchor is null)
         {
-            _toastLayer.Children.Add(overlay.Container);
+            // Carbon stacks toasts newest on top; a non-modal dialog docked here slides in like a modal one.
+            _toastLayer.Children.Insert(0, overlay.Container);
+            if (ShouldAnimate(overlay)) AnimateIn(overlay.Container);
         }
         else
         {
@@ -140,16 +169,28 @@ public partial class CdsOverlayHost : Grid
         _overlays.Remove(overlay);
         if (overlay.Layer == CdsOverlayLayer.Modal)
         {
-            _modalLayer.Children.Remove(overlay.Container);
-            if (!_overlays.Any(o => o.Layer == CdsOverlayLayer.Modal))
+            var last = !HasModal;
+            // The page takes input and focus again at once; only the picture fades out.
+            if (last) SetPageBlocked(false);
+            if (ShouldAnimate(overlay))
             {
-                _modalLayer.IsVisible = false;
-                SetPageBlocked(false);
+                if (last) _modalLayer.InputTransparent = true;
+                _ = AnimateOutAsync(overlay.Container, last ? _scrim : null, () =>
+                {
+                    _modalLayer.Children.Remove(overlay.Container);
+                    if (!HasModal) _modalLayer.IsVisible = false;
+                });
+            }
+            else
+            {
+                _modalLayer.Children.Remove(overlay.Container);
+                if (last) _modalLayer.IsVisible = false;
             }
         }
         else if (overlay.Layer == CdsOverlayLayer.Toast)
         {
-            _toastLayer.Children.Remove(overlay.Container);
+            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, () => _toastLayer.Children.Remove(overlay.Container));
+            else _toastLayer.Children.Remove(overlay.Container);
         }
         else
         {
@@ -165,10 +206,13 @@ public partial class CdsOverlayHost : Grid
         foreach (var o in _overlays.ToArray()) o.Close();
     }
 
-    /// <summary>Routes a key: top overlay first, then the focused Carbon control and its ancestors.</summary>
+    /// <summary>
+    /// Routes a key: the top overlay that takes keys first (toasts are skipped, so they never take Escape or the arrows
+    /// from a modal or menu), then the focused Carbon control and its ancestors.
+    /// </summary>
     public bool RouteKey(CdsKeyEventArgs e)
     {
-        if (TopOverlay is { } top)
+        if (KeyOverlay is { } top)
         {
             if (top.HandleKey(e)) return true;
             if (top.Options.IsModal) return false;
@@ -185,7 +229,7 @@ public partial class CdsOverlayHost : Grid
     {
         get
         {
-            if (TopOverlay is { } top)
+            if (KeyOverlay is { } top)
             {
                 var k = top.Options.Keys;
                 var full = k.HasFlag(CdsOverlayKeys.Navigation);
@@ -193,7 +237,8 @@ public partial class CdsOverlayHost : Grid
             }
             var chain = CdsFocusTracker.FocusChain().ToList();
             var nav = chain.Any(c => c.WantsNavigationKeys);
-            return new(chain.Any(c => c.WantsEscapeKey), nav, nav, false);
+            // While a toast is shown Escape stays captured, so a focused toast still closes on Escape.
+            return new(_overlays.Count > 0 || chain.Any(c => c.WantsEscapeKey), nav, nav, false);
         }
     }
 
@@ -201,6 +246,40 @@ public partial class CdsOverlayHost : Grid
     internal event EventHandler? KeyStateChanged;
 
     internal void OnKeyStateChanged() => KeyStateChanged?.Invoke(this, EventArgs.Empty);
+
+    bool HasModal => _overlays.Any(o => o.Layer == CdsOverlayLayer.Modal);
+
+    static bool ShouldAnimate(CdsOverlay overlay) =>
+        overlay.Options.Animate && !CdsMotion.IsReducedMotion && overlay.Container.Handler is not null;
+
+    static void AnimateIn(View container)
+    {
+        container.Opacity = 0;
+        container.TranslationY = SlideDistance;
+        _ = container.FadeToAsync(1, CdsDuration.Moderate02, EntranceEasing);
+        _ = container.TranslateToAsync(0, 0, CdsDuration.Moderate02, EntranceEasing);
+    }
+
+    static async Task AnimateOutAsync(View container, View? scrim, Action remove)
+    {
+        // Already out of the overlay list: it must not take taps or be read while it fades.
+        container.InputTransparent = true;
+        AutomationProperties.SetExcludedWithChildren(container, true);
+        var fades = new List<Task>
+        {
+            container.FadeToAsync(0, CdsDuration.Moderate02, ExitEasing),
+            container.TranslateToAsync(0, SlideDistance, CdsDuration.Moderate02, ExitEasing),
+        };
+        if (scrim is not null) fades.Add(scrim.FadeToAsync(0, CdsDuration.Moderate02, ExitEasing));
+        try
+        {
+            await Task.WhenAll(fades);
+        }
+        finally
+        {
+            remove();
+        }
+    }
 
     void DismissTop()
     {

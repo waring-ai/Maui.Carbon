@@ -58,9 +58,20 @@ public partial class ModalPage : GalleryPage
         Status.Text = "Draft saved";
     }
 
-    void OnDeleteBucket(object? sender, EventArgs e)
+    async void OnDeleteBucket(object? sender, EventArgs e)
+    {
+        // A short wait after submit: the primary shows an inline loading and the footer is disabled until it settles.
+        DangerModal.LoadingDescription = "Deleting bucket...";
+        DangerModal.LoadingStatus = CdsInlineLoadingStatus.Active;
+        await Task.Delay(1500);
+        DangerModal.LoadingDescription = "Bucket deleted";
+        DangerModal.LoadingStatus = CdsInlineLoadingStatus.Finished;
+    }
+
+    void OnBucketDeleted(object? sender, EventArgs e)
     {
         DangerModal.IsOpen = false;
+        DangerModal.LoadingStatus = CdsInlineLoadingStatus.Inactive;
         Status.Text = "Bucket deleted";
     }
 

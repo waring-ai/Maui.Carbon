@@ -16,10 +16,16 @@ public sealed class CdsOverlay
         Container = new CdsScopeView { Content = content, InputTransparent = options.InputTransparent };
         _contextElement = options.Anchor ?? context;
         _contextSource = FindContextSource(_contextElement);
+        // A modal or dialog with no launcher returns focus to whatever was focused before it opened (Carbon's
+        // "focus returns to launcherButtonRef or to the element focused before opening"). Captured before the overlay
+        // moves focus into itself.
+        if (options is { ReturnFocus: true, ReturnFocusTo: null, Anchor: null } && CdsFocusTracker.Focused is { } before)
+            _focusedBefore = new WeakReference<VisualElement>(before);
         ApplyContext();
     }
 
     readonly Element? _contextElement;
+    readonly WeakReference<VisualElement>? _focusedBefore;
 
     /// <summary>The overlay's content.</summary>
     public View Content { get; }
@@ -46,6 +52,41 @@ public sealed class CdsOverlay
 
     internal CdsOverlayLayer Layer { get; set; }
 
+    /// <summary>
+    /// Whether the overlay takes part in key routing: modals always do, other overlays when they handle keys or close on
+    /// Escape. Passive overlays (toasts) never take the keyboard from a modal or menu under them.
+    /// </summary>
+    internal bool TakesKeys =>
+        Options.IsModal || Options.KeyHandler is not null || Options.CloseOnEscape || Options.Keys != CdsOverlayKeys.None;
+
+    /// <summary>
+    /// Where focus goes when the overlay closes: <see cref="CdsOverlayOptions.ReturnFocusTo"/>, else the anchor, else (for
+    /// an anchorless overlay) the Carbon control that had focus before it opened, while that control is still on the page.
+    /// </summary>
+    internal VisualElement? ReturnFocusTarget
+    {
+        get
+        {
+            if (!Options.ReturnFocus) return null;
+            if ((Options.ReturnFocusTo ?? Options.Anchor) is { } explicitTarget) return explicitTarget;
+            if (_focusedBefore is null || !_focusedBefore.TryGetTarget(out var before)) return null;
+            return IsStillShown(before) ? before : null;
+        }
+    }
+
+    bool IsStillShown(VisualElement element)
+    {
+        // Gone when it was removed from the page, hidden, disabled, or lived in an overlay that has closed since
+        // (a menu item that opened the modal), or in this overlay itself.
+        for (Element? e = element; e is not null; e = e.Parent)
+        {
+            if (ReferenceEquals(e, Container)) return false;
+            if (e is VisualElement { IsVisible: false } or VisualElement { IsEnabled: false }) return false;
+            if (ReferenceEquals(e, _host)) return true;
+        }
+        return false;
+    }
+
     /// <summary>Closes the overlay.</summary>
     public void Close()
     {
@@ -53,7 +94,7 @@ public sealed class CdsOverlay
         IsOpen = false;
         Detach();
         _host.Remove(this);
-        var focus = Options.ReturnFocus ? Options.ReturnFocusTo ?? Options.Anchor : null;
+        var focus = ReturnFocusTarget;
         if (focus is CdsControl control) control.Focus();
         else focus?.Focus();
         Closed?.Invoke(this, EventArgs.Empty);

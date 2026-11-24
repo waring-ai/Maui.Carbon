@@ -82,6 +82,26 @@ public partial class CdsDialog
     public static readonly BindableProperty InitialFocusElementProperty = BindableProperty.Create(
         nameof(InitialFocusElement), typeof(VisualElement), typeof(CdsDialog), null);
 
+    /// <summary>Bindable property for <see cref="LoadingStatus"/>.</summary>
+    public static readonly BindableProperty LoadingStatusProperty = BindableProperty.Create(
+        nameof(LoadingStatus), typeof(CdsInlineLoadingStatus), typeof(CdsDialog), CdsInlineLoadingStatus.Inactive,
+        propertyChanged: static (b, _, _) => ((CdsDialog)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="LoadingDescription"/>.</summary>
+    public static readonly BindableProperty LoadingDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingDescription), typeof(string), typeof(CdsDialog), null,
+        propertyChanged: static (b, _, _) => ((CdsDialog)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="LoadingIconDescription"/>.</summary>
+    public static readonly BindableProperty LoadingIconDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingIconDescription), typeof(string), typeof(CdsDialog), null,
+        propertyChanged: static (b, _, _) => ((CdsDialog)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="IsAlert"/>.</summary>
+    public static readonly BindableProperty IsAlertProperty = BindableProperty.Create(
+        nameof(IsAlert), typeof(bool), typeof(CdsDialog), false,
+        propertyChanged: static (b, _, _) => ((CdsDialog)b).SyncParts());
+
     /// <summary>Bindable property for <see cref="RequestSubmitCommand"/>.</summary>
     public static readonly BindableProperty RequestSubmitCommandProperty = BindableProperty.Create(
         nameof(RequestSubmitCommand), typeof(ICommand), typeof(CdsDialog), null);
@@ -188,7 +208,10 @@ public partial class CdsDialog
         set => SetValue(FooterProperty, value);
     }
 
-    /// <summary>The element that opened the dialog; focus returns to it on close (<c>focusAfterCloseRef</c>).</summary>
+    /// <summary>
+    /// The element focus returns to on close (<c>focusAfterCloseRef</c>). When it is not set, focus returns to the Carbon
+    /// control that was focused when the dialog opened, if it is still on the page.
+    /// </summary>
     public VisualElement? LauncherElement
     {
         get => (VisualElement?)GetValue(LauncherElementProperty);
@@ -200,6 +223,42 @@ public partial class CdsDialog
     {
         get => (VisualElement?)GetValue(InitialFocusElementProperty);
         set => SetValue(InitialFocusElementProperty, value);
+    }
+
+    /// <summary>
+    /// The submit wait (the footer's <c>loadingStatus</c>): Active, Finished or Error disables the generated footer buttons
+    /// and shows a <see cref="CdsInlineLoading"/> with <see cref="LoadingDescription"/> in place of the primary label.
+    /// Default <see cref="CdsInlineLoadingStatus.Inactive"/>. Close the dialog on <see cref="LoadingSuccess"/>. Not used
+    /// with a custom <see cref="Footer"/>.
+    /// </summary>
+    public CdsInlineLoadingStatus LoadingStatus
+    {
+        get => (CdsInlineLoadingStatus)GetValue(LoadingStatusProperty);
+        set => SetValue(LoadingStatusProperty, value);
+    }
+
+    /// <summary>The loading text in place of the primary label (<c>loadingDescription</c>): "Deleting...", then "Deleted".</summary>
+    public string? LoadingDescription
+    {
+        get => (string?)GetValue(LoadingDescriptionProperty);
+        set => SetValue(LoadingDescriptionProperty, value);
+    }
+
+    /// <summary>Accessible name of the loading icon (<c>loadingIconDescription</c>); defaults to the inline loading's own.</summary>
+    public string? LoadingIconDescription
+    {
+        get => (string?)GetValue(LoadingIconDescriptionProperty);
+        set => SetValue(LoadingIconDescriptionProperty, value);
+    }
+
+    /// <summary>
+    /// An alert dialog (<c>role="alertdialog"</c>) for interruptive confirmations ("Delete bucket?"): the dialog is
+    /// described by its body text, and opening it announces the title and that text assertively.
+    /// </summary>
+    public bool IsAlert
+    {
+        get => (bool)GetValue(IsAlertProperty);
+        set => SetValue(IsAlertProperty, value);
     }
 
     /// <summary>Runs when the primary button is activated.</summary>

@@ -75,6 +75,12 @@ internal sealed class CdsModalSurface : Grid
     /// <summary>Gives the container its accessible name.</summary>
     public void SetName(string? name) => CdsSemantics.SetGroupName(_box, name);
 
+    /// <summary>Describes the container (an alert dialog is described by its body text); <c>null</c> removes it.</summary>
+    public void SetDescription(string? description) => CdsSemantics.SetGroupHint(_box, description);
+
+    /// <summary>The accessible description set by <see cref="SetDescription"/>.</summary>
+    internal string? Description => CdsSemantics.GetGroupHint(_box);
+
     /// <summary>Follows the size of the page host.</summary>
     public void Attach(CdsOverlayHost? host)
     {
@@ -120,6 +126,46 @@ internal sealed class CdsModalSurface : Grid
         _panel.MaxPanelHeight = Math.Max(0, maxHeight - 2); // the 1px border on each side
         if (_mode == CdsModalMode.Modal)
             _box.VerticalOptions = !_dialogSizing && vw < CdsModalSizing.BreakpointMd ? LayoutOptions.Start : LayoutOptions.Center;
+    }
+}
+
+/// <summary>The <c>alertdialog</c> role of a modal or dialog (<c>alert</c> / <c>role="alertdialog"</c>), shared by both.</summary>
+internal static class CdsModalAlert
+{
+    /// <summary>
+    /// The text that describes an alert dialog: the visible text of the labels in its body, in order. Carbon controls in
+    /// the body are skipped (they carry their own names).
+    /// </summary>
+    public static string? Describe(View? body)
+    {
+        var parts = new List<string>();
+        Collect(body, parts);
+        return parts.Count == 0 ? null : string.Join(" ", parts);
+    }
+
+    /// <summary>Announces an alert dialog that has just opened: its heading, then its description, assertively.</summary>
+    public static void Announce(string? heading, string? description)
+    {
+        var text = string.Join(". ", new[] { heading?.Trim().TrimEnd('.'), description?.Trim() }.Where(s => !string.IsNullOrEmpty(s)));
+        CdsAnnouncer.Announce(text, CdsAnnouncePriority.Assertive);
+    }
+
+    static void Collect(Element? element, List<string> parts)
+    {
+        switch (element)
+        {
+            case null:
+            case VisualElement { IsVisible: false }:
+            case CdsControl:
+                return;
+            case Label label:
+                var text = label.Text ?? label.FormattedText?.ToString();
+                if (!string.IsNullOrWhiteSpace(text)) parts.Add(text.Trim());
+                return;
+            case IVisualTreeElement tree:
+                foreach (var child in tree.GetVisualChildren()) Collect(child as Element, parts);
+                return;
+        }
     }
 }
 

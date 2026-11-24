@@ -50,7 +50,10 @@ public sealed class CdsOverlayOptions
     /// <summary>The popup ignores input (hover tooltips).</summary>
     public bool InputTransparent { get; set; }
 
-    /// <summary>Extra keys routed to <see cref="KeyHandler"/> while the overlay is on top.</summary>
+    /// <summary>
+    /// Extra keys routed to <see cref="KeyHandler"/> while the overlay is on top. An overlay with no keys, no handler and
+    /// <see cref="CloseOnEscape"/> off (a toast) is passive: keys skip it and go to the overlay under it.
+    /// </summary>
     public CdsOverlayKeys Keys { get; set; }
 
     /// <summary>Handles keys while the overlay is on top; return <c>true</c> to consume.</summary>
@@ -59,10 +62,14 @@ public sealed class CdsOverlayOptions
     /// <summary>Element focused when the overlay opens (for example Cancel in a danger modal).</summary>
     public VisualElement? InitialFocus { get; set; }
 
-    /// <summary>Return focus to <see cref="ReturnFocusTo"/> (or the anchor) when the overlay closes. Default <c>true</c>; tooltips turn it off.</summary>
+    /// <summary>
+    /// Return focus to <see cref="ReturnFocusTo"/> (or the anchor) when the overlay closes. An anchorless overlay (a modal
+    /// or dialog) without <see cref="ReturnFocusTo"/> returns focus to the Carbon control that had focus when it opened,
+    /// if that control is still on the page. Default <c>true</c>; tooltips and toasts turn it off.
+    /// </summary>
     public bool ReturnFocus { get; set; } = true;
 
-    /// <summary>Return focus to this element (default: the anchor) when the overlay closes.</summary>
+    /// <summary>Return focus to this element (default: the anchor, else the control focused before opening) when the overlay closes.</summary>
     public VisualElement? ReturnFocusTo { get; set; }
 
     /// <summary>Animate the overlay in and out with Carbon motion. Default <c>true</c>.</summary>

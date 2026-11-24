@@ -22,6 +22,16 @@
                 </HorizontalStackLayout>
             </g:GalleryExample>
 
+            <g:GalleryExample Title="Submit wait and alert" Description="LoadingStatus puts an inline loading in place of the primary label and disables the footer while the request runs; Delete bucket shows it, then closes on LoadingSuccess. IsAlert makes Session expiring an alert dialog that is announced as soon as it opens.">
+                <VerticalStackLayout Spacing="16">
+                    <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="320" HorizontalOptions="Start">
+                        <cds:CdsModalFooter BackgroundColor="{DynamicResource CdsLayer01}" PrimaryButtonText="Create key" SecondaryButtonText="Cancel"
+                                            LoadingStatus="Active" LoadingDescription="Creating key..." />
+                    </ContentView>
+                    <cds:CdsButton Text="Session expiring" Kind="Tertiary" Clicked="OnXsClicked" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
             <g:GalleryExample Title="Sizes" Description="xs and sm for short messages, md for most dialogs, lg for complex content such as a table. Widths are a share of the window that shrinks as it grows.">
                 <HorizontalStackLayout Spacing="16">
                     <cds:CdsButton Text="xs" Kind="Tertiary" Size="Md" Clicked="OnXsClicked" />
@@ -87,7 +97,8 @@
         </cds:CdsModal>
 
         <cds:CdsModal x:Name="DangerModal" Size="Xs" IsDanger="True" Label="logs-archive-prod" Heading="Delete bucket?"
-                      PrimaryButtonText="Delete bucket" SecondaryButtonText="Cancel" RequestSubmit="OnDeleteBucket">
+                      PrimaryButtonText="Delete bucket" SecondaryButtonText="Cancel" RequestSubmit="OnDeleteBucket"
+                      LoadingSuccess="OnBucketDeleted">
             <cds:CdsText Text="All 1,204 objects in the bucket are deleted. This cannot be undone." TypeStyle="Body01" />
         </cds:CdsModal>
 
@@ -95,7 +106,7 @@
             <cds:CdsText Text="Control plane patches for prod-us-east-1 start on April 12 at 02:00 UTC. Workloads keep running; kubectl may be unavailable for up to five minutes." TypeStyle="Body01" />
         </cds:CdsModal>
 
-        <cds:CdsModal x:Name="XsModal" Size="Xs" Heading="Session expiring" PrimaryButtonText="Stay signed in" SecondaryButtonText="Sign out">
+        <cds:CdsModal x:Name="XsModal" Size="Xs" Heading="Session expiring" PrimaryButtonText="Stay signed in" SecondaryButtonText="Sign out" IsAlert="True">
             <cds:CdsText Text="You will be signed out in two minutes." TypeStyle="Body01" />
         </cds:CdsModal>
         <cds:CdsModal x:Name="SmModal" Size="Sm" Heading="Rename cluster" PrimaryButtonText="Rename" SecondaryButtonText="Cancel" HasForm="True">

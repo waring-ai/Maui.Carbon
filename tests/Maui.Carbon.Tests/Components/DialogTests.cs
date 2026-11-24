@@ -41,4 +41,39 @@ public class DialogTests
         Assert.Equal(1, CdsModalSizing.FooterColumns(1).Spacer);
         Assert.True(footer.IsVisible);
     }
+
+    [Fact]
+    public void Dialog_loading_and_alert_reach_the_footer_and_the_screen_reader()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var dialog = new CdsDialog
+        {
+            Title = "Delete bucket?",
+            IsModal = true,
+            IsDanger = true,
+            PrimaryButtonText = "Delete",
+            IsAlert = true,
+            Body = new Label { Text = "All 1,204 objects are deleted." },
+        };
+        page.Add(dialog);
+        dialog.IsOpen = true;
+        using (var heard = CdsAnnouncer.Capture())
+        {
+            dialog.Show();
+            var said = Assert.Single(heard.Announcements);
+            Assert.Equal(CdsAnnouncePriority.Assertive, said.Priority);
+            Assert.Equal("Delete bucket?. All 1,204 objects are deleted.", said.Text);
+        }
+        Assert.Equal("All 1,204 objects are deleted.", dialog.Surface!.Description);
+
+        dialog.LoadingDescription = "Deleting...";
+        dialog.LoadingStatus = CdsInlineLoadingStatus.Active;
+        var footer = dialog.Surface.Footer!;
+        Assert.Equal("Deleting...", footer.PrimaryLoading!.Description);
+        Assert.All(footer.Buttons, b => Assert.False(b.IsEnabled));
+        dialog.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.All(footer.Buttons, b => Assert.True(b.IsEnabled));
+        dialog.IsOpen = false;
+    }
 }

@@ -62,6 +62,12 @@ public partial class CdsModal : CdsContainer
     /// <summary>Raised when the optional third button is activated.</summary>
     public event EventHandler? TertiarySubmit;
 
+    /// <summary>
+    /// Raised when the primary button's inline loading reports success (<c>onLoadingSuccess</c>): the success delay after
+    /// <see cref="LoadingStatus"/> became <see cref="CdsInlineLoadingStatus.Finished"/>. Close the modal here.
+    /// </summary>
+    public event EventHandler? LoadingSuccess;
+
     /// <inheritdoc/>
     protected override void OnBodyChanged(View? oldBody, View? newBody)
     {
@@ -115,11 +121,18 @@ public partial class CdsModal : CdsContainer
             _footer.TertiaryButtonText = TertiaryButtonText;
             _footer.IsDanger = IsDanger;
             _footer.PrimaryButtonDisabled = PrimaryButtonDisabled;
+            _footer.LoadingStatus = LoadingStatus;
+            _footer.LoadingDescription = LoadingDescription;
+            _footer.LoadingIconDescription = LoadingIconDescription;
         }
         _surface?.SetName(Heading);
+        _surface?.SetDescription(IsAlert ? CdsModalAlert.Describe(Body) : null);
     }
 
-    void Show()
+    /// <summary>The shown surface, while the modal is open (for tests).</summary>
+    internal CdsModalSurface? Surface => _surface;
+
+    internal void Show()
     {
         if (_presenter.IsShown) return;
 
@@ -141,11 +154,14 @@ public partial class CdsModal : CdsContainer
                 else TryClose();
             };
             _footer.TertiarySubmit += (_, _) => TertiarySubmit?.Invoke(this, EventArgs.Empty);
+            _footer.LoadingSuccess += (_, _) => LoadingSuccess?.Invoke(this, EventArgs.Empty);
         }
         SyncParts();
 
         _surface = new CdsModalSurface(CdsModalMode.Modal, Size, false, _header, _bodyPart, _footer) { BindingContext = BindingContext };
         _surface.SetName(Heading);
+        var alert = IsAlert ? CdsModalAlert.Describe(Body) : null;
+        _surface.SetDescription(alert);
         _surface.BackdropTapped += (_, _) =>
         {
             if (IsPassive && !PreventCloseOnClickOutside) TryClose();
@@ -166,6 +182,7 @@ public partial class CdsModal : CdsContainer
                 return true;
             },
         }, focus);
+        if (IsAlert) CdsModalAlert.Announce(Heading, alert);
     }
 
     void TryClose()

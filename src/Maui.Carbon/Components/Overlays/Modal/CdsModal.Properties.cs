@@ -86,6 +86,26 @@ public partial class CdsModal
     public static readonly BindableProperty InitialFocusElementProperty = BindableProperty.Create(
         nameof(InitialFocusElement), typeof(VisualElement), typeof(CdsModal), null);
 
+    /// <summary>Bindable property for <see cref="LoadingStatus"/>.</summary>
+    public static readonly BindableProperty LoadingStatusProperty = BindableProperty.Create(
+        nameof(LoadingStatus), typeof(CdsInlineLoadingStatus), typeof(CdsModal), CdsInlineLoadingStatus.Inactive,
+        propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="LoadingDescription"/>.</summary>
+    public static readonly BindableProperty LoadingDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingDescription), typeof(string), typeof(CdsModal), null,
+        propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="LoadingIconDescription"/>.</summary>
+    public static readonly BindableProperty LoadingIconDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingIconDescription), typeof(string), typeof(CdsModal), null,
+        propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
+
+    /// <summary>Bindable property for <see cref="IsAlert"/>.</summary>
+    public static readonly BindableProperty IsAlertProperty = BindableProperty.Create(
+        nameof(IsAlert), typeof(bool), typeof(CdsModal), false,
+        propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
+
     /// <summary>Bindable property for <see cref="RequestSubmitCommand"/>.</summary>
     public static readonly BindableProperty RequestSubmitCommandProperty = BindableProperty.Create(
         nameof(RequestSubmitCommand), typeof(ICommand), typeof(CdsModal), null);
@@ -199,7 +219,10 @@ public partial class CdsModal
         set => SetValue(CloseButtonLabelProperty, value);
     }
 
-    /// <summary>The element that opened the modal; focus returns to it on close (<c>launcherButtonRef</c>).</summary>
+    /// <summary>
+    /// The element that opened the modal; focus returns to it on close (<c>launcherButtonRef</c>). When it is not set,
+    /// focus returns to the Carbon control that was focused when the modal opened, if it is still on the page.
+    /// </summary>
     public VisualElement? LauncherElement
     {
         get => (VisualElement?)GetValue(LauncherElementProperty);
@@ -211,6 +234,44 @@ public partial class CdsModal
     {
         get => (VisualElement?)GetValue(InitialFocusElementProperty);
         set => SetValue(InitialFocusElementProperty, value);
+    }
+
+    /// <summary>
+    /// The submit wait (<c>loadingStatus</c>): Active, Finished or Error shows a <see cref="CdsInlineLoading"/> with
+    /// <see cref="LoadingDescription"/> in place of the primary label and disables the footer buttons, so the modal can
+    /// stay open while the request runs and the submit cannot run twice. Default <see cref="CdsInlineLoadingStatus.Inactive"/>.
+    /// For short waits only; show a <see cref="CdsLoading"/> overlay for long ones. Close the modal on
+    /// <see cref="LoadingSuccess"/>, or set the status back to Inactive after an error and show the error inline.
+    /// </summary>
+    public CdsInlineLoadingStatus LoadingStatus
+    {
+        get => (CdsInlineLoadingStatus)GetValue(LoadingStatusProperty);
+        set => SetValue(LoadingStatusProperty, value);
+    }
+
+    /// <summary>The loading text in place of the primary label (<c>loadingDescription</c>): "Creating key...", then "Key created".</summary>
+    public string? LoadingDescription
+    {
+        get => (string?)GetValue(LoadingDescriptionProperty);
+        set => SetValue(LoadingDescriptionProperty, value);
+    }
+
+    /// <summary>Accessible name of the loading icon (<c>loadingIconDescription</c>); defaults to the inline loading's own.</summary>
+    public string? LoadingIconDescription
+    {
+        get => (string?)GetValue(LoadingIconDescriptionProperty);
+        set => SetValue(LoadingIconDescriptionProperty, value);
+    }
+
+    /// <summary>
+    /// An alert dialog (<c>alert</c>, the <c>alertdialog</c> role) for interruptive confirmations such as an expiring
+    /// session or discarding changes: the dialog is described by its body text, and opening it announces the heading and
+    /// that text assertively.
+    /// </summary>
+    public bool IsAlert
+    {
+        get => (bool)GetValue(IsAlertProperty);
+        set => SetValue(IsAlertProperty, value);
     }
 
     /// <summary>Runs when the primary button is activated.</summary>

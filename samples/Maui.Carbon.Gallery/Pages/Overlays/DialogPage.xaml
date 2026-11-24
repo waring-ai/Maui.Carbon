@@ -37,7 +37,7 @@
         </VerticalStackLayout>
 
         <!-- Open when the page loads so it appears in screenshots. -->
-        <cds:CdsDialog x:Name="DeleteDialog" IsOpen="True" IsModal="True" Size="Xs" IsDanger="True"
+        <cds:CdsDialog x:Name="DeleteDialog" IsOpen="True" IsModal="True" Size="Xs" IsDanger="True" IsAlert="True"
                        Subtitle="logs-archive-prod" Title="Delete bucket?"
                        PrimaryButtonText="Delete" SecondaryButtonText="Cancel"
                        RequestSubmit="OnDeleteSubmit" LauncherElement="{x:Reference DeleteButton}">

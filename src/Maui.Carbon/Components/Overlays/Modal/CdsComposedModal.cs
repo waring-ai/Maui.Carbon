@@ -4,7 +4,8 @@ namespace Maui.Carbon;
 /// The composable form of <see cref="CdsModal"/>: put a <see cref="CdsModalHeader"/>, a <see cref="CdsModalBody"/> and a
 /// <see cref="CdsModalFooter"/> in <see cref="Parts"/> to build custom layouts (a progress modal, a form with its own
 /// footer buttons). Declare it in a page; it draws nothing inline and shows its parts while <see cref="IsOpen"/> is true.
-/// The header close button, Escape, the footer's secondary button and a scrim tap raise <see cref="RequestClose"/>.
+/// The header close button, Escape and the footer's secondary button raise <see cref="RequestClose"/>; a scrim tap does
+/// too, but only on a passive modal (one without footer buttons), so a form is never lost to a stray click outside.
 /// </summary>
 [ContentProperty(nameof(Parts))]
 public class CdsComposedModal : CdsControl
@@ -62,7 +63,7 @@ public class CdsComposedModal : CdsControl
     }
 
     /// <summary>
-    /// Raised when the modal is asked to close (close button, Escape, the footer's secondary button, a scrim tap). Set
+    /// Raised when the modal is asked to close (close button, Escape, the footer's secondary button, a scrim tap on a passive modal). Set
     /// <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to keep it open; otherwise <see cref="IsOpen"/> becomes false.
     /// </summary>
     public event EventHandler<CdsModalRequestCloseEventArgs>? RequestClose;
@@ -91,7 +92,10 @@ public class CdsComposedModal : CdsControl
         set => SetValue(IsDangerProperty, value);
     }
 
-    /// <summary>Keep the modal open when the scrim is tapped. By default a tap outside requests close.</summary>
+    /// <summary>
+    /// Keep a passive modal (no footer buttons) open when the scrim is tapped. A transactional modal (one with footer
+    /// buttons) never closes on a scrim tap; a passive one does unless this is set.
+    /// </summary>
     public bool PreventCloseOnClickOutside
     {
         get => (bool)GetValue(PreventCloseOnClickOutsideProperty);
@@ -132,7 +136,7 @@ public class CdsComposedModal : CdsControl
         }
     }
 
-    void Show()
+    internal void Show()
     {
         if (_presenter.IsShown) return;
 
@@ -174,7 +178,7 @@ public class CdsComposedModal : CdsControl
         _surface.SetName(header?.Title);
         _surface.BackdropTapped += (_, _) =>
         {
-            if (!PreventCloseOnClickOutside) TryClose();
+            if (ClosesOnScrimTap(footer, PreventCloseOnClickOutside)) TryClose();
         };
 
         var focus = _openedOnLoad ? null : CdsModalFocus.Resolve(InitialFocusElement, IsDanger || footer?.IsDanger == true, header, body, footer);
@@ -193,6 +197,13 @@ public class CdsComposedModal : CdsControl
             },
         }, focus);
     }
+
+    /// <summary>
+    /// Carbon: a transactional modal does not close on a scrim tap; a passive one (no footer buttons) does unless
+    /// <c>preventCloseOnClickOutside</c>. Read at tap time, since footer buttons can come and go while it is open.
+    /// </summary>
+    internal static bool ClosesOnScrimTap(CdsModalFooter? footer, bool preventCloseOnClickOutside) =>
+        !preventCloseOnClickOutside && footer is not { HasContent: true };
 
     void Unwire()
     {

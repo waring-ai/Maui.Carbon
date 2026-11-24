@@ -44,8 +44,9 @@ public sealed class CdsToastOptions
 }
 
 /// <summary>
-/// Shows toasts in the top-right toast region of a page: newest at the bottom of the column, 8px apart, through
-/// <see cref="CdsOverlayService"/>.
+/// Shows toasts in the top-right toast region of a page: newest on top of the column, 8px apart, through
+/// <see cref="CdsOverlayService"/>. A toast never takes the keyboard: Escape and the arrow keys keep going to a modal or
+/// menu that is open under it.
 /// </summary>
 public static class CdsToast
 {
@@ -58,7 +59,7 @@ public static class CdsToast
         ArgumentNullException.ThrowIfNull(options);
         var toast = Create(options);
         var overlay = CdsOverlayService.Open(toast,
-            new CdsOverlayOptions { Anchor = null, LightDismiss = false, CloseOnEscape = false, ReturnFocus = false }, context);
+            new CdsOverlayOptions { Anchor = null, LightDismiss = false, CloseOnEscape = false, ReturnFocus = false, Animate = false }, context);
         toast.Closed += (_, _) => overlay.Close();
         overlay.Closed += (_, _) => options.Closed?.Invoke();
         return overlay;

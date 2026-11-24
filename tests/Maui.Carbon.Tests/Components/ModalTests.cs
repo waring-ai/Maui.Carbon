@@ -203,4 +203,147 @@ public class ModalTests
         modal.IsOpen = true;
         modal.IsOpen = false;
     }
+
+    [Fact]
+    public void Footer_loading_replaces_the_primary_label_and_disables_every_button()
+    {
+        var footer = new CdsModalFooter { PrimaryButtonText = "Create key", SecondaryButtonText = "Cancel", TertiaryButtonText = "Save draft" };
+        Assert.Equal(CdsInlineLoadingStatus.Inactive, footer.LoadingStatus);
+        Assert.All(footer.Buttons, b => Assert.True(b.IsEnabled));
+        Assert.Null(footer.PrimaryLoading);
+
+        footer.LoadingDescription = "Creating key...";
+        footer.LoadingIconDescription = "Creating";
+        footer.LoadingStatus = CdsInlineLoadingStatus.Active;
+        Assert.Equal(3, footer.Buttons.Count());
+        Assert.All(footer.Buttons, b => Assert.False(b.IsEnabled));
+        var loading = Assert.IsType<CdsInlineLoading>(footer.PrimaryLoading);
+        Assert.Equal(CdsInlineLoadingStatus.Active, loading.Status);
+        Assert.Equal("Creating key...", loading.Description);
+        Assert.Equal("Creating", loading.IconDescription);
+        var primary = (CdsModalButton)footer.Buttons.Last();
+        Assert.Equal("Creating key...", SemanticProperties.GetDescription(primary.HitTarget));
+        Assert.Null(footer.InitialFocus(false));
+
+        footer.LoadingDescription = "Key created";
+        footer.LoadingStatus = CdsInlineLoadingStatus.Finished;
+        Assert.Equal(CdsInlineLoadingStatus.Finished, footer.PrimaryLoading!.Status);
+        Assert.Equal("Key created", footer.PrimaryLoading.Description);
+
+        // A rebuild (new label) keeps the wait.
+        footer.PrimaryButtonText = "Create";
+        Assert.NotNull(footer.PrimaryLoading);
+        Assert.All(footer.Buttons, b => Assert.False(b.IsEnabled));
+
+        footer.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.Null(footer.PrimaryLoading);
+        Assert.All(footer.Buttons, b => Assert.True(b.IsEnabled));
+        Assert.Equal("Create", SemanticProperties.GetDescription(((CdsModalButton)footer.Buttons.Last()).HitTarget));
+    }
+
+    [Fact]
+    public void Footer_loading_and_primary_disabled_combine()
+    {
+        var footer = new CdsModalFooter { PrimaryButtonText = "Store entry", SecondaryButtonText = "Cancel", PrimaryButtonDisabled = true };
+        Assert.False(footer.Buttons.Last().IsEnabled);
+        Assert.True(footer.Buttons.First().IsEnabled);
+        footer.LoadingStatus = CdsInlineLoadingStatus.Error;
+        Assert.All(footer.Buttons, b => Assert.False(b.IsEnabled));
+        footer.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.False(footer.Buttons.Last().IsEnabled);
+        footer.PrimaryButtonDisabled = false;
+        Assert.True(footer.Buttons.Last().IsEnabled);
+    }
+
+    [Fact]
+    public void Primary_does_not_submit_while_loading()
+    {
+        var footer = new CdsModalFooter { PrimaryButtonText = "Create key", LoadingStatus = CdsInlineLoadingStatus.Active };
+        var submitted = 0;
+        footer.RequestSubmit += (_, _) => submitted++;
+        var primary = (CdsModalButton)footer.Buttons.Single();
+        ((IButton)primary.HitTarget).Clicked();
+        Assert.Equal(0, submitted);
+    }
+
+    [Fact]
+    public void Modal_passes_its_loading_state_to_the_footer()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var modal = new CdsModal { Heading = "Create API key", PrimaryButtonText = "Create key", SecondaryButtonText = "Cancel" };
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        var footer = modal.Surface!.Footer!;
+        Assert.Null(footer.PrimaryLoading);
+
+        modal.LoadingDescription = "Creating key...";
+        modal.LoadingStatus = CdsInlineLoadingStatus.Active;
+        Assert.Equal(CdsInlineLoadingStatus.Active, footer.LoadingStatus);
+        Assert.Equal("Creating key...", footer.PrimaryLoading!.Description);
+        Assert.All(footer.Buttons, b => Assert.False(b.IsEnabled));
+        modal.IsOpen = false;
+    }
+
+    [Fact]
+    public void Alert_modal_is_described_by_its_body_and_announced_assertively()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var body = new VerticalStackLayout
+        {
+            new Label { Text = "Your session expires in 2 minutes." },
+            new CdsCheckbox { Label = "Remember me" },
+            new Label { Text = "Hidden", IsVisible = false },
+            new CdsText("Unsaved changes are lost."),
+        };
+        var modal = new CdsModal { Heading = "Session expiring", PrimaryButtonText = "Stay signed in", SecondaryButtonText = "Sign out", IsAlert = true, Body = body };
+        page.Add(modal);
+        modal.IsOpen = true;
+        using (var heard = CdsAnnouncer.Capture())
+        {
+            modal.Show();
+            var said = Assert.Single(heard.Announcements);
+            Assert.Equal(CdsAnnouncePriority.Assertive, said.Priority);
+            Assert.Equal("Session expiring. Your session expires in 2 minutes. Unsaved changes are lost.", said.Text);
+        }
+        Assert.Equal("Your session expires in 2 minutes. Unsaved changes are lost.", modal.Surface!.Description);
+        modal.IsAlert = false;
+        Assert.Null(modal.Surface.Description);
+        modal.IsOpen = false;
+    }
+
+    [Fact]
+    public void A_plain_modal_is_not_announced_as_an_alert()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var modal = new CdsModal { Heading = "Create API key", PrimaryButtonText = "Create key", Body = new Label { Text = "Name the key." } };
+        page.Add(modal);
+        modal.IsOpen = true;
+        using var heard = CdsAnnouncer.Capture();
+        modal.Show();
+        Assert.Empty(heard.Announcements);
+        Assert.Null(modal.Surface!.Description);
+        modal.IsOpen = false;
+    }
+
+    [Theory]
+    [InlineData(false, false, true)]   // passive (no footer): a scrim tap closes
+    [InlineData(false, true, false)]   // passive, preventCloseOnClickOutside
+    [InlineData(true, false, false)]   // transactional: never closes on a scrim tap
+    [InlineData(true, true, false)]
+    public void Composed_modal_closes_on_a_scrim_tap_only_when_passive(bool hasButtons, bool prevent, bool closes)
+    {
+        var footer = hasButtons ? new CdsModalFooter { PrimaryButtonText = "Create", SecondaryButtonText = "Cancel" } : null;
+        Assert.Equal(closes, CdsComposedModal.ClosesOnScrimTap(footer, prevent));
+    }
+
+    [Fact]
+    public void Composed_modal_with_an_empty_footer_is_passive()
+    {
+        Assert.True(CdsComposedModal.ClosesOnScrimTap(new CdsModalFooter(), false));
+        Assert.False(CdsComposedModal.ClosesOnScrimTap(new CdsModalFooter { Body = new Label { Text = "Custom" } }, false));
+    }
 }

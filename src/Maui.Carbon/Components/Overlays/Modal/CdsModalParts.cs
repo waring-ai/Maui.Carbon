@@ -239,7 +239,22 @@ public class CdsModalFooter : ContentView
     /// <summary>Bindable property for <see cref="PrimaryButtonDisabled"/>.</summary>
     public static readonly BindableProperty PrimaryButtonDisabledProperty = BindableProperty.Create(
         nameof(PrimaryButtonDisabled), typeof(bool), typeof(CdsModalFooter), false,
-        propertyChanged: static (b, _, n) => { if (((CdsModalFooter)b)._primary is { } p) p.IsEnabled = !(bool)n; });
+        propertyChanged: static (b, _, _) => ((CdsModalFooter)b).ApplyLoading());
+
+    /// <summary>Bindable property for <see cref="LoadingStatus"/>.</summary>
+    public static readonly BindableProperty LoadingStatusProperty = BindableProperty.Create(
+        nameof(LoadingStatus), typeof(CdsInlineLoadingStatus), typeof(CdsModalFooter), CdsInlineLoadingStatus.Inactive,
+        propertyChanged: static (b, _, _) => ((CdsModalFooter)b).ApplyLoading());
+
+    /// <summary>Bindable property for <see cref="LoadingDescription"/>.</summary>
+    public static readonly BindableProperty LoadingDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingDescription), typeof(string), typeof(CdsModalFooter), null,
+        propertyChanged: static (b, _, _) => ((CdsModalFooter)b).ApplyLoading());
+
+    /// <summary>Bindable property for <see cref="LoadingIconDescription"/>.</summary>
+    public static readonly BindableProperty LoadingIconDescriptionProperty = BindableProperty.Create(
+        nameof(LoadingIconDescription), typeof(string), typeof(CdsModalFooter), null,
+        propertyChanged: static (b, _, _) => ((CdsModalFooter)b).ApplyLoading());
 
     /// <summary>Bindable property for <see cref="Body"/>.</summary>
     public static readonly BindableProperty BodyProperty = BindableProperty.Create(
@@ -256,6 +271,7 @@ public class CdsModalFooter : ContentView
 
     CdsModalButton? _primary;
     CdsModalButton? _secondary;
+    CdsModalButton? _tertiary;
 
     /// <summary>Creates an empty footer.</summary>
     public CdsModalFooter()
@@ -274,6 +290,13 @@ public class CdsModalFooter : ContentView
 
     /// <summary>Raised when the tertiary (second secondary) button is activated.</summary>
     public event EventHandler? TertiarySubmit;
+
+    /// <summary>
+    /// Raised when the inline loading reports success: <see cref="CdsInlineLoading.SuccessDelay"/> after
+    /// <see cref="LoadingStatus"/> became <see cref="CdsInlineLoadingStatus.Finished"/> (<c>onLoadingSuccess</c>). Close the
+    /// modal or reset the form here.
+    /// </summary>
+    public event EventHandler? LoadingSuccess;
 
     /// <summary>Primary button label: a specific verb ("Create key"), never "OK".</summary>
     public string? PrimaryButtonText
@@ -312,6 +335,42 @@ public class CdsModalFooter : ContentView
         get => (bool)GetValue(PrimaryButtonDisabledProperty);
         set => SetValue(PrimaryButtonDisabledProperty, value);
     }
+
+    /// <summary>
+    /// The submit wait (<c>loadingStatus</c>): anything but <see cref="CdsInlineLoadingStatus.Inactive"/> (the default)
+    /// shows a <see cref="CdsInlineLoading"/> with <see cref="LoadingDescription"/> in place of the primary label and
+    /// disables every footer button, so the submit cannot run twice. Use it for short waits after submit; set it back to
+    /// Inactive, or close the modal on <see cref="LoadingSuccess"/>.
+    /// </summary>
+    public CdsInlineLoadingStatus LoadingStatus
+    {
+        get => (CdsInlineLoadingStatus)GetValue(LoadingStatusProperty);
+        set => SetValue(LoadingStatusProperty, value);
+    }
+
+    /// <summary>The loading text in place of the primary label ("Creating key...", then "Key created" or "Failed").</summary>
+    public string? LoadingDescription
+    {
+        get => (string?)GetValue(LoadingDescriptionProperty);
+        set => SetValue(LoadingDescriptionProperty, value);
+    }
+
+    /// <summary>Accessible name of the loading icon (<c>loadingIconDescription</c>); defaults to the inline loading's own.</summary>
+    public string? LoadingIconDescription
+    {
+        get => (string?)GetValue(LoadingIconDescriptionProperty);
+        set => SetValue(LoadingIconDescriptionProperty, value);
+    }
+
+    /// <summary>True while <see cref="LoadingStatus"/> is not Inactive: the footer buttons are disabled.</summary>
+    internal bool IsLoading => LoadingStatus != CdsInlineLoadingStatus.Inactive;
+
+    /// <summary>The inline loading shown in the primary button, while there is one.</summary>
+    internal CdsInlineLoading? PrimaryLoading => _primary?.Loading;
+
+    /// <summary>The generated footer buttons, left to right (tertiary, secondary, primary), for inspection.</summary>
+    internal IEnumerable<VisualElement> Buttons =>
+        new[] { _tertiary, _secondary, _primary }.Where(b => b is not null).Cast<VisualElement>();
 
     /// <summary>Your own footer content instead of the buttons.</summary>
     public View? Body
@@ -358,9 +417,22 @@ public class CdsModalFooter : ContentView
         if (RequestCloseCommand?.CanExecute(null) == true) RequestCloseCommand.Execute(null);
     }
 
+    void ApplyLoading()
+    {
+        var loading = IsLoading;
+        if (_tertiary is not null) _tertiary.IsEnabled = !loading;
+        if (_secondary is not null) _secondary.IsEnabled = !loading;
+        if (_primary is not null)
+        {
+            _primary.IsEnabled = !loading && !PrimaryButtonDisabled;
+            _primary.SetLoading(LoadingStatus, LoadingDescription, LoadingIconDescription);
+        }
+    }
+
     void Rebuild()
     {
-        _primary = _secondary = null;
+        if (_primary is not null) _primary.LoadingSuccess -= OnLoadingSuccess;
+        _primary = _secondary = _tertiary = null;
         if (Body is not null)
         {
             Content = Body;
@@ -369,12 +441,11 @@ public class CdsModalFooter : ContentView
         }
 
         var buttons = new List<CdsModalButton>();
-        CdsModalButton? tertiary = null;
         if (!string.IsNullOrEmpty(TertiaryButtonText))
         {
-            tertiary = new CdsModalButton(TertiaryButtonText, CdsButtonKind.Secondary);
-            tertiary.Clicked += (_, _) => TertiarySubmit?.Invoke(this, EventArgs.Empty);
-            buttons.Add(tertiary);
+            _tertiary = new CdsModalButton(TertiaryButtonText, CdsButtonKind.Secondary);
+            _tertiary.Clicked += (_, _) => TertiarySubmit?.Invoke(this, EventArgs.Empty);
+            buttons.Add(_tertiary);
         }
         if (!string.IsNullOrEmpty(SecondaryButtonText))
         {
@@ -384,14 +455,17 @@ public class CdsModalFooter : ContentView
         }
         if (!string.IsNullOrEmpty(PrimaryButtonText))
         {
-            _primary = new CdsModalButton(PrimaryButtonText, CdsModalTokens.PrimaryKind(IsDanger)) { IsEnabled = !PrimaryButtonDisabled };
+            _primary = new CdsModalButton(PrimaryButtonText, CdsModalTokens.PrimaryKind(IsDanger));
             _primary.Clicked += (_, _) =>
             {
+                if (IsLoading) return;
                 RequestSubmit?.Invoke(this, EventArgs.Empty);
                 if (RequestSubmitCommand?.CanExecute(null) == true) RequestSubmitCommand.Execute(null);
             };
+            _primary.LoadingSuccess += OnLoadingSuccess;
             buttons.Add(_primary);
         }
+        ApplyLoading();
 
         if (buttons.Count == 0)
         {
@@ -411,6 +485,8 @@ public class CdsModalFooter : ContentView
         Content = grid;
         IsVisible = true;
     }
+
+    void OnLoadingSuccess(object? sender, EventArgs e) => LoadingSuccess?.Invoke(this, EventArgs.Empty);
 }
 
 /// <summary>Arguments of a modal's <c>RequestClose</c>: set <see cref="CancelEventArgs.Cancel"/> to keep it open.</summary>
