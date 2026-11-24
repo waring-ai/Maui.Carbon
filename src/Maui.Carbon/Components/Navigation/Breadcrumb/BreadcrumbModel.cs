@@ -40,16 +40,27 @@ public static class CdsBreadcrumbTokens
 /// <summary>Pure logic for <see cref="CdsBreadcrumb"/>.</summary>
 internal static class BreadcrumbModel
 {
+    /// <summary>The trailing levels a collapsed trail keeps (Carbon: the first level and the last two).</summary>
+    public const int KeptTrailingLevels = 2;
+
+    /// <summary>The fewest crumbs a collapsed trail shows: the first level, the overflow crumb and the last two levels.</summary>
+    public const int MinVisibleItems = 1 + 1 + KeptTrailingLevels;
+
+    /// <summary>
+    /// <see cref="CdsBreadcrumb.MaxVisibleItems"/> as stored: 0 or less turns collapsing off (0), anything else is at least
+    /// <see cref="MinVisibleItems"/> (a collapsed trail always shows four crumbs).
+    /// </summary>
+    public static int CoerceMaxVisible(int maxVisible) => maxVisible <= 0 ? 0 : Math.Max(MinVisibleItems, maxVisible);
+
     /// <summary>
     /// For a trail of <paramref name="count"/> items that may show at most <paramref name="maxVisible"/> crumbs (counting the overflow
-    /// crumb), the middle run to collapse: keeps the first level and the last <c>maxVisible - 2</c> (at least one). Returns
-    /// <c>(0, 0)</c> when nothing collapses (<paramref name="maxVisible"/> 0 or the trail fits).
+    /// crumb), the middle run to collapse: keeps the first level and the last two, as Carbon does. Returns <c>(0, 0)</c> when
+    /// nothing collapses (<paramref name="maxVisible"/> 0 or the trail fits; a limit below four counts as four).
     /// </summary>
     public static (int Start, int Count) Collapse(int count, int maxVisible)
     {
-        if (maxVisible <= 0 || count <= maxVisible) return (0, 0);
-        var tail = Math.Max(1, maxVisible - 2);
-        var collapsed = count - 1 - tail;
-        return collapsed < 1 ? (0, 0) : (1, collapsed);
+        maxVisible = CoerceMaxVisible(maxVisible);
+        if (maxVisible == 0 || count <= maxVisible) return (0, 0);
+        return (1, count - 1 - KeptTrailingLevels);
     }
 }

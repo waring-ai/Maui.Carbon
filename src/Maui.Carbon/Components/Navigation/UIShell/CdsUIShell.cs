@@ -128,6 +128,7 @@ public class CdsUIShell : CdsContainer
         if (_sideNav is not null)
         {
             _sideNav.WidthChanged -= OnSideNavWidthChanged;
+            _sideNav.OpenChanged -= OnSideNavOpenChanged;
             _sideNav.PropertyChanged -= OnSideNavPropertyChanged;
         }
         _sideNav = newView as CdsSideNav;
@@ -135,6 +136,7 @@ public class CdsUIShell : CdsContainer
         if (_sideNav is not null)
         {
             _sideNav.WidthChanged += OnSideNavWidthChanged;
+            _sideNav.OpenChanged += OnSideNavOpenChanged;
             _sideNav.PropertyChanged += OnSideNavPropertyChanged;
         }
         Refresh();
@@ -156,6 +158,9 @@ public class CdsUIShell : CdsContainer
     // from inside its own animation tick.
     void OnSideNavWidthChanged(object? sender, EventArgs e) => UpdateBody();
 
+    // Once per open/close (persistence, a rail's hover expansion, a user collapse), not per frame: the menu button mirrors it.
+    void OnSideNavOpenChanged(object? sender, EventArgs e) => Refresh();
+
     void OnSideNavPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(CdsSideNav.IsExpanded) or nameof(CdsSideNav.IsRail) or nameof(CdsSideNav.IsFixed))
@@ -175,7 +180,8 @@ public class CdsUIShell : CdsContainer
     {
         UpdateBody();
         // Parts re-evaluate on the breakpoint and the side nav's state, not on every resize within a breakpoint.
-        var state = (EffectiveBreakpoint, _sideNav, _sideNav?.IsExpanded, _sideNav?.IsRail, _sideNav?.IsFixed);
+        // IsOpen, not IsExpanded: it changes once per open or close whatever the cause (IsExpanded, persistence, a rail's hover).
+        var state = (EffectiveBreakpoint, _sideNav, _sideNav?.IsOpen, _sideNav?.IsRail, _sideNav?.IsFixed);
         if (_raised is { } raised && raised.Equals(state)) return;
         _raised = state;
         ShellChanged?.Invoke(this, EventArgs.Empty);

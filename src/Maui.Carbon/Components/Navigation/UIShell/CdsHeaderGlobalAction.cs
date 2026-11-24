@@ -7,7 +7,8 @@ namespace Maui.Carbon;
 /// <c>icon-secondary</c> going to <c>icon-primary</c>; <see cref="Label"/> is its accessible name and tooltip (it
 /// always names the action: "Notifications", "Open switcher"). While the action's panel is open set
 /// <see cref="CdsShellItem.IsActive"/>: the button fills with <c>layer-01</c> and gets <c>border-subtle-00</c> side borders so it flows
-/// into the <see cref="CdsHeaderPanel"/>. Focus is a 1px <c>focus</c> border.
+/// into the <see cref="CdsHeaderPanel"/>. Set <see cref="ControlsPanel"/> on an action that opens a panel or menu so screen readers
+/// hear it as expanded or collapsed (<c>aria-expanded</c>). Focus is a 1px <c>focus</c> border.
 /// </summary>
 public class CdsHeaderGlobalAction : CdsShellItem
 {
@@ -18,6 +19,10 @@ public class CdsHeaderGlobalAction : CdsShellItem
     /// <summary>Bindable property for <see cref="Icon"/>.</summary>
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
         nameof(Icon), typeof(CdsIconName?), typeof(CdsHeaderGlobalAction), null, propertyChanged: OnChanged);
+
+    /// <summary>Bindable property for <see cref="ControlsPanel"/>.</summary>
+    public static readonly BindableProperty ControlsPanelProperty = BindableProperty.Create(
+        nameof(ControlsPanel), typeof(bool), typeof(CdsHeaderGlobalAction), false, propertyChanged: OnChanged);
 
     readonly Grid _root = new() { WidthRequest = UIShellModel.HeaderHeight, HeightRequest = UIShellModel.HeaderHeight };
     readonly Border _box = new() { StrokeThickness = 1, StrokeShape = new Rectangle(), InputTransparent = true };
@@ -64,6 +69,20 @@ public class CdsHeaderGlobalAction : CdsShellItem
         set => SetValue(IconProperty, value);
     }
 
+    /// <summary>
+    /// The action opens a <see cref="CdsHeaderPanel"/> (switcher, notifications) or a menu: it reports expanded while
+    /// <see cref="CdsShellItem.IsActive"/> and collapsed otherwise (Carbon's <c>aria-expanded</c>). Default <c>false</c>: a plain
+    /// action reports no expanded state while inactive.
+    /// </summary>
+    public bool ControlsPanel
+    {
+        get => (bool)GetValue(ControlsPanelProperty);
+        set => SetValue(ControlsPanelProperty, value);
+    }
+
+    /// <summary>The expanded state the action reports: open while active, collapsed while a panel action is inactive, else none.</summary>
+    internal static bool? ExpandedState(bool controlsPanel, bool isActive) => isActive ? true : controlsPanel ? false : null;
+
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
@@ -82,14 +101,14 @@ public class CdsHeaderGlobalAction : CdsShellItem
         _icon.Icon = Icon;
         SemanticProperties.SetDescription(_hit, Label);
         if (!string.IsNullOrEmpty(Label)) ToolTipProperties.SetText(_hit, Label);
-        _hit.IsExpanded = IsActive ? true : null;
+        _hit.IsExpanded = ExpandedState(ControlsPanel, IsActive);
         RefreshVisuals();
     }
 
     /// <inheritdoc/>
     protected override void OnActiveChanged()
     {
-        _hit.IsExpanded = IsActive ? true : null;
+        _hit.IsExpanded = ExpandedState(ControlsPanel, IsActive);
         base.OnActiveChanged();
     }
 

@@ -8,9 +8,12 @@ public class BreadcrumbModelTests
     [InlineData(4, 4, 0, 0)]
     [InlineData(5, 4, 1, 2)]
     [InlineData(6, 4, 1, 3)]
-    [InlineData(7, 5, 1, 3)]
-    [InlineData(5, 3, 1, 3)]
-    [InlineData(4, 2, 1, 2)]
+    [InlineData(6, 5, 1, 3)]
+    [InlineData(7, 5, 1, 4)]
+    [InlineData(9, 6, 1, 6)]
+    [InlineData(5, 3, 1, 2)]
+    [InlineData(4, 2, 0, 0)]
+    [InlineData(4, 3, 0, 0)]
     public void Keeps_the_first_level_and_the_last_two_and_collapses_the_middle(int count, int max, int start, int collapsed) =>
         Assert.Equal((start, collapsed), BreadcrumbModel.Collapse(count, max));
 
@@ -19,6 +22,19 @@ public class BreadcrumbModelTests
     {
         Assert.Equal((0, 0), BreadcrumbModel.Collapse(2, 1));
         Assert.Equal((0, 0), BreadcrumbModel.Collapse(0, 3));
+    }
+
+    [Theory]
+    [InlineData(-3, 0)]
+    [InlineData(0, 0)]
+    [InlineData(1, 4)]
+    [InlineData(3, 4)]
+    [InlineData(4, 4)]
+    [InlineData(7, 7)]
+    public void Max_visible_items_is_off_or_at_least_four(int requested, int stored)
+    {
+        Assert.Equal(stored, BreadcrumbModel.CoerceMaxVisible(requested));
+        Assert.Equal(stored, new CdsBreadcrumb { MaxVisibleItems = requested }.MaxVisibleItems);
     }
 }
 

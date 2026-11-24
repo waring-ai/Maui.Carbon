@@ -162,3 +162,70 @@ public class ContentSwitcherControlTests
         Assert.True(switcher.WantsNavigationKeys);
     }
 }
+
+public class ContentSwitcherRovingFocusTests
+{
+    static CdsContentSwitcher Make(int selected = 0)
+    {
+        var switcher = new CdsContentSwitcher
+        {
+            Items =
+            {
+                new CdsSwitch { Text = "All" },
+                new CdsSwitch { Text = "Warnings" },
+                new CdsSwitch { Text = "Errors", IsEnabled = false },
+                new CdsSwitch { Text = "Debug" },
+            },
+        };
+        switcher.SelectedIndex = selected;
+        return switcher;
+    }
+
+    static IEnumerable<Element> Walk(Element root)
+    {
+        yield return root;
+        if (root is IVisualTreeElement tree)
+            foreach (var child in tree.GetVisualChildren().OfType<Element>())
+                foreach (var e in Walk(child)) yield return e;
+    }
+
+    static int[] TabStops(CdsContentSwitcher switcher) =>
+        [.. Walk(switcher).OfType<CdsHitTarget>().Select((h, i) => (h, i)).Where(x => x.h.IsTabStop).Select(x => x.i)];
+
+    [Fact]
+    public void The_switcher_is_a_single_tab_stop_on_the_selected_segment()
+    {
+        var switcher = Make(selected: 1);
+        Assert.Equal(4, Walk(switcher).OfType<CdsHitTarget>().Count());
+        Assert.Equal([1], TabStops(switcher));
+        switcher.SelectedIndex = 3;
+        Assert.Equal([3], TabStops(switcher));
+    }
+
+    [Fact]
+    public void Automatic_arrows_move_the_stop_with_the_selection()
+    {
+        var switcher = Make(selected: 1);
+        switcher.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right));
+        Assert.Equal(3, switcher.SelectedIndex);
+        Assert.Equal([3], TabStops(switcher));
+    }
+
+    [Fact]
+    public void Manual_arrows_move_the_stop_to_the_focused_segment_only()
+    {
+        var switcher = Make();
+        switcher.Activation = CdsActivation.Manual;
+        switcher.OnKeyDown(new CdsKeyEventArgs(CdsKey.Left));
+        Assert.Equal(0, switcher.SelectedIndex);
+        Assert.Equal([3], TabStops(switcher));
+        Assert.Equal(3, switcher.TabStopIndex);
+    }
+
+    [Fact]
+    public void A_disabled_selected_segment_hands_the_stop_to_the_first_enabled_one()
+    {
+        var switcher = Make(selected: 2);
+        Assert.Equal([0], TabStops(switcher));
+    }
+}

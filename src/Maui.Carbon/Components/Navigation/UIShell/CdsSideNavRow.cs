@@ -103,6 +103,13 @@ public abstract class CdsSideNavRow : CdsShellItem
     /// <summary>Whether the row currently shows the selected fill and bar.</summary>
     protected virtual bool ShowsSelection => IsActive;
 
+    /// <inheritdoc/>
+    protected override void OnActiveChanged()
+    {
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
+        base.OnActiveChanged();
+    }
+
     /// <summary>Whether the row is reachable by Tab (a collapsed side nav removes its links from the tab order).</summary>
     internal void SetReachable(bool reachable) => _hit.IsTabStop = reachable;
 
@@ -140,6 +147,7 @@ public abstract class CdsSideNavRow : CdsShellItem
         _row.HeightRequest = IsLarge ? UIShellModel.SideNavLargeRowHeight : UIShellModel.SideNavRowHeight;
         SemanticProperties.SetDescription(_hit, Text);
         ToolTipProperties.SetText(_hit, Text ?? string.Empty);
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
         RefreshVisuals();
     }
 }

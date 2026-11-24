@@ -8,7 +8,8 @@ namespace Maui.Carbon;
 /// and use a button for actions. <see cref="Href"/> is opened with the system launcher; <see cref="Clicked"/> and
 /// <see cref="Command"/> run first. <see cref="IsInline"/> underlines the link and hides the icon. Put an
 /// <see cref="Icon"/> after the text: <see cref="CdsIconName.ArrowRight"/> for internal and <see cref="CdsIconName.Launch"/> for
-/// external destinations. For a link in the middle of running text use <see cref="CdsLinkSpan"/> inside a formatted label.
+/// external destinations. For a link in the middle of running text use a <see cref="CdsLinkSpan"/> inside a
+/// <see cref="CdsParagraph"/>, which makes it reachable by keyboard and screen readers.
 /// </summary>
 public class CdsLink : CdsControl
 {

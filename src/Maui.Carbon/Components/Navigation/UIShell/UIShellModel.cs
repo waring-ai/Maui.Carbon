@@ -26,8 +26,11 @@ internal static class UIShellModel
     /// <summary>True from the lg breakpoint (1056) up, where the side nav is persistent and header links show.</summary>
     public static bool IsLarge(CdsBreakpoint breakpoint) => breakpoint >= CdsBreakpoint.Lg;
 
-    /// <summary>The width a side nav animates to.</summary>
-    public static double SideNavTargetWidth(CdsSideNavMode mode, CdsBreakpoint breakpoint, bool isExpanded, bool isPersistent, bool transientExpanded)
+    /// <summary>
+    /// The width a side nav animates to. <paramref name="userCollapsed"/> is a persistent side nav at lg or wider that the user
+    /// collapsed with a collapsible header menu button (it stays 0 wide until expanded again).
+    /// </summary>
+    public static double SideNavTargetWidth(CdsSideNavMode mode, CdsBreakpoint breakpoint, bool isExpanded, bool isPersistent, bool transientExpanded, bool userCollapsed = false)
     {
         switch (mode)
         {
@@ -37,9 +40,27 @@ internal static class UIShellModel
                 return isExpanded || transientExpanded ? SideNavWidth : RailWidth;
             default:
                 if (isExpanded) return SideNavWidth;
-                return isPersistent && IsLarge(breakpoint) ? SideNavWidth : 0;
+                return isPersistent && IsLarge(breakpoint) && !userCollapsed ? SideNavWidth : 0;
         }
     }
+
+    /// <summary>
+    /// Whether a side nav of this target width shows expanded (256, also while a rail is expanded by hover or focus, or a
+    /// persistent side nav sits open at lg): what the footer toggle and the header menu button report.
+    /// </summary>
+    public static bool SideNavOpen(double targetWidth) => targetWidth > RailWidth + 0.5;
+
+    /// <summary>
+    /// Whether the side-nav footer toggle can change anything: a rail (48 to 256 and back), or a default side nav that is not
+    /// held open by persistence at lg. A fixed side nav, and a persistent one at lg, never collapse from the footer (the
+    /// collapsed nav would hide the footer itself and leave no way back but the header menu button).
+    /// </summary>
+    public static bool SideNavFooterToggles(CdsSideNavMode mode, CdsBreakpoint breakpoint, bool isPersistent) => mode switch
+    {
+        CdsSideNavMode.Rail => true,
+        CdsSideNavMode.Fixed => false,
+        _ => !(isPersistent && IsLarge(breakpoint)),
+    };
 
     /// <summary>
     /// How far the page body is pushed from the start edge for a side nav that is currently <paramref name="currentWidth"/> wide.
@@ -108,6 +129,14 @@ internal static class UIShellModel
         CdsKey.End => LastEnabled(enabled),
         _ => -1,
     };
+
+    /// <summary>
+    /// Whether an open header panel closes after focus left one of its elements: blur closing is on, nothing inside the panel
+    /// has focus, focus is not on the action that opened it (<see cref="CdsHeaderPanel.ReturnFocusTo"/>, which toggles the
+    /// panel itself) and focus went somewhere (focus that merely left the window keeps the panel open).
+    /// </summary>
+    public static bool HeaderPanelClosesOnBlur(bool closesOnBlur, bool isExpanded, bool focusInside, bool focusOnOpener, bool focusElsewhere) =>
+        closesOnBlur && isExpanded && !focusInside && !focusOnOpener && focusElsewhere;
 
     /// <summary>Whether a header panel closes on a tap outside it: explicit setting, else only when it holds a switcher.</summary>
     public static bool ClosesOnOutsideTap(bool? explicitValue, bool holdsSwitcher) => explicitValue ?? holdsSwitcher;

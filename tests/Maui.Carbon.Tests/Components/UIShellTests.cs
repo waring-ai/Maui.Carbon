@@ -410,10 +410,176 @@ public class UIShellControlTests
         // The width animates frame by frame; parts that re-evaluated on each frame restarted the side nav's own animation.
         nav.IsPersistent = false;
         Assert.Equal(0, nav.CurrentWidth);
-        Assert.Equal(0, raised);
+        Assert.Equal(1, raised); // the side nav closed: the menu button mirrors that
         nav.IsExpanded = true;
-        Assert.Equal(1, raised);
+        Assert.Equal(2, raised);
         nav.IsExpanded = true;
-        Assert.Equal(1, raised);
+        Assert.Equal(2, raised);
+    }
+}
+
+public class UIShellConformanceTests
+{
+    static CdsHitTarget Hit(CdsControl control) => (CdsHitTarget)control.AccessibilityTarget!;
+
+    [Fact]
+    public void Side_nav_open_state_and_footer_toggling_by_mode()
+    {
+        Assert.Equal(0, UIShellModel.SideNavTargetWidth(CdsSideNavMode.Default, CdsBreakpoint.Lg, false, true, false, userCollapsed: true));
+        Assert.Equal(256, UIShellModel.SideNavTargetWidth(CdsSideNavMode.Default, CdsBreakpoint.Lg, true, true, false, userCollapsed: true));
+        Assert.True(UIShellModel.SideNavOpen(256));
+        Assert.False(UIShellModel.SideNavOpen(48));
+        Assert.False(UIShellModel.SideNavOpen(0));
+        Assert.True(UIShellModel.SideNavFooterToggles(CdsSideNavMode.Rail, CdsBreakpoint.Lg, true));
+        Assert.False(UIShellModel.SideNavFooterToggles(CdsSideNavMode.Fixed, CdsBreakpoint.Sm, true));
+        Assert.False(UIShellModel.SideNavFooterToggles(CdsSideNavMode.Default, CdsBreakpoint.Lg, true));
+        Assert.True(UIShellModel.SideNavFooterToggles(CdsSideNavMode.Default, CdsBreakpoint.Md, true));
+        Assert.True(UIShellModel.SideNavFooterToggles(CdsSideNavMode.Default, CdsBreakpoint.Lg, false));
+    }
+
+    [Fact]
+    public void Footer_of_a_persistent_side_nav_at_lg_says_expanded_and_hides_its_toggle()
+    {
+        var footer = new CdsSideNavFooter();
+        var nav = new CdsSideNav { Footer = footer, Body = new CdsSideNavItems() };
+        Assert.False(nav.IsExpanded);
+        Assert.True(nav.IsOpen);
+        Assert.True(footer.ShowsExpanded);
+        Assert.Equal(true, Hit(footer).IsExpanded);
+        Assert.Equal("Collapse side navigation", SemanticProperties.GetDescription(Hit(footer)));
+        Assert.False(((View)footer.AccessibilityTarget!.Parent!).IsVisible);
+    }
+
+    [Fact]
+    public void Rail_footer_follows_hover_or_focus_expansion_and_collapses_it()
+    {
+        var footer = new CdsSideNavFooter();
+        var nav = new CdsSideNav { IsRail = true, Footer = footer, Body = new CdsSideNavItems() };
+        Assert.False(footer.ShowsExpanded);
+        nav.ItemFocusChanged(true); // focus inside expands a rail
+        Assert.Equal(256, nav.CurrentWidth);
+        Assert.True(footer.ShowsExpanded);
+        footer.Activate();
+        Assert.Equal(48, nav.CurrentWidth);
+        Assert.False(footer.ShowsExpanded);
+        footer.Activate();
+        Assert.True(nav.IsExpanded);
+        Assert.Equal(256, nav.CurrentWidth);
+        Assert.True(footer.ShowsExpanded);
+    }
+
+    [Fact]
+    public void Collapsible_menu_button_reports_and_collapses_a_persistent_side_nav_at_lg()
+    {
+        var nav = new CdsSideNav { Body = new CdsSideNavItems() };
+        var button = new CdsHeaderMenuButton { IsCollapsible = true };
+        var header = new CdsHeader();
+        header.Items.Add(button);
+        _ = new CdsUIShell { Breakpoint = CdsBreakpoint.Lg, Header = header, SideNav = nav };
+        Assert.Equal(256, nav.CurrentWidth);
+        Assert.True(button.IsActive);
+        Assert.Equal("Close menu", SemanticProperties.GetDescription(Hit(button)));
+        button.Activate();
+        Assert.Equal(0, nav.CurrentWidth);
+        Assert.False(button.IsActive);
+        Assert.False(nav.IsExpanded);
+        button.Activate();
+        Assert.Equal(256, nav.CurrentWidth);
+        Assert.True(button.IsActive);
+        button.Activate();
+        Assert.Equal(0, nav.CurrentWidth);
+    }
+
+    [Fact]
+    public void Menu_button_below_lg_toggles_the_side_nav()
+    {
+        var nav = new CdsSideNav { Body = new CdsSideNavItems() };
+        var button = new CdsHeaderMenuButton();
+        var header = new CdsHeader();
+        header.Items.Add(button);
+        _ = new CdsUIShell { Breakpoint = CdsBreakpoint.Md, Header = header, SideNav = nav };
+        Assert.False(button.IsActive);
+        button.Activate();
+        Assert.True(nav.IsExpanded);
+        Assert.True(button.IsActive);
+        button.Activate();
+        Assert.False(nav.IsExpanded);
+        Assert.False(button.IsActive);
+    }
+
+    [Fact]
+    public void Skip_to_content_defaults_to_the_first_focusable_element_of_the_shell_body()
+    {
+        var hidden = new CdsButton { Text = "Hidden", IsVisible = false };
+        var disabled = new CdsLink { Text = "Disabled", IsEnabled = false };
+        var first = new CdsLink { Text = "Clusters" };
+        var skip = new CdsSkipToContent();
+        var header = new CdsHeader();
+        header.Items.Add(skip);
+        var shell = new CdsUIShell
+        {
+            Header = header,
+            Body = new VerticalStackLayout { new CdsText("Overview"), hidden, disabled, new ContentView { Content = first } },
+        };
+        Assert.Same(first.AccessibilityTarget, skip.ResolveTarget());
+        var entry = new Entry();
+        skip.Target = new VerticalStackLayout { new Label { Text = "Name" }, entry };
+        Assert.Same(entry, skip.ResolveTarget());
+        skip.Target = entry;
+        Assert.Same(entry, skip.ResolveTarget());
+        shell.Body = null;
+        skip.Target = null;
+        Assert.Null(skip.ResolveTarget());
+    }
+
+    [Fact]
+    public void Side_nav_links_and_menu_items_report_the_current_page()
+    {
+        var link = new CdsSideNavLink("Dashboard");
+        var item = new CdsSideNavMenuItem("Buckets", isActive: true);
+        Assert.Equal(CdsCurrentKind.None, Hit(link).CurrentKind);
+        Assert.Equal(CdsCurrentKind.Page, Hit(item).CurrentKind);
+        link.IsActive = true;
+        item.IsActive = false;
+        Assert.Equal(CdsCurrentKind.Page, Hit(link).CurrentKind);
+        Assert.Equal(CdsCurrentKind.None, Hit(item).CurrentKind);
+    }
+
+    [Fact]
+    public void Header_menu_items_and_switcher_items_report_the_current_page()
+    {
+        var link = new CdsHeaderMenuItem("Catalog", isActive: true);
+        Assert.Equal(CdsCurrentKind.Page, Hit(link).CurrentKind);
+        link.IsActive = false;
+        Assert.Equal(CdsCurrentKind.None, Hit(link).CurrentKind);
+        var product = new CdsSwitcherItem("Platform", isSelected: true);
+        Assert.Equal(CdsCurrentKind.Page, Hit(product).CurrentKind);
+    }
+
+    [Fact]
+    public void Panel_actions_report_collapsed_while_closed_and_plain_actions_report_nothing()
+    {
+        Assert.Equal(true, CdsHeaderGlobalAction.ExpandedState(controlsPanel: true, isActive: true));
+        Assert.Equal(false, CdsHeaderGlobalAction.ExpandedState(controlsPanel: true, isActive: false));
+        Assert.Null(CdsHeaderGlobalAction.ExpandedState(controlsPanel: false, isActive: false));
+        var action = new CdsHeaderGlobalAction(CdsIconName.Switcher, "Switch environment") { ControlsPanel = true };
+        Assert.Equal(false, Hit(action).IsExpanded);
+        action.IsActive = true;
+        Assert.Equal(true, Hit(action).IsExpanded);
+        action.IsActive = false;
+        Assert.Equal(false, Hit(action).IsExpanded);
+        var plain = new CdsHeaderGlobalAction(CdsIconName.Search, "Search");
+        Assert.Null(Hit(plain).IsExpanded);
+    }
+
+    [Fact]
+    public void Header_menu_trigger_and_breadcrumb_overflow_report_collapsed_while_closed()
+    {
+        var menu = new CdsHeaderMenu { Label = "Manage" };
+        Assert.Equal(false, Hit(menu).IsExpanded);
+        var overflow = new CdsBreadcrumbItem();
+        overflow.OverflowItems.Add(new CdsBreadcrumbItem("Projects"));
+        Assert.Equal(false, Hit(overflow).IsExpanded);
+        Assert.Equal(CdsAccessibilityRole.Button, Hit(overflow).Role);
     }
 }

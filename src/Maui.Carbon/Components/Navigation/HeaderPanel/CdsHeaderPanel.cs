@@ -12,7 +12,8 @@ namespace Maui.Carbon;
 /// header, aligned to the end, with a 48 top margin (for example a <c>Grid</c> row 1 with <c>HorizontalOptions="End"</c>); it
 /// then closes on Escape only, so also give it <see cref="ReturnFocusTo"/> and toggle <see cref="IsExpanded"/> from your action.
 /// </para>
-/// Escape closes it (when focus is inside) and returns focus to <see cref="ReturnFocusTo"/>; for custom content give it a
+/// Escape closes it (when focus is inside) and returns focus to <see cref="ReturnFocusTo"/>, and focus moving from the panel to
+/// anything but <see cref="ReturnFocusTo"/> closes it (<see cref="ClosesOnBlur"/>); for custom content give it a
 /// <see cref="Label"/> and make links non-focusable while it is closed (this panel hides itself, so they already are).
 /// </summary>
 public class CdsHeaderPanel : CdsContainer
@@ -35,6 +36,10 @@ public class CdsHeaderPanel : CdsContainer
     public static readonly BindableProperty ClosesOnEscapeProperty = BindableProperty.Create(
         nameof(ClosesOnEscape), typeof(bool), typeof(CdsHeaderPanel), true);
 
+    /// <summary>Bindable property for <see cref="ClosesOnBlur"/>.</summary>
+    public static readonly BindableProperty ClosesOnBlurProperty = BindableProperty.Create(
+        nameof(ClosesOnBlur), typeof(bool), typeof(CdsHeaderPanel), true);
+
     /// <summary>Bindable property for <see cref="ReturnFocusTo"/>.</summary>
     public static readonly BindableProperty ReturnFocusToProperty = BindableProperty.Create(
         nameof(ReturnFocusTo), typeof(VisualElement), typeof(CdsHeaderPanel), null);
@@ -44,7 +49,9 @@ public class CdsHeaderPanel : CdsContainer
     readonly ScrollView _scroll = new();
     readonly BoxView _left = new() { WidthRequest = 1, HorizontalOptions = LayoutOptions.Start, InputTransparent = true };
     readonly BoxView _right = new() { WidthRequest = 1, HorizontalOptions = LayoutOptions.End, InputTransparent = true };
+    readonly HashSet<VisualElement> _tracked = [];
     double _width;
+    bool _blurCheckPending;
 
     /// <summary>Creates a closed panel.</summary>
     public CdsHeaderPanel()
@@ -62,6 +69,8 @@ public class CdsHeaderPanel : CdsContainer
         _clip.Add(_panel);
         SetChrome(_clip);
         SetWidth(0);
+        DescendantAdded += (_, e) => Track(e.Element, true);
+        DescendantRemoved += (_, e) => Track(e.Element, false);
     }
 
     /// <summary>Raised when the (animating) width changes.</summary>
@@ -96,6 +105,17 @@ public class CdsHeaderPanel : CdsContainer
     {
         get => (bool)GetValue(ClosesOnEscapeProperty);
         set => SetValue(ClosesOnEscapeProperty, value);
+    }
+
+    /// <summary>
+    /// Whether focus leaving the panel closes it (Carbon's blur listener; with <see cref="ClosesOnEscape"/> it makes up
+    /// <c>addFocusListeners</c>). Focus moving to <see cref="ReturnFocusTo"/> (the action, which toggles the panel itself) keeps it
+    /// open. Default <c>true</c>.
+    /// </summary>
+    public bool ClosesOnBlur
+    {
+        get => (bool)GetValue(ClosesOnBlurProperty);
+        set => SetValue(ClosesOnBlurProperty, value);
     }
 
     /// <summary>The element that gets focus back when Escape closes the panel (the action that opened it).</summary>
@@ -137,6 +157,49 @@ public class CdsHeaderPanel : CdsContainer
         var target = open ? UIShellModel.HeaderPanelWidth : 0;
         if (open) _clip.IsVisible = true;
         _ = CdsMotion.AnimateAsync(this, "CdsHeaderPanelWidth", SetWidth, _width, target, CdsDuration.Fast02, CdsEasing.ExitProductive);
+    }
+
+    void Track(Element element, bool add)
+    {
+        if (element is not VisualElement visual) return;
+        if (add && _tracked.Add(visual)) visual.Unfocused += OnDescendantUnfocused;
+        else if (!add && _tracked.Remove(visual)) visual.Unfocused -= OnDescendantUnfocused;
+    }
+
+    // Focus leaves an element first and lands on the next one after it, so look once the move is over (at once off screen).
+    void OnDescendantUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (!IsExpanded || !ClosesOnBlur || _blurCheckPending) return;
+        if (Handler is not null && Dispatcher is { } dispatcher)
+        {
+            _blurCheckPending = true;
+            dispatcher.Dispatch(() =>
+            {
+                _blurCheckPending = false;
+                CloseIfFocusLeft();
+            });
+            return;
+        }
+        CloseIfFocusLeft();
+    }
+
+    /// <summary>Closes the panel when focus is now outside it and not on its action (see <see cref="ClosesOnBlur"/>).</summary>
+    internal void CloseIfFocusLeft()
+    {
+        var focused = CdsFocusTracker.Focused;
+        var inside = _tracked.Any(v => v.IsFocused) || (focused is not null && IsInside(focused));
+        var onOpener = ReturnFocusTo is { } opener && (opener.IsFocused || (opener is CdsControl c && c.Is(CdsInteractionState.Focused)) || (focused is not null && IsWithin(focused, opener)));
+        if (UIShellModel.HeaderPanelClosesOnBlur(ClosesOnBlur, IsExpanded, inside, onOpener, focused is not null))
+            IsExpanded = false;
+    }
+
+    bool IsInside(Element element) => IsWithin(element, this);
+
+    static bool IsWithin(Element element, Element ancestor)
+    {
+        for (var e = element; e is not null; e = e.Parent)
+            if (ReferenceEquals(e, ancestor)) return true;
+        return false;
     }
 
     void SetWidth(double width)

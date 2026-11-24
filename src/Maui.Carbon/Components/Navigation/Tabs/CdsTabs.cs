@@ -9,8 +9,8 @@ namespace Maui.Carbon;
 /// Line tabs (40) sit on a 2px rule with a 2px <c>border-interactive</c> underline under the selected tab; contained
 /// tabs (48) are <c>layer-accent-01</c> blocks, the selected one in <c>layer-01</c> with a 2px top edge. Use at least
 /// two and about six tabs; use a <see cref="CdsContentSwitcher"/> to switch the format of the same content and a progress
-/// indicator for steps. Keyboard: Tab moves into the row (every tab is a tab stop on platforms without a roving tab index), Left and Right move
-/// between enabled tabs (wrapping), Home and End jump to the first and last; arrows select in
+/// indicator for steps. Keyboard: the row is a single Tab stop (the selected tab; a roving tab index), so Tab moves from the row
+/// into the panel; Left and Right move between enabled tabs (wrapping), Home and End jump to the first and last; arrows select in
 /// <see cref="CdsActivation.Automatic"/> mode, Enter or Space select in <see cref="CdsActivation.Manual"/> mode. When the tabs
 /// do not fit the row scrolls, with scroll buttons at the edges.
 /// </summary>
@@ -26,8 +26,8 @@ public partial class CdsTabs : CdsControl
     readonly ContentView _panel = new() { Padding = new Thickness(CdsSpacing.Spacing05) };
     readonly CdsTabScrollButton _left;
     readonly CdsTabScrollButton _right;
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Horizontal, wraps: true) { RemembersFocus = false };
     int _applied = -2;
-    int _focusIndex = -1;
     bool _rebuilding;
     bool _fullWidthActive;
 
@@ -54,6 +54,9 @@ public partial class CdsTabs : CdsControl
         HorizontalOptions = LayoutOptions.Fill;
         SetChrome(stack);
 
+        _roving.CanFocus = i => i >= 0 && i < _items.Count && _items[i].IsEnabled;
+        _roving.PreferredIndex = () => _applied;
+        _roving.Navigated += OnRovingNavigated;
         _items.CollectionChanged += OnItemsChanged;
         _scroll.Scrolled += (_, _) => UpdateScrollButtons();
         _scroll.SizeChanged += OnStripSizeChanged;
@@ -81,18 +84,10 @@ public partial class CdsTabs : CdsControl
     protected internal override bool WantsNavigationKeys => true;
 
     /// <inheritdoc/>
-    protected internal override bool OnKeyDown(CdsKeyEventArgs e)
-    {
-        if (_views.Count == 0) return false;
-        var enabled = Enabled();
-        var current = _focusIndex >= 0 ? _focusIndex : Math.Max(0, _applied);
-        var target = TabsModel.Target(e.Key, enabled, current);
-        if (target < 0) return false;
-        e.Handled = true;
-        FocusTab(target);
-        if (Activation == CdsActivation.Automatic) Select(target);
-        return true;
-    }
+    protected internal override bool OnKeyDown(CdsKeyEventArgs e) => _views.Count > 0 && _roving.HandleKey(e);
+
+    /// <summary>The index of the tab that Tab lands on (the selected tab, or the one arrowed to while focus is in the row).</summary>
+    internal int TabStopIndex => _roving.TabStopIndex;
 
     internal void OnTabActivated(int index)
     {
@@ -121,11 +116,15 @@ public partial class CdsTabs : CdsControl
         else ApplySelection();
     }
 
-    void FocusTab(int index)
+    void OnRovingNavigated(object? sender, int index)
+    {
+        RevealTab(index);
+        if (Activation == CdsActivation.Automatic) Select(index);
+    }
+
+    void RevealTab(int index)
     {
         if (index < 0 || index >= _views.Count) return;
-        _focusIndex = index;
-        _views[index].Focus();
         var view = _views[index];
         var x = TabsModel.ScrollToReveal(view.X, view.X + view.Width, _scroll.ScrollX, _scroll.Width);
         if (Math.Abs(x - _scroll.ScrollX) > 0.5) _ = _scroll.ScrollToAsync(x, 0, false);
@@ -143,6 +142,7 @@ public partial class CdsTabs : CdsControl
         var previous = _applied;
         _applied = coerced;
         for (var i = 0; i < _views.Count; i++) _views[i].Update(_items[i], i == _applied);
+        _roving.Refresh();
         _panel.Content = SelectedTab?.Body;
         if (previous != -2 && previous != _applied)
             SelectionChanged?.Invoke(this, new CdsTabsSelectionChangedEventArgs(previous, _applied));
@@ -213,7 +213,6 @@ public partial class CdsTabs : CdsControl
             for (var i = 0; i < _items.Count; i++)
             {
                 var view = new CdsTabItemView(this, i);
-                view.StateChanged += OnTabStateChanged;
                 _views.Add(view);
                 _row.ColumnDefinitions.Add(new ColumnDefinition(_fullWidthActive ? GridLength.Star : GridLength.Auto));
                 _row.Add(view, i);
@@ -242,15 +241,9 @@ public partial class CdsTabs : CdsControl
         }
         _applied = coerced;
         for (var i = 0; i < _views.Count; i++) _views[i].Update(_items[i], i == _applied);
+        _roving.SetItems(_views.Select(v => v.Hit));
         _panel.Content = SelectedTab?.Body;
         UpdateScrollButtons();
-    }
-
-    void OnTabStateChanged(object? sender, EventArgs e)
-    {
-        if (sender is not CdsTabItemView view) return;
-        if (view.Is(CdsInteractionState.Focused)) _focusIndex = view.Index;
-        else if (_focusIndex == view.Index) _focusIndex = -1;
     }
 
     void UpdateScrollButtons()
@@ -278,7 +271,9 @@ public partial class CdsTabs : CdsControl
             _direction = direction;
             _icon = new CdsIcon(icon) { InputTransparent = true };
             AutomationProperties.SetExcludedWithChildren(_icon, true);
+            // Pointer only, as in Carbon (tabindex -1): the arrow keys already scroll the focused tab into view.
             _hit = CreateHitTarget();
+            _hit.IsTabStop = false;
             SemanticProperties.SetDescription(_hit, direction < 0 ? "Scroll left" : "Scroll right");
             _root.Add(_fill);
             _root.Add(_icon);

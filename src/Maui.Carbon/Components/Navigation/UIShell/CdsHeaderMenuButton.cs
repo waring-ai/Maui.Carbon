@@ -4,8 +4,9 @@ namespace Maui.Carbon;
 
 /// <summary>
 /// The hamburger at the start of the header that expands and collapses the side nav. Inside a <see cref="CdsUIShell"/> it
-/// drives the shell's <see cref="CdsSideNav"/> and mirrors its state in <see cref="CdsShellItem.IsActive"/> (the button
-/// shows the close icon while the side nav is open); on its own it just toggles <see cref="CdsShellItem.IsActive"/>. It is
+/// drives the shell's <see cref="CdsSideNav"/> and mirrors whether it is open in <see cref="CdsShellItem.IsActive"/> (the button
+/// shows the close icon while the side nav is open, including a persistent side nav at lg and a rail expanded by hover or
+/// focus; activating it then collapses the side nav); on its own it just toggles <see cref="CdsShellItem.IsActive"/>. It is
 /// hidden from the lg breakpoint (1056) up unless <see cref="IsCollapsible"/>. It looks and behaves like a
 /// <see cref="CdsHeaderGlobalAction"/>: 48 x 48, 20px icon, accessible name from <see cref="Label"/>.
 /// </summary>
@@ -67,7 +68,7 @@ public class CdsHeaderMenuButton : CdsShellItem
     /// <inheritdoc/>
     protected override void OnItemActivated()
     {
-        if (_watcher.Shell?.SideNav is CdsSideNav nav) nav.IsExpanded = !nav.IsExpanded;
+        if (_watcher.Shell?.SideNav is CdsSideNav nav) nav.Toggle();
         else IsActive = !IsActive;
     }
 
@@ -87,7 +88,7 @@ public class CdsHeaderMenuButton : CdsShellItem
     void Sync()
     {
         if (_watcher is null) return;
-        if (_watcher.Shell?.SideNav is CdsSideNav nav && IsActive != nav.IsExpanded) IsActive = nav.IsExpanded;
+        if (_watcher.Shell?.SideNav is CdsSideNav nav && IsActive != nav.IsOpen) IsActive = nav.IsOpen;
         _root.IsVisible = IsShown;
         _icon.Icon = IsActive ? CdsIconName.Close : CdsIconName.Menu;
         var name = Label ?? (IsActive ? "Close menu" : "Open menu");

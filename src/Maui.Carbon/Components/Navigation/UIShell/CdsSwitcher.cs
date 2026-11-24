@@ -67,7 +67,7 @@ public class CdsSwitcherItem : CdsShellItem
     {
         _label.Text = Text;
         SemanticProperties.SetDescription(_hit, Text);
-        _hit.IsSelected = IsActive;
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
         ToolTipProperties.SetText(_hit, Text ?? string.Empty);
         RefreshVisuals();
     }
@@ -75,7 +75,7 @@ public class CdsSwitcherItem : CdsShellItem
     /// <inheritdoc/>
     protected override void OnActiveChanged()
     {
-        _hit.IsSelected = IsActive;
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
         base.OnActiveChanged();
     }
 }

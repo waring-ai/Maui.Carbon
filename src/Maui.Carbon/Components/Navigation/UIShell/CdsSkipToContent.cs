@@ -6,7 +6,8 @@ namespace Maui.Carbon;
 /// <summary>
 /// The "Skip to main content" link: the first focusable element of the header. It is invisible (1 x 1) until it gets
 /// keyboard focus, then shows as a 48 high bar over the header (<c>background</c>, <c>text-secondary</c>, 4px <c>focus</c>
-/// border). Activating it moves focus to <see cref="Target"/> (the page body or its first control). It needs a hardware
+/// border). Activating it moves focus to <see cref="Target"/>, by default the first focusable element of the enclosing
+/// <see cref="CdsUIShell"/>'s <see cref="CdsContainer.Body"/> (Carbon's <c>#main-content</c>). It needs a hardware
 /// keyboard: on touch-only devices it is never reached (best effort on desktop).
 /// </summary>
 public class CdsSkipToContent : CdsControl
@@ -56,7 +57,10 @@ public class CdsSkipToContent : CdsControl
         set => SetValue(TextProperty, value);
     }
 
-    /// <summary>The element that receives focus (the <c>href="#main-content"</c> target).</summary>
+    /// <summary>
+    /// The element that receives focus (the <c>href="#main-content"</c> target). Default <c>null</c>: the first focusable element
+    /// of the enclosing shell's body. A layout or control given here passes focus to its first focusable element.
+    /// </summary>
     public VisualElement? Target
     {
         get => (VisualElement?)GetValue(TargetProperty);
@@ -70,13 +74,46 @@ public class CdsSkipToContent : CdsControl
         set => SetValue(CommandProperty, value);
     }
 
+    /// <summary>
+    /// The element activation focuses: <see cref="Target"/> when it can take focus itself, else the first focusable element inside
+    /// it; without a target, the first focusable element of the enclosing <see cref="CdsUIShell"/>'s body. <c>null</c> when
+    /// there is none.
+    /// </summary>
+    internal VisualElement? ResolveTarget()
+    {
+        if (Target is { } target) return IsFocusable(target) ? target : FirstFocusable(target);
+        return CdsShellContext.FindShell(this)?.Body is { } body ? FirstFocusable(body) : null;
+    }
+
     /// <inheritdoc/>
     protected override void OnActivated()
     {
         Clicked?.Invoke(this, EventArgs.Empty);
         ExecuteCommand();
-        Target?.Focus();
+        ResolveTarget()?.Focus();
     }
+
+    /// <summary>
+    /// The first element under <paramref name="root"/> (itself included) that keyboard focus can land on, in tree order: a
+    /// visible, enabled hit target that is a tab stop, or a native input or control. Hidden and disabled branches are skipped.
+    /// </summary>
+    internal static VisualElement? FirstFocusable(Element root)
+    {
+        if (root is VisualElement { IsVisible: false } or VisualElement { IsEnabled: false }) return null;
+        if (root is VisualElement element && IsFocusable(element)) return element;
+        if (root is not IVisualTreeElement tree) return null;
+        foreach (var child in tree.GetVisualChildren())
+            if (child is Element e && FirstFocusable(e) is { } found) return found;
+        return null;
+    }
+
+    static bool IsFocusable(VisualElement element) =>
+        element is { IsVisible: true, IsEnabled: true } && element switch
+        {
+            CdsHitTarget hit => hit.IsTabStop,
+            InputView or Picker or DatePicker or TimePicker or Button or CheckBox or Switch or Slider or Stepper or RadioButton => true,
+            _ => false,
+        };
 
     /// <inheritdoc/>
     protected override void ApplyVisuals()

@@ -5,9 +5,10 @@ namespace Maui.Carbon;
 /// <summary>
 /// An inline link for use inside formatted text (<c>Label.FormattedText</c>): <c>link-primary</c> (or <c>link-visited</c>) text,
 /// always underlined, taking the surrounding paragraph's size, that opens <see cref="Href"/> or runs
-/// <see cref="Command"/> when tapped. A span cannot take keyboard focus, show hover or pressed colors, or be named for
-/// screen readers on its own, so use it only for links that are also reachable another way; prefer a standalone
-/// <see cref="CdsLink"/> with <see cref="CdsLink.IsInline"/> when the link can sit on its own line.
+/// <see cref="Command"/> when tapped. A span is not a view: it cannot take keyboard focus or be named for screen readers on its
+/// own. Put the formatted text in a <see cref="CdsParagraph"/>, which gives every link span a Tab stop and an accessible link
+/// name; in a plain label the link is pointer-only. A standalone <see cref="CdsLink"/> with <see cref="CdsLink.IsInline"/> also
+/// works when the link can sit on its own line.
 /// </summary>
 public class CdsLinkSpan : Span
 {
@@ -37,6 +38,8 @@ public class CdsLinkSpan : Span
     /// <summary>Bindable property for <see cref="CommandParameter"/>.</summary>
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
         nameof(CommandParameter), typeof(object), typeof(CdsLinkSpan), null);
+
+    bool _showsFocus;
 
     /// <summary>Creates an underlined link span.</summary>
     public CdsLinkSpan()
@@ -93,7 +96,23 @@ public class CdsLinkSpan : Span
         set => SetValue(CommandParameterProperty, value);
     }
 
-    void Activate()
+    /// <summary>
+    /// Whether the span shows the keyboard focus of its <see cref="CdsParagraph"/> link: a <c>highlight</c> background (a span
+    /// cannot draw Carbon's 1px focus outline).
+    /// </summary>
+    internal bool ShowsFocus
+    {
+        get => _showsFocus;
+        set
+        {
+            if (_showsFocus == value) return;
+            _showsFocus = value;
+            ApplyColor();
+        }
+    }
+
+    /// <summary>Follows the link as a tap does: <see cref="Clicked"/>, <see cref="Command"/>, then <see cref="Href"/>.</summary>
+    internal void Activate()
     {
         if (!IsEnabled) return;
         Clicked?.Invoke(this, EventArgs.Empty);
@@ -108,5 +127,6 @@ public class CdsLinkSpan : Span
         var v = CdsLinkTokens.Resolve(state, IsVisited, isInline: true, IsInverse);
         TextDecorations = v.Underline ? TextDecorations.Underline : TextDecorations.None;
         CdsTokens.SetColor(this, TextColorProperty, v.Foreground);
+        CdsTokens.SetColor(this, BackgroundColorProperty, _showsFocus && IsEnabled ? CdsColorKeys.Highlight : null);
     }
 }

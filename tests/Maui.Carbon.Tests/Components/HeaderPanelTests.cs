@@ -89,3 +89,82 @@ public class HeaderPanelTests
         panel.IsExpanded = false;
     }
 }
+
+[CollectionDefinition(nameof(HeaderPanelFocusTests), DisableParallelization = true)]
+public sealed class HeaderPanelFocusCollection;
+
+/// <summary>Uses the process-wide focus tracker, so it runs on its own.</summary>
+[Collection(nameof(HeaderPanelFocusTests))]
+public class HeaderPanelFocusTests
+{
+    static CdsHitTarget Hit(CdsControl control) => (CdsHitTarget)control.AccessibilityTarget!;
+
+    static (CdsHeaderPanel Panel, CdsSwitcherItem Inside) Open(CdsHeaderGlobalAction? opener = null)
+    {
+        var inside = new CdsSwitcherItem("Storage");
+        var panel = new CdsHeaderPanel { Body = new CdsSwitcher { Items = { inside, new CdsSwitcherItem("Compute") } }, ReturnFocusTo = opener, IsExpanded = true };
+        return (panel, inside);
+    }
+
+    [Fact]
+    public void Blur_closes_only_when_focus_moved_somewhere_outside_the_panel_and_its_action()
+    {
+        Assert.True(UIShellModel.HeaderPanelClosesOnBlur(true, true, focusInside: false, focusOnOpener: false, focusElsewhere: true));
+        Assert.False(UIShellModel.HeaderPanelClosesOnBlur(true, true, focusInside: true, focusOnOpener: false, focusElsewhere: true));
+        Assert.False(UIShellModel.HeaderPanelClosesOnBlur(true, true, focusInside: false, focusOnOpener: true, focusElsewhere: true));
+        Assert.False(UIShellModel.HeaderPanelClosesOnBlur(true, true, focusInside: false, focusOnOpener: false, focusElsewhere: false));
+        Assert.False(UIShellModel.HeaderPanelClosesOnBlur(false, true, focusInside: false, focusOnOpener: false, focusElsewhere: true));
+        Assert.False(UIShellModel.HeaderPanelClosesOnBlur(true, false, focusInside: false, focusOnOpener: false, focusElsewhere: true));
+    }
+
+    [Fact]
+    public void Tabbing_out_of_the_panel_closes_it()
+    {
+        var (panel, inside) = Open();
+        var outside = new CdsButton { Text = "Deploy" };
+        Assert.True(panel.ClosesOnBlur);
+        Hit(inside).ReportFocus(true, fromKeyboard: true);
+        Hit(outside).ReportFocus(true, fromKeyboard: true);
+        Hit(inside).ReportFocus(false, fromKeyboard: true);
+        Assert.False(panel.IsExpanded);
+        Hit(outside).ReportFocus(false, fromKeyboard: true);
+    }
+
+    [Fact]
+    public void Moving_focus_inside_the_panel_or_back_to_its_action_keeps_it_open()
+    {
+        var action = new CdsHeaderGlobalAction(CdsIconName.Switcher, "Switch product") { ControlsPanel = true, IsActive = true };
+        var (panel, inside) = Open(action);
+        var next = (CdsSwitcherItem)((CdsSwitcher)panel.Body!).Items[1];
+        Hit(inside).ReportFocus(true, fromKeyboard: true);
+        Hit(next).ReportFocus(true, fromKeyboard: true);
+        Hit(inside).ReportFocus(false, fromKeyboard: true);
+        Assert.True(panel.IsExpanded);
+        Hit(action).ReportFocus(true, fromKeyboard: true);
+        Hit(next).ReportFocus(false, fromKeyboard: true);
+        Assert.True(panel.IsExpanded);
+        Hit(action).ReportFocus(false, fromKeyboard: true);
+    }
+
+    [Fact]
+    public void Blur_closing_can_be_turned_off()
+    {
+        var (panel, inside) = Open();
+        panel.ClosesOnBlur = false;
+        var outside = new CdsButton { Text = "Deploy" };
+        Hit(inside).ReportFocus(true, fromKeyboard: true);
+        Hit(outside).ReportFocus(true, fromKeyboard: true);
+        Hit(inside).ReportFocus(false, fromKeyboard: true);
+        Assert.True(panel.IsExpanded);
+        Hit(outside).ReportFocus(false, fromKeyboard: true);
+    }
+
+    [Fact]
+    public void Focus_that_leaves_for_nowhere_keeps_the_panel_open()
+    {
+        var (panel, inside) = Open();
+        Hit(inside).ReportFocus(true, fromKeyboard: true);
+        Hit(inside).ReportFocus(false, fromKeyboard: true);
+        Assert.True(panel.IsExpanded);
+    }
+}

@@ -9,7 +9,8 @@ namespace Maui.Carbon;
 /// <see cref="CdsSwitch"/> is always selected. Segments share the width equally (icon-only segments are squares of the control
 /// height). Sizes are sm 32, md 40 (default) and lg 48. High contrast (default) fills the selected segment with
 /// <c>layer-selected-inverse</c>; <see cref="IsLowContrast"/> draws it on the next layer for cards and dialogs. Place it above the
-/// content it controls, aligned left or right, never centered. It is a single Tab stop; Left and Right move between
+/// content it controls, aligned left or right, never centered. It is a single Tab stop (the selected segment, or the one arrowed to
+/// while focus is inside); Left and Right move between
 /// enabled segments (wrapping) and select in <see cref="CdsActivation.Automatic"/> mode, Enter or Space select in
 /// <see cref="CdsActivation.Manual"/> mode. For distinct sections use <see cref="CdsTabs"/>, for on/off use a toggle.
 /// </summary>
@@ -50,15 +51,21 @@ public class CdsContentSwitcher : CdsControl
     readonly List<CdsSwitchView> _views = [];
     readonly Border _frame = new() { StrokeThickness = 1, StrokeShape = new RoundRectangle { CornerRadius = 4 }, Padding = 0 };
     readonly CdsEqualWidthRow _grid = new();
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Horizontal, wraps: true) { RemembersFocus = false, HandlesHomeEnd = false };
     bool _rebuilding;
     int _applied = -2;
-    int _focusIndex = -1;
 
     /// <summary>Creates an empty medium, high-contrast switcher.</summary>
     public CdsContentSwitcher()
     {
         _frame.Content = _grid;
         SetChrome(_frame);
+        _roving.CanFocus = i => i >= 0 && i < _items.Count && _items[i].IsEnabled;
+        _roving.PreferredIndex = () => _applied;
+        _roving.Navigated += (_, index) =>
+        {
+            if (Activation == CdsActivation.Automatic) OnSegmentActivated(index);
+        };
         _items.CollectionChanged += OnItemsChanged;
         Rebuild();
     }
@@ -115,32 +122,16 @@ public class CdsContentSwitcher : CdsControl
     protected internal override bool WantsNavigationKeys => true;
 
     /// <inheritdoc/>
-    protected internal override bool OnKeyDown(CdsKeyEventArgs e)
-    {
-        if (_views.Count == 0 || e.Key is not (CdsKey.Left or CdsKey.Right)) return false;
-        var current = _focusIndex >= 0 ? _focusIndex : Math.Max(0, _applied);
-        var target = TabsModel.Target(e.Key, Enabled(), current);
-        if (target < 0) return false;
-        e.Handled = true;
-        FocusSegment(target);
-        if (Activation == CdsActivation.Automatic) OnSegmentActivated(target);
-        return true;
-    }
+    protected internal override bool OnKeyDown(CdsKeyEventArgs e) => _views.Count > 0 && _roving.HandleKey(e);
+
+    /// <summary>The index of the segment that Tab lands on.</summary>
+    internal int TabStopIndex => _roving.TabStopIndex;
 
     internal void OnSegmentActivated(int index)
     {
         if (index < 0 || index >= _items.Count || !_items[index].IsEnabled) return;
         if (SelectedIndex != index) SelectedIndex = index;
         else ApplySelection();
-    }
-
-    IReadOnlyList<bool> Enabled() => _items.Select(i => i.IsEnabled).ToArray();
-
-    void FocusSegment(int index)
-    {
-        if (index < 0 || index >= _views.Count) return;
-        _focusIndex = index;
-        _views[index].Focus();
     }
 
     void ApplySelection()
@@ -155,6 +146,7 @@ public class CdsContentSwitcher : CdsControl
         var previous = _applied;
         _applied = coerced;
         for (var i = 0; i < _views.Count; i++) _views[i].Update(_items[i], i == _applied);
+        _roving.Refresh();
         UpdateDividers();
         if (previous != -2 && previous != _applied && _applied >= 0)
         {
@@ -210,19 +202,12 @@ public class CdsContentSwitcher : CdsControl
             _rebuilding = false;
         }
         for (var i = 0; i < _views.Count; i++) _views[i].Update(_items[i], i == _applied);
+        _roving.SetItems(_views.Select(v => v.Hit));
         UpdateDividers();
         RefreshVisuals();
     }
 
-    void OnSegmentStateChanged(object? sender, EventArgs e)
-    {
-        if (sender is CdsSwitchView view)
-        {
-            if (view.Is(CdsInteractionState.Focused)) _focusIndex = view.Index;
-            else if (_focusIndex == view.Index) _focusIndex = -1;
-        }
-        UpdateDividers();
-    }
+    void OnSegmentStateChanged(object? sender, EventArgs e) => UpdateDividers();
 
     void UpdateDividers()
     {

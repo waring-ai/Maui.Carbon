@@ -28,7 +28,7 @@ public class CdsBreadcrumb : CdsControl
     /// <summary>Bindable property for <see cref="MaxVisibleItems"/>.</summary>
     public static readonly BindableProperty MaxVisibleItemsProperty = BindableProperty.Create(
         nameof(MaxVisibleItems), typeof(int), typeof(CdsBreadcrumb), 0,
-        coerceValue: static (_, v) => Math.Max(0, (int)v),
+        coerceValue: static (_, v) => BreadcrumbModel.CoerceMaxVisible((int)v),
         propertyChanged: static (b, _, _) => ((CdsBreadcrumb)b).Rebuild());
 
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
@@ -68,8 +68,9 @@ public class CdsBreadcrumb : CdsControl
     }
 
     /// <summary>
-    /// The most crumbs to show, counting the "…" crumb; longer trails keep the first level and the last <c>MaxVisibleItems - 2</c> and
-    /// collapse the rest into the overflow list. 0 (default) never collapses.
+    /// The most crumbs to show, counting the "…" crumb: a longer trail keeps the first level and the last two and collapses the
+    /// levels between them into the overflow list. Values from 1 to 3 count as 4 (the first level, "…" and the last two); 0
+    /// (default) never collapses.
     /// </summary>
     public int MaxVisibleItems
     {

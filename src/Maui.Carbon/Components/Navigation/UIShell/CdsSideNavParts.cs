@@ -245,8 +245,9 @@ public class CdsSideNavHeader : CdsControl
 
 /// <summary>
 /// A 48 high row at the bottom of the side nav (over a <c>border-subtle-00</c> rule) with a full-width toggle that expands and collapses the
-/// side nav it sits in: a 20px chevron while collapsed, a close icon while expanded, <c>background-hover</c> on hover and a 2px
-/// inset focus ring. <see cref="Label"/> is its accessible name and tooltip.
+/// side nav it sits in: a 20px chevron while collapsed, a close icon while expanded (also while a rail is expanded by hover or
+/// focus), <c>background-hover</c> on hover and a 2px inset focus ring. <see cref="Label"/> is its accessible name and tooltip.
+/// The toggle hides itself where the side nav cannot collapse from it: a fixed side nav, and a persistent one from lg up.
 /// </summary>
 public class CdsSideNavFooter : CdsShellItem
 {
@@ -289,19 +290,23 @@ public class CdsSideNavFooter : CdsShellItem
         set => SetValue(LabelProperty, value);
     }
 
-    /// <summary>Mirrors the side nav's expanded state (set by <see cref="CdsSideNav"/>).</summary>
-    internal void SetExpanded(bool expanded)
+    /// <summary>True while the footer shows the side nav as expanded (close icon, "Collapse side navigation").</summary>
+    internal bool ShowsExpanded => _expanded;
+
+    /// <summary>
+    /// Mirrors the side nav's open state and whether the toggle can change it (set by <see cref="CdsSideNav"/>); the toggle hides
+    /// itself when it cannot.
+    /// </summary>
+    internal void SetSideNavState(bool expanded, bool toggles)
     {
+        _root.IsVisible = toggles;
         if (_expanded == expanded) return;
         _expanded = expanded;
         Update();
     }
 
     /// <inheritdoc/>
-    protected override void OnItemActivated()
-    {
-        if (CdsShellContext.FindSideNav(this) is { } nav) nav.IsExpanded = !nav.IsExpanded;
-    }
+    protected override void OnItemActivated() => CdsShellContext.FindSideNav(this)?.Toggle();
 
     /// <inheritdoc/>
     protected override void ApplyVisuals()

@@ -58,7 +58,9 @@ public class CdsSideNav : CdsContainer
     int _widthRun;
     int _focusCount;
     bool _transient;
+    bool _userCollapsed;
     bool _initialized;
+    bool _open;
 
     /// <summary>Creates a collapsed side nav (it expands from its <see cref="IsExpanded"/>, rail and persistence settings).</summary>
     public CdsSideNav()
@@ -88,6 +90,9 @@ public class CdsSideNav : CdsContainer
     /// <summary>Raised when the side nav's current width (animating) changed: the shell uses it to move the body.</summary>
     internal event EventHandler? WidthChanged;
 
+    /// <summary>Raised when <see cref="IsOpen"/> changed (once per change, not per animation frame).</summary>
+    internal event EventHandler? OpenChanged;
+
     /// <summary>The accessible name of the navigation landmark.</summary>
     public string Label
     {
@@ -97,7 +102,8 @@ public class CdsSideNav : CdsContainer
 
     /// <summary>
     /// Expanded (256 wide) or collapsed (two-way). The header menu button and the footer toggle set it; below lg a tap on the
-    /// scrim clears it; Escape clears it.
+    /// scrim clears it; Escape clears it. A persistent side nav is open from lg up even while this is <c>false</c>, and a rail
+    /// opens on hover and focus: the header menu button and the footer report and toggle that open state, not this flag.
     /// </summary>
     public bool IsExpanded
     {
@@ -146,6 +152,12 @@ public class CdsSideNav : CdsContainer
     /// <summary>The current (animating) width.</summary>
     public double CurrentWidth => _width;
 
+    /// <summary>
+    /// Whether the side nav is (or is animating to) its 256 wide expanded state, for whatever reason: <see cref="IsExpanded"/>,
+    /// persistence at lg, a rail expanded by hover or focus, or <see cref="IsFixed"/>.
+    /// </summary>
+    internal bool IsOpen => _open;
+
     /// <summary>How far the page body is pushed by this side nav at the current breakpoint and width.</summary>
     public double BodyOffset => UIShellModel.BodyOffset(Mode, _watcher.Current, _width);
 
@@ -181,6 +193,32 @@ public class CdsSideNav : CdsContainer
             SetTransient(Is(CdsInteractionState.Hover) || _focusCount > 0);
     }
 
+    /// <summary>
+    /// What the header menu button and the footer toggle do: collapses an open side nav (clearing <see cref="IsExpanded"/>, a rail's
+    /// hover or focus expansion, and, for a persistent side nav at lg, holding it closed until it is expanded again) and
+    /// expands a closed one.
+    /// </summary>
+    internal void Toggle()
+    {
+        if (IsFixed) return;
+        if (_open)
+        {
+            SetTransient(false);
+            IsExpanded = false;
+            if (TargetWidth() > UIShellModel.RailWidth + 0.5 && Mode == CdsSideNavMode.Default)
+            {
+                _userCollapsed = true;
+                ApplyWidth(animate: _initialized);
+            }
+        }
+        else
+        {
+            _userCollapsed = false;
+            if (IsExpanded) ApplyWidth(animate: _initialized);
+            else IsExpanded = true;
+        }
+    }
+
     /// <summary>A row inside gained or lost focus: a rail expands while focus is inside.</summary>
     internal void ItemFocusChanged(bool focused)
     {
@@ -199,19 +237,45 @@ public class CdsSideNav : CdsContainer
     {
         if (oldView is not null) _panel.Remove(oldView);
         if (newView is not null) _panel.Add(newView, 0, row);
-        if (newView is CdsSideNavFooter footer) footer.SetExpanded(IsExpanded || _width > UIShellModel.RailWidth);
+        UpdateFooter();
     }
 
     void OnModeChanged()
     {
-        if (Footer is CdsSideNavFooter footer) footer.SetExpanded(IsExpanded);
+        if (IsExpanded) _userCollapsed = false;
         ApplyWidth(animate: _initialized);
+    }
+
+    double TargetWidth() =>
+        _watcher is null ? 0 : UIShellModel.SideNavTargetWidth(Mode, _watcher.Current, IsExpanded, IsPersistent, _transient, _userCollapsed);
+
+    void UpdateFooter()
+    {
+        if (Footer is CdsSideNavFooter footer && _watcher is not null)
+            footer.SetSideNavState(_open, UIShellModel.SideNavFooterToggles(Mode, _watcher.Current, IsPersistent));
     }
 
     void ApplyWidth(bool animate)
     {
         if (_watcher is null) return;
-        var target = UIShellModel.SideNavTargetWidth(Mode, _watcher.Current, IsExpanded, IsPersistent, _transient);
+        var target = TargetWidth();
+        // The open state follows the target, not the animating width: the toggles flip once, when the change starts.
+        var open = UIShellModel.SideNavOpen(target);
+        var openChanged = open != _open;
+        _open = open;
+        UpdateFooter();
+        try
+        {
+            ApplyWidthTo(target, animate);
+        }
+        finally
+        {
+            if (openChanged) OpenChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    void ApplyWidthTo(double target, bool animate)
+    {
         // Already on its way there. A re-evaluation caused by the animation itself (its first frame runs synchronously, and
         // every frame resizes the nav) must not restart it: each restart's first frame would re-evaluate again, without end.
         if (target.Equals(_animatingTo)) return;

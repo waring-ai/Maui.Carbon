@@ -254,3 +254,80 @@ public class TabsControlTests
     [Fact]
     public void Tabs_want_navigation_keys() => Assert.True(Make().WantsNavigationKeys);
 }
+
+public class TabsRovingFocusTests
+{
+    static CdsTabs Make(int selected = 0)
+    {
+        var tabs = new CdsTabs
+        {
+            Items =
+            {
+                new CdsTab { Text = "Overview" },
+                new CdsTab { Text = "Nodes" },
+                new CdsTab { Text = "Billing", IsEnabled = false },
+                new CdsTab { Text = "Access" },
+            },
+        };
+        tabs.SelectedIndex = selected;
+        return tabs;
+    }
+
+    static IEnumerable<Element> Walk(Element root)
+    {
+        yield return root;
+        if (root is IVisualTreeElement tree)
+            foreach (var child in tree.GetVisualChildren().OfType<Element>())
+                foreach (var e in Walk(child)) yield return e;
+    }
+
+    static int[] TabStops(CdsTabs tabs) =>
+        [.. Walk(tabs).OfType<CdsHitTarget>().Where(h => h.Role == CdsAccessibilityRole.Tab).Select((h, i) => (h, i)).Where(x => x.h.IsTabStop).Select(x => x.i)];
+
+    [Fact]
+    public void Only_the_selected_tab_is_a_tab_stop()
+    {
+        var tabs = Make(selected: 1);
+        Assert.Equal([1], TabStops(tabs));
+        tabs.SelectedIndex = 3;
+        Assert.Equal([3], TabStops(tabs));
+        Assert.Equal(3, tabs.TabStopIndex);
+    }
+
+    [Fact]
+    public void The_stop_follows_the_arrow_keys_and_skips_disabled_tabs()
+    {
+        var tabs = Make(selected: 1);
+        Assert.True(tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right)));
+        Assert.Equal(3, tabs.SelectedIndex);
+        Assert.Equal([3], TabStops(tabs));
+    }
+
+    [Fact]
+    public void Manual_mode_moves_the_stop_without_selecting()
+    {
+        var tabs = Make();
+        tabs.Activation = CdsActivation.Manual;
+        tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right));
+        Assert.Equal(0, tabs.SelectedIndex);
+        Assert.Equal([1], TabStops(tabs));
+    }
+
+    [Fact]
+    public void Rebuilding_keeps_a_single_stop_on_the_selected_tab()
+    {
+        var tabs = Make(selected: 3);
+        tabs.Type = CdsTabsType.Contained;
+        tabs.Items.Add(new CdsTab { Text = "Logs" });
+        Assert.Equal([3], TabStops(tabs));
+    }
+
+    [Fact]
+    public void Scroll_buttons_are_not_tab_stops()
+    {
+        var tabs = Make();
+        var others = Walk(tabs).OfType<CdsHitTarget>().Where(h => h.Role != CdsAccessibilityRole.Tab).ToList();
+        Assert.NotEmpty(others);
+        Assert.All(others, h => Assert.False(h.IsTabStop));
+    }
+}

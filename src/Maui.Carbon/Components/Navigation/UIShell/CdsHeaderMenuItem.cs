@@ -113,6 +113,13 @@ public class CdsHeaderMenuItem : CdsShellItem
     /// <summary>The highlight came from the keyboard: show the inset focus ring on the highlighted row.</summary>
     internal bool ShowHighlightRing { get; set; }
 
+    /// <inheritdoc/>
+    protected override void OnActiveChanged()
+    {
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
+        base.OnActiveChanged();
+    }
+
     /// <summary>Whether Tab can focus the item (a dropdown row keeps focus on its trigger).</summary>
     internal void SetTabStop(bool value) => _hit.IsTabStop = value;
 
@@ -145,6 +152,7 @@ public class CdsHeaderMenuItem : CdsShellItem
     {
         _label.Text = Text;
         SemanticProperties.SetDescription(_hit, Text);
+        _hit.CurrentKind = IsActive ? CdsCurrentKind.Page : CdsCurrentKind.None;
         switch (_presentation)
         {
             case CdsShellPresentation.Bar:
