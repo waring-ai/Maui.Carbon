@@ -130,3 +130,14 @@ UI hangs, crashes, and every logged warning attributed to the step that caused i
 
 After updating `design/carbon/tokens.json` or the icons, regenerate with
 `dotnet run --project tools/Maui.Carbon.Generator`.
+
+## Agent skill
+
+The [Maui.Carbon skill](skills/maui-carbon/SKILL.md) explains setup, component selection,
+bindings, themes, layers, tables and overlays. Its [component catalog](skills/maui-carbon/references/components.md)
+lists supported controls and companion APIs with links to source and gallery examples.
+
+To use it with Codex, copy `skills/maui-carbon` into `.agents/skills/maui-carbon` in your
+consuming project (or your user-level skills directory). Copy the whole folder, including
+`references`. Source and gallery links target this repository; keep a matching checkout
+available when using the skill in another project. You can also read the skill directly here.

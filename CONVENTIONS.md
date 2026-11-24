@@ -141,6 +141,25 @@ public CdsButtonKind Kind
 - `HorizontalStackLayout` measures children unconstrained: cap a label's `MaximumWidthRequest` to get an ellipsis.
 - A Label with `LineBreakMode.NoWrap` and no `MaxLines` draws one line: set `MaxLines` for multi-line monospace text.
 - In a row of items with different heights, set `VerticalOptions=Start` so a short item isn't stretched to its neighbour.
+- `ContentView` measures its content even when the content is hidden. `CdsControl` measures to zero while its chrome
+  is hidden, so hide a part by hiding the root you passed to `SetChrome`, not by sizing it.
+
+### Lifetime and performance traps (found by `tools/relay-exercise.sh`)
+- A self-drawing `GraphicsView` sets `Drawable = new CdsWeakDrawable(this)`, never `Drawable = this`. On iOS and Mac
+  Catalyst a platform view in a hierarchy keeps its managed peer alive, so anything a platform view holds strongly must
+  not lead back to the page: that is a cycle through native code the GC never collects, and it leaks the whole page.
+- Subscribe to longer-lived sources (a view model's command, the shell, a static event) weakly
+  (`CdsWeakSubscription<T>`) or only while `Loaded`. `SetCommand` and `CdsBreakpointWatcher` already do.
+- Child collections are `CdsItemCollection<T>`, not `ObservableCollection<T>`: its `Clear()` raises one `Remove`
+  listing the items, where `ObservableCollection` raises a `Reset` with no `OldItems` (old children would stay).
+- A control that rebuilds its views on every collection change requests the rebuild through `CdsCoalescedAction`, so
+  filling a shown list costs one rebuild, not one per item.
+- `SetColor`/`SetBrush` remember the applied key on the target, so discarded views can be collected; `ForgetColors` is
+  only needed to force colors to apply again.
+- Hover tracking comes with `CreateHitTarget`/`TrackFocus`; call `TrackHover()` only for a control that reacts to hover
+  without either. Every gesture recognizer costs platform setup each time its page enters or leaves the window.
+- Moving a large screen into and out of the window costs MAUI hundreds of milliseconds (window and resource
+  propagation over every element, native subviews and gestures). Keep long-lived screens attached and hide them.
 
 ## 8. Overlays and keyboard
 
@@ -270,3 +289,7 @@ property, a new required setup step), update Relay too.
   - `tools/verify.sh --samples` builds Relay and runs its tests.
   - `APP=relay tools/snapshots.sh out/relay white,g100` signs in and captures every screen and open state, then
     prints the log's warning count and any `[ERR]`/`[FTL]` entries.
+  - `tools/relay-exercise.sh out/exercise` (`Hosting/ExerciseRunner`) drives every screen, open state and interaction
+    in every theme and window size and writes `exercise-report.md`: logged warnings and errors with the step and stack
+    that caused them, layout overflow, low contrast, collapsed or unsettled layout, leaked element types (with what
+    holds them), UI-thread hangs, and the crash stack if the app dies. Run it after changing a component Relay uses.
