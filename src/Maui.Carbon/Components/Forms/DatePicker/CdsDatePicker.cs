@@ -9,7 +9,7 @@ namespace Maui.Carbon;
 /// <see cref="DateFormat"/>, or is outside <see cref="MinDate"/>..<see cref="MaxDate"/> or on a disabled day, shows an error
 /// message. Use a time picker for a time of day and a dropdown of presets for relative periods.
 /// <para>
-/// The calendar is an overlay under the first field. Keyboard: Down moves from the field into the calendar; arrows move by day
+/// The calendar is an overlay under the first field. Clicking or tapping a field (focusing it) opens it. Keyboard: Down moves from the field into the calendar; arrows move by day
 /// and week, PageUp and PageDown by month, Home and End to the first and last day of the week; Enter picks; Escape closes and
 /// returns to the field. Single closes after a pick; range after the second pick.
 /// </para>
@@ -34,6 +34,12 @@ public partial class CdsDatePicker : CdsFormField
     readonly Grid _endIconHost = new() { WidthRequest = 16, HeightRequest = 16, VerticalOptions = LayoutOptions.Center, BackgroundColor = Colors.Transparent };
     Grid _root = null!;
     readonly Grid _fields = new() { ColumnSpacing = 1, HorizontalOptions = LayoutOptions.Start };
+    // Fluid range: the 1px split on the start edge of the end field (drawn over it, as Carbon's border-inline-start is),
+    // the picker-level outline and message under both fields, and the field-01 fill of a taller cell.
+    readonly BoxView _rangeDivider = new() { WidthRequest = 1, HorizontalOptions = LayoutOptions.Start, InputTransparent = true, IsVisible = false };
+    readonly CdsFluidGroupMessage _fluidMessage = new();
+    readonly CdsFocusRing _fluidRing = new(CdsFocusRingStyle.Inset);
+    readonly Grid _fluidFill = new() { InputTransparent = true, IsVisible = false };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false, Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0) };
     CdsDateEntryError _startError;
     CdsDateEntryError _endError;
@@ -47,6 +53,9 @@ public partial class CdsDatePicker : CdsFormField
     bool _waitingForSize;
     bool _engageOnOpen;
     bool _inCalendar;
+    bool _startStatus;
+    bool _endStatus;
+    long? _closedAt;
     int _activeField;
     CalendarModel? _model;
     CdsCalendarView? _view;
@@ -70,8 +79,16 @@ public partial class CdsDatePicker : CdsFormField
         EndEntry.TextChanged += (_, e) => OnEntryTextChanged(1, e);
         StartEntry.Completed += (_, _) => OnEntryCompleted(0);
         EndEntry.Completed += (_, _) => OnEntryCompleted(1);
-        StartEntry.Focused += (_, _) => SetFieldFocus(0, true);
-        EndEntry.Focused += (_, _) => SetFieldFocus(1, true);
+        StartEntry.Focused += (_, _) =>
+        {
+            SetFieldFocus(0, true);
+            OnEntryFocused(0);
+        };
+        EndEntry.Focused += (_, _) =>
+        {
+            SetFieldFocus(1, true);
+            OnEntryFocused(1);
+        };
         StartEntry.Unfocused += (_, _) => OnEntryUnfocused(0);
         EndEntry.Unfocused += (_, _) => OnEntryUnfocused(1);
         TrackFocus(EndEntry);
@@ -81,13 +98,23 @@ public partial class CdsDatePicker : CdsFormField
         _fields.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _fields.Add(Chrome, 0);
         _fields.Add(EndChrome, 1);
+        _fields.Add(_rangeDivider, 1);
 
         _root = new Grid { RowSpacing = 0, HorizontalOptions = LayoutOptions.Start };
         var root = _root;
         root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        // Fluid: the picker fills its cell (Carbon's block-size: 100%); the rest below the fields is field-01.
+        root.RowDefinitions.Add(new RowDefinition(GridLength.Star));
         root.Add(_fields, 0, 0);
-        root.Add(_message, 0, 1);
+        root.Add(_fluidMessage, 0, 1);
+        root.Add(_message, 0, 2);
+        root.Add(_fluidFill, 0, 3);
+        root.Add(_fluidRing, 0, 0);
+        Grid.SetRowSpan(_fluidRing, 2);
+        CdsTokens.SetColor(_fluidFill, BackgroundColorProperty, CdsColorKeys.Field01);
+        _fluidRing.SetColorKey(CdsColorKeys.SupportError);
 
         Loaded += (_, _) => Dispatcher.Dispatch(SyncCalendar);
         Unloaded += (_, _) => HideCalendar(keepOpenFlag: true);
@@ -131,20 +158,55 @@ public partial class CdsDatePicker : CdsFormField
     Func<DateOnly, bool>? DisabledPredicate => IsDateDisabled is { } f ? d => f(d.ToDateTime(TimeOnly.MinValue)) : null;
 
     /// <inheritdoc/>
-    protected override bool EffectiveInvalid => IsInvalid || _startError != CdsDateEntryError.None || _endError != CdsDateEntryError.None;
+    protected override bool EffectiveInvalid => IsInvalid || StartInputInvalid || EndInputInvalid;
 
     /// <inheritdoc/>
     protected override string? EffectiveInvalidText
     {
         get
         {
-            var error = _startError != CdsDateEntryError.None ? _startError : _endError;
-            return error != CdsDateEntryError.None ? DatePickerFormat.Message(error, DateFormat, Min, Max) : InvalidText;
+            var error = _startError != CdsDateEntryError.None ? _startError : IsRange ? _endError : CdsDateEntryError.None;
+            if (error != CdsDateEntryError.None) return DatePickerFormat.Message(error, DateFormat, Min, Max);
+            if (IsInvalid) return InvalidText;
+            if (IsStartInvalid) return StartInvalidText;
+            return IsRange && IsEndInvalid ? EndInvalidText : InvalidText;
         }
     }
 
+    /// <summary>Input-level error on the first field: <see cref="IsStartInvalid"/> or a typed date that is not valid.</summary>
+    internal bool StartInputInvalid => IsStartInvalid || _startError != CdsDateEntryError.None;
+
+    /// <summary>Input-level error on the end field of a range.</summary>
+    internal bool EndInputInvalid => IsRange && (IsEndInvalid || _endError != CdsDateEntryError.None);
+
+    string? StartInputInvalidText => _startError != CdsDateEntryError.None
+        ? DatePickerFormat.Message(_startError, DateFormat, Min, Max)
+        : StartInvalidText;
+
+    string? EndInputInvalidText => _endError != CdsDateEntryError.None
+        ? DatePickerFormat.Message(_endError, DateFormat, Min, Max)
+        : EndInvalidText;
+
+    /// <summary>
+    /// Fluid range: picker-level invalid and warning states draw one outline around both fields and one message row under
+    /// them; input-level errors stay on their own field.
+    /// </summary>
+    bool UsesGroupMessage => IsFluidMode && IsRange;
+
+    /// <summary>The picker-level message row of a fluid range (for tests).</summary>
+    internal CdsFluidGroupMessage FluidMessage => _fluidMessage;
+
+    /// <summary>The 1px split between the halves of a fluid range (for tests).</summary>
+    internal BoxView RangeDivider => _rangeDivider;
+
+    /// <summary>The calendar icons of the two fields (for tests).</summary>
+    internal (CdsIcon Start, CdsIcon End) CalendarIcons => (_startIcon, _endIcon);
+
     /// <inheritdoc/>
-    protected override string? HintText() => IsFluidMode ? Chrome.CurrentMessage : _message.IsVisible ? _message.Text : null;
+    protected override string? HintText() => IsFluidMode ? FluidHint(Chrome) : _message.IsVisible ? _message.Text : null;
+
+    // A field's own message first, else the picker-level one under a fluid range.
+    string? FluidHint(CdsFieldChrome chrome) => chrome.CurrentMessage ?? (UsesGroupMessage ? _fluidMessage.Message : null);
 
     // ---- construction helpers ----
 
@@ -215,11 +277,13 @@ public partial class CdsDatePicker : CdsFormField
         EndChrome.IsFluid = Chrome.IsFluid;
         // The picker draws one message under both fields; the field chromes only show the outline and status icon.
         // Fluid: the first field shows the message inside itself (a range outlines both, one message under the first).
+        // A fluid range: each field shows its own input-level error, and the picker draws the picker-level message.
+        var group = UsesGroupMessage;
         foreach (var c in new[] { Chrome, EndChrome })
         {
             c.HelperText = null;
-            c.InvalidText = fluid && c == Chrome ? EffectiveInvalidText : null;
-            c.WarnText = fluid && c == Chrome ? WarnText : null;
+            c.InvalidText = !fluid ? null : group ? (c == Chrome ? StartInputInvalidText : EndInputInvalidText) : c == Chrome ? EffectiveInvalidText : null;
+            c.WarnText = fluid && !group && c == Chrome ? WarnText : null;
             c.IsInline = false;
             c.Size = CdsListBoxTokens.Coerce(Size);
             c.HideLabel = HideLabel;
@@ -243,10 +307,16 @@ public partial class CdsDatePicker : CdsFormField
         var columns = IsRange ? 2 : 1;
         for (var i = 0; i < 2; i++)
             _fields.ColumnDefinitions.Add(new ColumnDefinition(fluid && i < columns ? GridLength.Star : GridLength.Auto));
+        // Only a range has a split: a 1px gap between the default fields, a divider view in fluid (never a background
+        // showing through a gap, which turned read-only fields into a border-strong-01 slab and left a stray line on the
+        // right of single pickers).
+        _fields.ColumnSpacing = IsRange && !fluid ? 1 : 0;
         _fields.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
         _root.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
         HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
-        CdsTokens.SetColor(_fields, BackgroundColorProperty, fluid ? CdsColorKeys.BorderStrong01 : null);
+        CdsTokens.SetColor(_fields, BackgroundColorProperty, fluid ? CdsColorKeys.Field01 : null);
+        _rangeDivider.IsVisible = fluid && IsRange;
+        _fluidFill.IsVisible = fluid;
         var hasCalendar = Type != CdsDatePickerType.Simple;
         _startIconHost.IsVisible = hasCalendar;
         _endIconHost.IsVisible = hasCalendar;
@@ -274,15 +344,56 @@ public partial class CdsDatePicker : CdsFormField
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
-        // Focus and hover belong to one field of a range, not to the whole control.
-        var shared = FieldState & ~(CdsInteractionState.Focused | CdsInteractionState.FocusVisible | CdsInteractionState.Hover);
-        Chrome.Apply(shared | (_startFocused ? CdsInteractionState.Focused : 0) | (_startHover ? CdsInteractionState.Hover : 0));
-        EndChrome.Apply(shared | (_endFocused ? CdsInteractionState.Focused : 0) | (_endHover ? CdsInteractionState.Hover : 0));
+        // Focus and hover belong to one field of a range, not to the whole control; so do input-level errors.
+        var shared = FieldState & ~(CdsInteractionState.Focused | CdsInteractionState.FocusVisible | CdsInteractionState.Hover
+            | CdsInteractionState.Invalid | CdsInteractionState.Warn);
+        var group = UsesGroupMessage;
+        var active = IsEnabled && !IsReadOnly;
+        var groupInvalid = group && IsInvalid && active;
+        var groupWarn = group && IsWarning && !groupInvalid && active;
+        CdsInteractionState startStatus, endStatus;
+        if (group)
+        {
+            // Fluid range: picker-level states go to the group below; each field keeps only its own error.
+            startStatus = StartInputInvalid ? CdsInteractionState.Invalid : 0;
+            endStatus = EndInputInvalid ? CdsInteractionState.Invalid : 0;
+        }
+        else
+        {
+            var warn = IsWarning ? CdsInteractionState.Warn : 0;
+            startStatus = (IsInvalid || StartInputInvalid || (!IsRange && EffectiveInvalid) ? CdsInteractionState.Invalid : 0) | warn;
+            endStatus = (IsInvalid || EndInputInvalid ? CdsInteractionState.Invalid : 0) | warn;
+        }
+        _startStatus = startStatus != 0 && active;
+        _endStatus = endStatus != 0 && active;
+
+        // While the group shows its message the fields give up their bottom rules (a warning draws one under the message).
+        Chrome.IsRuleSuppressed = groupInvalid || groupWarn;
+        EndChrome.IsRuleSuppressed = groupInvalid || groupWarn;
+        Chrome.Apply(shared | startStatus | (_startFocused ? CdsInteractionState.Focused : 0) | (_startHover ? CdsInteractionState.Hover : 0));
+        EndChrome.Apply(shared | endStatus | (_endFocused ? CdsInteractionState.Focused : 0) | (_endHover ? CdsInteractionState.Hover : 0));
+
+        _fluidMessage.Apply(groupInvalid, groupWarn, groupInvalid ? InvalidText : WarnText);
+        _fluidRing.IsActive = groupInvalid;
+        ApplyRangeDivider(groupInvalid || groupWarn);
+
         UpdateMessage();
-        var hint = HintText();
-        SemanticProperties.SetHint(StartEntry, hint);
-        SemanticProperties.SetHint(EndEntry, hint);
+        SemanticProperties.SetHint(StartEntry, HintText());
+        SemanticProperties.SetHint(EndEntry, IsFluidMode ? FluidHint(EndChrome) : HintText());
         ApplyInput();
+    }
+
+    // The fluid range split: border-strong-01 (border-subtle-01 when read only), inset 8px from the top and bottom while the
+    // picker-level message shows, and gone next to a field with its own error outline.
+    void ApplyRangeDivider(bool groupMessage)
+    {
+        if (!_rangeDivider.IsVisible) return;
+        var active = IsEnabled && !IsReadOnly;
+        var key = active && (StartInputInvalid || EndInputInvalid) ? null
+            : IsReadOnly && !groupMessage ? CdsColorKeys.BorderSubtle01
+            : CdsColorKeys.BorderStrong01;
+        SetColor(_rangeDivider, BoxView.ColorProperty, key);
+        _rangeDivider.Margin = groupMessage ? new Thickness(0, CdsSpacing.Spacing03) : new Thickness(0);
     }
 
     /// <inheritdoc/>
@@ -296,14 +407,15 @@ public partial class CdsDatePicker : CdsFormField
             SetColor(entry, Microsoft.Maui.Controls.Entry.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary);
             SetColor(entry, Microsoft.Maui.Controls.Entry.PlaceholderColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPlaceholder);
         }
-        // The calendar icon gives way to the error and warning icons.
-        var status = (EffectiveInvalid || IsWarning) && !disabled && !readOnly;
+        // The calendar icon gives way to a field's error or warning icon. In fluid layout the status icon sits in the
+        // message row, so the calendar icon stays (the calendar can still be opened by pointer).
         var iconKey = disabled || readOnly ? CdsColorKeys.IconDisabled : CdsColorKeys.IconPrimary;
         SetColor(_startIcon, CdsIcon.ColorProperty, iconKey);
         SetColor(_endIcon, CdsIcon.ColorProperty, iconKey);
-        var show = Type != CdsDatePickerType.Simple && !status;
-        _startIcon.IsVisible = show;
-        _endIcon.IsVisible = show;
+        var fluid = IsFluidMode;
+        var calendar = Type != CdsDatePickerType.Simple;
+        _startIcon.IsVisible = calendar && (fluid || !_startStatus);
+        _endIcon.IsVisible = calendar && (fluid || !_endStatus);
     }
 
     // ---- dates and text ----
@@ -429,10 +541,27 @@ public partial class CdsDatePicker : CdsFormField
     void OnIconTapped(int field)
     {
         if (!CanOpenCalendar) return;
+        // Focusing the field may already open the calendar (OnEntryFocused); the tap decides the final state.
+        var open = !IsOpen;
         _activeField = field;
         (field == 0 ? StartEntry : EndEntry).Focus();
-        IsOpen = !IsOpen;
+        IsOpen = open;
     }
+
+    /// <summary>
+    /// Clicking or tapping a field (it takes focus) opens the calendar, as Carbon's inputs do. Focus that comes back to
+    /// the field as the calendar closes (Escape, a pick, a click outside) does not open it again.
+    /// </summary>
+    internal void OnEntryFocused(int field)
+    {
+        if (!CanOpenCalendar || IsOpen || _overlay is not null) return;
+        if (_closedAt is { } closed && Environment.TickCount64 - closed < ReopenGuardMilliseconds) return;
+        _activeField = field;
+        IsOpen = true;
+    }
+
+    /// <summary>Focus that reaches a field this soon after the calendar closed is the focus coming back from it.</summary>
+    const long ReopenGuardMilliseconds = 400;
 
     void SyncCalendar()
     {
@@ -515,6 +644,7 @@ public partial class CdsDatePicker : CdsFormField
     void OnCalendarClosed(CdsOverlay overlay)
     {
         if (ReferenceEquals(_overlay, overlay)) _overlay = null;
+        _closedAt = Environment.TickCount64;
         _model = null;
         _view = null;
         _inCalendar = false;

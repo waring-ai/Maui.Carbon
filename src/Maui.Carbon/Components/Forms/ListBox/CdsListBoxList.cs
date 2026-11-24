@@ -15,12 +15,19 @@ internal sealed class CdsListBoxList
     readonly bool _multi;
     int _hovered = -1;
 
-    public CdsListBoxList(CdsSize size, bool inline, bool multi, string? accessibleName, double? rowHeight = null)
+    public CdsListBoxList(CdsSize size, bool inline, bool multi, string? accessibleName)
+        : this(inline, multi, accessibleName, CdsListBoxTokens.RowHeight(size), CdsListBoxTokens.MaxListHeight(size), CdsListBoxTokens.RowHeight(size))
+    {
+    }
+
+    /// <summary>Creates a list with explicit metrics (fluid list boxes: 64px rows, content in the top 40px, at most 220px).</summary>
+    public CdsListBoxList(bool inline, bool multi, string? accessibleName, double rowHeight, double maxHeight, double contentHeight)
     {
         _inline = inline;
         _multi = multi;
-        RowHeight = rowHeight ?? CdsListBoxTokens.RowHeight(size);
-        MaxHeight = RowHeight * CdsListBoxTokens.VisibleRows;
+        RowHeight = rowHeight;
+        MaxHeight = maxHeight;
+        ContentHeight = Math.Min(contentHeight, rowHeight);
 
         _scroll = new ScrollView { Content = _stack, MaximumHeightRequest = MaxHeight, VerticalScrollBarVisibility = ScrollBarVisibility.Never };
         Surface = new Border
@@ -41,8 +48,11 @@ internal sealed class CdsListBoxList
     /// <summary>Row height (equal to the field height).</summary>
     public double RowHeight { get; }
 
-    /// <summary>The list's maximum height (5.5 rows).</summary>
+    /// <summary>The list's maximum height (5.5 rows; 220 in fluid list boxes).</summary>
     public double MaxHeight { get; }
+
+    /// <summary>Height of the band at the top of each row that holds its content (the row height, or 40 in 64px fluid rows).</summary>
+    public double ContentHeight { get; }
 
     /// <summary>The number of rows.</summary>
     public int Count => _rows.Count;
@@ -62,7 +72,7 @@ internal sealed class CdsListBoxList
         for (var i = 0; i < rows.Count; i++)
         {
             var index = i;
-            var row = new CdsListBoxRow(rows[i], RowHeight, _inline, _multi, isChosen(i), content?.Invoke(i, rows[i]));
+            var row = new CdsListBoxRow(rows[i], RowHeight, _inline, _multi, isChosen(i), content?.Invoke(i, rows[i]), ContentHeight);
             row.Chosen += (_, _) => RowChosen?.Invoke(this, index);
             row.HoverChanged += (_, entered) =>
             {

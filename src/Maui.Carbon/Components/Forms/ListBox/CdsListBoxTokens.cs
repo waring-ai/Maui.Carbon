@@ -54,6 +54,15 @@ public static class CdsListBoxTokens
     /// <summary>The list shows about this many rows before it scrolls (a half row hints that there is more).</summary>
     public const double VisibleRows = 5.5;
 
+    /// <summary>Fluid list boxes: the open list is at most this tall (13.75rem), whatever the row height.</summary>
+    public const double FluidMaxListHeight = 220;
+
+    /// <summary>Fluid list boxes: row height with <see cref="CdsListBox.IsCondensed"/> (2.5rem; 4rem otherwise).</summary>
+    public const double FluidCondensedRowHeight = 40;
+
+    /// <summary>Fluid list boxes: the 64px rows keep their text, check mark and checkbox in this top band (2.5rem).</summary>
+    public const double FluidRowContentHeight = 40;
+
     /// <summary>Size of the chevron, clear and tag-close hit boxes: 1.5rem.</summary>
     public const double ButtonSize = 24;
 

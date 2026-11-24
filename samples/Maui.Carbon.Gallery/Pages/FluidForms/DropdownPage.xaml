@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectedItem="Frankfurt (eu-de)" /></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectedItem="Frankfurt (eu-de)" IsInvalid="True" InvalidText="Frankfurt is not available on this plan." /></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectedItem="Dallas (us-south)" IsWarning="True" WarnText="Dallas is at capacity." /></cds:CdsFluidForm>
@@ -25,6 +25,14 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdown x:Name="Input" Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectionChanged="OnChanged" /></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Condensed" Description="IsCondensed gives the open list 40px rows instead of 64px, so more options show before it scrolls; either way the list is at most 220px tall.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" IsCondensed="True" /></cds:CdsFluidForm>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDropdownSkeleton /></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" /></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="14" InvalidText="Enter a number from 1 to 10" /></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidNumberInput Label="Replicas" Value="1" IsWarning="True" WarnText="One replica has no redundancy." /></cds:CdsFluidForm>
@@ -26,6 +26,10 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidNumberInput x:Name="Input" Label="Worker nodes" Min="1" Max="10" Value="3" ValueChanged="OnChanged" /></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidNumberInputSkeleton /></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

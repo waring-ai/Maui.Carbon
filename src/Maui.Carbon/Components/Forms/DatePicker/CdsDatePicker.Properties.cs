@@ -12,6 +12,26 @@ public partial class CdsDatePicker
         nameof(EndLabel), typeof(string), typeof(CdsDatePicker), "End date",
         propertyChanged: static (b, _, _) => ((CdsDatePicker)b).UpdateChrome());
 
+    /// <summary>Bindable property for <see cref="IsStartInvalid"/>.</summary>
+    public static readonly BindableProperty IsStartInvalidProperty = BindableProperty.Create(
+        nameof(IsStartInvalid), typeof(bool), typeof(CdsDatePicker), false,
+        propertyChanged: static (b, _, _) => ((CdsDatePicker)b).UpdateChrome());
+
+    /// <summary>Bindable property for <see cref="StartInvalidText"/>.</summary>
+    public static readonly BindableProperty StartInvalidTextProperty = BindableProperty.Create(
+        nameof(StartInvalidText), typeof(string), typeof(CdsDatePicker), null,
+        propertyChanged: static (b, _, _) => ((CdsDatePicker)b).UpdateChrome());
+
+    /// <summary>Bindable property for <see cref="IsEndInvalid"/>.</summary>
+    public static readonly BindableProperty IsEndInvalidProperty = BindableProperty.Create(
+        nameof(IsEndInvalid), typeof(bool), typeof(CdsDatePicker), false,
+        propertyChanged: static (b, _, _) => ((CdsDatePicker)b).UpdateChrome());
+
+    /// <summary>Bindable property for <see cref="EndInvalidText"/>.</summary>
+    public static readonly BindableProperty EndInvalidTextProperty = BindableProperty.Create(
+        nameof(EndInvalidText), typeof(string), typeof(CdsDatePicker), null,
+        propertyChanged: static (b, _, _) => ((CdsDatePicker)b).UpdateChrome());
+
     /// <summary>Bindable property for <see cref="Placeholder"/>.</summary>
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
         nameof(Placeholder), typeof(string), typeof(CdsDatePicker), null,
@@ -81,6 +101,43 @@ public partial class CdsDatePicker
     {
         get => (CdsDatePickerType)GetValue(TypeProperty);
         set => SetValue(TypeProperty, value);
+    }
+
+    /// <summary>
+    /// Input-level error on the (first) date field (Carbon's <c>DatePickerInput invalid</c>): only that field is outlined, and
+    /// in the fluid range layout it shows <see cref="StartInvalidText"/> inside itself. Prefer it to
+    /// <see cref="CdsFormField.IsInvalid"/> (the whole picker) when only one end of a range is wrong, so users know which
+    /// field to fix. Ignored when disabled or read only. A typed date that does not parse sets the same state by itself.
+    /// </summary>
+    public bool IsStartInvalid
+    {
+        get => (bool)GetValue(IsStartInvalidProperty);
+        set => SetValue(IsStartInvalidProperty, value);
+    }
+
+    /// <summary>Message for <see cref="IsStartInvalid"/>: what is wrong with the first date and how to fix it.</summary>
+    public string? StartInvalidText
+    {
+        get => (string?)GetValue(StartInvalidTextProperty);
+        set => SetValue(StartInvalidTextProperty, value);
+    }
+
+    /// <summary>
+    /// Input-level error on the end field of a range picker: only that field is outlined, and in the fluid layout it shows
+    /// <see cref="EndInvalidText"/> inside itself ("End date must be after the start date"). Ignored by single and simple
+    /// pickers, and when disabled or read only.
+    /// </summary>
+    public bool IsEndInvalid
+    {
+        get => (bool)GetValue(IsEndInvalidProperty);
+        set => SetValue(IsEndInvalidProperty, value);
+    }
+
+    /// <summary>Message for <see cref="IsEndInvalid"/>.</summary>
+    public string? EndInvalidText
+    {
+        get => (string?)GetValue(EndInvalidTextProperty);
+        set => SetValue(EndInvalidTextProperty, value);
     }
 
     /// <summary>Label of the second field of a range picker. Default "End date". Label each field for what it is ("Start date", "Snapshot date").</summary>

@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" /></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Windows Server 2022" IsInvalid="True" InvalidText="Windows images need a larger flavor." /></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidComboBox Label="Image" Placeholder="Choose an image" ItemsSource="{x:Static data:GListData.Images}" SelectedItem="Ubuntu 24.04 LTS minimal" IsWarning="True" WarnText="This image reaches end of support soon." /></cds:CdsFluidForm>
@@ -25,6 +25,10 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidComboBox x:Name="Input" Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectionChanged="OnChanged" /></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidComboBoxSkeleton /></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

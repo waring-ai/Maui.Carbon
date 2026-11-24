@@ -9,7 +9,10 @@ namespace Maui.Carbon;
 /// <b>Fluid layout</b> (<see cref="IsFluid"/>, or the <c>Cds.IsFluid</c> context of a <see cref="CdsFluidForm"/>): the
 /// label sits inside the 64px field at the top start, the input below it, helper text is not shown, and an invalid or
 /// warning message sits inside the field under a 1px <c>border-subtle-01</c> divider with the status icon at its end. The
-/// focus and error outlines wrap the field and its message; the size and inline settings are ignored.
+/// focus and error outlines wrap the field and its message; the size and inline settings are ignored. As in Carbon's
+/// fluid wrappers, a read-only fluid field keeps its <c>field-01</c> fill, a long label truncates on one line, and the
+/// field fills the height of its cell (the space under the field and message is <c>field-01</c>) so fields of different
+/// heights in a <see cref="CdsFluidFormRow"/> line up.
 /// </para>
 /// </summary>
 public sealed class CdsFieldChrome : Grid
@@ -26,6 +29,10 @@ public sealed class CdsFieldChrome : Grid
     readonly BoxView _divider = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(CdsSpacing.Spacing05, 0), InputTransparent = true };
     readonly BoxView _shellRule = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
     readonly CdsFocusRing _fluidOutline = new(CdsFocusRingStyle.Inset);
+    // Fluid: fills the rest of a cell taller than the field (a neighbour in a CdsFluidFormRow shows a message), as
+    // Carbon's fluid wrappers do with block-size: 100% on a field-01 background.
+    // An empty Grid measures 0 high (a BoxView asks for 40), so the fill takes only space the cell has to spare.
+    readonly Grid _fluidFill = new() { InputTransparent = true, IsVisible = false };
     bool _fluid;
     bool _layoutFluid;
     double _fieldHeight;
@@ -192,6 +199,18 @@ public sealed class CdsFieldChrome : Grid
     /// </summary>
     public string? RuleColorKeyOverride { get; set; }
 
+    /// <summary>
+    /// The bottom rule's color key while the field is disabled; <c>null</c> (the default) drops the rule, as Carbon does for
+    /// most disabled fields. Fluid number inputs and fluid search keep a <c>border-subtle-01</c> rule.
+    /// </summary>
+    public string? DisabledRuleColorKey { get; set; }
+
+    /// <summary>
+    /// Hides the bottom rule in every state, for a field that is one part of a group drawing its own outline and message
+    /// (the parts of a fluid time picker or range date picker while the group shows an error or warning).
+    /// </summary>
+    internal bool IsRuleSuppressed { get; set; }
+
     /// <summary>The 1px bottom rule (for controls that animate or hide it).</summary>
     public BoxView Rule => _rule;
 
@@ -232,14 +251,14 @@ public sealed class CdsFieldChrome : Grid
         var focused = state.HasFlag(CdsInteractionState.Focused) && !disabled;
         var hover = state.HasFlag(CdsInteractionState.Hover) && !disabled && !readOnly;
 
-        Set(_field, VisualElement.BackgroundColorProperty,
-            readOnly ? null : hover ? CdsColorKeys.FieldHover01 : IsFlat ? null : CdsColorKeys.Field01);
+        var fluid = IsFluidLayout;
+        Set(_field, VisualElement.BackgroundColorProperty, FieldFillKey(fluid, readOnly, hover, IsFlat));
         Set(_rule, BoxView.ColorProperty,
-            RuleColorKeyOverride ?? (disabled || IsFlat ? null : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01));
+            RuleColorKeyOverride ?? (IsFlat ? null : disabled ? DisabledRuleColorKey : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01));
+        Set(_fluidFill, VisualElement.BackgroundColorProperty, IsFlat ? null : CdsColorKeys.Field01);
         Set(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         Set(_counter, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
 
-        var fluid = IsFluidLayout;
         _outline.IsActive = !fluid && (focused || invalid);
         _outline.SetColorKey(focused ? CdsColorKeys.Focus : CdsColorKeys.SupportError);
         _fluidOutline.IsActive = fluid && (focused || invalid);
@@ -275,13 +294,21 @@ public sealed class CdsFieldChrome : Grid
         // states; the outline replaces the bottom rule, and a warning keeps a strong rule under the message.
         _messageBlock.IsVisible = fluid && (invalid || warn);
         _shellRule.IsVisible = fluid && warn;
-        _rule.Opacity = fluid && (invalid || warn) ? 0 : 1;
+        _rule.Opacity = IsRuleSuppressed || (fluid && (invalid || warn)) ? 0 : 1;
         Set(_divider, BoxView.ColorProperty, CdsColorKeys.BorderSubtle01);
         Set(_shellRule, BoxView.ColorProperty, CdsColorKeys.BorderStrong01);
-        Set(_messageBlock, VisualElement.BackgroundColorProperty, readOnly ? null : CdsColorKeys.Field01);
+        Set(_messageBlock, VisualElement.BackgroundColorProperty, CdsColorKeys.Field01);
 
         _labelRow.IsVisible = (fluid || !HideLabel) && (!string.IsNullOrEmpty(Label) || _counter.IsVisible);
     }
+
+    /// <summary>
+    /// The field fill: <c>field-01</c>, <c>field-hover-01</c> on hover, none when flat. Read-only fields are transparent in
+    /// the default layout; a fluid field keeps <c>field-01</c> (Carbon's fluid wrappers paint it under the transparent
+    /// read-only input), so a read-only part of a fluid row never shows what is behind it.
+    /// </summary>
+    internal static string? FieldFillKey(bool fluid, bool readOnly, bool hover, bool flat) =>
+        readOnly ? (fluid && !flat ? CdsColorKeys.Field01 : null) : hover ? CdsColorKeys.FieldHover01 : flat ? null : CdsColorKeys.Field01;
 
     void OnFluidChanged()
     {
@@ -324,11 +351,16 @@ public sealed class CdsFieldChrome : Grid
         Trailing.Remove(_statusIcon);
 
         _layoutFluid = IsFluidLayout;
+        _fluidFill.IsVisible = _layoutFluid;
         if (_layoutFluid)
         {
             LayoutFluid();
             return;
         }
+
+        // A long label wraps above the field.
+        _label.MaxLines = -1;
+        _label.LineBreakMode = LineBreakMode.WordWrap;
 
         Trailing.Insert(0, _statusIcon);
         _statusIcon.Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0);
@@ -371,6 +403,10 @@ public sealed class CdsFieldChrome : Grid
         _labelRow.Margin = new Thickness(0, 13, 0, 0);
         _labelRow.VerticalOptions = LayoutOptions.Start;
         _labelRow.InputTransparent = true;
+        // The label floats in a fixed band of the 64px field: a long one truncates instead of wrapping over the value
+        // (Carbon scrolls it). The input keeps the full label as its accessible name.
+        _label.MaxLines = 1;
+        _label.LineBreakMode = LineBreakMode.TailTruncation;
         _field.Add(_labelRow, 0);
         SetColumnSpan((BindableObject)_labelRow, 2);
         _inputSlot.Margin = _fieldHeight < 0 ? new Thickness(0, 32, 0, 13) : new Thickness(0, 29, 0, 10);
@@ -387,9 +423,13 @@ public sealed class CdsFieldChrome : Grid
         _messageBlock.Add(_message);
         _messageBlock.Add(_statusIcon);
 
-        RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        // The shell fills the cell it is given (Carbon's block-size: 100%), so fields of different heights in one row line
+        // up: below the field and its message, the rest is field-01.
+        RowDefinitions.Add(new RowDefinition(GridLength.Star));
         _shell.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _shell.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+        _shell.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+        _shell.Add(_fluidFill, 0, 2);
         _shell.Add(_field, 0, 0);
         _shell.Add(_messageBlock, 0, 1);
         _shell.Add(_shellRule, 0, 1);

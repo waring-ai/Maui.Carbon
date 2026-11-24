@@ -69,6 +69,25 @@ public abstract partial class CdsListBox : CdsFormField
     /// <summary>Every row built from <see cref="ItemsSource"/>, before filtering.</summary>
     internal IReadOnlyList<ListBoxEntry> AllRows => _all;
 
+    /// <summary>
+    /// The open list's row height, maximum height, and the band at the top of each row its content is centred in. Default:
+    /// rows match the field, 5.5 rows tall. Fluid: 64px rows with the content in the top 40px (40px rows when
+    /// <see cref="IsCondensed"/>), at most 220px tall.
+    /// </summary>
+    internal (double Row, double Max, double Content) ListMetrics
+    {
+        get
+        {
+            if (!IsFluidMode)
+            {
+                var row = CdsListBoxTokens.RowHeight(Size);
+                return (row, row * CdsListBoxTokens.VisibleRows, row);
+            }
+            var fluidRow = IsCondensed ? CdsListBoxTokens.FluidCondensedRowHeight : CdsFieldChrome.FluidFieldHeight;
+            return (fluidRow, CdsListBoxTokens.FluidMaxListHeight, Math.Min(fluidRow, CdsListBoxTokens.FluidRowContentHeight));
+        }
+    }
+
     /// <summary>The virtual-focus model.</summary>
     internal ListBoxModel Model => _model;
 
@@ -295,7 +314,8 @@ public abstract partial class CdsListBox : CdsFormField
     {
         _hidingForEmpty = false;
         var rows = _model.Rows;
-        var list = new CdsListBoxList(CdsListBoxTokens.Coerce(Size), UsesInlineType, IsMultiple, Label ?? Placeholder, IsFluidMode ? CdsFieldChrome.FluidFieldHeight : null);
+        var metrics = ListMetrics;
+        var list = new CdsListBoxList(UsesInlineType, IsMultiple, Label ?? Placeholder, metrics.Row, metrics.Max, metrics.Content);
         list.Build(rows, i => IsRowChosen(rows[i]), CreateRowContent);
         list.RowChosen += (_, i) => OnRowChosen(i);
         list.RowHovered += (_, i) =>
@@ -538,7 +558,7 @@ public abstract partial class CdsListBox : CdsFormField
         // The field fill and underline depend on the open and inline states, which the shared chrome does not know about.
         var fill = flat
             ? CdsListBoxTokens.InlineFill(hover, disabled, readOnly, open)
-            : readOnly ? null : hover && !open ? CdsColorKeys.FieldHover01 : CdsColorKeys.Field01;
+            : CdsFieldChrome.FieldFillKey(IsFluidMode, readOnly, hover && !open, flat: false);
         CdsTokens.SetColor(Chrome.Field, BackgroundColorProperty, fill);
         if (FindRule() is { } rule) CdsTokens.SetColor(rule, BoxView.ColorProperty, CdsListBoxTokens.FieldRule(disabled, readOnly, open, flat));
 

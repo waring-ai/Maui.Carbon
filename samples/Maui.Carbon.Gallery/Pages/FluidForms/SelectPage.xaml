@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de" IsInvalid="True" InvalidText="Frankfurt is not available on this plan."><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidSelect Label="Region" SelectedItem="us-south" IsWarning="True" WarnText="Dallas is at capacity."><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
@@ -25,6 +25,10 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidSelect x:Name="Input" Label="Region" SelectedItem="eu-de" SelectedItemChanged="OnChanged"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidSelectSkeleton /></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

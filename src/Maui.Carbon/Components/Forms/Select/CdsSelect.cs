@@ -70,7 +70,7 @@ public partial class CdsSelect : CdsFormField
         // Inline: no fill (except on hover) and no underline.
         var hover = Is(CdsInteractionState.Hover) && !disabled && !IsReadOnly;
         var inline = IsInline && !IsFluidMode;
-        var fill = inline ? (hover ? CdsColorKeys.FieldHover01 : null) : IsReadOnly ? null : hover ? CdsColorKeys.FieldHover01 : CdsColorKeys.Field01;
+        var fill = inline ? (hover ? CdsColorKeys.FieldHover01 : null) : CdsFieldChrome.FieldFillKey(IsFluidMode, IsReadOnly, hover, flat: false);
         CdsTokens.SetColor(Chrome.Field, BackgroundColorProperty, fill);
         if (FindRule() is { } rule) rule.IsVisible = !inline;
     }
@@ -86,6 +86,17 @@ public partial class CdsSelect : CdsFormField
 
     /// <summary>Forces the fluid layout on (used by the time picker's parts); the context turns it on by itself.</summary>
     internal void SetFluid(bool fluid) => Chrome.IsFluid = fluid;
+
+    /// <summary>
+    /// Hides the bottom rule while a group around this select draws its own outline and message (the fluid time picker's
+    /// invalid and warning states).
+    /// </summary>
+    internal void SetRuleSuppressed(bool suppressed)
+    {
+        if (Chrome.IsRuleSuppressed == suppressed) return;
+        Chrome.IsRuleSuppressed = suppressed;
+        RefreshVisuals();
+    }
 
     BoxView? FindRule()
     {

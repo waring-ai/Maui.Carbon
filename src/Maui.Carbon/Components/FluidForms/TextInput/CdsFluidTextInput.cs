@@ -13,3 +13,18 @@ public class CdsFluidTextInput : CdsTextInput
         Chrome.IsFluid = true;
     }
 }
+
+/// <summary>
+/// The loading placeholder of <see cref="CdsFluidTextInput"/> (Carbon's <c>FluidTextInputSkeleton</c>): a 64px <c>skeleton-background</c>
+/// field with a <c>skeleton-element</c> bottom rule, a label bar and a value bar, matching the field it turns into. It is
+/// decorative and stays out of the accessibility tree; announce the loading state elsewhere if it matters.
+/// </summary>
+public class CdsFluidTextInputSkeleton : CdsControl
+{
+    /// <summary>Creates the skeleton.</summary>
+    public CdsFluidTextInputSkeleton()
+    {
+        AutomationProperties.SetIsInAccessibleTree(this, false);
+        SetChrome(FluidSkeleton.Field(CdsFieldChrome.FluidFieldHeight));
+    }
+}

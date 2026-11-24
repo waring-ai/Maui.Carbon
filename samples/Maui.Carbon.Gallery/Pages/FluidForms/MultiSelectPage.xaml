@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" /></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" IsInvalid="True" InvalidText="Choose at most one event." /></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" IsWarning="True" WarnText="Alerts can be noisy." /></cds:CdsFluidForm>
@@ -26,6 +26,10 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidMultiSelect x:Name="Input" Label="Channels" Placeholder="Choose channels" ItemsSource="{x:Static data:GListData.Channels}" SelectionChanged="OnChanged" /></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidMultiSelectSkeleton /></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

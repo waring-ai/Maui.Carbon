@@ -128,6 +128,8 @@ public partial class CdsSearch : CdsControl
         var height = fluid ? CdsSize.Md.Height() : Size.Height();
         var expanded = fluid || !IsExpandable || IsExpanded;
         Chrome.Size = Size;
+        // Fluid: a disabled search keeps a border-subtle-01 bottom rule.
+        Chrome.DisabledRuleColorKey = fluid ? CdsColorKeys.BorderSubtle01 : null;
         Chrome.IsVisible = expanded;
         _collapsed.IsVisible = !expanded;
         _collapsed.SetSize(height, height);

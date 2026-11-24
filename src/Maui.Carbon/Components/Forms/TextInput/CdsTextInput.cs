@@ -45,12 +45,18 @@ public partial class CdsTextInput : CdsControl
         if (IsWarning) state |= CdsInteractionState.Warn;
         if (IsReadOnly) state |= CdsInteractionState.ReadOnly;
         Chrome.Apply(state);
-        SetColor(Entry, Microsoft.Maui.Controls.Entry.TextColorProperty,
-            Is(CdsInteractionState.Disabled) ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary);
+        SetColor(Entry, Microsoft.Maui.Controls.Entry.TextColorProperty, ValueColorKey(Is(CdsInteractionState.Disabled), IsReadOnly, IsFluidMode));
         SetColor(Entry, Microsoft.Maui.Controls.Entry.PlaceholderColorProperty,
             Is(CdsInteractionState.Disabled) ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPlaceholder);
         SemanticProperties.SetHint(Entry, Chrome.CurrentMessage);
     }
+
+    /// <summary>
+    /// The value's color: <c>text-disabled</c> when disabled, <c>text-secondary</c> when read only in the fluid layout
+    /// (Carbon's fluid read-only value), else <c>text-primary</c>.
+    /// </summary>
+    internal static string ValueColorKey(bool disabled, bool readOnly, bool fluid) =>
+        disabled ? CdsColorKeys.TextDisabled : readOnly && fluid ? CdsColorKeys.TextSecondary : CdsColorKeys.TextPrimary;
 
     /// <summary>Re-applies texts, sizes and accessibility after a property change.</summary>
     protected virtual void UpdateChrome()

@@ -11,7 +11,7 @@
             <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" /></cds:CdsFluidForm>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only is transparent; disabled is skipped by Tab.">
+        <g:GalleryExample Title="States" Description="Invalid outlines the whole field, message included, with the error under a 1px divider; a warning keeps the strong rule under its message; read-only keeps the field fill with a subtle rule; disabled is skipped by Tab.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker Type="Range" Label="Start date" EndLabel="End date" StartDate="{x:Static data:GListData.RangeStart}" EndDate="{x:Static data:GListData.RangeEnd}" /></cds:CdsFluidForm>
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker Type="Simple" Label="Contract start" Placeholder="mm/dd/yyyy" /></cds:CdsFluidForm>
@@ -27,6 +27,17 @@
                 <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker x:Name="Input" Label="Report date" DateChanged="OnChanged" /></cds:CdsFluidForm>
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />
             </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Range errors" Description="A picker-level error outlines both halves with one message under them; an input-level error (IsEndInvalid) outlines only the field to fix.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker Type="Range" Label="From" EndLabel="To" IsInvalid="True" InvalidText="Choose a period of 92 days or less." /></cds:CdsFluidForm>
+                <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><cds:CdsFluidDatePicker Type="Range" Label="From" EndLabel="To" IsEndInvalid="True" EndInvalidText="End date must be after the start date." /></cds:CdsFluidForm>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a skeleton field the size of the one it turns into, with a label bar and a value bar.">
+            <cds:CdsFluidForm WidthRequest="400" HorizontalOptions="Start"><VerticalStackLayout Spacing="24"><cds:CdsFluidDatePickerSkeleton /><cds:CdsFluidDatePickerSkeleton Range="True" /></VerticalStackLayout></cds:CdsFluidForm>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The fluid field in all four themes.">

@@ -13,3 +13,21 @@ public class CdsFluidTextArea : CdsTextArea
         Chrome.IsFluid = true;
     }
 }
+
+/// <summary>
+/// The loading placeholder of <see cref="CdsFluidTextArea"/> (Carbon's <c>FluidTextAreaSkeleton</c>): a 128px <c>skeleton-background</c>
+/// field with a <c>skeleton-element</c> bottom rule, a label bar and a value bar, matching the field it turns into. It is
+/// decorative and stays out of the accessibility tree; announce the loading state elsewhere if it matters.
+/// </summary>
+public class CdsFluidTextAreaSkeleton : CdsControl
+{
+    /// <summary>Height of the skeleton field: 8rem.</summary>
+    internal const double SkeletonHeight = 128;
+
+    /// <summary>Creates the skeleton.</summary>
+    public CdsFluidTextAreaSkeleton()
+    {
+        AutomationProperties.SetIsInAccessibleTree(this, false);
+        SetChrome(FluidSkeleton.Field(SkeletonHeight));
+    }
+}

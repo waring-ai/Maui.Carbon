@@ -13,3 +13,18 @@ public class CdsFluidSelect : CdsSelect
         Chrome.IsFluid = true;
     }
 }
+
+/// <summary>
+/// The loading placeholder of <see cref="CdsFluidSelect"/> (Carbon's <c>FluidSelectSkeleton</c>): a 64px <c>skeleton-background</c>
+/// field with a <c>skeleton-element</c> bottom rule, a label bar and a value bar, matching the field it turns into. It is
+/// decorative and stays out of the accessibility tree; announce the loading state elsewhere if it matters.
+/// </summary>
+public class CdsFluidSelectSkeleton : CdsControl
+{
+    /// <summary>Creates the skeleton.</summary>
+    public CdsFluidSelectSkeleton()
+    {
+        AutomationProperties.SetIsInAccessibleTree(this, false);
+        SetChrome(FluidSkeleton.Field(CdsFieldChrome.FluidFieldHeight));
+    }
+}

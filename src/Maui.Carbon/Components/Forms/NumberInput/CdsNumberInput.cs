@@ -145,6 +145,8 @@ public partial class CdsNumberInput : CdsFormField
         // Fluid: the steppers are 40 square at the bottom of the 64px field whatever the size.
         var fluid = IsFluidMode;
         var height = fluid ? CdsSize.Md.Height() : Size.Height();
+        // Fluid: a disabled number input keeps a border-subtle-01 bottom rule.
+        Chrome.DisabledRuleColorKey = fluid ? CdsColorKeys.BorderSubtle01 : null;
         Controls.VerticalOptions = fluid ? LayoutOptions.End : LayoutOptions.Fill;
         Chrome.Trailing.VerticalOptions = fluid ? LayoutOptions.End : LayoutOptions.Center;
         Chrome.Trailing.Margin = new Thickness(0);

@@ -33,6 +33,10 @@ public abstract partial class CdsListBox
     public static readonly BindableProperty DirectionProperty = BindableProperty.Create(
         nameof(Direction), typeof(CdsListBoxDirection), typeof(CdsListBox), CdsListBoxDirection.Bottom);
 
+    /// <summary>Bindable property for <see cref="IsCondensed"/>.</summary>
+    public static readonly BindableProperty IsCondensedProperty = BindableProperty.Create(
+        nameof(IsCondensed), typeof(bool), typeof(CdsListBox), false);
+
     /// <summary>Bindable property for <see cref="Type"/>.</summary>
     public static readonly BindableProperty TypeProperty = BindableProperty.Create(
         nameof(Type), typeof(CdsListBoxType), typeof(CdsListBox), CdsListBoxType.Default,
@@ -93,6 +97,16 @@ public abstract partial class CdsListBox
     {
         get => (CdsListBoxDirection)GetValue(DirectionProperty);
         set => SetValue(DirectionProperty, value);
+    }
+
+    /// <summary>
+    /// Condensed menu rows in the fluid layout (Carbon's <c>isCondensed</c>): 40px rows instead of 64px, so more options
+    /// show before the list scrolls. The default layout ignores it (its rows match the field size). Default false.
+    /// </summary>
+    public bool IsCondensed
+    {
+        get => (bool)GetValue(IsCondensedProperty);
+        set => SetValue(IsCondensedProperty, value);
     }
 
     /// <summary>

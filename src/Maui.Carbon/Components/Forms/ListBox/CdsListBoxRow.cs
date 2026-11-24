@@ -21,7 +21,7 @@ internal sealed class CdsListBoxRow : CdsControl
     bool _showRing;
     bool _separatorVisible;
 
-    public CdsListBoxRow(ListBoxEntry entry, double height, bool inline, bool multi, bool isSelected, View? content)
+    public CdsListBoxRow(ListBoxEntry entry, double height, bool inline, bool multi, bool isSelected, View? content, double contentHeight = double.PositiveInfinity)
     {
         Entry = entry;
         _multi = multi;
@@ -30,7 +30,8 @@ internal sealed class CdsListBoxRow : CdsControl
 
         var inset = CdsListBoxTokens.RowInset(inline);
         _root.HeightRequest = height;
-        _root.Padding = new Thickness(inset, 0);
+        // Tall fluid rows (64px) keep the text, check mark and checkbox centred in a top band (40px), as in Carbon.
+        _root.Padding = new Thickness(inset, 0, inset, Math.Max(0, height - contentHeight));
         _root.ColumnSpacing = multi ? CdsSpacing.Spacing04 : CdsSpacing.Spacing03;
 
         var column = 0;

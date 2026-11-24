@@ -33,6 +33,12 @@ public partial class CdsPasswordInput : CdsTextInput
         Margin = new Thickness(0, 0, -CdsSpacing.Spacing05, 0),
     };
 
+    /// <summary>Side of the show/hide toggle in the fluid layout: 2rem.</summary>
+    internal const double FluidToggleSize = 32;
+
+    /// <summary>Distance of the fluid toggle from the top of the field: 1.625rem.</summary>
+    internal const double FluidToggleTop = 26;
+
     /// <summary>Creates a medium password input.</summary>
     public CdsPasswordInput()
     {
@@ -94,8 +100,24 @@ public partial class CdsPasswordInput : CdsTextInput
         _toggle.Icon = shown ? CdsIconName.ViewOff : CdsIconName.View;
         _toggle.Description = label;
         _tooltip.Text = label;
-        var height = Size.Height();
-        _toggle.SetSize(height, height);
+        if (IsFluidMode)
+        {
+            // Fluid: a 32x32 toggle 26 from the top and 8 from the end of the 64px field (the field pads its end by 16).
+            _toggle.SetSize(FluidToggleSize, FluidToggleSize);
+            _tooltip.Margin = new Thickness(0, 0, CdsSpacing.Spacing03 - CdsSpacing.Spacing05, 0);
+            _tooltip.VerticalOptions = LayoutOptions.Start;
+            Chrome.Trailing.VerticalOptions = LayoutOptions.Start;
+            Chrome.Trailing.Margin = new Thickness(0, FluidToggleTop, 0, 0);
+        }
+        else
+        {
+            var height = Size.Height();
+            _toggle.SetSize(height, height);
+            _tooltip.Margin = new Thickness(0, 0, -CdsSpacing.Spacing05, 0);
+            _tooltip.VerticalOptions = LayoutOptions.Fill;
+            Chrome.Trailing.VerticalOptions = LayoutOptions.Center;
+            Chrome.Trailing.Margin = new Thickness(0);
+        }
         _toggle.IsEnabled = IsEnabled;
     }
 }
