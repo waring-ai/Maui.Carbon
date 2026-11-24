@@ -104,6 +104,33 @@ internal sealed class CdsFieldIconButton : CdsControl
         set { _description = value; SemanticProperties.SetDescription(_hit, value); }
     }
 
+    /// <summary>
+    /// Whether Tab stops on the button. Default on. Number-input steppers turn it off (Carbon: <c>tabIndex=-1</c>); they
+    /// stay clickable and reachable by screen readers.
+    /// </summary>
+    public bool IsTabStop
+    {
+        get => _hit.IsTabStop;
+        set => _hit.IsTabStop = value;
+    }
+
+    /// <summary>The accessibility role. Default <see cref="CdsAccessibilityRole.Button"/>.</summary>
+    public CdsAccessibilityRole Role
+    {
+        get => _hit.Role;
+        set => _hit.Role = value;
+    }
+
+    /// <summary>The expanded state reported with an expander role (<c>aria-expanded</c>); <c>null</c> for none.</summary>
+    public bool? IsExpanded
+    {
+        get => _hit.IsExpanded;
+        set => _hit.IsExpanded = value;
+    }
+
+    /// <summary>The button's hit target (for tests).</summary>
+    internal CdsHitTarget HitTarget => _hit;
+
     public void SetSize(double width, double height)
     {
         _root.WidthRequest = width;

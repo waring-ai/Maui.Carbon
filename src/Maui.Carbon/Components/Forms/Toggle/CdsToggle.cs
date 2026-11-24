@@ -71,6 +71,8 @@ public partial class CdsToggle : CdsControl
         SetColor(_stateText, Microsoft.Maui.Controls.Label.TextColorProperty, v.StateText);
         SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.LabelText);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
+        // aria-readonly: focusable, and screen readers say why it does not switch.
+        _hit.IsReadOnly = IsReadOnly && !Is(CdsInteractionState.Disabled);
     }
 
     void UpdateChrome()

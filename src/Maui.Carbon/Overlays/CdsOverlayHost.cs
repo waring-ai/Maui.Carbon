@@ -224,6 +224,21 @@ public partial class CdsOverlayHost : Grid
         return false;
     }
 
+    /// <summary>
+    /// Routes a printable character the platform did not give to a text input (type-ahead) to the focused Carbon control
+    /// and its ancestors (<see cref="CdsControl.OnCharacter"/>); returns true when one consumed it. Control characters and
+    /// white space (Space activates) are not routed.
+    /// </summary>
+    public bool RouteCharacter(char character)
+    {
+        if (char.IsControl(character) || char.IsWhiteSpace(character)) return false;
+        foreach (var control in CdsFocusTracker.FocusChain())
+        {
+            if (control.OnCharacter(character)) return true;
+        }
+        return false;
+    }
+
     /// <summary>Keys the platform layer should capture right now.</summary>
     internal CdsWantedKeys WantedKeys
     {

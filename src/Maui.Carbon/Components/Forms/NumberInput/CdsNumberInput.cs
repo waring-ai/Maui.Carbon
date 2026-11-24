@@ -35,9 +35,9 @@ public sealed class CdsNumberChangedEventArgs : EventArgs
 /// <summary>
 /// A numeric field with decrement and increment steppers, constrained by <see cref="Min"/>, <see cref="Max"/> and
 /// <see cref="Step"/>. A value outside the range, or an empty field without <see cref="AllowEmpty"/>, is invalid
-/// automatically. Steppers clamp to the range and keep the decimal precision of the step and the value; they are out of
-/// the keyboard flow in Carbon (MAUI has no cross-platform tab-stop switch, so they stay reachable): keyboard users type or use Up / Down. Always set a sensible default and state the range in the label
-/// or helper text.
+/// automatically. Steppers clamp to the range and keep the decimal precision of the step and the value; as in Carbon they
+/// are not Tab stops (they stay clickable and visible to screen readers): keyboard users type or use Up / Down. Always set
+/// a sensible default and state the range in the label or helper text.
 /// </summary>
 public partial class CdsNumberInput : CdsFormField
 {
@@ -45,10 +45,10 @@ public partial class CdsNumberInput : CdsFormField
     protected readonly CdsNativeEntry Entry = new() { Keyboard = Keyboard.Numeric };
 
     /// <summary>The decrement button.</summary>
-    internal readonly CdsFieldIconButton DownButton = new(CdsIconName.Subtract);
+    internal readonly CdsFieldIconButton DownButton = new(CdsIconName.Subtract) { IsTabStop = false };
 
     /// <summary>The increment button.</summary>
-    internal readonly CdsFieldIconButton UpButton = new(CdsIconName.Add);
+    internal readonly CdsFieldIconButton UpButton = new(CdsIconName.Add) { IsTabStop = false };
 
     /// <summary>The steppers (divider, decrement, divider, increment) at the end of the field.</summary>
     protected readonly HorizontalStackLayout Controls = new() { Spacing = 0, VerticalOptions = LayoutOptions.Fill, Margin = new Thickness(0, 0, -CdsSpacing.Spacing05, 0) };

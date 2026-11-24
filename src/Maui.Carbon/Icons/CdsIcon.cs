@@ -8,7 +8,12 @@ public class CdsIcon : GraphicsView, IDrawable
 {
     /// <summary>Bindable property for <see cref="Icon"/>.</summary>
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
-        nameof(Icon), typeof(CdsIconName?), typeof(CdsIcon), null, propertyChanged: Redraw);
+        nameof(Icon), typeof(CdsIconName?), typeof(CdsIcon), null,
+        propertyChanged: static (b, o, n) =>
+        {
+            ((CdsIcon)b).UpdateDefaultInnerColor();
+            Redraw(b, o, n);
+        });
 
     /// <summary>Bindable property for <see cref="Glyph"/>.</summary>
     public static readonly BindableProperty GlyphProperty = BindableProperty.Create(
@@ -27,6 +32,16 @@ public class CdsIcon : GraphicsView, IDrawable
     public static readonly BindableProperty InnerColorProperty = BindableProperty.Create(
         nameof(InnerColor), typeof(Color), typeof(CdsIcon), null, propertyChanged: Redraw);
 
+    // The theme where the icon sits, and the inner-mark color a status glyph gets when InnerColor is not set.
+    static readonly BindableProperty ContextThemeProperty = BindableProperty.Create(
+        "ContextTheme", typeof(CdsThemeName), typeof(CdsIcon), CdsThemeName.White,
+        propertyChanged: static (b, _, _) => ((CdsIcon)b).UpdateDefaultInnerColor());
+
+    static readonly BindableProperty DefaultInnerColorProperty = BindableProperty.Create(
+        "DefaultInnerColor", typeof(Color), typeof(CdsIcon), null, propertyChanged: Redraw);
+
+    string? _defaultInnerKey = CdsContextKeys.Transparent;
+
     /// <summary>Bindable property for <see cref="Description"/>.</summary>
     public static readonly BindableProperty DescriptionProperty = BindableProperty.Create(
         nameof(Description), typeof(string), typeof(CdsIcon), null,
@@ -42,6 +57,7 @@ public class CdsIcon : GraphicsView, IDrawable
         VerticalOptions = LayoutOptions.Center;
         ApplySize(16);
         SetDynamicResource(ColorProperty, CdsColorKeys.IconPrimary);
+        SetDynamicResource(ContextThemeProperty, CdsContextKeys.ThemeId);
         ApplyDescription(null);
     }
 
@@ -80,7 +96,11 @@ public class CdsIcon : GraphicsView, IDrawable
         set => SetValue(ColorProperty, value);
     }
 
-    /// <summary>Color of a filled status glyph's inner mark (the check in <c>checkmark--filled</c>). Default transparent.</summary>
+    /// <summary>
+    /// Color of a filled status glyph's inner mark (the check in <c>checkmark--filled</c>). Default transparent, except for
+    /// <see cref="CdsIconName.WarningAltFilled"/>: its "!" stays dark on the yellow triangle in every theme, as in Carbon
+    /// (<c>icon-primary</c> in White and G10, <c>icon-inverse</c> in G90 and G100). Set a color to override that.
+    /// </summary>
     public Color? InnerColor
     {
         get => (Color?)GetValue(InnerColorProperty);
@@ -112,13 +132,33 @@ public class CdsIcon : GraphicsView, IDrawable
         canvas.FillColor = color;
         foreach (var p in glyph.Paths)
             canvas.FillPath(CdsIcons.GetPath(p.Data), p.EvenOdd ? WindingMode.EvenOdd : WindingMode.NonZero);
-        if (InnerColor is { Alpha: > 0 } inner)
+        if ((InnerColor ?? (Color?)GetValue(DefaultInnerColorProperty)) is { Alpha: > 0 } inner)
         {
             canvas.FillColor = inner;
             foreach (var p in glyph.InnerPaths)
                 canvas.FillPath(CdsIcons.GetPath(p.Data), p.EvenOdd ? WindingMode.EvenOdd : WindingMode.NonZero);
         }
         canvas.RestoreState();
+    }
+
+    /// <summary>The inner-mark color in effect: <see cref="InnerColor"/>, else the glyph's default (for tests).</summary>
+    internal Color? EffectiveInnerColor => InnerColor ?? (Color?)GetValue(DefaultInnerColorProperty);
+
+    /// <summary>
+    /// The color key of the default inner mark for <paramref name="icon"/> in <paramref name="theme"/>, or <c>null</c> when
+    /// the mark stays a hole. Carbon keeps the "!" of <c>warning--alt--filled</c> dark on its yellow triangle
+    /// (<c>.cds--icon [data-icon-path='inner-path']</c>: <c>icon-primary</c>, <c>icon-inverse</c> in G90 and G100).
+    /// </summary>
+    internal static string? DefaultInnerColorKey(CdsIconName? icon, CdsThemeName theme) =>
+        icon == CdsIconName.WarningAltFilled ? (theme.IsDark() ? CdsColorKeys.IconInverse : CdsColorKeys.IconPrimary) : null;
+
+    void UpdateDefaultInnerColor()
+    {
+        var key = DefaultInnerColorKey(Icon, (CdsThemeName)GetValue(ContextThemeProperty)) ?? CdsContextKeys.Transparent;
+        if (key == _defaultInnerKey) return;
+        _defaultInnerKey = key;
+        // No default mark binds to the transparent color: a dynamic resource outranks ClearValue.
+        SetDynamicResource(DefaultInnerColorProperty, key);
     }
 
     static void Redraw(BindableObject b, object? o, object? n) => ((CdsIcon)b).Invalidate();

@@ -105,6 +105,8 @@ internal sealed class CdsAppleHitTargetView : UIButton
                 CdsOverlayHostHandler.Route(CdsOverlayHost.Find(Target), key, k.ModifierFlags.HasFlag(UIKeyModifierFlags.Shift)))
                 return;
         }
+        // A letter typed on a focused list box trigger is type-ahead.
+        if (CdsAppleHostView.TypedCharacter(presses) is { } c && CdsOverlayHost.Find(Target)?.RouteCharacter(c) == true) return;
         base.PressesBegan(presses, evt);
     }
 

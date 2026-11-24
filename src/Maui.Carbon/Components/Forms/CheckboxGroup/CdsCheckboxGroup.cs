@@ -6,7 +6,8 @@ namespace Maui.Carbon;
 /// <summary>
 /// Groups <see cref="CdsCheckbox"/> items under one legend and owns the group's helper, invalid and warning messages.
 /// Boxes stack 8px apart, or sit in a wrapping row 16px apart when <see cref="Orientation"/> is horizontal. Prefer
-/// vertical, and leave 32px before the next form component.
+/// vertical, and leave 32px before the next form component. The group's message is read with each checkbox (its hint), and
+/// an error or warning is announced when it appears.
 /// </summary>
 [ContentProperty(nameof(Items))]
 public partial class CdsCheckboxGroup : CdsControl
@@ -40,8 +41,11 @@ public partial class CdsCheckboxGroup : CdsControl
         var state = GroupState();
         var disabled = state.HasFlag(CdsInteractionState.Disabled);
         SetColor(_legend, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
-        _message.Apply(CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText));
-        foreach (var item in _items) item.SetInherited(InheritedFor(state));
+        var message = CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText);
+        // The message row is drawn only (it is out of the accessibility tree): an error or warning that appears is announced
+        // by it, and every checkbox carries the message in its hint, as the fieldset's aria-describedby does on the web.
+        _message.Apply(message);
+        foreach (var item in _items) item.SetInherited(InheritedFor(state), message.Text);
     }
 
     /// <inheritdoc/>

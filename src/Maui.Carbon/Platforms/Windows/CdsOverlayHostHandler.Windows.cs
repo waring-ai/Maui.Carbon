@@ -8,6 +8,7 @@ namespace Maui.Carbon;
 public partial class CdsOverlayHostHandler
 {
     KeyEventHandler? _keyHandler;
+    global::Windows.Foundation.TypedEventHandler<UIElement, CharacterReceivedRoutedEventArgs>? _characterHandler;
 
     /// <inheritdoc/>
     protected override void ConnectHandler(LayoutPanel platformView)
@@ -15,13 +16,22 @@ public partial class CdsOverlayHostHandler
         base.ConnectHandler(platformView);
         _keyHandler = OnKeyDown;
         platformView.AddHandler(UIElement.KeyDownEvent, _keyHandler, handledEventsToo: true);
+        _characterHandler = OnCharacterReceived;
+        platformView.CharacterReceived += _characterHandler;
     }
 
     /// <inheritdoc/>
     protected override void DisconnectHandler(LayoutPanel platformView)
     {
         if (_keyHandler is not null) platformView.RemoveHandler(UIElement.KeyDownEvent, _keyHandler);
+        if (_characterHandler is not null) platformView.CharacterReceived -= _characterHandler;
         base.DisconnectHandler(platformView);
+    }
+
+    // A letter a text box did not take is type-ahead (a focused dropdown jumps to the match).
+    void OnCharacterReceived(UIElement sender, CharacterReceivedRoutedEventArgs e)
+    {
+        if (!e.Handled && VirtualView is CdsOverlayHost host && host.RouteCharacter(e.Character)) e.Handled = true;
     }
 
     void OnKeyDown(object sender, KeyRoutedEventArgs e)

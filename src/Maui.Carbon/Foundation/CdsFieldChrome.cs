@@ -48,6 +48,7 @@ public sealed class CdsFieldChrome : Grid
     readonly CdsIcon _statusIcon = new() { IsVisible = false, Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0) };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false };
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
+    readonly CdsMessageAlert _alert = new();
     bool _inline;
     CdsSize _size = CdsSize.Md;
 
@@ -181,7 +182,10 @@ public sealed class CdsFieldChrome : Grid
     /// <summary>Raised after the fluid layout turned on or off, so the owner can re-apply its sizes and decorations.</summary>
     public event EventHandler? FluidLayoutChanged;
 
-    /// <summary>Label (and helper) to the start of the field, for dense settings rows.</summary>
+    /// <summary>
+    /// Label (and helper text, in the label column under the label) to the start of the field, for dense settings rows.
+    /// Invalid and warning messages stay under the field.
+    /// </summary>
     public bool IsInline
     {
         get => _inline;
@@ -283,12 +287,16 @@ public sealed class CdsFieldChrome : Grid
 
         string? text;
         string key;
-        if (invalid && !string.IsNullOrEmpty(InvalidText)) (text, key) = (InvalidText, CdsColorKeys.TextError);
-        else if (warn && !string.IsNullOrEmpty(WarnText)) (text, key) = (WarnText, CdsColorKeys.TextPrimary);
+        string? alert = null;
+        if (invalid && !string.IsNullOrEmpty(InvalidText)) (text, key, alert) = (InvalidText, CdsColorKeys.TextError, InvalidText);
+        else if (warn && !string.IsNullOrEmpty(WarnText)) (text, key, alert) = (WarnText, CdsColorKeys.TextPrimary, WarnText);
         else (text, key) = (fluid ? null : HelperText, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextHelper);
         _message.Text = text;
         _message.IsVisible = !string.IsNullOrEmpty(text);
         Set(_message, Microsoft.Maui.Controls.Label.TextColorProperty, key);
+        PlaceInlineMessage(isHelper: alert is null);
+        // role="alert": an error or warning that appears or changes while the field is on screen is spoken once.
+        _alert.Update(this, alert);
 
         // Fluid: the message row (divider, text, status icon) belongs to the field and shows for invalid and warning
         // states; the outline replaces the bottom rule, and a warning keeps a strong rule under the message.
@@ -309,6 +317,23 @@ public sealed class CdsFieldChrome : Grid
     /// </summary>
     internal static string? FieldFillKey(bool fluid, bool readOnly, bool hover, bool flat) =>
         readOnly ? (fluid && !flat ? CdsColorKeys.Field01 : null) : hover ? CdsColorKeys.FieldHover01 : flat ? null : CdsColorKeys.Field01;
+
+    // Inline (Carbon's label-helper wrapper): helper text sits in the label column under the label, at most 8rem wide;
+    // an invalid or warning message sits under the field.
+    void PlaceInlineMessage(bool isHelper)
+    {
+        if (!_inline || _layoutFluid) return;
+        var column = isHelper ? 0 : 1;
+        if (GetColumn((BindableObject)_message) != column) SetColumn((BindableObject)_message, column);
+        _message.MaximumWidthRequest = isHelper ? InlineHelperMaxWidth : double.PositiveInfinity;
+        _message.Margin = isHelper ? new Thickness(0, CdsSpacing.Spacing02, CdsSpacing.Spacing05, 0) : new Thickness(0, CdsSpacing.Spacing02, 0, 0);
+    }
+
+    /// <summary>Widest an inline helper text gets (Carbon's <c>label-helper-wrapper</c>: 8rem).</summary>
+    internal const double InlineHelperMaxWidth = 128;
+
+    /// <summary>The grid column of the message row (for tests): 0 under the label, 1 under the field when inline.</summary>
+    internal int MessageColumn => GetColumn((BindableObject)_message);
 
     void OnFluidChanged()
     {
@@ -371,9 +396,10 @@ public sealed class CdsFieldChrome : Grid
         Trailing.Margin = new Thickness(0);
         _labelRow.InputTransparent = false;
         _message.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
+        _message.MaximumWidthRequest = double.PositiveInfinity;
         if (_inline)
         {
-            // [label | field] with the message under the field.
+            // [label | field]; Apply puts helper text under the label and an error or warning under the field.
             ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
             ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             RowDefinitions.Add(new RowDefinition(GridLength.Auto));
@@ -436,5 +462,31 @@ public sealed class CdsFieldChrome : Grid
         _shell.Add(_fluidOutline, 0, 0);
         SetRowSpan((BindableObject)_fluidOutline, 2);
         this.Add(_shell, 0, 0);
+    }
+}
+
+/// <summary>
+/// Speaks a form message once when an error or warning appears or changes while its owner is on screen, as Carbon's
+/// <c>role="alert"</c> message does (assertive). A message already showing when the owner loads is not spoken; it is in the
+/// input's hint. Clearing the message re-arms it, so the same error is spoken again the next time it appears.
+/// </summary>
+internal sealed class CdsMessageAlert
+{
+    string? _current;
+
+    /// <summary>The alert text last seen (for tests).</summary>
+    public string? Current => _current;
+
+    /// <summary>Records the error or warning text now shown (<c>null</c> for none or helper text) and speaks a new one.</summary>
+    public void Update(VisualElement owner, string? alertText)
+    {
+        if (string.IsNullOrEmpty(alertText))
+        {
+            _current = null;
+            return;
+        }
+        if (alertText == _current) return;
+        _current = alertText;
+        if (owner.IsLoaded) CdsAnnouncer.Announce(alertText, CdsAnnouncePriority.Assertive);
     }
 }

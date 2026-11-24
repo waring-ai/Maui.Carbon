@@ -124,9 +124,11 @@ public class CdsRadioButton : CdsControl
 
     internal bool IsEffectivelyReadOnly => IsReadOnly || _inherited.HasFlag(CdsInteractionState.ReadOnly);
 
-    internal void SetInherited(CdsInteractionState flags, CdsRadioLabelPosition? position)
+    internal void SetInherited(CdsInteractionState flags, CdsRadioLabelPosition? position, string? groupMessage = null)
     {
         _inherited = flags;
+        // The group's message row is out of the accessibility tree; each radio reads it as its hint (aria-describedby).
+        SemanticProperties.SetHint(_hit, string.IsNullOrEmpty(groupMessage) ? null : groupMessage);
         if (position is { } p && p != _groupPosition)
         {
             _groupPosition = p;
@@ -137,6 +139,9 @@ public class CdsRadioButton : CdsControl
 
     /// <summary>Moves keyboard focus to the radio.</summary>
     internal bool FocusRadio() => _hit.Focus();
+
+    /// <summary>The radio's hit target (a group keeps one of them in the Tab order).</summary>
+    internal CdsHitTarget HitTarget => _hit;
 
     CdsRadioLabelPosition? _groupPosition;
 
@@ -160,6 +165,8 @@ public class CdsRadioButton : CdsControl
         SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.Label);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
         _hit.IsEnabled = !state.HasFlag(CdsInteractionState.Disabled);
+        // aria-readonly: still focusable, and screen readers say why activating it changes nothing.
+        _hit.IsReadOnly = state.HasFlag(CdsInteractionState.ReadOnly) && !state.HasFlag(CdsInteractionState.Disabled);
     }
 
     void UpdateChrome()

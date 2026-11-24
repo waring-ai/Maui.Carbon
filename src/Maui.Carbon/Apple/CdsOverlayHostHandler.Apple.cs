@@ -64,6 +64,28 @@ internal sealed class CdsAppleHostView : LayoutView
         }
     }
 
+    // While an open list box holds first responder, the letters typed reach the host: route them as type-ahead.
+    public override void PressesBegan(NSSet<UIPress> presses, UIPressesEvent evt)
+    {
+        if (TypedCharacter(presses) is { } c && Host?.RouteCharacter(c) == true) return;
+        base.PressesBegan(presses, evt);
+    }
+
+    /// <summary>The printable character of a single key press without Command, Control or Option; <c>null</c> otherwise.</summary>
+    internal static char? TypedCharacter(NSSet<UIPress> presses)
+    {
+        if (presses.Count != 1) return null;
+        foreach (var press in presses)
+        {
+            if (press.Key is not { } key) return null;
+            if ((key.ModifierFlags & (UIKeyModifierFlags.Command | UIKeyModifierFlags.Control | UIKeyModifierFlags.Alternate)) != 0) return null;
+            var characters = key.Characters;
+            if (characters is not { Length: 1 } || char.IsControl(characters[0]) || char.IsWhiteSpace(characters[0])) return null;
+            return characters[0];
+        }
+        return null;
+    }
+
     [Export(ActionName)]
     void OnKeyCommand(UIKeyCommand command)
     {

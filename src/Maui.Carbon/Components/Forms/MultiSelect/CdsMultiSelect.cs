@@ -217,9 +217,7 @@ public partial class CdsMultiSelect : CdsListBox
     {
         _clearText.IsVisible = IsFilterable && !string.IsNullOrEmpty(e.NewTextValue);
         if (_filterSyncing || !CanOpen) return;
-        RefreshRows(keepHighlight: false);
-        if (!IsOpen) IsOpen = true;
-        HighlightFirstRow();
+        RefilterFromTyping();
     }
 
     void OnEntryCompleted()

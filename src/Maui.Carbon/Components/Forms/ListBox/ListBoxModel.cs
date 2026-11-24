@@ -230,6 +230,30 @@ internal sealed class ListBoxModel
 /// <summary>Pure helpers of the list box layer: filtering, ordering, scrolling and the row separators.</summary>
 internal static class ListBoxLogic
 {
+    /// <summary>
+    /// What a screen reader hears for a highlighted row: its text, its state ("selected" for the chosen row of a single
+    /// select; "checked" or "not checked" in a multi-select; "unavailable" for a disabled row) and its position, as
+    /// <c>aria-activedescendant</c> with <c>aria-selected</c>, <c>aria-posinset</c> and <c>aria-setsize</c> would:
+    /// "Frankfurt, selected, 3 of 4".
+    /// </summary>
+    public static string RowAnnouncement(ListBoxEntry row, int index, int count, bool chosen, bool multi)
+    {
+        var parts = new List<string>(4) { row.Text };
+        if (multi) parts.Add(chosen ? "checked" : "not checked");
+        else if (chosen) parts.Add("selected");
+        if (row.IsDisabled) parts.Add("unavailable");
+        parts.Add($"{index + 1} of {count}");
+        return string.Join(", ", parts.Where(p => p.Length > 0));
+    }
+
+    /// <summary>The announcement of an open list with no row highlighted: "4 options available", "No options available".</summary>
+    public static string CountAnnouncement(int count) => count switch
+    {
+        0 => "No options available",
+        1 => "1 option available",
+        _ => $"{count} options available",
+    };
+
     /// <summary>The default combo box filter: case-insensitive "contains" on the row text.</summary>
     public static bool DefaultFilter(string text, string input) =>
         text.Contains(input, StringComparison.OrdinalIgnoreCase);

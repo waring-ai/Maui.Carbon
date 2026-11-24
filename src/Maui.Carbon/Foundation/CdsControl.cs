@@ -364,6 +364,13 @@ public abstract class CdsControl : ContentView, IView
     /// </summary>
     protected internal virtual bool WantsEscapeKey => false;
 
+    /// <summary>
+    /// Handles a printable character typed while this control (or a descendant) has focus and no text input took it, for
+    /// type-ahead (a focused dropdown jumps to the first option starting with the letter). Return <c>true</c> to consume
+    /// it. Routed by the page host (<see cref="CdsOverlayHost.RouteCharacter"/>). Default <c>false</c>.
+    /// </summary>
+    protected internal virtual bool OnCharacter(char character) => false;
+
     /// <inheritdoc/>
     protected override void OnPropertyChanged(string? propertyName = null)
     {

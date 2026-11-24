@@ -15,6 +15,7 @@ public partial class CdsCheckbox : CdsControl
     readonly CdsFormMessage _message = new();
     readonly CdsHitTarget _hit;
     CdsInteractionState _inherited;
+    string? _groupMessage;
 
     /// <summary>Creates an unchecked checkbox.</summary>
     public CdsCheckbox()
@@ -61,13 +62,29 @@ public partial class CdsCheckbox : CdsControl
     /// <summary>Whether the checkbox is currently in the disabled state (own or inherited from a group).</summary>
     internal bool IsEffectivelyDisabled => Is(CdsInteractionState.Disabled) || _inherited.HasFlag(CdsInteractionState.Disabled);
 
-    /// <summary>Sets the state a <see cref="CdsCheckboxGroup"/> passes down (invalid, warning, read-only, disabled).</summary>
-    internal void SetInherited(CdsInteractionState flags)
+    /// <summary>
+    /// Sets what a <see cref="CdsCheckboxGroup"/> passes down: its state (invalid, read-only, disabled) and its message
+    /// (helper, invalid or warning text), which joins the checkbox's own message in its accessibility hint: the group's
+    /// message row is not in the accessibility tree.
+    /// </summary>
+    internal void SetInherited(CdsInteractionState flags, string? groupMessage = null)
     {
-        if (_inherited == flags) return;
+        if (_inherited == flags && _groupMessage == groupMessage) return;
         _inherited = flags;
+        _groupMessage = groupMessage;
         RefreshVisuals();
     }
+
+    /// <summary>The accessibility hint of the checkbox (for tests).</summary>
+    internal string? AccessibilityHint => SemanticProperties.GetHint(_hit);
+
+    /// <summary>The checkbox's hit target (for tests).</summary>
+    internal CdsHitTarget HitTarget => _hit;
+
+    /// <summary>The hint: the checkbox's own message, then its group's; <c>null</c> when there is neither.</summary>
+    internal static string? CombineHint(string? own, string? group) =>
+        string.IsNullOrEmpty(own) ? (string.IsNullOrEmpty(group) ? null : group)
+        : string.IsNullOrEmpty(group) || group == own ? own : $"{own}. {group}";
 
     /// <inheritdoc/>
     protected override void OnActivated()
@@ -103,7 +120,9 @@ public partial class CdsCheckbox : CdsControl
         var message = CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText);
         _message.Apply(message);
         _hit.IsEnabled = !state.HasFlag(CdsInteractionState.Disabled);
-        SemanticProperties.SetHint(_hit, message.Text);
+        // aria-readonly (own or from the group): focusable, and screen readers say why it does not toggle.
+        _hit.IsReadOnly = state.HasFlag(CdsInteractionState.ReadOnly) && !state.HasFlag(CdsInteractionState.Disabled);
+        SemanticProperties.SetHint(_hit, CombineHint(message.Text, _groupMessage));
     }
 
     CdsInteractionState EffectiveState()

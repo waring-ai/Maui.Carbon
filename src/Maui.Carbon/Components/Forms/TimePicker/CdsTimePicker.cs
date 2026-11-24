@@ -37,6 +37,7 @@ public partial class CdsTimePicker : CdsControl
     readonly BoxView _periodDivider = new() { WidthRequest = 1, HorizontalOptions = LayoutOptions.Start, InputTransparent = true };
     readonly BoxView _zoneDivider = new() { WidthRequest = 1, HorizontalOptions = LayoutOptions.Start, InputTransparent = true };
     readonly CdsFocusRing _fluidRing = new(CdsFocusRingStyle.Inset);
+    readonly CdsMessageAlert _alert = new();
     bool _autoInvalid;
     bool _syncing;
     bool _fluidBuilt;
@@ -160,6 +161,8 @@ public partial class CdsTimePicker : CdsControl
         _message.IsVisible = !string.IsNullOrEmpty(text);
         SetColor(_message, Microsoft.Maui.Controls.Label.TextColorProperty, key);
         SemanticProperties.SetHint(Entry, _message.IsVisible ? text : null);
+        // role="alert": a new error or warning is spoken once.
+        _alert.Update(this, text);
 
         if (fluid)
         {
@@ -191,7 +194,8 @@ public partial class CdsTimePicker : CdsControl
         Chrome.Label = fluid ? Label : null;
         PeriodSelect.SetFluid(fluid);
         ZoneSelect.SetFluid(fluid);
-        Chrome.Size = Size;
+        // Carbon's time picker comes in sm, md and lg only; other sizes clamp to that range.
+        Chrome.Size = CdsListBoxTokens.Coerce(Size);
         Entry.Placeholder = Placeholder;
         Entry.IsReadOnly = IsReadOnly;
         PeriodSelect.Size = Size;

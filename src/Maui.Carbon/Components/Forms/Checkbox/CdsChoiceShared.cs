@@ -79,6 +79,7 @@ internal sealed class CdsFormMessage : Grid
     readonly CdsIcon _icon = new() { IsVisible = false, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(0, 1, 0, 0) };
     readonly CdsText _text = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper };
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
+    readonly CdsMessageAlert _alert = new();
 
     public CdsFormMessage()
     {
@@ -99,6 +100,8 @@ internal sealed class CdsFormMessage : Grid
     {
         _text.Text = v.Text;
         IsVisible = !string.IsNullOrEmpty(v.Text);
+        // role="alert": the row itself is out of the accessibility tree, so a new error or warning is spoken once.
+        _alert.Update(this, v.Kind is CdsFormMessageKind.Invalid or CdsFormMessageKind.Warn ? v.Text : null);
         Set(_text, Label.TextColorProperty, v.TextColor);
         if (v.Icon is { } icon)
         {

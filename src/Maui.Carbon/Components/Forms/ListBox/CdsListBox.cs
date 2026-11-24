@@ -42,6 +42,11 @@ public abstract partial class CdsListBox : CdsFormField
     bool _openByKeyboard;
     bool _waitingForSize;
     bool _hidingForEmpty;
+    // Screen-reader announcements of the highlight: the last one spoken (not repeated), and the two opening paths whose
+    // caller announces the row it highlights next (keyboard open with type-ahead, typing into a text field).
+    string? _lastAnnouncement;
+    bool _deferAnnouncement;
+    bool _typing;
 
     /// <summary>Creates the list-box scaffold. Derived constructors call <see cref="BuildField"/>.</summary>
     protected CdsListBox()
@@ -226,7 +231,6 @@ public abstract partial class CdsListBox : CdsFormField
         if (_list is null) return;
         _list.Refresh(_model.Highlighted, _keyboardHighlight, i => i < _model.Rows.Count && IsRowChosen(_model.Rows[i]));
         if (scroll) _list.ScrollTo(_model.Highlighted);
-        if (TriggerHit is { } hit && _model.HighlightedRow is { } row) SemanticProperties.SetHint(hit, row.Text);
     }
 
     /// <summary>Highlights the first enabled row with the focus ring (a combo box does this as the filter changes); no-op while closed.</summary>
@@ -235,6 +239,30 @@ public abstract partial class CdsListBox : CdsFormField
         _model.MoveFirst();
         _keyboardHighlight = true;
         RefreshList(scroll: true);
+        AnnounceHighlight();
+    }
+
+    /// <summary>
+    /// What a screen reader hears for the highlighted row ("Frankfurt, selected, 3 of 4"), or, with no row highlighted,
+    /// how many options the open list has; <c>null</c> while the list is closed.
+    /// </summary>
+    internal string? HighlightAnnouncement()
+    {
+        if (_overlay is null || _model.Rows.Count == 0) return null;
+        if (_model.HighlightedRow is not { } row) return ListBoxLogic.CountAnnouncement(_model.Rows.Count);
+        return ListBoxLogic.RowAnnouncement(row, _model.Highlighted, _model.Rows.Count, IsRowChosen(row), IsMultiple);
+    }
+
+    // The list uses virtual focus, so the screen reader stays on the trigger and never moves to a row (the web's
+    // aria-activedescendant). Speak the highlighted row, its state and its position instead, each time the highlight moves
+    // from the keyboard and when the list opens. Assertive: like a focus move it replaces what is being read, so quick
+    // arrowing does not queue up stale rows.
+    void AnnounceHighlight()
+    {
+        var text = HighlightAnnouncement();
+        if (text is null || text == _lastAnnouncement) return;
+        _lastAnnouncement = text;
+        CdsAnnouncer.Announce(text, CdsAnnouncePriority.Assertive);
     }
 
     /// <summary>Redraws the open list's rows (a selection changed); no-op while closed.</summary>
@@ -266,6 +294,36 @@ public abstract partial class CdsListBox : CdsFormField
         {
             _model.HighlightValueOrFirst(HighlightOnOpen);
             RefreshList(scroll: true);
+            if (!_deferAnnouncement) AnnounceHighlight();
+        }
+    }
+
+
+    /// <summary>
+    /// After the text of a combo box or filterable multi-select changed: re-filters the rows, opens the list when it is
+    /// closed and highlights (and announces) the first match, or announces that nothing matches.
+    /// </summary>
+    private protected void RefilterFromTyping()
+    {
+        RefreshRows(keepHighlight: false);
+        _typing = true;
+        try
+        {
+            if (!IsOpen) IsOpen = true;
+        }
+        finally
+        {
+            _typing = false;
+        }
+        HighlightFirstRow();
+        if (_model.Rows.Count == 0 && IsOpen)
+        {
+            var none = ListBoxLogic.CountAnnouncement(0);
+            if (none != _lastAnnouncement)
+            {
+                _lastAnnouncement = none;
+                CdsAnnouncer.Announce(none, CdsAnnouncePriority.Assertive);
+            }
         }
     }
 
@@ -345,6 +403,9 @@ public abstract partial class CdsListBox : CdsFormField
         if (TriggerHit is { } hit) hit.IsExpanded = true;
         UpdateOpenVisuals();
         list.ScrollTo(_model.Highlighted);
+        _lastAnnouncement = null;
+        // Opened from the keyboard (or by typing into a text field), the caller announces the row it highlights next.
+        if (!_openByKeyboard && !_typing) AnnounceHighlight();
         Opened?.Invoke(this, EventArgs.Empty);
     }
 
@@ -382,6 +443,7 @@ public abstract partial class CdsListBox : CdsFormField
         _model.ClearHighlight();
         _model.ResetTypeAhead();
         _keyboardHighlight = false;
+        _lastAnnouncement = null;
         if (IsOpen && !_hidingForEmpty) SetValue(IsOpenProperty, false);
         _hidingForEmpty = false;
         if (TriggerHit is { } hit) hit.IsExpanded = false;
@@ -409,7 +471,12 @@ public abstract partial class CdsListBox : CdsFormField
         if (!CanOpen || index < 0 || index >= _model.Rows.Count || _model.Rows[index].IsDisabled) return;
         ChooseRow(index);
         if (!IsMultiple) IsOpen = false;
-        else RefreshList(scroll: false);
+        else
+        {
+            RefreshList(scroll: false);
+            // The highlighted row's new state ("checked") is spoken, as a change of aria-selected on the active descendant is.
+            if (_keyboardHighlight) AnnounceHighlight();
+        }
     }
 
     bool OnListKey(CdsKeyEventArgs e)
@@ -430,6 +497,7 @@ public abstract partial class CdsListBox : CdsFormField
         {
             _keyboardHighlight = true;
             RefreshList(scroll: true);
+            AnnounceHighlight();
         }
         return result.Handled;
     }
@@ -482,8 +550,9 @@ public abstract partial class CdsListBox : CdsFormField
 
     /// <summary>
     /// Type-ahead: jumps the highlight to the next row that starts with <paramref name="character"/> (letters typed
-    /// within half a second build one search string). Opens the list when it is closed. The platform key router does not
-    /// deliver characters yet, so hosts and tests call this directly.
+    /// within half a second build one search string). Opens the list when it is closed. The page host routes the
+    /// characters typed on a focused list box here (<see cref="CdsOverlayHost.RouteCharacter"/>); fields with a text input
+    /// (combo box, filterable multi-select) filter instead and return <c>false</c>.
     /// </summary>
     public bool TypeAhead(char character)
     {
@@ -498,18 +567,31 @@ public abstract partial class CdsListBox : CdsFormField
         if (!_model.TypeAhead(character, now)) return false;
         _keyboardHighlight = true;
         RefreshList(scroll: true);
+        AnnounceHighlight();
         return true;
     }
+
+    /// <inheritdoc/>
+    protected internal override bool OnCharacter(char character) => TypeAhead(character);
 
     /// <summary>Called when type-ahead matched while the list is closed; the default opens the list on the match.</summary>
     protected virtual bool OnTypeAheadClosed()
     {
         var target = _model.Highlighted;
-        OpenFromKeyboard();
+        _deferAnnouncement = true;
+        try
+        {
+            OpenFromKeyboard();
+        }
+        finally
+        {
+            _deferAnnouncement = false;
+        }
         if (_overlay is not null && _model.SetHighlight(target))
         {
             RefreshList(scroll: true);
         }
+        AnnounceHighlight();
         return true;
     }
 
@@ -565,6 +647,8 @@ public abstract partial class CdsListBox : CdsFormField
         if (TriggerHit is { } hit)
         {
             hit.IsEnabled = !disabled;
+            // Read-only stays focusable; screen readers hear "read only" instead of a list that silently will not open.
+            hit.IsReadOnly = readOnly && !disabled;
         }
         ApplyTrigger(disabled, readOnly);
     }

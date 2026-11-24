@@ -6,8 +6,9 @@ namespace Maui.Carbon;
 /// <summary>
 /// A set of <see cref="CdsRadioButton"/> items for choosing exactly one of a few visible options. The group owns the
 /// selection (<see cref="SelectedValue"/> / <see cref="SelectedItem"/>), the legend and the helper, invalid and
-/// warning messages. Arrow keys move the focus and select within the group (wrapping, skipping disabled radios). MAUI cannot take a
-/// native button out of the Tab order, so every enabled radio stays a tab stop (Carbon's web radios are one tab stop). Prefer <see cref="CdsChoiceOrientation.Vertical"/> for scanning.
+/// warning messages. The group is one Tab stop: Tab lands on the selected radio (the first enabled one when nothing is
+/// selected) and leaves the group; the arrow keys move the focus and select within it (wrapping, skipping disabled radios;
+/// a read-only group only moves the focus). Prefer <see cref="CdsChoiceOrientation.Vertical"/> for scanning.
 /// </summary>
 [ContentProperty(nameof(Items))]
 public class CdsRadioButtonGroup : CdsControl
@@ -72,6 +73,8 @@ public class CdsRadioButtonGroup : CdsControl
     readonly ContentView _itemsHost = new();
     readonly CdsFormMessage _message = new() { Margin = new Thickness(0, 6, 0, 0) };
     readonly CdsItemCollection<CdsRadioButton> _items = [];
+    // One Tab stop for the group; it returns to the selected radio once focus leaves (RemembersFocus off).
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Both, wraps: true) { RemembersFocus = false, HandlesHomeEnd = false };
     bool _syncing;
 
     /// <summary>Creates an empty group.</summary>
@@ -84,6 +87,9 @@ public class CdsRadioButtonGroup : CdsControl
         _root.Add(_itemsHost, 0, 1);
         _root.Add(_message, 0, 2);
         _items.CollectionChanged += OnItemsChanged;
+        _roving.CanFocus = i => i >= 0 && i < _items.Count && _items[i] is { IsVisible: true } radio && !radio.IsEffectivelyDisabled;
+        _roving.PreferredIndex = SelectedIndex;
+        _roving.Navigated += OnRovingNavigated;
         SetChrome(_root);
         UpdateChrome();
     }
@@ -177,20 +183,18 @@ public class CdsRadioButtonGroup : CdsControl
     /// <inheritdoc/>
     protected internal override bool OnKeyDown(CdsKeyEventArgs e)
     {
-        var direction = RadioGroupModel.Direction(e.Key);
-        if (direction == 0 || _items.Count == 0) return false;
+        if (RadioGroupModel.Direction(e.Key) == 0 || _roving.TabStopIndex < 0) return false;
+        return _roving.HandleKey(e);
+    }
 
-        var enabled = _items.Select(r => !r.IsEffectivelyDisabled).ToList();
-        var current = _items.ToList().FindIndex(r => r.Is(CdsInteractionState.Focused));
-        if (current < 0) current = SelectedIndex();
-        var next = RadioGroupModel.NextEnabled(enabled, current, direction);
-        if (next < 0) return false;
+    /// <summary>The radio that is in the Tab order (the selected one, else the first enabled one), or <c>null</c>.</summary>
+    internal CdsRadioButton? TabStopRadio => _roving.TabStopIndex >= 0 ? _items[_roving.TabStopIndex] : null;
 
-        var target = _items[next];
-        target.FocusRadio();
+    // Selection follows focus, except in a read-only group or on a read-only radio.
+    void OnRovingNavigated(object? sender, int index)
+    {
+        var target = _items[index];
         if (!IsReadOnly && !target.IsReadOnly) SelectedValue = target.Value;
-        e.Handled = true;
-        return true;
     }
 
     /// <inheritdoc/>
@@ -199,9 +203,11 @@ public class CdsRadioButtonGroup : CdsControl
         var state = GroupState();
         SetColor(_legend, Microsoft.Maui.Controls.Label.TextColorProperty,
             state.HasFlag(CdsInteractionState.Disabled) ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
-        _message.Apply(CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText, hideHelperWhenBlocked: true));
+        var message = CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText, hideHelperWhenBlocked: true);
+        _message.Apply(message);
         var inherited = state & (CdsInteractionState.Disabled | CdsInteractionState.ReadOnly | CdsInteractionState.Invalid);
-        foreach (var item in _items) item.SetInherited(inherited, LabelPosition);
+        foreach (var item in _items) item.SetInherited(inherited, LabelPosition, message.Text);
+        _roving.Refresh();
     }
 
     /// <inheritdoc/>
@@ -243,6 +249,7 @@ public class CdsRadioButtonGroup : CdsControl
 
     void Hook(CdsRadioButton radio)
     {
+        radio.PropertyChanged += OnRadioPropertyChanged;
         radio.UserSelected += OnRadioSelected;
         radio.CheckedPropertyChanged += OnRadioCheckedChanged;
         radio.ValueChanged += OnRadioValueChanged;
@@ -250,9 +257,19 @@ public class CdsRadioButtonGroup : CdsControl
 
     void Unhook(CdsRadioButton radio)
     {
+        radio.PropertyChanged -= OnRadioPropertyChanged;
         radio.UserSelected -= OnRadioSelected;
         radio.CheckedPropertyChanged -= OnRadioCheckedChanged;
         radio.ValueChanged -= OnRadioValueChanged;
+        // A radio taken out of the group is a lone control again: back in the Tab order, without the group's message.
+        radio.HitTarget.IsTabStop = true;
+        SemanticProperties.SetHint(radio.HitTarget, null);
+    }
+
+    // A radio shown, hidden, enabled or disabled: the Tab stop may move.
+    void OnRadioPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == IsVisibleProperty.PropertyName || e.PropertyName == IsEnabledProperty.PropertyName) _roving.Refresh();
     }
 
     void OnRadioSelected(object? sender, EventArgs e)
@@ -301,6 +318,7 @@ public class CdsRadioButtonGroup : CdsControl
         {
             _syncing = false;
         }
+        _roving.Refresh();
     }
 
     void RebuildItems()
@@ -324,6 +342,7 @@ public class CdsRadioButtonGroup : CdsControl
             foreach (var item in _items) column.Add(item);
             _itemsHost.Content = column;
         }
+        _roving.SetItems(_items.Select(r => r.HitTarget));
         RefreshVisuals();
     }
 }

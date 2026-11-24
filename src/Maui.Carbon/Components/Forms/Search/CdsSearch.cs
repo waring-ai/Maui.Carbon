@@ -24,7 +24,8 @@ public partial class CdsSearch : CdsControl
     readonly Grid _root = new();
     readonly Grid _input = new() { ColumnSpacing = 0 };
     readonly CdsFieldIconButton _clear = new(CdsIconName.Close, CdsFieldButtonKind.Search) { IsVisible = false };
-    readonly CdsFieldIconButton _collapsed = new(CdsIconName.Search, CdsFieldButtonKind.Plain) { IsVisible = false };
+    // The collapsed magnifier is a disclosure (aria-expanded): it reports "collapsed" until it expands into the field.
+    readonly CdsFieldIconButton _collapsed = new(CdsIconName.Search, CdsFieldButtonKind.Plain) { IsVisible = false, Role = CdsAccessibilityRole.Expander };
 
     /// <summary>Creates a medium search field.</summary>
     public CdsSearch()
@@ -135,6 +136,7 @@ public partial class CdsSearch : CdsControl
         _collapsed.SetSize(height, height);
         _collapsed.Icon = Icon;
         _collapsed.Description = Label;
+        _collapsed.IsExpanded = IsExpandable && !fluid ? expanded : null;
         _clear.SetSize(height, height);
         _clear.Description = CloseButtonLabel;
         _clear.IsVisible = expanded && !string.IsNullOrEmpty(Text);

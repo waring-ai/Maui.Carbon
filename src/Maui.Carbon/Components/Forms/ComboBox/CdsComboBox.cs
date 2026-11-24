@@ -124,10 +124,8 @@ public partial class CdsComboBox : CdsListBox
         InputText = e.NewTextValue ?? string.Empty;
         _syncing = false;
         if (!CanOpen) return;
-        // Typing filters the list, opens it, and highlights the first match.
-        RefreshRows(keepHighlight: false);
-        if (!IsOpen) IsOpen = true;
-        HighlightFirstRow();
+        // Typing filters the list, opens it, and highlights (and announces) the first match.
+        RefilterFromTyping();
     }
 
     void OnEntryCompleted()

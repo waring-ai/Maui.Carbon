@@ -46,6 +46,10 @@ internal sealed class CdsAndroidHostView : LayoutViewGroup
                 _ => null,
             };
             if (key is { } k && CdsOverlayHostHandler.Route(host, k, e.IsShiftPressed)) return true;
+            // A letter typed while no text input has focus is type-ahead (a focused dropdown jumps to the match).
+            if (key is null && !e.IsCtrlPressed && !e.IsAltPressed && !e.IsMetaPressed && e.UnicodeChar is > 0 and < 0xFFFF &&
+                host.RouteCharacter((char)e.UnicodeChar))
+                return true;
         }
         return base.DispatchKeyEvent(e);
     }

@@ -10,6 +10,8 @@ namespace Maui.Carbon;
 /// <see cref="CdsSelectItem"/> children or an <see cref="ItemsSource"/> (text from <see cref="ItemToString"/>). Use a
 /// radio group for two options, and a dropdown or combo box when rows need styling or filtering.
 /// <see cref="CdsFormField.IsInline"/> puts the label beside a transparent control for toolbars and table headers.
+/// <see cref="CdsFormField.Size"/> is sm, md (default) or lg; other sizes clamp to that range. Read-only keeps the field
+/// focusable and puts back any change made in the native list.
 /// </summary>
 [ContentProperty(nameof(Items))]
 public partial class CdsSelect : CdsFormField
@@ -62,7 +64,8 @@ public partial class CdsSelect : CdsFormField
     {
         var disabled = Is(CdsInteractionState.Disabled);
         Picker.IsEnabled = IsEnabled;
-        Picker.InputTransparent = IsReadOnly;
+        // Read-only stays focusable (no InputTransparent: on Apple it takes the picker out of keyboard focus); a change
+        // made in the native list is put back in OnPickerIndexChanged.
         SetColor(Picker, Microsoft.Maui.Controls.Picker.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary);
         SetColor(Picker, Microsoft.Maui.Controls.Picker.TitleColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPlaceholder);
         SetColor(Chevron, CdsIcon.ColorProperty, disabled || IsReadOnly ? CdsColorKeys.IconDisabled : CdsColorKeys.IconPrimary);
@@ -79,6 +82,8 @@ public partial class CdsSelect : CdsFormField
     protected override void UpdateChrome()
     {
         base.UpdateChrome();
+        // Carbon's select comes in sm, md and lg only (32 / 40 / 48); xs and the larger sizes clamp to that range.
+        Chrome.Size = CdsListBoxTokens.Coerce(Size);
         Picker.Title = Placeholder;
         Chrome.Field.Padding = new Thickness(IsInline && !IsFluidMode ? CdsSpacing.Spacing03 : CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0);
         RefreshVisuals();

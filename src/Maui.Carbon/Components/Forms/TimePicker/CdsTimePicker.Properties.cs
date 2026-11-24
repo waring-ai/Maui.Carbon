@@ -153,7 +153,7 @@ public partial class CdsTimePicker
         set => SetValue(IsReadOnlyProperty, value);
     }
 
-    /// <summary>Height of the input and the selects: sm 32, md 40 (default), lg 48.</summary>
+    /// <summary>Height of the input and the selects: sm 32, md 40 (default), lg 48. Other sizes clamp to that range (Carbon defines no xs or larger time picker).</summary>
     public CdsSize Size
     {
         get => (CdsSize)GetValue(SizeProperty);

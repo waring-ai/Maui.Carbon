@@ -6,8 +6,9 @@ namespace Maui.Carbon;
 /// For two options use radio buttons; for long lists or values not in the list use a <see cref="CdsComboBox"/>; for several
 /// choices a <see cref="CdsMultiSelect"/>; for plain forms on mobile a <see cref="CdsSelect"/>. Never nest dropdowns.
 /// <para>
-/// Keyboard: Down and Up open and move the highlight, Home and End jump, Enter or Space opens or chooses, Escape or Tab
-/// close without changing the choice. Read-only fields stay focusable and ignore input.
+/// Keyboard: Down and Up open and move the highlight, Home and End jump, typing letters jumps to the next match, Enter or
+/// Space opens or chooses, Escape or Tab close without changing the choice. Screen readers hear the highlighted option,
+/// its state and its position as it moves. Read-only fields stay focusable, ignore input and are reported as read only.
 /// </para>
 /// </summary>
 public partial class CdsDropdown : CdsListBox
