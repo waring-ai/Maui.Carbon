@@ -308,6 +308,7 @@ public partial class CdsOverlayHost : Grid
     {
         var bp = CdsBreakpointExtensions.FromWidth(Width);
         _breakpointScope.Resources[CdsContextKeys.ViewportWidth] = Width;
+        _toastLayer.Resources[CdsContextKeys.ViewportWidth] = Width; // toasts are sized by the viewport too
         if (bp != Breakpoint || !_breakpointScope.Resources.ContainsKey(CdsContextKeys.Breakpoint))
         {
             Breakpoint = bp;

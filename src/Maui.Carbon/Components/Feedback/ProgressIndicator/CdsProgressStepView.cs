@@ -47,7 +47,9 @@ internal sealed class CdsProgressStepView : CdsControl
         _label.Text = step.Label;
         _label.LineBreakMode = vertical ? LineBreakMode.WordWrap : LineBreakMode.TailTruncation;
         _label.MaxLines = vertical ? 0 : 1;
-        _label.MaximumWidthRequest = ProgressIndicatorModel.LabelMaxWidth(vertical);
+        _label.MaximumWidthRequest = ProgressIndicatorModel.LabelMaxWidth(vertical, spaceEqually);
+        // Start, not Fill: a filling label with a maximum width is centered once the step is wider than the maximum.
+        _label.HorizontalOptions = LayoutOptions.Start;
         _secondary.Text = step.SecondaryLabel;
         _secondary.IsVisible = !string.IsNullOrEmpty(step.SecondaryLabel);
         ToolTipProperties.SetText(_layout, step.Label ?? "");

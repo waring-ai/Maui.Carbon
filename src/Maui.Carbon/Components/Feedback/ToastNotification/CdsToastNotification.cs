@@ -2,7 +2,7 @@ namespace Maui.Carbon;
 
 /// <summary>
 /// A transient message that floats above the page to report the result of an action: status icon, title, subtitle,
-/// optional caption and a close button, 288 wide, with a <c>shadow</c>. It can close itself after
+/// optional caption and a close button, 288 wide (352 from the max breakpoint, 1584 up), with a <c>shadow</c>. It can close itself after
 /// <see cref="Timeout"/> milliseconds; only auto-dismiss low-severity messages that can be found elsewhere, never errors.
 /// Show it with <see cref="CdsToast.Show"/> so it lands in the page's top-right toast region.
 /// It holds no action: a toast that times out must never hold something the person needs.
@@ -20,8 +20,11 @@ public class CdsToastNotification : CdsDismissibleNotification
         coerceValue: static (_, v) => Math.Max(0, (int)v),
         propertyChanged: static (b, _, _) => ((CdsToastNotification)b).RestartTimer());
 
-    /// <summary>The fixed width of a toast.</summary>
-    public const double ToastWidth = 288;
+    /// <summary>The width of a toast below the max breakpoint (1584); from there it is <see cref="WideToastWidth"/>.</summary>
+    public const double ToastWidth = NotificationWidthModel.Narrow;
+
+    /// <summary>The width of a toast from the max breakpoint (1584 up).</summary>
+    public const double WideToastWidth = 352;
 
     readonly Grid _content = new() { ColumnSpacing = CdsSpacing.Spacing05, Margin = new Thickness(3, 0, 0, 0) };
     readonly CdsText _title = CdsNotificationText.CreateLine(CdsTypeStyle.HeadingCompact01);
@@ -50,7 +53,7 @@ public class CdsToastNotification : CdsDismissibleNotification
         _content.Add(StatusIcon, 0);
         _content.Add(texts, 1);
 
-        WidthRequest = ToastWidth;
+        WidthRequest = NotificationWidthModel.Toast(ViewportWidth);
         HorizontalOptions = LayoutOptions.Start;
         CdsTokens.SetShadow(Surface, CdsColorKeys.Shadow, 2, 6);
         SetBody(_content);
@@ -95,6 +98,9 @@ public class CdsToastNotification : CdsDismissibleNotification
         _caption.IsVisible = !string.IsNullOrEmpty(Caption);
         _content.Padding = new Thickness(13, 0, CloseSpace + CdsSpacing.Spacing05, 0);
     }
+
+    /// <inheritdoc/>
+    private protected override void OnViewportWidthChanged() => WidthRequest = NotificationWidthModel.Toast(ViewportWidth);
 
     void RestartTimer()
     {

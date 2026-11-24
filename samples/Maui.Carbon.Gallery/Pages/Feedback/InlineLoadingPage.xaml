@@ -5,13 +5,14 @@
                xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.InlineLoadingPage">
     <VerticalStackLayout Spacing="48">
-        <g:GalleryExample Title="Statuses" Description="Active shows the small spinner; finished a success check; error an error icon; inactive keeps only the text.">
+        <g:GalleryExample Title="Statuses" Description="Active shows the small spinner; finished a success check; error an error icon; inactive keeps only the text. Text changes are announced assertively; LiveMode=&quot;Polite&quot; suits background refreshes.">
             <VerticalStackLayout Spacing="12">
                 <cds:CdsInlineLoading Status="Active" Description="Saving..." />
                 <cds:CdsInlineLoading Status="Finished" Description="Saved" SuccessDelay="600000" />
                 <cds:CdsInlineLoading Status="Error" Description="Could not save" />
                 <cds:CdsInlineLoading Status="Inactive" Description="Idle" />
                 <cds:CdsInlineLoading Status="Active" IconDescription="Checking the cluster name" />
+                <cds:CdsInlineLoading Status="Active" LiveMode="Polite" Description="Refreshing node status..." />
             </VerticalStackLayout>
         </g:GalleryExample>
 

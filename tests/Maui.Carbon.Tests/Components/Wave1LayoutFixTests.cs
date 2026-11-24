@@ -36,10 +36,12 @@ public class Wave1LayoutFixTests
     }
 
     [Fact]
-    public void Horizontal_progress_labels_are_not_capped_before_the_step_edge()
+    public void Horizontal_progress_labels_are_capped_at_88_unless_spaced_equally()
     {
-        Assert.True(double.IsPositiveInfinity(ProgressIndicatorModel.LabelMaxWidth(vertical: false)));
+        Assert.Equal(88, ProgressIndicatorModel.LabelMaxWidth(vertical: false));
+        Assert.True(double.IsPositiveInfinity(ProgressIndicatorModel.LabelMaxWidth(vertical: false, spaceEqually: true)));
         Assert.Equal(160, ProgressIndicatorModel.LabelMaxWidth(vertical: true));
+        Assert.Equal(160, ProgressIndicatorModel.LabelMaxWidth(vertical: true, spaceEqually: true));
     }
 
     [Fact]

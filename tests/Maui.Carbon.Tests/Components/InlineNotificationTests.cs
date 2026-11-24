@@ -159,3 +159,227 @@ public class InlineNotificationTests
         Assert.True(kept.IsVisible);
     }
 }
+
+/// <summary>Puts views on a page in a window, so they are loaded (Loaded fires without a platform).</summary>
+internal static class TestWindow
+{
+    public static Window Show(params View[] views)
+    {
+        var stack = new VerticalStackLayout();
+        foreach (var view in views) stack.Children.Add(view);
+        return new Window(new ContentPage { Content = stack });
+    }
+}
+
+public class NotificationAnnouncementTests
+{
+    [Fact]
+    public void A_notification_shown_when_loaded_is_announced_once_politely()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Error, "Deployment failed", "Image checkout-api:2.4 was not found.");
+        _ = TestWindow.Show(n);
+        Assert.True(n.IsLoaded);
+        Assert.Equal([new CdsAnnouncement("Deployment failed. Image checkout-api:2.4 was not found", CdsAnnouncePriority.Polite)], heard.Announcements);
+    }
+
+    [Fact]
+    public void A_hidden_notification_is_not_announced_at_load_but_when_it_is_shown()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Error, "Pre-flight failed") { IsVisible = false };
+        _ = TestWindow.Show(n);
+        Assert.Empty(heard.Announcements);
+
+        n.IsVisible = true;
+        Assert.Equal("Pre-flight failed", Assert.Single(heard.Announcements).Text);
+
+        n.IsVisible = false;
+        n.IsVisible = true;
+        Assert.Equal(2, heard.Announcements.Count);
+    }
+
+    [Fact]
+    public void Showing_a_hidden_ancestor_announces_the_notification()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Warning, "Quota nearly reached");
+        var section = new ContentView { Content = new VerticalStackLayout { Children = { n } }, IsVisible = false };
+        _ = TestWindow.Show(section);
+        Assert.Empty(heard.Announcements);
+
+        section.IsVisible = true;
+        Assert.Equal("Quota nearly reached", Assert.Single(heard.Announcements).Text);
+    }
+
+    [Fact]
+    public void Moving_into_a_hidden_container_is_tracked()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Saved");
+        var first = new VerticalStackLayout { Children = { n } };
+        var hidden = new VerticalStackLayout { IsVisible = false };
+        _ = TestWindow.Show(first, hidden);
+        heard.Announcements.Clear();
+
+        first.Children.Remove(n);
+        hidden.Children.Add(n);
+        Assert.Empty(heard.Announcements);
+        hidden.IsVisible = true;
+        Assert.Equal("Saved", Assert.Single(heard.Announcements).Text);
+    }
+
+    [Fact]
+    public void Text_and_kind_changes_are_announced_only_while_shown()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Checking") { IsVisible = false };
+        _ = TestWindow.Show(n);
+        n.Title = "Outcome";
+        n.Subtitle = "Teardown failed.";
+        Assert.Empty(heard.Announcements);
+
+        n.IsVisible = true;
+        heard.Announcements.Clear();
+        n.Subtitle = "Deploy failed.";
+        Assert.Equal("Outcome. Deploy failed", Assert.Single(heard.Announcements).Text);
+        n.Kind = CdsNotificationKind.Error;
+        Assert.Equal(2, heard.Announcements.Count);
+    }
+
+    [Fact]
+    public void Nothing_is_announced_before_the_notification_is_loaded()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Saved") { IsVisible = false };
+        n.IsVisible = true;
+        n.Title = "Changed";
+        Assert.Empty(heard.Announcements);
+    }
+
+    [Theory]
+    [InlineData(CdsNotificationRole.Status, CdsAnnouncePriority.Polite)]
+    [InlineData(CdsNotificationRole.Log, CdsAnnouncePriority.Polite)]
+    [InlineData(CdsNotificationRole.Alert, CdsAnnouncePriority.Assertive)]
+    [InlineData(CdsNotificationRole.AlertDialog, CdsAnnouncePriority.Assertive)]
+    public void The_role_picks_the_priority(CdsNotificationRole role, CdsAnnouncePriority priority)
+    {
+        Assert.Equal(priority, CdsNotificationBase.AnnouncementPriority(role));
+        using var heard = CdsAnnouncer.Capture();
+        _ = TestWindow.Show(new CdsInlineNotification(CdsNotificationKind.Error, "Backup failed") { Role = role });
+        Assert.Equal(priority, Assert.Single(heard.Announcements).Priority);
+    }
+
+    [Fact]
+    public void Role_none_and_callouts_are_not_announced()
+    {
+        Assert.Null(CdsNotificationBase.AnnouncementPriority(CdsNotificationRole.None));
+        using var heard = CdsAnnouncer.Capture();
+        _ = TestWindow.Show(
+            new CdsInlineNotification(CdsNotificationKind.Info, "Quiet") { Role = CdsNotificationRole.None },
+            new CdsCallout(CdsNotificationKind.Warning, "3 persistent volumes are deleted too", "Snapshot them first."));
+        Assert.Empty(heard.Announcements);
+    }
+
+    [Fact]
+    public void A_closed_notification_is_announced_again_when_shown_again()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Saved");
+        _ = TestWindow.Show(n);
+        n.Close();
+        n.Title = "Saved again";
+        Assert.Single(heard.Announcements);
+        n.IsVisible = true;
+        Assert.Equal("Saved again", heard.Announcements[^1].Text);
+    }
+}
+
+public class NotificationEscapeTests
+{
+    [Fact]
+    public void A_dismissible_notification_asks_for_Escape()
+    {
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Saved");
+        Assert.True(n.WantsEscapeKey);
+        n.CloseOnEscape = false;
+        Assert.False(n.WantsEscapeKey);
+        n.CloseOnEscape = true;
+        n.HideCloseButton = true;
+        Assert.False(n.WantsEscapeKey);
+        n.HideCloseButton = false;
+        n.IsVisible = false;
+        Assert.False(n.WantsEscapeKey);
+        Assert.True(new CdsToastNotification().WantsEscapeKey);
+        Assert.True(new CdsActionableNotification().WantsEscapeKey);
+    }
+
+    [Fact]
+    public void Escape_does_not_close_a_notification_without_a_close_button()
+    {
+        var n = new CdsInlineNotification(CdsNotificationKind.Error, "Read this") { HideCloseButton = true };
+        Assert.False(n.OnKeyDown(new CdsKeyEventArgs(CdsKey.Escape)));
+        Assert.True(n.IsVisible);
+    }
+}
+
+[CollectionDefinition(nameof(FocusTrackerCollection), DisableParallelization = true)]
+public class FocusTrackerCollection;
+
+[Collection(nameof(FocusTrackerCollection))]
+public class NotificationFocusAfterCloseTests
+{
+    static CdsHitTarget Hit(CdsControl control) => (CdsHitTarget)control.AccessibilityTarget!;
+
+    [Fact]
+    public void Focus_moves_to_the_next_focusable_element_after_the_notification()
+    {
+        var before = new CdsButton { Text = "Back" };
+        var n = new CdsInlineNotification(CdsNotificationKind.Error, "Deployment failed");
+        var after = new CdsButton { Text = "Retry" };
+        _ = TestWindow.Show(before, new Label { Text = "Not focusable" }, n, new Label(), after);
+        Assert.Same(after, n.FindFocusAfterClose());
+
+        after.IsEnabled = false;
+        Assert.Same(before, n.FindFocusAfterClose());
+        before.IsVisible = false;
+        Assert.Null(n.FindFocusAfterClose());
+    }
+
+    [Fact]
+    public void Focus_after_close_and_the_toast_fallback_come_first_when_they_can_take_focus()
+    {
+        var chosen = new CdsButton { Text = "Open logs" };
+        var fallback = new CdsButton { Text = "Deploy" };
+        var after = new CdsButton { Text = "Retry" };
+        var n = new CdsInlineNotification(CdsNotificationKind.Error, "Deployment failed") { FocusAfterClose = chosen };
+        _ = TestWindow.Show(chosen, fallback, n, after);
+        Assert.Same(chosen, n.FindFocusAfterClose());
+
+        chosen.IsVisible = false;
+        Assert.Same(after, n.FindFocusAfterClose());
+        n.FocusFallback = fallback;
+        Assert.Same(fallback, n.FindFocusAfterClose());
+    }
+
+    [Fact]
+    public void Focus_inside_the_notification_is_detected()
+    {
+        var n = new CdsInlineNotification(CdsNotificationKind.Info, "Saved");
+        _ = TestWindow.Show(n);
+        Assert.False(n.HoldsFocus);
+        var hit = Hit(n.CloseButton);
+        hit.ReportFocus(true, fromKeyboard: true);
+        try
+        {
+            Assert.True(n.HoldsFocus);
+            Assert.True(n.Close());
+            Assert.False(n.IsVisible);
+        }
+        finally
+        {
+            hit.ReportFocus(false, fromKeyboard: true);
+        }
+        Assert.False(n.HoldsFocus);
+    }
+}

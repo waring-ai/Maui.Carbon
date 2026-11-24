@@ -13,6 +13,17 @@ public enum CdsInlineLoadingStatus
     Error,
 }
 
+/// <summary>How a live region announces its changes (the web's <c>aria-live</c>).</summary>
+public enum CdsLiveMode
+{
+    /// <summary>Interrupts what the screen reader is saying (<c>aria-live="assertive"</c>). The default of inline loading.</summary>
+    Assertive,
+    /// <summary>Queued after what the screen reader is saying (<c>aria-live="polite"</c>): background refreshes and progress polls.</summary>
+    Polite,
+    /// <summary>Not announced (<c>aria-live="off"</c>).</summary>
+    Off,
+}
+
 /// <summary>What a status draws (pure, tested).</summary>
 /// <param name="Spinner">Show the spinner.</param>
 /// <param name="Icon">The status icon, if any.</param>
@@ -39,7 +50,8 @@ public static class CdsInlineLoadingTokens
 /// icon; inactive winds the spinner down and keeps the text. <see cref="Success"/> is raised
 /// <see cref="SuccessDelay"/> milliseconds after the status becomes finished. Disable the other actions of the form
 /// while it is active, and move focus somewhere sensible when the button it replaced comes back. Status text changes
-/// are announced assertively.
+/// are announced while it is shown, assertively by default; set <see cref="LiveMode"/> to
+/// <see cref="CdsLiveMode.Polite"/> for background refreshes (a progress poll) or <see cref="CdsLiveMode.Off"/>.
 /// </summary>
 public class CdsInlineLoading : CdsControl
 {
@@ -62,15 +74,22 @@ public class CdsInlineLoading : CdsControl
     public static readonly BindableProperty SuccessDelayProperty = BindableProperty.Create(
         nameof(SuccessDelay), typeof(int), typeof(CdsInlineLoading), 1500, coerceValue: static (_, v) => Math.Max(0, (int)v));
 
+    /// <summary>Bindable property for <see cref="LiveMode"/>.</summary>
+    public static readonly BindableProperty LiveModeProperty = BindableProperty.Create(
+        nameof(LiveMode), typeof(CdsLiveMode), typeof(CdsInlineLoading), CdsLiveMode.Assertive);
+
     readonly CdsSpinnerView _spinner = new() { IsSmall = true };
     readonly CdsIcon _icon = new() { IsVisible = false };
     readonly CdsText _text = new() { TypeStyle = CdsTypeStyle.Label02, Tone = CdsTextTone.Secondary, VerticalOptions = LayoutOptions.Center };
     readonly Grid _glyph = new() { WidthRequest = 16, HeightRequest = 16, VerticalOptions = LayoutOptions.Center };
+    readonly CdsCoalescedAction _announce;
     IDispatcherTimer? _timer;
+    (string? Text, CdsInlineLoadingStatus Status)? _announced;
 
     /// <summary>Creates an active indicator.</summary>
     public CdsInlineLoading()
     {
+        _announce = new CdsCoalescedAction(this, AnnounceNow);
         CdsTokens.SetColor(_spinner, CdsSpinnerView.TrackColorProperty, CdsColorKeys.LayerAccent01);
         _glyph.Add(_spinner);
         _glyph.Add(_icon);
@@ -80,7 +99,11 @@ public class CdsInlineLoading : CdsControl
         HorizontalOptions = LayoutOptions.Start;
         VerticalOptions = LayoutOptions.Center;
         SetChrome(row);
-        Unloaded += (_, _) => StopTimer();
+        Unloaded += (_, _) =>
+        {
+            StopTimer();
+            _announced = null;
+        };
         Update();
     }
 
@@ -113,6 +136,17 @@ public class CdsInlineLoading : CdsControl
     {
         get => (string?)GetValue(IconDescriptionProperty);
         set => SetValue(IconDescriptionProperty, value);
+    }
+
+    /// <summary>
+    /// How status text changes are announced (Carbon's <c>aria-live</c>): <see cref="CdsLiveMode.Assertive"/> (default),
+    /// <see cref="CdsLiveMode.Polite"/> for background refreshes, or <see cref="CdsLiveMode.Off"/>. A status and text
+    /// changed together are announced once, and nothing is announced while the indicator is hidden.
+    /// </summary>
+    public CdsLiveMode LiveMode
+    {
+        get => (CdsLiveMode)GetValue(LiveModeProperty);
+        set => SetValue(LiveModeProperty, value);
     }
 
     /// <summary>Milliseconds between finishing and <see cref="Success"/>. Default 1500.</summary>
@@ -183,9 +217,24 @@ public class CdsInlineLoading : CdsControl
         if (Status == CdsInlineLoadingStatus.Finished) Success?.Invoke(this, EventArgs.Empty);
     }
 
-    void AnnounceText()
+    void AnnounceText() => _announce.Request();
+
+    void AnnounceNow()
     {
-        if (!IsLoaded || string.IsNullOrEmpty(Description)) return;
-        CdsAnnouncer.Announce(Description);
+        if (!IsLoaded || !CdsLoop.IsShown(this) || string.IsNullOrEmpty(Description)) return;
+        if (AnnouncementPriority(LiveMode) is not { } priority) return;
+        // The same text in the same status says nothing new (a poll re-setting the status).
+        (string? Text, CdsInlineLoadingStatus Status) announcement = (Description, Status);
+        if (_announced == announcement) return;
+        _announced = announcement;
+        CdsAnnouncer.Announce(Description, priority);
     }
+
+    /// <summary>The announcement priority of a live mode, or <c>null</c> when it is off.</summary>
+    internal static CdsAnnouncePriority? AnnouncementPriority(CdsLiveMode mode) => mode switch
+    {
+        CdsLiveMode.Assertive => CdsAnnouncePriority.Assertive,
+        CdsLiveMode.Polite => CdsAnnouncePriority.Polite,
+        _ => null,
+    };
 }

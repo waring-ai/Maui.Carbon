@@ -52,10 +52,12 @@ public static class CdsProgressStepTokens
 internal static class ProgressIndicatorModel
 {
     /// <summary>
-    /// The widest a label may be: 160 in a vertical indicator; horizontally unlimited, so the label takes what is left of the
-    /// step (128, or its share when spaced equally) beside the icon and only then truncates.
+    /// The widest a label may be: 160 (10rem, wrapping) in a vertical indicator; 88 (5.5rem, ellipsized) horizontally; and
+    /// unlimited when the steps are spaced equally, so the label takes its share of the row beside the icon and only then
+    /// truncates. The full label stays in the tooltip.
     /// </summary>
-    public static double LabelMaxWidth(bool vertical) => vertical ? 160 : double.PositiveInfinity;
+    public static double LabelMaxWidth(bool vertical, bool spaceEqually = false) =>
+        vertical ? 160 : spaceEqually ? double.PositiveInfinity : 88;
 
     /// <summary>The state that follows from the position alone: earlier steps are complete, the current one is current.</summary>
     public static CdsProgressStepState Underlying(int index, int currentIndex, bool forceComplete) =>

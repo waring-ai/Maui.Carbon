@@ -1,13 +1,27 @@
 namespace Maui.Carbon;
 
+/// <summary>What the overlay of a <see cref="CdsLoading"/> covers.</summary>
+public enum CdsLoadingOverlayScope
+{
+    /// <summary>The whole page: a modal overlay opened through the page host (the default).</summary>
+    Page,
+    /// <summary>
+    /// Only the region the control is placed in: it fills its cell with the <c>overlay</c> scrim and the spinner, and the
+    /// views beside it in the same layout stop taking input and leave the accessibility tree while it is active.
+    /// </summary>
+    Region,
+}
+
 /// <summary>
 /// A spinner that shows the app or a region is busy, optionally covering the page with a dimmed overlay. The large
 /// spinner is 88 (a 10-unit <c>interactive</c> arc, one turn every 690ms) for full-page takeovers; the small one is 16
 /// with a 48% arc over a <c>layer-accent-01</c> track, for use next to a trigger. With
 /// <see cref="WithOverlay"/> the control draws nothing itself: while <see cref="IsActive"/> it opens a modal overlay with
-/// the spinner centered (it does not trap focus; disable the content beneath yourself). Without the overlay it renders
-/// only the spinner so you can place it inside a region. Reduced motion shows a static arc. Never show several spinners
-/// at once; for measurable progress use <see cref="CdsProgressBar"/>.
+/// the spinner centered (it does not trap focus; disable the content beneath yourself). To cover only the region that is
+/// blocked (Carbon: "overlay Loading covers only the region that is blocked"), set <see cref="OverlayScope"/> to
+/// <see cref="CdsLoadingOverlayScope.Region"/> and place the control over the region, in the same Grid cell as its
+/// content. Without the overlay it renders only the spinner so you can place it inside a region. Reduced motion shows a
+/// static arc. Never show several spinners at once; for measurable progress use <see cref="CdsProgressBar"/>.
 /// </summary>
 public class CdsLoading : CdsControl
 {
@@ -27,7 +41,15 @@ public class CdsLoading : CdsControl
     public static readonly BindableProperty DescriptionProperty = BindableProperty.Create(
         nameof(Description), typeof(string), typeof(CdsLoading), "loading", propertyChanged: OnChanged);
 
-    readonly CdsSpinnerView _spinner = new();
+    /// <summary>Bindable property for <see cref="OverlayScope"/>.</summary>
+    public static readonly BindableProperty OverlayScopeProperty = BindableProperty.Create(
+        nameof(OverlayScope), typeof(CdsLoadingOverlayScope), typeof(CdsLoading), CdsLoadingOverlayScope.Page,
+        propertyChanged: static (b, _, _) => ((CdsLoading)b).OnOverlayScopeChanged());
+
+    readonly CdsSpinnerView _spinner = new() { HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
+    readonly BoxView _scrim = new() { IsVisible = false };
+    readonly Grid _root = new();
+    readonly List<BlockedView> _blocked = [];
     CdsOverlay? _overlay;
     CdsSpinnerView? _overlaySpinner;
     bool _announced;
@@ -37,9 +59,17 @@ public class CdsLoading : CdsControl
     {
         HorizontalOptions = LayoutOptions.Center;
         VerticalOptions = LayoutOptions.Center;
-        SetChrome(_spinner);
+        CdsTokens.SetColor(_scrim, BoxView.ColorProperty, CdsColorKeys.Overlay);
+        AutomationProperties.SetExcludedWithChildren(_scrim, true);
+        _root.Add(_scrim);
+        _root.Add(_spinner);
+        SetChrome(_root);
         Loaded += (_, _) => Update();
-        Unloaded += (_, _) => CloseOverlay();
+        Unloaded += (_, _) =>
+        {
+            CloseOverlay();
+            UnblockRegion();
+        };
         Update();
     }
 
@@ -75,6 +105,21 @@ public class CdsLoading : CdsControl
         set => SetValue(WithOverlayProperty, value);
     }
 
+    /// <summary>
+    /// What the overlay covers while <see cref="WithOverlay"/> is on: the whole page (default) or only the region the
+    /// control is placed in (<see cref="CdsLoadingOverlayScope.Region"/>: place it in the same Grid cell as the region's
+    /// content; it fills the cell, and the other views in that layout ignore input and are hidden from screen readers while
+    /// it is active).
+    /// </summary>
+    public CdsLoadingOverlayScope OverlayScope
+    {
+        get => (CdsLoadingOverlayScope)GetValue(OverlayScopeProperty);
+        set => SetValue(OverlayScopeProperty, value);
+    }
+
+    /// <summary>Whether the region overlay is drawn now (region scope, overlay on, active).</summary>
+    internal bool IsRegionOverlayShown => _scrim.IsVisible;
+
     /// <summary>The accessible name and the announcement while active: name it after what is loading ("Recalculating billing summary"). Default "loading".</summary>
     public string Description
     {
@@ -87,11 +132,19 @@ public class CdsLoading : CdsControl
 
     void Update()
     {
-        ConfigureSpinner(_spinner, spinning: IsActive && !WithOverlay);
-        // With an overlay the control itself draws nothing (the overlay shows the spinner).
-        _spinner.IsVisible = !WithOverlay;
-        if (WithOverlay && IsActive && IsLoaded) OpenOverlay();
+        var region = WithOverlay && OverlayScope == CdsLoadingOverlayScope.Region;
+        var page = WithOverlay && !region;
+        ConfigureSpinner(_spinner, spinning: IsActive && !page);
+        // With a page overlay the control itself draws nothing (the overlay shows the spinner). A region overlay draws the
+        // scrim and spinner over its cell while active, and nothing (and lets input through) while inactive.
+        _spinner.IsVisible = region ? IsActive : !page;
+        _scrim.IsVisible = region && IsActive;
+        _root.IsVisible = !region || IsActive;
+        InputTransparent = region && !IsActive;
+        if (page && IsActive && IsLoaded) OpenOverlay();
         else CloseOverlay();
+        if (region && IsActive && IsLoaded) BlockRegion();
+        else UnblockRegion();
 
         if (IsActive && IsLoaded)
         {
@@ -160,6 +213,50 @@ public class CdsLoading : CdsControl
     {
         CdsAnnouncer.Announce(Description);
     }
+
+    void OnOverlayScopeChanged()
+    {
+        // A region overlay fills the cell it covers; the spinner alone is centered.
+        var fill = OverlayScope == CdsLoadingOverlayScope.Region;
+        HorizontalOptions = fill ? LayoutOptions.Fill : LayoutOptions.Center;
+        VerticalOptions = fill ? LayoutOptions.Fill : LayoutOptions.Center;
+        Update();
+    }
+
+    // The views beside the control in its layout: the region it covers. They stop taking input (the scrim blocks
+    // pointers, this blocks keyboard focus) and leave the accessibility tree, as the page does under a page overlay.
+    void BlockRegion()
+    {
+        if (_blocked.Count > 0 || Parent is not Layout layout) return;
+        foreach (var child in layout.Children)
+        {
+            if (child is not VisualElement view || ReferenceEquals(view, this)) continue;
+            _blocked.Add(new BlockedView(new WeakReference<VisualElement>(view), view.InputTransparent, AutomationProperties.GetExcludedWithChildren(view)));
+            view.InputTransparent = true;
+            AutomationProperties.SetExcludedWithChildren(view, true);
+        }
+    }
+
+    void UnblockRegion()
+    {
+        foreach (var blocked in _blocked)
+        {
+            if (!blocked.View.TryGetTarget(out var view)) continue;
+            view.InputTransparent = blocked.InputTransparent;
+            AutomationProperties.SetExcludedWithChildren(view, blocked.ExcludedWithChildren);
+        }
+        _blocked.Clear();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParentSet()
+    {
+        UnblockRegion();
+        base.OnParentSet();
+        Update();
+    }
+
+    readonly record struct BlockedView(WeakReference<VisualElement> View, bool InputTransparent, bool? ExcludedWithChildren);
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsLoading)b).Update();
 }

@@ -6,7 +6,8 @@ namespace Maui.Carbon;
 /// A persistent, non-dismissible message placed in page content to highlight information the person should know before
 /// acting (Carbon's former StaticNotification). Low contrast by default; it has no close button and no live-region
 /// role, so place it right next to the control or data it is about, before the control it warns about. Do not stack
-/// callouts or put many on one page.
+/// callouts or put many on one page. It is at least 288 wide and fills its container up to 288 below the md breakpoint,
+/// then 608, 736 from lg and 832 from max.
 /// </summary>
 public class CdsCallout : CdsNotificationBase
 {
@@ -54,8 +55,8 @@ public class CdsCallout : CdsNotificationBase
         };
 
         Surface.MinimumHeightRequest = CdsSizing.Large;
-        MinimumWidthRequest = 288;
-        SetMaxContentWidth(608);
+        MinimumWidthRequest = NotificationWidthModel.Narrow;
+        SetMaxContentWidth(NotificationWidthModel.Inline(ViewportWidth));
         HorizontalOptions = LayoutOptions.Fill;
         SetBody(_content);
     }
@@ -97,6 +98,9 @@ public class CdsCallout : CdsNotificationBase
 
     /// <inheritdoc/>
     protected override double OutlineOpacity => IsLowContrast ? 0.4 : 0;
+
+    /// <inheritdoc/>
+    private protected override void OnViewportWidthChanged() => SetMaxContentWidth(NotificationWidthModel.Inline(ViewportWidth));
 
     /// <inheritdoc/>
     protected override void UpdateContent()

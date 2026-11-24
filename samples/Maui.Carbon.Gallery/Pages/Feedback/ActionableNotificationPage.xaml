@@ -5,7 +5,7 @@
                xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.ActionableNotificationPage">
     <VerticalStackLayout Spacing="48">
-        <g:GalleryExample Title="Inline layout" Description="Ghost action; the action moves to the same row from about 600 wide. IsInline, low contrast and high contrast shown.">
+        <g:GalleryExample Title="Inline layout" Description="Ghost action; from the md breakpoint (windows 672 wide and up) the action shares the row with the text, before the close button, and below it sits under the text. The width cap grows with the window: 608, 736 from 1056, 832 from 1584. IsInline, low contrast and high contrast shown.">
             <VerticalStackLayout Spacing="16">
                 <cds:CdsActionableNotification IsInline="True" Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Payment method expires soon" Subtitle="The card ending 4242 expires on 30 Nov 2026." ActionButtonLabel="Update card" />
                 <cds:CdsActionableNotification IsInline="True" Kind="Error" Role="Status" HasFocus="False" Title="Backup failed" Subtitle="The last snapshot of orders-db did not finish." ActionButtonLabel="View logs" />

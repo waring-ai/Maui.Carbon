@@ -24,6 +24,17 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Region overlay" Description="OverlayScope=&quot;Region&quot; covers only the region that is blocked: placed in the same Grid cell as the region's content, it fills the cell with the overlay scrim and the spinner, and the content beside it ignores input and is hidden from screen readers while it is active.">
+            <Grid HeightRequest="200" MaximumWidthRequest="480" HorizontalOptions="Start">
+                <VerticalStackLayout Spacing="8" Padding="16">
+                    <cds:CdsText Text="orders-db snapshot" TypeStyle="HeadingCompact01" />
+                    <cds:CdsText Text="Taken 24 Nov 2026, 09:12. 48.2 GB, 3 persistent volumes." />
+                    <cds:CdsButton Text="Download" Kind="Tertiary" Size="Sm" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+                <cds:CdsLoading OverlayScope="Region" Description="Restoring snapshot" />
+            </Grid>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Themes">
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>

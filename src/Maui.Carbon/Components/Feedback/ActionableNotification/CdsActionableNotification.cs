@@ -4,9 +4,11 @@ namespace Maui.Carbon;
 
 /// <summary>
 /// A notification with one action button, in a toast layout (stacked, 288 wide, tertiary action under the text) or an
-/// inline layout (<see cref="IsInline"/>: full width up to 608, ghost action on the same row from about 600 wide).
+/// inline layout (<see cref="IsInline"/>: full width up to 288 below the md breakpoint, then 608, 736 from lg and 832 from
+/// max; the ghost action shares the row with the text from md, 672 up, and sits under it below).
 /// It stays until dismissed, even in the toast layout. One action only, labelled with one or two words. By default it
-/// is announced as an alert dialog and focus moves to the action; set <see cref="CdsDismissibleNotification.Role"/> to
+/// is announced as an alert dialog: when it appears focus moves to the action, and Tab and Shift+Tab wrap between the
+/// action and the close button until it closes. Set <see cref="CdsDismissibleNotification.Role"/> to
 /// <see cref="CdsNotificationRole.Status"/> or <see cref="HasFocus"/> to <c>false</c> to leave focus where it is.
 /// </summary>
 public class CdsActionableNotification : CdsDismissibleNotification
@@ -35,10 +37,12 @@ public class CdsActionableNotification : CdsDismissibleNotification
     public static readonly BindableProperty ActionCommandParameterProperty = BindableProperty.Create(
         nameof(ActionCommandParameter), typeof(object), typeof(CdsActionableNotification), null);
 
-    const double MaxInlineWidth = 608;
-    const double WideThreshold = 576;
+    // How long after an item of the notification lost focus a sentinel that gains focus counts as Tab from inside.
+    const long FocusHandOverMilliseconds = 500;
 
-    readonly Grid _content = new() { Margin = new Thickness(3, 0, 0, 0), ColumnSpacing = CdsSpacing.Spacing05 };
+    readonly ActionableNotificationLayout _content;
+    readonly ContentView _startSentinel;
+    readonly ContentView _endSentinel;
     readonly VerticalStackLayout _texts = new() { Spacing = 0 };
     readonly Label _flow;
     readonly Span _flowTitle;
@@ -47,7 +51,8 @@ public class CdsActionableNotification : CdsDismissibleNotification
     readonly CdsText _subtitle = CdsNotificationText.CreateLine(CdsTypeStyle.BodyCompact01);
     readonly CdsText _caption = CdsNotificationText.CreateLine(CdsTypeStyle.BodyCompact01);
     readonly CdsNotificationAction _action = new();
-    bool _wide;
+    CdsControl? _leftItem;
+    long _leftItemAt = long.MinValue;
 
     /// <summary>Creates an error notification in the toast layout.</summary>
     public CdsActionableNotification()
@@ -67,33 +72,29 @@ public class CdsActionableNotification : CdsDismissibleNotification
         _texts.Children.Add(_caption);
         _texts.Children.Add(BodyHost);
 
-        _content.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-        _content.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-        _content.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-        _content.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        _content.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        _content.Add(StatusIcon);
-        _content.Add(_texts);
-        _content.Add(_action);
+        _action.VerticalOptions = LayoutOptions.Start;
+        _action.Margin = new Thickness(0);
+        _content = new ActionableNotificationLayout(StatusIcon, _texts, _action) { Margin = new Thickness(3, 0, 0, 0) };
+        // Carbon decides by the viewport (672 up: one row); the decision is made while measuring, never after arranging.
+        _content.SingleRow = width =>
+            IsInline && NotificationWidthModel.IsSingleRow(ViewportWidth, width + _content.Margin.HorizontalThickness);
 
         _action.Clicked += (_, _) =>
         {
             ActionClicked?.Invoke(this, EventArgs.Empty);
             if (ActionCommand?.CanExecute(ActionCommandParameter) == true) ActionCommand.Execute(ActionCommandParameter);
         };
-        SizeChanged += (_, _) =>
-        {
-            var wide = IsInline && Width >= WideThreshold;
-            if (wide == _wide) return;
-            _wide = wide;
-            Refresh();
-        };
-        Loaded += (_, _) =>
-        {
-            if (HasFocus && Role == CdsNotificationRole.AlertDialog && _action.IsVisible) _action.Focus();
-        };
+        _action.FocusLost += OnItemFocusLost;
+        CloseButton.FocusLost += OnItemFocusLost;
+
+        // Focus sentinels (the web's focus-trap spans): Tab from the last item or Shift+Tab from the first lands on one
+        // and is sent back into the notification. One leads the tab order (top start), one ends it (bottom end).
+        _startSentinel = CreateSentinel(LayoutOptions.Start, LayoutOptions.Start, start: true);
+        _endSentinel = CreateSentinel(LayoutOptions.End, LayoutOptions.End, start: false);
 
         SetBody(_content);
+        Surface.Children.Insert(0, _startSentinel);
+        Surface.Children.Add(_endSentinel);
     }
 
     /// <summary>Creates an actionable notification with a kind, title, subtitle and action label.</summary>
@@ -156,6 +157,94 @@ public class CdsActionableNotification : CdsDismissibleNotification
     /// <inheritdoc/>
     protected override double OutlineOpacity => IsInline && IsLowContrast ? 0.4 : 0;
 
+    /// <summary>Whether Tab wraps inside the notification: the alert-dialog role with an action or close button to wrap between.</summary>
+    internal bool WrapsFocus => Role == CdsNotificationRole.AlertDialog && (_action.IsVisible || !HideCloseButton);
+
+    /// <summary>Whether focus moves to the action when the notification appears.</summary>
+    internal bool TakesFocusWhenShown => HasFocus && Role == CdsNotificationRole.AlertDialog && _action.IsVisible;
+
+    /// <summary>Whether the action shares the row with the text (decided by the last measure).</summary>
+    internal bool IsSingleRow => _content.IsSingleRow;
+
+    /// <summary>The layout of the icon, text and action (tests).</summary>
+    internal ActionableNotificationLayout ContentLayout => _content;
+
+    /// <summary>The action button (tests).</summary>
+    internal CdsControl ActionButton => _action;
+
+    /// <summary>The focus sentinels (tests).</summary>
+    internal CdsHitTarget StartSentinel => (CdsHitTarget)_startSentinel.Content;
+
+    /// <inheritdoc cref="StartSentinel"/>
+    internal CdsHitTarget EndSentinel => (CdsHitTarget)_endSentinel.Content;
+
+    /// <summary>
+    /// The item a focus sentinel sends focus to: when focus comes from inside the notification (Tab from the last item or
+    /// Shift+Tab from the first), the other item, so focus wraps; when it comes from outside, the nearest item.
+    /// </summary>
+    internal CdsControl? SentinelTarget(bool start)
+    {
+        var hasAction = _action.IsVisible;
+        var hasClose = !HideCloseButton;
+        CdsControl? from =
+            _action.Is(CdsInteractionState.Focused) ? _action
+            : CloseButton.Is(CdsInteractionState.Focused) ? CloseButton
+            : Environment.TickCount64 - _leftItemAt <= FocusHandOverMilliseconds ? _leftItem
+            : null;
+        var cameFrom = ReferenceEquals(from, _action) ? NotificationFocusItem.Action
+            : ReferenceEquals(from, CloseButton) ? NotificationFocusItem.Close
+            : NotificationFocusItem.None;
+        return NotificationFocusModel.SentinelTarget(start, cameFrom, hasAction, hasClose) switch
+        {
+            NotificationFocusItem.Action => _action,
+            NotificationFocusItem.Close => CloseButton,
+            _ => null,
+        };
+    }
+
+    /// <inheritdoc/>
+    private protected override void OnShown()
+    {
+        base.OnShown();
+        if (TakesFocusWhenShown) FocusSoon(_action);
+    }
+
+    /// <inheritdoc/>
+    private protected override void OnViewportWidthChanged() => Refresh();
+
+    ContentView CreateSentinel(LayoutOptions horizontal, LayoutOptions vertical, bool start)
+    {
+        var hit = new CdsHitTarget();
+        AutomationProperties.SetIsInAccessibleTree(hit, false);
+        hit.Focused += (_, _) =>
+        {
+            if (WrapsFocus && SentinelTarget(start) is { } target) FocusSoon(target);
+        };
+        // 1 x 1: a zero-sized view cannot take keyboard focus. The hit target draws nothing.
+        return new ContentView
+        {
+            WidthRequest = 1,
+            HeightRequest = 1,
+            HorizontalOptions = horizontal,
+            VerticalOptions = vertical,
+            IsVisible = false,
+            Content = hit,
+        };
+    }
+
+    void OnItemFocusLost(object? sender, EventArgs e)
+    {
+        _leftItem = sender as CdsControl;
+        _leftItemAt = Environment.TickCount64;
+    }
+
+    // Focus moves after the current focus change or layout pass, when the target is laid out and visible.
+    void FocusSoon(CdsControl target)
+    {
+        if (Handler is not null && Dispatcher is { } dispatcher) dispatcher.Dispatch(() => target.Focus());
+        else target.Focus();
+    }
+
     /// <inheritdoc/>
     protected override void UpdateContent()
     {
@@ -178,37 +267,22 @@ public class CdsActionableNotification : CdsDismissibleNotification
         _action.LowContrast = IsLowContrast;
         _action.Visuals = Visuals;
 
-        MinimumWidthRequest = 288;
+        MinimumWidthRequest = NotificationWidthModel.Narrow;
         if (inline)
         {
             WidthRequest = -1;
             MaximumWidthRequest = double.PositiveInfinity;
-            SetMaxContentWidth(MaxInlineWidth);
+            SetMaxContentWidth(NotificationWidthModel.Inline(ViewportWidth));
             HorizontalOptions = LayoutOptions.Fill;
             StatusIcon.Margin = new Thickness(0, 14, 0, 0);
             _texts.Padding = new Thickness(0, 15);
-            _content.Padding = new Thickness(13, 0, _wide ? (HideCloseButton ? CdsSpacing.Spacing03 : CloseSpace) : CloseSpace, 0);
-            Grid.SetRow(StatusIcon, 0);
-            Grid.SetColumn(StatusIcon, 0);
-            Grid.SetRow(_texts, 0);
-            Grid.SetColumn(_texts, 1);
-            Grid.SetColumnSpan(_texts, _wide ? 1 : 2);
-            if (_wide)
-            {
-                Grid.SetRow(_action, 0);
-                Grid.SetColumn(_action, 2);
-                Grid.SetColumnSpan(_action, 1);
-                _action.Margin = new Thickness(0, CdsSpacing.Spacing03, 0, CdsSpacing.Spacing03);
-                _action.VerticalOptions = LayoutOptions.Center;
-            }
-            else
-            {
-                Grid.SetRow(_action, 1);
-                Grid.SetColumn(_action, 0);
-                Grid.SetColumnSpan(_action, 3);
-                _action.Margin = new Thickness(20, 0, 0, CdsSpacing.Spacing03);
-                _action.VerticalOptions = LayoutOptions.Start;
-            }
+            // One row: details 13 in, the action 8 above and below, then the 48 close slot (8 when the close button is
+            // hidden). Stacked: the close button floats at the top end over a 48 slot, the action sits under the text.
+            _content.Configure(
+                singleRowPadding: new Thickness(13, 0, HideCloseButton ? CdsSpacing.Spacing03 : CloseSpace, 0),
+                stackedPadding: new Thickness(13, 0, CloseSpace, 0),
+                singleRowActionInsets: new Thickness(0, CdsSpacing.Spacing03),
+                stackedActionInsets: new Thickness(20, 0, 0, CdsSpacing.Spacing03));
         }
         else
         {
@@ -218,18 +292,12 @@ public class CdsActionableNotification : CdsDismissibleNotification
             HorizontalOptions = LayoutOptions.Start;
             StatusIcon.Margin = new Thickness(0, CdsSpacing.Spacing05, 0, 0);
             _texts.Padding = new Thickness(0, 15, 0, hasAction ? CdsSpacing.Spacing03 : CdsSpacing.Spacing05);
-            _content.Padding = new Thickness(13, 0, CloseSpace + CdsSpacing.Spacing03, 0);
-            Grid.SetRow(StatusIcon, 0);
-            Grid.SetColumn(StatusIcon, 0);
-            Grid.SetRow(_texts, 0);
-            Grid.SetColumn(_texts, 1);
-            Grid.SetColumnSpan(_texts, 2);
-            Grid.SetRow(_action, 1);
-            Grid.SetColumn(_action, 0);
-            Grid.SetColumnSpan(_action, 3);
-            _action.Margin = new Thickness(34, 0, 0, CdsSpacing.Spacing05);
-            _action.VerticalOptions = LayoutOptions.Start;
+            var stacked = new Thickness(13, 0, CloseSpace + CdsSpacing.Spacing03, 0);
+            _content.Configure(stacked, stacked, new Thickness(0), new Thickness(34, 0, 0, CdsSpacing.Spacing05));
         }
+        var wraps = WrapsFocus;
+        _startSentinel.IsVisible = wraps;
+        _endSentinel.IsVisible = wraps;
         CdsTokens.SetShadow(Surface, inline ? null : CdsColorKeys.Shadow, 2, 6);
     }
 

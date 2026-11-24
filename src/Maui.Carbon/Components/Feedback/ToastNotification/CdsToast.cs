@@ -58,6 +58,8 @@ public static class CdsToast
     {
         ArgumentNullException.ThrowIfNull(options);
         var toast = Create(options);
+        // A toast does not take focus; if the person tabs into it and closes it, focus returns to where it was.
+        toast.FocusFallback = CdsFocusTracker.Focused;
         var overlay = CdsOverlayService.Open(toast,
             new CdsOverlayOptions { Anchor = null, LightDismiss = false, CloseOnEscape = false, ReturnFocus = false, Animate = false }, context);
         toast.Closed += (_, _) => overlay.Close();

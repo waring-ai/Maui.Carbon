@@ -71,3 +71,28 @@ public class ToastNotificationTests
         Assert.Throws<InvalidOperationException>(() => CdsToast.Show(new Label(), new CdsToastOptions { Title = "Saved" }));
     }
 }
+
+public class ToastNotificationWidthTests
+{
+    [Theory]
+    [InlineData(double.NaN, 288)]
+    [InlineData(1583, 288)]
+    [InlineData(1584, 352)]
+    public void Toast_width_follows_the_viewport(double viewport, double width)
+    {
+        Assert.Equal(width, NotificationWidthModel.Toast(viewport));
+        var toast = new CdsToastNotification();
+        var scope = new ContentView { Content = toast };
+        if (!double.IsNaN(viewport)) scope.Resources[CdsContextKeys.ViewportWidth] = viewport;
+        Assert.Equal(width, toast.WidthRequest);
+    }
+
+    [Fact]
+    public void Actionable_toasts_stay_288_wide()
+    {
+        var n = new CdsActionableNotification();
+        var scope = new ContentView { Content = n };
+        scope.Resources[CdsContextKeys.ViewportWidth] = 1800d;
+        Assert.Equal(288, n.WidthRequest);
+    }
+}

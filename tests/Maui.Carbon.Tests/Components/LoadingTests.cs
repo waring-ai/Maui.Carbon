@@ -92,3 +92,105 @@ public class InlineLoadingTests
         inline.Description = null;
     }
 }
+
+public class LoadingRegionTests
+{
+    [Fact]
+    public void Page_scope_is_the_default()
+    {
+        var loading = new CdsLoading();
+        Assert.Equal(CdsLoadingOverlayScope.Page, loading.OverlayScope);
+        Assert.Equal(LayoutOptions.Center, loading.HorizontalOptions);
+        Assert.False(loading.IsRegionOverlayShown);
+    }
+
+    [Fact]
+    public void A_region_overlay_covers_its_cell_and_blocks_only_the_views_beside_it()
+    {
+        var table = new Label { Text = "Snapshots" };
+        var loading = new CdsLoading("Restoring snapshot") { OverlayScope = CdsLoadingOverlayScope.Region };
+        var region = new Grid { Children = { table, loading } };
+        var outside = new CdsButton { Text = "Cancel" };
+        using var heard = CdsAnnouncer.Capture();
+        _ = TestWindow.Show(region, outside);
+
+        Assert.Equal(LayoutOptions.Fill, loading.HorizontalOptions);
+        Assert.Equal(LayoutOptions.Fill, loading.VerticalOptions);
+        Assert.True(loading.IsRegionOverlayShown);
+        Assert.Null(loading.Overlay);
+        Assert.False(loading.InputTransparent);
+        Assert.True(table.InputTransparent);
+        Assert.True(AutomationProperties.GetExcludedWithChildren(table));
+        Assert.False(outside.InputTransparent);
+        Assert.Equal("Restoring snapshot", Assert.Single(heard.Announcements).Text);
+
+        loading.IsActive = false;
+        Assert.False(loading.IsRegionOverlayShown);
+        Assert.True(loading.InputTransparent);
+        Assert.False(table.InputTransparent);
+        Assert.Null(AutomationProperties.GetExcludedWithChildren(table));
+    }
+
+    [Fact]
+    public void Leaving_region_scope_restores_the_region()
+    {
+        var table = new Label { InputTransparent = false };
+        var loading = new CdsLoading { OverlayScope = CdsLoadingOverlayScope.Region };
+        _ = TestWindow.Show(new Grid { Children = { table, loading } });
+        Assert.True(table.InputTransparent);
+
+        loading.WithOverlay = false;
+        Assert.False(table.InputTransparent);
+        Assert.False(loading.InputTransparent);
+        loading.OverlayScope = CdsLoadingOverlayScope.Page;
+        Assert.Equal(LayoutOptions.Center, loading.HorizontalOptions);
+    }
+}
+
+public class InlineLoadingLiveModeTests
+{
+    [Fact]
+    public void Text_changes_are_assertive_by_default()
+    {
+        var inline = new CdsInlineLoading(CdsInlineLoadingStatus.Active, "Deploying...");
+        Assert.Equal(CdsLiveMode.Assertive, inline.LiveMode);
+        using var heard = CdsAnnouncer.Capture();
+        _ = TestWindow.Show(inline);
+        inline.Description = "Rolling out";
+        Assert.Equal([new CdsAnnouncement("Rolling out", CdsAnnouncePriority.Assertive)], heard.Announcements);
+    }
+
+    [Fact]
+    public void Polite_and_off_modes()
+    {
+        var inline = new CdsInlineLoading(CdsInlineLoadingStatus.Active, "Deploying...") { LiveMode = CdsLiveMode.Polite };
+        using var heard = CdsAnnouncer.Capture();
+        _ = TestWindow.Show(inline);
+        inline.Description = "Phase 2 of 5";
+        Assert.Equal(CdsAnnouncePriority.Polite, Assert.Single(heard.Announcements).Priority);
+
+        inline.LiveMode = CdsLiveMode.Off;
+        inline.Description = "Phase 3 of 5";
+        Assert.Single(heard.Announcements);
+    }
+
+    [Fact]
+    public void Hidden_or_unloaded_indicators_and_repeats_are_silent()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var detached = new CdsInlineLoading(CdsInlineLoadingStatus.Active, "Saving...");
+        detached.Description = "Saved";
+
+        var hidden = new CdsInlineLoading(CdsInlineLoadingStatus.Active, "Saving...") { IsVisible = false };
+        var shown = new CdsInlineLoading(CdsInlineLoadingStatus.Active, "Saving...");
+        _ = TestWindow.Show(hidden, shown);
+        hidden.Description = "Saved";
+        Assert.Empty(heard.Announcements);
+
+        shown.Status = CdsInlineLoadingStatus.Finished;
+        shown.Status = CdsInlineLoadingStatus.Finished;
+        shown.Description = "Saved";
+        shown.Description = "Saved";
+        Assert.Equal(["Saving...", "Saved"], heard.Announcements.Select(a => a.Text));
+    }
+}
