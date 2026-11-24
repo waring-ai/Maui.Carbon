@@ -2,14 +2,22 @@ namespace Maui.Carbon;
 
 /// <summary>
 /// A label that renders a Carbon type style. Text defaults to <c>text-primary</c>; set <see cref="Tone"/> for the other
-/// Carbon text colors, or set <c>TextColor</c> yourself.
+/// Carbon text colors, or set <c>TextColor</c> yourself. Fluid styles step up at the page breakpoint
+/// (<see cref="CdsContextKeys.Breakpoint"/>, see <see cref="CdsFluidType"/>).
 /// </summary>
 public class CdsText : Label
 {
     /// <summary>Bindable property for <see cref="TypeStyle"/>.</summary>
     public static readonly BindableProperty TypeStyleProperty = BindableProperty.Create(
         nameof(TypeStyle), typeof(CdsTypeStyle), typeof(CdsText), CdsTypeStyle.BodyCompact01,
-        propertyChanged: static (b, _, n) => CdsTypography.Apply((Label)b, (CdsTypeStyle)n));
+        propertyChanged: static (b, _, _) => ((CdsText)b).ApplyTypeStyle());
+
+    // The page breakpoint, read only while the style is fluid (one dynamic resource per fluid label, none for the rest).
+    static readonly BindableProperty ContextBreakpointProperty = BindableProperty.Create(
+        "ContextBreakpoint", typeof(CdsBreakpoint?), typeof(CdsText), null,
+        propertyChanged: static (b, _, _) => ((CdsText)b).ApplyTypeStyle());
+
+    bool _tracksBreakpoint;
 
     /// <summary>Bindable property for <see cref="Tone"/>.</summary>
     public static readonly BindableProperty ToneProperty = BindableProperty.Create(
@@ -46,6 +54,23 @@ public class CdsText : Label
     }
 
     void ApplyTone(CdsTextTone tone) => this.SetDynamicResource(TextColorProperty, tone.ColorKey());
+
+    void ApplyTypeStyle()
+    {
+        var style = TypeStyle;
+        if (!CdsFluidType.IsFluid(style))
+        {
+            CdsTypography.Apply(this, style);
+            return;
+        }
+        if (!_tracksBreakpoint)
+        {
+            _tracksBreakpoint = true;
+            // Re-enters through ContextBreakpointProperty's callback when the page already publishes a breakpoint.
+            SetDynamicResource(ContextBreakpointProperty, CdsContextKeys.Breakpoint);
+        }
+        CdsTypography.Apply(this, style, (CdsBreakpoint?)GetValue(ContextBreakpointProperty) ?? CdsBreakpoint.Sm);
+    }
 }
 
 /// <summary>Carbon text color roles.</summary>

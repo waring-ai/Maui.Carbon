@@ -57,7 +57,7 @@ public static partial class SvgIconConverter
 
             if (paths.Count == 0) throw new FormatException("No drawable paths left after dropping transparent shapes.");
 
-            var (vx, vy, vs) = ViewBox(size, paths.Select(p => p.Path));
+            var (vx, vy, vs) = ViewBox(stem, size, paths.Select(p => p.Path));
             return new GlyphData(stem, size, vx, vy, vs, vs,
                 paths.Select(p => new GlyphPathData(p.Path.ToDataString(), p.EvenOdd)).ToList(),
                 inner.Select(p => new GlyphPathData(p.Path.ToDataString(), p.EvenOdd)).ToList());
@@ -68,9 +68,23 @@ public static partial class SvgIconConverter
         }
     }
 
-    static (float X, float Y, float Size) ViewBox(int size, IEnumerable<PathData> paths)
+    // Carbon's 16px versions of these are the 32px artwork at half scale (close: an 8px cross; checkbox: a 12px box), so
+    // they keep the full 32 box (design/carbon/components/Icon/README.md; the reference bundle.js crops neither).
+    static readonly HashSet<string> FullBox = ["close", "checkbox", "checkbox--checked", "checkbox--indeterminate"];
+
+    // Carbon's 16px add is a 10px cross: drawn from the centre 26x26 (the reference bundle.js CROP 'add-32'). subtract is
+    // its pair in steppers and gets the same box, so the two bars match.
+    static readonly HashSet<string> Centre26 = ["add", "subtract"];
+
+    /// <summary>
+    /// The region of the artboard a glyph is drawn from. 32px artboards: <c>close</c> and the checkbox glyphs keep the full
+    /// box, <c>add</c> and <c>subtract</c> use the centre 26x26, and any other artwork that fits the centre 24x24 is cropped
+    /// to it; the rest keep the full box so nothing is clipped. Smaller artboards are never cropped.
+    /// </summary>
+    static (float X, float Y, float Size) ViewBox(string stem, int size, IEnumerable<PathData> paths)
     {
-        if (size != 32) return (0, 0, size);
+        if (size != 32 || FullBox.Contains(stem)) return (0, 0, size);
+        if (Centre26.Contains(stem)) return (3, 3, 26);
         double minX = double.MaxValue, minY = double.MaxValue, maxX = double.MinValue, maxY = double.MinValue;
         foreach (var p in paths)
         {

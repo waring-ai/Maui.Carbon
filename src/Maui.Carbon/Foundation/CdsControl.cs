@@ -5,8 +5,15 @@ namespace Maui.Carbon;
 /// tracks its <see cref="State"/> (hover, pressed, focus, disabled, selection, validation), and re-applies token
 /// colors in <see cref="ApplyVisuals"/> whenever the state changes. Interaction comes from a <see cref="CdsHitTarget"/>
 /// (see <see cref="CreateHitTarget"/>) or a native input (see <see cref="TrackFocus"/>).
+/// <para>
+/// A <c>SemanticProperties.Description</c> or <c>Hint</c> set on the control itself never reaches its own platform view
+/// (where, on iOS and Mac Catalyst, it would turn the control into one accessibility element and hide its hit target):
+/// it is forwarded to the control's one hit target or input, overriding the name the control gives it (a hint is added
+/// after the control's own); a control with several, or with interactive content of its own, is named as a group with
+/// <see cref="CdsSemantics"/> instead. A control with nothing interactive inside keeps the name itself.
+/// </para>
 /// </summary>
-public abstract class CdsControl : ContentView
+public abstract class CdsControl : ContentView, IView
 {
     static readonly BindableProperty ContextThemeProperty = BindableProperty.Create(
         "ContextTheme", typeof(CdsThemeName), typeof(CdsControl), CdsThemeName.White,
@@ -35,6 +42,12 @@ public abstract class CdsControl : ContentView
     bool _visualsApplied;
     VisualElement? _focusTarget;
     bool _tracksHover;
+    // Everything passed to TrackFocus (weakly: a rebuilt chrome drops its old hit targets).
+    readonly List<WeakReference<VisualElement>> _focusables = [];
+    SemanticForward? _semanticForward;
+    bool _forwardedGroup;
+    bool _forwardsOnLoad;
+    Semantics? _platformSemantics;
 
     /// <summary>Initializes the control: context tracking.</summary>
     protected CdsControl()
@@ -261,6 +274,9 @@ public abstract class CdsControl : ContentView
     {
         TrackHover();
         _focusTarget = focusable;
+        _focusables.RemoveAll(w => !w.TryGetTarget(out _));
+        _focusables.Add(new WeakReference<VisualElement>(focusable));
+        if (_semanticForward is not null || _forwardedGroup) UpdateSemanticForwarding();
         focusable.Focused += (_, _) =>
         {
             SetState(CdsInteractionState.FocusVisible, isKeyboardFocus?.Invoke() ?? true);
@@ -356,11 +372,225 @@ public abstract class CdsControl : ContentView
         {
             SetState(CdsInteractionState.Disabled, !IsEnabled);
         }
+        else if (propertyName == SemanticProperties.DescriptionProperty.PropertyName || propertyName == SemanticProperties.HintProperty.PropertyName)
+        {
+            UpdateSemanticForwarding();
+        }
         else if (propertyName == ContentProperty.PropertyName && !_settingChrome)
         {
             throw new InvalidOperationException(
                 $"{GetType().Name} draws its own content. Use its content properties (Body, Items, Text...) instead of Content.");
         }
+    }
+
+    // ----- Description and Hint set on the control (see the class summary) -----
+
+    enum SemanticMode
+    {
+        /// <summary>No Description or Hint on the control.</summary>
+        None,
+        /// <summary>Nothing interactive inside: the control itself carries the name, as any MAUI view would.</summary>
+        Leaf,
+        /// <summary>One hit target or input: it carries the name.</summary>
+        Target,
+        /// <summary>Several, or interactive content: the control is a named group (<see cref="CdsSemantics"/>).</summary>
+        Group,
+    }
+
+    /// <summary>The one hit target or input that carries a Description or Hint set on the control, if it has one.</summary>
+    internal VisualElement? SemanticForwardTarget => _semanticForward?.Target;
+
+    // MAUI maps Semantics from this to the platform view. Outside the leaf case the control's own Description and Hint are
+    // left out, so the content view never becomes an accessibility element that hides its hit target.
+    Semantics? IView.Semantics
+    {
+        get
+        {
+            var description = SemanticProperties.GetDescription(this);
+            var hint = SemanticProperties.GetHint(this);
+            var heading = SemanticProperties.GetHeadingLevel(this);
+            var mode = ResolveSemanticMode(out _);
+            if (mode is not (SemanticMode.None or SemanticMode.Leaf))
+            {
+                description = null;
+                hint = null;
+            }
+            if (description is null && hint is null && heading == SemanticHeadingLevel.None && _platformSemantics is null) return null;
+            _platformSemantics ??= new Semantics();
+            _platformSemantics.Description = description;
+            _platformSemantics.Hint = hint;
+            _platformSemantics.HeadingLevel = heading;
+            return _platformSemantics;
+        }
+    }
+
+    SemanticMode ResolveSemanticMode(out VisualElement? target)
+    {
+        target = null;
+        if (string.IsNullOrWhiteSpace(SemanticProperties.GetDescription(this)) && string.IsNullOrWhiteSpace(SemanticProperties.GetHint(this)))
+            return SemanticMode.None;
+        VisualElement? single = null;
+        var count = 0;
+        foreach (var weak in _focusables)
+        {
+            if (!weak.TryGetTarget(out var focusable) || !IsInside(focusable)) continue;
+            single = focusable;
+            count++;
+        }
+        if (count == 1)
+        {
+            target = single;
+            return SemanticMode.Target;
+        }
+        return count > 1 || HasInteractiveContent(Content) ? SemanticMode.Group : SemanticMode.Leaf;
+    }
+
+    bool IsInside(Element element)
+    {
+        for (var e = element.Parent; e is not null; e = e.Parent)
+            if (ReferenceEquals(e, this)) return true;
+        return false;
+    }
+
+    static bool HasInteractiveContent(Element? element)
+    {
+        if (element is CdsHitTarget or InputView or Button or ImageButton or Picker or DatePicker or TimePicker or Slider or Stepper or Switch or CheckBox or RadioButton)
+            return true;
+        if (element is not IVisualTreeElement tree) return false;
+        foreach (var child in tree.GetVisualChildren())
+            if (HasInteractiveContent(child as Element)) return true;
+        return false;
+    }
+
+    void UpdateSemanticForwarding()
+    {
+        var mode = ResolveSemanticMode(out var target);
+        var description = SemanticProperties.GetDescription(this);
+        var hint = SemanticProperties.GetHint(this);
+
+        if (mode == SemanticMode.Target && target is not null)
+        {
+            if (!ReferenceEquals(_semanticForward?.Target, target))
+            {
+                _semanticForward?.Detach();
+                _semanticForward = new SemanticForward(target);
+            }
+            _semanticForward.Update(description, hint);
+        }
+        else if (_semanticForward is not null)
+        {
+            _semanticForward.Detach();
+            _semanticForward = null;
+        }
+
+        if (mode == SemanticMode.Group)
+        {
+            // A control that names itself as a group (side nav, header) keeps its own name.
+            if (_forwardedGroup || !CdsSemantics.HasGroup(this))
+            {
+                _forwardedGroup = true;
+                CdsSemantics.SetGroupHint(this, string.IsNullOrWhiteSpace(hint) ? null : hint);
+                CdsSemantics.SetGroupName(this, string.IsNullOrWhiteSpace(description) ? null : description);
+            }
+        }
+        else if (_forwardedGroup)
+        {
+            _forwardedGroup = false;
+            CdsSemantics.SetGroupHint(this, null);
+            CdsSemantics.SetGroupName(this, null);
+        }
+
+        if (mode != SemanticMode.None && !_forwardsOnLoad)
+        {
+            // Set before the chrome was complete (or rebuilt since): decide again once the control is on screen.
+            _forwardsOnLoad = true;
+            Loaded += (_, _) => UpdateSemanticForwarding();
+        }
+        Handler?.UpdateValue(nameof(IView.Semantics));
+    }
+
+    /// <summary>
+    /// Carries the control's Description and Hint on its one hit target or input. The control keeps setting the target's
+    /// own name (from its text, label…): that is remembered and comes back when the control's Description goes away.
+    /// </summary>
+    sealed class SemanticForward
+    {
+        string? _ownDescription;
+        string? _ownHint;
+        string? _description;
+        string? _hint;
+        string? _writtenDescription;
+        string? _writtenHint;
+        bool _writing;
+
+        public SemanticForward(VisualElement target)
+        {
+            Target = target;
+            _ownDescription = SemanticProperties.GetDescription(target);
+            _ownHint = SemanticProperties.GetHint(target);
+            target.PropertyChanged += OnTargetPropertyChanged;
+        }
+
+        public VisualElement Target { get; }
+
+        public void Update(string? description, string? hint)
+        {
+            _description = string.IsNullOrWhiteSpace(description) ? null : description;
+            _hint = string.IsNullOrWhiteSpace(hint) ? null : hint;
+            Write(_description ?? _ownDescription, CombineHints(_ownHint, _hint));
+        }
+
+        public void Detach()
+        {
+            Target.PropertyChanged -= OnTargetPropertyChanged;
+            Write(_ownDescription, _ownHint);
+        }
+
+        // A value written from inside the target's own PropertyChanged is applied by MAUI after that change completes (it
+        // delays re-entrant sets of a property), so the guard alone does not see it: the value written last is ours too.
+        void OnTargetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (_writing) return;
+            if (e.PropertyName == SemanticProperties.DescriptionProperty.PropertyName)
+            {
+                var value = SemanticProperties.GetDescription(Target);
+                if (value == _writtenDescription) return;
+                _ownDescription = value;
+            }
+            else if (e.PropertyName == SemanticProperties.HintProperty.PropertyName)
+            {
+                var value = SemanticProperties.GetHint(Target);
+                if (value == _writtenHint) return;
+                _ownHint = value;
+            }
+            else
+            {
+                return;
+            }
+            Write(_description ?? _ownDescription, CombineHints(_ownHint, _hint));
+        }
+
+        void Write(string? description, string? hint)
+        {
+            _writing = true;
+            try
+            {
+                _writtenDescription = description;
+                _writtenHint = hint;
+                if (SemanticProperties.GetDescription(Target) != description) SemanticProperties.SetDescription(Target, description);
+                if (SemanticProperties.GetHint(Target) != hint) SemanticProperties.SetHint(Target, hint);
+            }
+            finally
+            {
+                _writing = false;
+            }
+        }
+
+        // The control's own hint (helper or error text) first, then the consumer's.
+        static string? CombineHints(string? own, string? consumer) =>
+            string.IsNullOrWhiteSpace(consumer) ? own
+            : string.IsNullOrWhiteSpace(own) || own == consumer ? consumer
+            : $"{own}. {consumer}";
     }
 }
 

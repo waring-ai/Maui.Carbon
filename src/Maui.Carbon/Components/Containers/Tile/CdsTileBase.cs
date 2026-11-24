@@ -71,7 +71,9 @@ public abstract class CdsTileBase : CdsContainer
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
-        var v = CdsTileTokens.Resolve(TileKind, TokenState);
+        var state = TokenState;
+        var v = CdsTileTokens.Resolve(TileKind, state);
+        ApplyContentTone(state.HasFlag(CdsInteractionState.Disabled));
         Surface.StrokeThickness = BorderThickness;
         SetColor(Surface, BackgroundColorProperty, v.Background);
         SetBrush(Surface, Border.StrokeProperty, v.Border);
@@ -82,6 +84,30 @@ public abstract class CdsTileBase : CdsContainer
     /// <summary>Applies variant parts (icons) from the resolved colors.</summary>
     protected virtual void ApplyTileVisuals(CdsTileVisuals visuals)
     {
+    }
+
+    /// <inheritdoc/>
+    protected override void OnContextChanged() => RefreshVisuals();
+
+    // A disabled tile's content uses text-disabled and icon-disabled (Tile, SelectableTile and RadioTile READMEs). On the
+    // web the color is inherited; here every CdsText and CdsIcon binds its own token, so the tile re-maps the text and
+    // icon tokens for everything inside it, the way CdsLayer re-maps the layer tokens. Created on the first disable only.
+    ResourceDictionary? _contentTone;
+    (CdsThemeName Theme, bool Disabled)? _contentToneApplied;
+
+    void ApplyContentTone(bool disabled)
+    {
+        if (_contentTone is null)
+        {
+            if (!disabled) return;
+            _contentTone = [];
+            Stack.Resources = _contentTone;
+        }
+        var applied = (ContextTheme, disabled);
+        if (_contentToneApplied == applied) return;
+        _contentToneApplied = applied;
+        foreach (var (key, disabledKey) in CdsTileTokens.DisabledContentKeys)
+            _contentTone[key] = CdsPalettes.GetColor(applied.ContextTheme, disabled ? disabledKey : key);
     }
 }
 

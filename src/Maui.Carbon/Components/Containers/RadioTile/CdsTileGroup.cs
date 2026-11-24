@@ -3,8 +3,9 @@ namespace Maui.Carbon;
 /// <summary>
 /// Groups <see cref="CdsRadioTile"/> items so exactly one can be chosen. The tiles can sit in any layout you put in
 /// <see cref="CdsContainer.Body"/> (a grid of cards): the group finds every radio tile inside it. It owns the legend and
-/// <see cref="SelectedValue"/>; arrow keys move the focus and choose within the group (wrapping, skipping disabled tiles).
-/// MAUI cannot take a native button out of the Tab order, so every enabled tile stays a tab stop.
+/// <see cref="SelectedValue"/>. Like native radios the group is one tab stop: Tab lands on the chosen tile (the first
+/// enabled one when nothing is chosen) and leaves the group in one step; the arrow keys move the focus and choose within
+/// the group (wrapping, skipping disabled and hidden tiles), and Space chooses the focused tile.
 /// </summary>
 public class CdsTileGroup : CdsContainer
 {
@@ -26,6 +27,9 @@ public class CdsTileGroup : CdsContainer
     readonly CdsText _legend = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary };
     readonly ContentView _bodyHost = new();
     readonly List<CdsRadioTile> _tiles = [];
+    // Radio-group keyboard model: the stop returns to the chosen tile when focus leaves, any arrow moves (tiles can wrap
+    // in a grid of cards), and there is no Home or End, as with native radios.
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Both, wraps: true) { RemembersFocus = false, HandlesHomeEnd = false };
     bool _syncing;
 
     /// <summary>Creates an empty group.</summary>
@@ -35,6 +39,9 @@ public class CdsTileGroup : CdsContainer
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _root.Add(_legend, 0, 0);
         _root.Add(_bodyHost, 0, 1);
+        _roving.CanFocus = i => i >= 0 && i < _tiles.Count && _tiles[i].CanTakeFocus;
+        _roving.PreferredIndex = () => _tiles.FindIndex(t => t.IsChecked);
+        _roving.Navigated += OnNavigated;
         SetChrome(_root);
         UpdateChrome();
     }
@@ -67,19 +74,15 @@ public class CdsTileGroup : CdsContainer
     protected internal override bool WantsNavigationKeys => true;
 
     /// <inheritdoc/>
-    protected internal override bool OnKeyDown(CdsKeyEventArgs e)
+    protected internal override bool OnKeyDown(CdsKeyEventArgs e) => _tiles.Count > 0 && _roving.HandleKey(e);
+
+    /// <summary>The index of the tile that has the group's one tab stop, or -1 when no tile can take focus.</summary>
+    internal int TabStopIndex => _roving.TabStopIndex;
+
+    // An arrow moved the focus: the focused tile is chosen (selection follows focus, as with native radios).
+    void OnNavigated(object? sender, int index)
     {
-        var direction = RadioGroupModel.Direction(e.Key);
-        if (direction == 0 || _tiles.Count == 0) return false;
-        var enabled = _tiles.Select(t => !t.IsEffectivelyDisabled).ToList();
-        var current = _tiles.FindIndex(t => t.Is(CdsInteractionState.Focused));
-        if (current < 0) current = RadioGroupModel.IndexOfValue(_tiles.Select(t => t.Value).ToList(), SelectedValue);
-        var next = RadioGroupModel.NextEnabled(enabled, current, direction);
-        if (next < 0) return false;
-        _tiles[next].FocusTile();
-        if (!IsReadOnly) SelectedValue = _tiles[next].Value;
-        e.Handled = true;
-        return true;
+        if (!IsReadOnly && index >= 0 && index < _tiles.Count) SelectedValue = _tiles[index].Value;
     }
 
     /// <inheritdoc/>
@@ -132,6 +135,7 @@ public class CdsTileGroup : CdsContainer
         _tiles.AddRange(found);
         SyncChecked();
         RefreshVisuals();
+        _roving.SetItems(_tiles.Select(t => t.Hit));
     }
 
     void Hook(CdsRadioTile tile)
@@ -139,6 +143,7 @@ public class CdsTileGroup : CdsContainer
         tile.UserSelected += OnTileSelected;
         tile.CheckedPropertyChanged += OnTileCheckedChanged;
         tile.ValueChanged += OnTileValueChanged;
+        tile.PropertyChanged += OnTilePropertyChanged;
     }
 
     void Unhook(CdsRadioTile tile)
@@ -146,6 +151,14 @@ public class CdsTileGroup : CdsContainer
         tile.UserSelected -= OnTileSelected;
         tile.CheckedPropertyChanged -= OnTileCheckedChanged;
         tile.ValueChanged -= OnTileValueChanged;
+        tile.PropertyChanged -= OnTilePropertyChanged;
+        tile.Hit.IsTabStop = true;
+    }
+
+    // A hidden tile cannot take the tab stop (its hit target's own visibility does not change).
+    void OnTilePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == IsVisibleProperty.PropertyName) _roving.Refresh();
     }
 
     void OnTileSelected(object? sender, EventArgs e)
@@ -192,5 +205,6 @@ public class CdsTileGroup : CdsContainer
         {
             _syncing = false;
         }
+        _roving.Refresh();
     }
 }

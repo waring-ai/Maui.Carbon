@@ -28,6 +28,22 @@ public readonly record struct CdsTileVisuals(string Background, string? Border, 
 public static class CdsTileTokens
 {
     /// <summary>
+    /// The text and icon tokens a disabled tile re-maps for its content, and what they become: every text color is
+    /// <c>text-disabled</c> and every icon <c>icon-disabled</c>.
+    /// </summary>
+    public static IReadOnlyList<(string Key, string DisabledKey)> DisabledContentKeys { get; } =
+    [
+        (CdsColorKeys.TextPrimary, CdsColorKeys.TextDisabled),
+        (CdsColorKeys.TextSecondary, CdsColorKeys.TextDisabled),
+        (CdsColorKeys.TextHelper, CdsColorKeys.TextDisabled),
+        (CdsColorKeys.TextPlaceholder, CdsColorKeys.TextDisabled),
+        (CdsColorKeys.LinkPrimary, CdsColorKeys.TextDisabled),
+        (CdsColorKeys.IconPrimary, CdsColorKeys.IconDisabled),
+        (CdsColorKeys.IconSecondary, CdsColorKeys.IconDisabled),
+        (CdsColorKeys.IconInteractive, CdsColorKeys.IconDisabled),
+    ];
+
+    /// <summary>
     /// Resolves the colors. Flags that matter: <see cref="CdsInteractionState.Disabled"/>, <see cref="CdsInteractionState.Hover"/>,
     /// <see cref="CdsInteractionState.Pressed"/> and <see cref="CdsInteractionState.Selected"/> (selectable and radio tiles).
     /// Only <c>-01</c> tokens are used: a <see cref="CdsLayer"/> steps them up.

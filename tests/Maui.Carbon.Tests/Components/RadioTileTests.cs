@@ -127,4 +127,65 @@ public class RadioTileTests
         tile.IsChecked = true;
         Assert.True(seen);
     }
+
+    // RadioTile/README.md: the group is one tab stop; with nothing selected Tab lands on the first tile (CF-02).
+    [Fact]
+    public void The_group_is_one_tab_stop_on_the_first_tile_until_one_is_chosen()
+    {
+        var group = Group(out var dev, out var standard, out var premium);
+        Assert.Equal([true, false, false], new[] { dev, standard, premium }.Select(t => t.Hit.IsTabStop));
+        group.SelectedValue = "pro";
+        Assert.Equal([false, false, true], new[] { dev, standard, premium }.Select(t => t.Hit.IsTabStop));
+        Assert.Equal(2, group.TabStopIndex);
+    }
+
+    [Fact]
+    public void The_tab_stop_skips_disabled_and_hidden_tiles()
+    {
+        var group = Group(out var dev, out var standard, out var premium);
+        dev.IsEnabled = false;
+        Assert.True(standard.Hit.IsTabStop);
+        Assert.False(dev.Hit.IsTabStop);
+        standard.IsVisible = false;
+        Assert.True(premium.Hit.IsTabStop);
+        Assert.Single(new[] { dev, standard, premium }, t => t.Hit.IsTabStop);
+
+        group.SelectedValue = "dev";
+        Assert.False(dev.Hit.IsTabStop);
+        Assert.True(premium.Hit.IsTabStop);
+    }
+
+    [Fact]
+    public void Arrow_keys_skip_disabled_tiles_and_move_the_tab_stop_with_the_choice()
+    {
+        var group = Group(out var dev, out var standard, out var premium);
+        group.SelectedValue = "dev";
+        standard.IsEnabled = false;
+        Assert.True(group.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right)));
+        Assert.Equal("pro", group.SelectedValue);
+        Assert.True(premium.Hit.IsTabStop);
+        Assert.False(dev.Hit.IsTabStop);
+        Assert.False(group.OnKeyDown(new CdsKeyEventArgs(CdsKey.Home)));
+    }
+
+    [Fact]
+    public void A_disabled_group_has_no_tab_stop_and_tiles_added_later_join_the_rotation()
+    {
+        var stack = new VerticalStackLayout();
+        var group = new CdsTileGroup { Body = stack };
+        var first = new CdsRadioTile { Value = "a" };
+        var second = new CdsRadioTile { Value = "b" };
+        stack.Add(first);
+        stack.Add(second);
+        Assert.True(first.Hit.IsTabStop);
+        Assert.False(second.Hit.IsTabStop);
+
+        group.IsEnabled = false;
+        Assert.Equal(-1, group.TabStopIndex);
+        group.IsEnabled = true;
+
+        stack.Remove(first);
+        Assert.True(first.Hit.IsTabStop); // a tile that leaves the group is a lone tab stop again
+        Assert.True(second.Hit.IsTabStop);
+    }
 }

@@ -105,3 +105,54 @@ public class TileTests
         selectable.IsEnabled = false;
     }
 }
+
+public class TileDisabledContentTests
+{
+    static Color Token(string key) => CdsPalettes.GetColor(CdsThemeName.White, key);
+
+    [Fact]
+    public void Disabling_a_tile_turns_its_text_and_icons_disabled_and_enabling_restores_them()
+    {
+        var title = new CdsText("Log analysis");
+        var detail = new CdsText("Search and alert on logs") { Tone = CdsTextTone.Secondary };
+        var icon = new CdsIcon(CdsIconName.Catalog);
+        var tile = new CdsSelectableTile { Body = new VerticalStackLayout { title, detail, icon } };
+
+        tile.IsEnabled = false;
+        Assert.Equal(Token(CdsColorKeys.TextDisabled), title.TextColor);
+        Assert.Equal(Token(CdsColorKeys.TextDisabled), detail.TextColor);
+        Assert.Equal(Token(CdsColorKeys.IconDisabled), icon.Color);
+
+        tile.IsEnabled = true;
+        Assert.Equal(Token(CdsColorKeys.TextPrimary), title.TextColor);
+        Assert.Equal(Token(CdsColorKeys.TextSecondary), detail.TextColor);
+        Assert.Equal(Token(CdsColorKeys.IconPrimary), icon.Color);
+    }
+
+    [Fact]
+    public void A_disabled_tile_group_disables_the_text_of_its_radio_tiles()
+    {
+        var title = new CdsText("Standard");
+        var tile = new CdsRadioTile { Value = "std", Body = title };
+        var group = new CdsTileGroup { Legend = "Plan", Body = new VerticalStackLayout { tile } };
+        group.IsEnabled = false;
+        Assert.Equal(Token(CdsColorKeys.TextDisabled), title.TextColor);
+    }
+
+    [Fact]
+    public void Clickable_and_expandable_tiles_disable_their_content_too()
+    {
+        var link = new CdsText("View clusters");
+        var clickable = new CdsClickableTile { Body = link, IsEnabled = false };
+        Assert.Equal(Token(CdsColorKeys.TextDisabled), link.TextColor);
+
+        var summary = new CdsText("Deployment details");
+        var expandable = new CdsExpandableTile { Body = summary, IsEnabled = false };
+        Assert.Equal(Token(CdsColorKeys.TextDisabled), summary.TextColor);
+    }
+
+    [Fact]
+    public void Disabled_content_keys_map_text_to_text_disabled_and_icons_to_icon_disabled() =>
+        Assert.All(CdsTileTokens.DisabledContentKeys, pair =>
+            Assert.Equal(pair.Key.Contains("Icon") ? CdsColorKeys.IconDisabled : CdsColorKeys.TextDisabled, pair.DisabledKey));
+}

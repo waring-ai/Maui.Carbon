@@ -7,7 +7,8 @@ namespace Maui.Carbon;
 /// gutter) and outer margins per breakpoint (<see cref="CdsBreakpointExtensions.Margin"/>). Children take a
 /// <see cref="SpanProperty">Span</see> and an <see cref="OffsetProperty">Offset</see> (the column it starts at; right after the previous child by default), with
 /// responsive overrides per breakpoint (<c>SpanSm</c>…<c>SpanMax</c>, <c>OffsetSm</c>…<c>OffsetMax</c>; a breakpoint
-/// without a value inherits the smaller one, a span of 0 hides the child) and wrap to new rows. Use it for page
+/// without a value inherits the smaller one, a span of 0 hides the child: it takes no space and is hidden, so it is neither
+/// drawn, hit-tested nor in the accessibility tree, until its span is non-zero again) and wrap to new rows. Use it for page
 /// structure, not inside components (use <see cref="CdsStack"/> there). The grid is centered and never wider than
 /// 1584 unless <see cref="FullWidth"/>. The breakpoint comes from the page (<see cref="CdsContextKeys.Breakpoint"/>) unless
 /// <see cref="Breakpoint"/> is set, and falls back to the grid's own width.
@@ -73,6 +74,11 @@ public class CdsGrid : Layout
 
     /// <summary>Attached: the offset from the max breakpoint up.</summary>
     public static readonly BindableProperty OffsetMaxProperty = Attach("OffsetMax");
+
+    // Set on a child the grid hid because its span is 0 at the current breakpoint: the grid shows it again when its span
+    // becomes non-zero, while a child the consumer hid (IsVisible false) stays hidden.
+    internal static readonly BindableProperty HiddenBySpanProperty = BindableProperty.CreateAttached(
+        "CdsHiddenBySpan", typeof(bool), typeof(CdsGrid), false);
 
     /// <summary>Creates a wide grid that follows the page breakpoint.</summary>
     public CdsGrid()
@@ -170,6 +176,18 @@ public class CdsGrid : Layout
     /// <inheritdoc/>
     protected override ILayoutManager CreateLayoutManager() => new CdsGridLayoutManager(this);
 
+    /// <inheritdoc/>
+    protected override void OnChildRemoved(Element child, int oldLogicalIndex)
+    {
+        base.OnChildRemoved(child, oldLogicalIndex);
+        // A child hidden for a span of 0 leaves the grid as it came in: visible.
+        if (child is VisualElement view && (bool)view.GetValue(HiddenBySpanProperty))
+        {
+            view.ClearValue(HiddenBySpanProperty);
+            view.IsVisible = true;
+        }
+    }
+
     static BindableProperty Attach(string name) => BindableProperty.CreateAttached(
         name, typeof(int?), typeof(CdsGrid), null,
         propertyChanged: static (b, _, _) =>
@@ -180,7 +198,7 @@ public class CdsGrid : Layout
 
 sealed class CdsGridLayoutManager(CdsGrid grid) : LayoutManager(grid)
 {
-    sealed record Plan(GridMetrics Metrics, IReadOnlyList<GridCell> Cells, IReadOnlyList<IView> Views);
+    sealed record Plan(GridMetrics Metrics, IReadOnlyList<GridCell> Cells, IReadOnlyList<IView> Views, IReadOnlyList<bool> HiddenByConsumer);
 
     Plan MakePlan(double width)
     {
@@ -188,16 +206,44 @@ sealed class CdsGridLayoutManager(CdsGrid grid) : LayoutManager(grid)
         var metrics = GridModel.Metrics(width, breakpoint, grid.Mode, grid.FullWidth, grid.Align);
         var views = new List<IView>();
         var items = new List<(int, int?)>();
+        var byConsumer = new List<bool>();
         foreach (var child in grid)
         {
             views.Add(child);
-            var hidden = child.Visibility == Visibility.Collapsed;
+            // A child the grid itself hid for a span of 0 is not "collapsed": its span decides again.
+            var hidden = child.Visibility == Visibility.Collapsed
+                         && !(child is BindableObject flagged && (bool)flagged.GetValue(CdsGrid.HiddenBySpanProperty));
+            byConsumer.Add(hidden);
             if (child is BindableObject b)
                 items.Add((hidden ? 0 : GridModel.ResolveSpan(CdsGrid.SpanOf(b), breakpoint), GridModel.ResolveOffset(CdsGrid.OffsetOf(b), breakpoint)));
             else
                 items.Add((hidden ? 0 : metrics.Columns, null));
         }
-        return new Plan(metrics, GridModel.Place(metrics.Columns, items), views);
+        var plan = new Plan(metrics, GridModel.Place(metrics.Columns, items), views, byConsumer);
+        SyncSpanVisibility(plan);
+        return plan;
+    }
+
+    // Skipping a span-0 child in arrange leaves its platform view at its last frame: still drawn over the reflowed
+    // columns, hit-testable and in the accessibility tree. Hide it instead, and show it again once its span is non-zero.
+    static void SyncSpanVisibility(Plan plan)
+    {
+        foreach (var cell in plan.Cells)
+        {
+            if (plan.Views[cell.Index] is not VisualElement view) continue;
+            var bySpan = cell.Hidden && !plan.HiddenByConsumer[cell.Index];
+            var flagged = (bool)view.GetValue(CdsGrid.HiddenBySpanProperty);
+            if (bySpan)
+            {
+                if (!flagged) view.SetValue(CdsGrid.HiddenBySpanProperty, true);
+                if (view.IsVisible) view.IsVisible = false;
+            }
+            else if (flagged)
+            {
+                view.SetValue(CdsGrid.HiddenBySpanProperty, false);
+                view.IsVisible = true;
+            }
+        }
     }
 
     static double[] RowHeights(Plan plan, double[] heights)

@@ -233,4 +233,64 @@ public class GridControlTests
         Assert.Equal(16 + 4 * 64 + 16, b.Frame.X);
         Assert.Equal(12 * 64 - 32, b.Frame.Width);
     }
+
+    [Fact]
+    public void A_child_whose_span_becomes_zero_is_hidden_and_comes_back()
+    {
+        var grid = new CdsGrid { Breakpoint = CdsBreakpoint.Lg };
+        var side = new BoxView { HeightRequest = 20 };
+        var main = new BoxView { HeightRequest = 20 };
+        CdsGrid.SetSpanSm(side, 0);
+        CdsGrid.SetSpanLg(side, 4);
+        CdsGrid.SetSpan(main, 12);
+        grid.Add(side);
+        grid.Add(main);
+        var layout = (ICrossPlatformLayout)grid;
+
+        layout.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        layout.CrossPlatformArrange(new Rect(0, 0, 1056, 20));
+        Assert.True(side.IsVisible);
+
+        // Below lg its span is 0: it must not stay drawn (and hit-testable) at its old frame.
+        grid.Breakpoint = CdsBreakpoint.Sm;
+        layout.CrossPlatformMeasure(320, double.PositiveInfinity);
+        layout.CrossPlatformArrange(new Rect(0, 0, 320, 20));
+        Assert.False(side.IsVisible);
+        Assert.True(main.IsVisible);
+        Assert.Equal(16, main.Frame.X);
+
+        grid.Breakpoint = CdsBreakpoint.Lg;
+        layout.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        layout.CrossPlatformArrange(new Rect(0, 0, 1056, 20));
+        Assert.True(side.IsVisible);
+        Assert.Equal(32, side.Frame.X);
+    }
+
+    [Fact]
+    public void A_child_the_consumer_hid_stays_hidden_and_a_removed_child_leaves_visible()
+    {
+        var grid = new CdsGrid { Breakpoint = CdsBreakpoint.Sm };
+        var hidden = new BoxView { IsVisible = false };
+        var zero = new BoxView();
+        CdsGrid.SetSpan(zero, 0);
+        grid.Add(hidden);
+        grid.Add(zero);
+        var layout = (ICrossPlatformLayout)grid;
+        layout.CrossPlatformMeasure(320, double.PositiveInfinity);
+        layout.CrossPlatformArrange(new Rect(0, 0, 320, 20));
+        Assert.False(hidden.IsVisible);
+        Assert.False(zero.IsVisible);
+
+        grid.Breakpoint = CdsBreakpoint.Lg;
+        CdsGrid.SetSpan(zero, 4);
+        layout.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        Assert.False(hidden.IsVisible);
+        Assert.True(zero.IsVisible);
+
+        CdsGrid.SetSpan(zero, 0);
+        layout.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        Assert.False(zero.IsVisible);
+        grid.Remove(zero);
+        Assert.True(zero.IsVisible);
+    }
 }

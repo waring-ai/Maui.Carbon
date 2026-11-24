@@ -78,6 +78,12 @@ public class CdsRadioTile : CdsTileBase
 
     internal bool FocusTile() => _hit.Focus();
 
+    /// <summary>The tile's hit target (the group's roving tab stop moves between these).</summary>
+    internal CdsHitTarget Hit => _hit;
+
+    /// <summary>Whether the tile can take keyboard focus: shown and not disabled (by itself or its group).</summary>
+    internal bool CanTakeFocus => IsVisible && !IsEffectivelyDisabled;
+
     /// <inheritdoc/>
     protected override CdsTileKind TileKind => CdsTileKind.Radio;
 

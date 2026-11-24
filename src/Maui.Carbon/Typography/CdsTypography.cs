@@ -6,10 +6,14 @@ public static class CdsTypography
     /// <summary>Key of the keyed Label style for a type style (<c>{StaticResource CdsType.BodyCompact01}</c>).</summary>
     public static string StyleKey(CdsTypeStyle style) => "CdsType." + style;
 
-    /// <summary>Applies a type style to a label.</summary>
-    public static void Apply(Label label, CdsTypeStyle style)
+    /// <summary>Applies a type style to a label (fluid styles at their base, sm, size).</summary>
+    public static void Apply(Label label, CdsTypeStyle style) => Apply(label, CdsTypeSpecs.Get(style));
+
+    /// <summary>Applies a type style to a label at a breakpoint: fluid styles take that breakpoint's step (<see cref="CdsFluidType"/>).</summary>
+    public static void Apply(Label label, CdsTypeStyle style, CdsBreakpoint breakpoint) => Apply(label, CdsFluidType.Resolve(style, breakpoint));
+
+    static void Apply(Label label, CdsTypeSpec spec)
     {
-        var spec = CdsTypeSpecs.Get(style);
         label.FontFamily = spec.FontFamily;
         label.FontSize = spec.FontSize;
         label.CharacterSpacing = spec.CharacterSpacing;

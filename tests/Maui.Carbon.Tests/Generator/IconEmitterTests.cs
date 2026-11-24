@@ -263,6 +263,18 @@ public sealed class SvgIconConverterTests
     }
 
     [Fact]
+    public void Close_and_checkbox_keep_the_full_box_and_add_uses_the_centre_26()
+    {
+        var art = Svg("""<path d="M8 8h16v16H8z"/>""");
+        Assert.Equal(32f, SvgIconConverter.Convert(art, "close-32.svg").ViewBoxWidth);
+        Assert.Equal(32f, SvgIconConverter.Convert(art, "checkbox-32.svg").ViewBoxWidth);
+        var add = SvgIconConverter.Convert(art, "add-32.svg");
+        Assert.Equal((3f, 3f, 26f, 26f), (add.ViewBoxX, add.ViewBoxY, add.ViewBoxWidth, add.ViewBoxHeight));
+        Assert.Equal(26f, SvgIconConverter.Convert(art, "subtract-32.svg").ViewBoxWidth);
+        Assert.Equal(16f, SvgIconConverter.Convert(Svg("""<path d="M6 6h4v4z"/>""", 16), "close-16.svg").ViewBoxWidth);
+    }
+
+    [Fact]
     public void Art_touching_the_edge_is_not_cropped()
     {
         var g = SvgIconConverter.Convert(Svg("""<path d="M2 4h24v24H2z"/>"""), "t-32.svg");
@@ -381,8 +393,35 @@ public sealed partial class RealIconTests
         {
             if (g.ViewBoxX == 0) { Assert.Equal(g.ArtboardSize, g.ViewBoxWidth); return; }
             Assert.Equal(32, g.ArtboardSize);
-            Assert.Equal((4f, 4f, 24f, 24f), (g.ViewBoxX, g.ViewBoxY, g.ViewBoxWidth, g.ViewBoxHeight));
+            var expected = g.Stem is "add" or "subtract" ? (3f, 3f, 26f, 26f) : (4f, 4f, 24f, 24f);
+            Assert.Equal(expected, (g.ViewBoxX, g.ViewBoxY, g.ViewBoxWidth, g.ViewBoxHeight));
         });
+
+    // Icon/README.md: close is drawn from its full 32 box (an 8px cross at 16px, as Carbon's 16px glyph), add from its
+    // centre 26x26; the checkbox glyphs, whose 16px versions are the 32 art at half scale, are not cropped either.
+    [Theory]
+    [InlineData("close", 0f, 32f)]
+    [InlineData("checkbox", 0f, 32f)]
+    [InlineData("checkbox--checked", 0f, 32f)]
+    [InlineData("checkbox--indeterminate", 0f, 32f)]
+    [InlineData("add", 3f, 26f)]
+    [InlineData("subtract", 3f, 26f)]
+    [InlineData("caret--down", 4f, 24f)]
+    [InlineData("overflow-menu--vertical", 4f, 24f)]
+    public void Carbon_crop_rules_for_32_only_glyphs(string stem, float origin, float size)
+    {
+        var g = All.Value.Single(x => x.Stem == stem && x.ArtboardSize == 32);
+        Assert.Equal((origin, origin, size, size), (g.ViewBoxX, g.ViewBoxY, g.ViewBoxWidth, g.ViewBoxHeight));
+    }
+
+    [Fact]
+    public void Close_draws_an_8px_cross_at_16px()
+    {
+        var g = All.Value.Single(x => x.Stem == "close" && x.ArtboardSize == 32);
+        var xs = Numbers(g.Paths[0].Data).Where((_, i) => i % 2 == 0).ToArray();
+        var drawn = (xs.Max() - xs.Min()) * 16 / g.ViewBoxWidth;
+        Assert.InRange(drawn, 7.9, 8.1);
+    }
 
     [Fact]
     public void Filled_status_icons_have_inner_paths()
