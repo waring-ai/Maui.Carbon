@@ -87,7 +87,13 @@ public abstract class CdsTileBase : CdsContainer
     }
 
     /// <inheritdoc/>
-    protected override void OnContextChanged() => RefreshVisuals();
+    // Only the disabled content tone depends on the theme; the surface colors follow their dynamic resources. This runs
+    // from CdsControl's constructor when an app theme is already in place, before a variant has built its parts, so it
+    // must not reach ApplyTileVisuals.
+    protected override void OnContextChanged()
+    {
+        if (_contentToneApplied is { } applied) ApplyContentTone(applied.Disabled);
+    }
 
     // A disabled tile's content uses text-disabled and icon-disabled (Tile, SelectableTile and RadioTile READMEs). On the
     // web the color is inherited; here every CdsText and CdsIcon binds its own token, so the tile re-maps the text and
