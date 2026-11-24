@@ -97,6 +97,18 @@ public partial class CdsDataTable
     public static readonly BindableProperty StickyHeaderProperty = BindableProperty.Create(
         nameof(StickyHeader), typeof(bool), typeof(CdsDataTable), false, propertyChanged: OnLayoutChanged);
 
+    static readonly BindablePropertyKey VisibleRowCountPropertyKey = BindableProperty.CreateReadOnly(
+        nameof(VisibleRowCount), typeof(int), typeof(CdsDataTable), 0);
+
+    /// <summary>Read-only bindable property for <see cref="VisibleRowCount"/>.</summary>
+    public static readonly BindableProperty VisibleRowCountProperty = VisibleRowCountPropertyKey.BindableProperty;
+
+    static readonly BindablePropertyKey TotalRowCountPropertyKey = BindableProperty.CreateReadOnly(
+        nameof(TotalRowCount), typeof(int), typeof(CdsDataTable), 0);
+
+    /// <summary>Read-only bindable property for <see cref="TotalRowCount"/>.</summary>
+    public static readonly BindableProperty TotalRowCountProperty = TotalRowCountPropertyKey.BindableProperty;
+
     /// <summary>Bindable property for <see cref="EmptyState"/>.</summary>
     public static readonly BindableProperty EmptyStateProperty = BindableProperty.Create(
         nameof(EmptyState), typeof(CdsDataTableEmptyState), typeof(CdsDataTable), null,
@@ -323,6 +335,21 @@ public partial class CdsDataTable
         get => (CdsDataTableEmptyState?)GetValue(EmptyStateProperty);
         set => SetValue(EmptyStateProperty, value);
     }
+
+    /// <summary>
+    /// The number of rows that pass the search: what the table shows, across every page of a virtualized table. Read-only
+    /// and bindable (<see cref="VisibleRowCountProperty"/>, raises <c>PropertyChanged</c>), updated whenever the rows,
+    /// <see cref="SearchText"/> or anything else changes the visible set, so a page can show and announce "Showing
+    /// <see cref="VisibleRowCount"/> of <see cref="TotalRowCount"/>" while a search filters the table.
+    /// </summary>
+    public int VisibleRowCount => (int)GetValue(VisibleRowCountProperty);
+
+    /// <summary>
+    /// The number of rows in <see cref="ItemsSource"/> (null items are skipped), whatever the search hides. Read-only and
+    /// bindable (<see cref="TotalRowCountProperty"/>, raises <c>PropertyChanged</c>); updated when the source or its
+    /// collection changes.
+    /// </summary>
+    public int TotalRowCount => (int)GetValue(TotalRowCountProperty);
 
     /// <summary>Your own empty-state view; it replaces <see cref="EmptyState"/>.</summary>
     public View? EmptyContent

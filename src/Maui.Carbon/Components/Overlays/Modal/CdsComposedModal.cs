@@ -38,6 +38,7 @@ public class CdsComposedModal : CdsControl
     readonly CdsModalPresenter _presenter;
     readonly List<View> _parts = [];
     CdsModalSurface? _surface;
+    CdsModalFooter? _footer;
     Action? _unwire;
     bool _openedOnLoad;
 
@@ -64,7 +65,11 @@ public class CdsComposedModal : CdsControl
 
     /// <summary>
     /// Raised when the modal is asked to close (close button, Escape, the footer's secondary button, a scrim tap on a passive modal). Set
-    /// <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to keep it open; otherwise <see cref="IsOpen"/> becomes false.
+    /// <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to keep it open; otherwise the footer's
+    /// <see cref="CdsModalFooter.RequestClose"/> and <see cref="CdsModalFooter.RequestCloseCommand"/> run and <see cref="IsOpen"/>
+    /// becomes false. Not raised while the footer's <see cref="CdsModalFooter.LoadingStatus"/> is not
+    /// <see cref="CdsInlineLoadingStatus.Inactive"/>: the submit is in flight, so the close button is disabled and Escape and
+    /// the scrim do nothing.
     /// </summary>
     public event EventHandler<CdsModalRequestCloseEventArgs>? RequestClose;
 
@@ -163,15 +168,36 @@ public class CdsComposedModal : CdsControl
 
         if (footer is not null && IsDanger) footer.IsDanger = true;
         void OnHeaderClose(object? s, EventArgs e) => TryClose();
-        void OnFooterClose(object? s, EventArgs e) => TryClose();
+        // The footer's own close notification and command run only once the modal agreed to close.
+        bool OnFooterClose(Action notify) => TryClose(notify);
+        // While the footer's submit runs the close button is disabled, as Carbon's loadingStatus does.
+        void SyncClose() { if (header is not null) header.IsCloseEnabled = footer is not { IsLoading: true }; }
+        void OnFooterChanged(object? s, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == CdsModalFooter.LoadingStatusProperty.PropertyName) SyncClose();
+        }
         if (header is not null) header.CloseButtonClicked += OnHeaderClose;
-        if (footer is not null) footer.RequestClose += OnFooterClose;
+        if (footer is not null)
+        {
+            footer.CloseHandler = OnFooterClose;
+            footer.PropertyChanged += OnFooterChanged;
+        }
+        SyncClose();
+        _footer = footer;
         var wiredHeader = header;
         var wiredFooter = footer;
         _unwire = () =>
         {
-            if (wiredHeader is not null) wiredHeader.CloseButtonClicked -= OnHeaderClose;
-            if (wiredFooter is not null) wiredFooter.RequestClose -= OnFooterClose;
+            if (wiredHeader is not null)
+            {
+                wiredHeader.CloseButtonClicked -= OnHeaderClose;
+                wiredHeader.IsCloseEnabled = true;
+            }
+            if (wiredFooter is not null)
+            {
+                wiredFooter.CloseHandler = null;
+                wiredFooter.PropertyChanged -= OnFooterChanged;
+            }
         };
 
         _surface = new CdsModalSurface(CdsModalMode.Modal, Size, false, header, body, footer) { BindingContext = BindingContext };
@@ -210,13 +236,24 @@ public class CdsComposedModal : CdsControl
         _unwire?.Invoke();
         _unwire = null;
         _surface = null;
+        _footer = null;
     }
 
-    void TryClose()
+    /// <summary>True while the shown footer's submit runs: the modal cannot be closed from its chrome.</summary>
+    internal bool IsLoading => _footer is { IsLoading: true };
+
+    /// <summary>
+    /// Asks to close from the chrome: refused while loading or when a <see cref="RequestClose"/> handler cancels;
+    /// otherwise runs <paramref name="notify"/> (the footer's close notification) and closes.
+    /// </summary>
+    internal bool TryClose(Action? notify = null)
     {
+        if (IsLoading) return false;
         var args = new CdsModalRequestCloseEventArgs();
         RequestClose?.Invoke(this, args);
-        if (args.Cancel) return;
+        if (args.Cancel) return false;
+        notify?.Invoke();
         IsOpen = false;
+        return true;
     }
 }

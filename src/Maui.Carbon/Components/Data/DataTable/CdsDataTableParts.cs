@@ -320,11 +320,15 @@ public class CdsDataTableEmptyState : BindableObject
 
     /// <summary>Bindable property for <see cref="ActionCommand"/>.</summary>
     public static readonly BindableProperty ActionCommandProperty = BindableProperty.Create(
-        nameof(ActionCommand), typeof(ICommand), typeof(CdsDataTableEmptyState), null);
+        nameof(ActionCommand), typeof(ICommand), typeof(CdsDataTableEmptyState), null, propertyChanged: OnChanged);
+
+    /// <summary>Bindable property for <see cref="ActionCommandParameter"/>.</summary>
+    public static readonly BindableProperty ActionCommandParameterProperty = BindableProperty.Create(
+        nameof(ActionCommandParameter), typeof(object), typeof(CdsDataTableEmptyState), null, propertyChanged: OnChanged);
 
     internal event EventHandler? Changed;
 
-    /// <summary>Raised when the action button is activated.</summary>
+    /// <summary>Raised when the action button is activated (only while it is enabled), before <see cref="ActionCommand"/> runs.</summary>
     public event EventHandler? ActionInvoked;
 
     /// <summary>The title: what is missing ("No clusters yet").</summary>
@@ -348,18 +352,25 @@ public class CdsDataTableEmptyState : BindableObject
         set => SetValue(ActionTextProperty, value);
     }
 
-    /// <summary>The command run by the action button.</summary>
+    /// <summary>
+    /// The command run by the action button, with <see cref="ActionCommandParameter"/>. The button follows
+    /// <c>CanExecute</c>, as a <see cref="CdsButton"/> does: it draws disabled and cannot be focused or clicked while the
+    /// command cannot run, and is asked again on <c>CanExecuteChanged</c>.
+    /// </summary>
     public ICommand? ActionCommand
     {
         get => (ICommand?)GetValue(ActionCommandProperty);
         set => SetValue(ActionCommandProperty, value);
     }
 
-    internal void InvokeAction()
+    /// <summary>The parameter passed to <see cref="ActionCommand"/>'s <c>CanExecute</c> and <c>Execute</c>.</summary>
+    public object? ActionCommandParameter
     {
-        ActionInvoked?.Invoke(this, EventArgs.Empty);
-        if (ActionCommand?.CanExecute(null) == true) ActionCommand.Execute(null);
+        get => GetValue(ActionCommandParameterProperty);
+        set => SetValue(ActionCommandParameterProperty, value);
     }
+
+    internal void RaiseActionInvoked() => ActionInvoked?.Invoke(this, EventArgs.Empty);
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsDataTableEmptyState)b).Changed?.Invoke(b, EventArgs.Empty);
 }

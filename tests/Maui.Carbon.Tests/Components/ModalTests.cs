@@ -346,4 +346,178 @@ public class ModalTests
         Assert.True(CdsComposedModal.ClosesOnScrimTap(new CdsModalFooter(), false));
         Assert.False(CdsComposedModal.ClosesOnScrimTap(new CdsModalFooter { Body = new Label { Text = "Custom" } }, false));
     }
+
+    // ----- loadingStatus: the submit is in flight, the chrome cannot close the modal -----
+
+    sealed class Counter : System.Windows.Input.ICommand
+    {
+        public int Executed;
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => Executed++;
+    }
+
+    static bool Escape(CdsOverlayHost host) => host.RouteKey(new CdsKeyEventArgs(CdsKey.Escape, false));
+
+    [Theory]
+    [InlineData(CdsInlineLoadingStatus.Active)]
+    [InlineData(CdsInlineLoadingStatus.Finished)]
+    [InlineData(CdsInlineLoadingStatus.Error)]
+    public void A_loading_modal_cannot_be_closed_from_its_chrome(CdsInlineLoadingStatus status)
+    {
+        var page = new VerticalStackLayout();
+        var host = new CdsOverlayHost { Body = page };
+        var close = new Counter();
+        var modal = new CdsModal { Heading = "Create API key", PrimaryButtonText = "Create key", SecondaryButtonText = "Cancel", RequestCloseCommand = close };
+        var requested = 0;
+        modal.RequestClose += (_, _) => requested++;
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        var header = modal.Surface!.Header!;
+        Assert.True(header.IsCloseEnabled);
+        Assert.True(header.CloseTarget.IsEnabled);
+
+        modal.LoadingStatus = status;
+        Assert.False(header.IsCloseEnabled);
+        Assert.False(header.CloseTarget.IsEnabled);
+        ((IButton)header.CloseTarget).Clicked();
+        Assert.True(Escape(host));   // Escape is taken (the page behind gets nothing) but does nothing
+        Assert.False(modal.TryClose());
+        Assert.True(modal.IsOpen);
+        Assert.Equal(0, requested);
+        Assert.Equal(0, close.Executed);
+
+        // The wait ends: the chrome closes it again.
+        modal.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.True(header.IsCloseEnabled);
+        Assert.True(header.CloseTarget.IsEnabled);
+        Assert.True(Escape(host));
+        Assert.False(modal.IsOpen);
+        Assert.Equal(1, requested);
+        Assert.Equal(1, close.Executed);
+    }
+
+    [Fact]
+    public void A_modal_opened_while_loading_starts_with_the_close_button_disabled()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var modal = new CdsModal { Heading = "Create API key", PrimaryButtonText = "Create key", LoadingStatus = CdsInlineLoadingStatus.Active };
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        Assert.False(modal.Surface!.Header!.CloseTarget.IsEnabled);
+        // Closing from code still works (LoadingSuccess handlers do it).
+        modal.IsOpen = false;
+        Assert.Null(modal.Surface);
+    }
+
+    [Fact]
+    public void Cancelling_RequestClose_keeps_the_modal_open_and_skips_the_command()
+    {
+        var page = new VerticalStackLayout();
+        var host = new CdsOverlayHost { Body = page };
+        var close = new Counter();
+        var modal = new CdsModal { Heading = "Edit entry", PrimaryButtonText = "Save", SecondaryButtonText = "Cancel", RequestCloseCommand = close };
+        var cancel = true;
+        modal.RequestClose += (_, e) => e.Cancel = cancel;
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        ((IButton)modal.Surface!.Header!.CloseTarget).Clicked();
+        Escape(host);
+        var secondary = (CdsModalButton)modal.Surface.Footer!.Buttons.First();
+        ((IButton)secondary.HitTarget).Clicked();
+        Assert.True(modal.IsOpen);
+        Assert.Equal(0, close.Executed);
+        cancel = false;
+        ((IButton)secondary.HitTarget).Clicked();
+        Assert.False(modal.IsOpen);
+        Assert.Equal(1, close.Executed);
+    }
+
+    [Fact]
+    public void A_composed_modal_follows_its_footer_loading_status()
+    {
+        var page = new VerticalStackLayout();
+        var host = new CdsOverlayHost { Body = page };
+        var header = new CdsModalHeader { Title = "Add task" };
+        var footerClose = new Counter();
+        var footer = new CdsModalFooter { PrimaryButtonText = "Add", SecondaryButtonText = "Cancel", RequestCloseCommand = footerClose };
+        var footerClosed = 0;
+        footer.RequestClose += (_, _) => footerClosed++;
+        var modal = new CdsComposedModal();
+        modal.Parts.Add(header);
+        modal.Parts.Add(new CdsModalBody { Body = new Label { Text = "Describe the task." } });
+        modal.Parts.Add(footer);
+        var requested = 0;
+        modal.RequestClose += (_, _) => requested++;
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        Assert.True(header.CloseTarget.IsEnabled);
+
+        footer.LoadingStatus = CdsInlineLoadingStatus.Active;
+        Assert.False(header.IsCloseEnabled);
+        Assert.False(header.CloseTarget.IsEnabled);
+        ((IButton)header.CloseTarget).Clicked();
+        Assert.True(Escape(host));
+        footer.RaiseClose();
+        Assert.False(modal.TryClose());
+        Assert.True(modal.IsOpen);
+        Assert.Equal(0, requested);
+        Assert.Equal(0, footerClosed);
+        Assert.Equal(0, footerClose.Executed);
+
+        footer.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.True(header.CloseTarget.IsEnabled);
+        Assert.True(Escape(host));
+        Assert.False(modal.IsOpen);
+        Assert.Equal(1, requested);
+        // Closing unwired the parts: the header is usable again in a later open.
+        Assert.True(header.IsCloseEnabled);
+    }
+
+    [Fact]
+    public void A_cancelled_composed_close_does_not_run_the_footer_close_command()
+    {
+        var page = new VerticalStackLayout();
+        _ = new CdsOverlayHost { Body = page };
+        var footerClose = new Counter();
+        var footer = new CdsModalFooter { PrimaryButtonText = "Save", SecondaryButtonText = "Cancel", RequestCloseCommand = footerClose };
+        var footerClosed = 0;
+        footer.RequestClose += (_, _) => footerClosed++;
+        var modal = new CdsComposedModal();
+        modal.Parts.Add(new CdsModalHeader { Title = "Edit" });
+        modal.Parts.Add(footer);
+        var cancel = true;
+        modal.RequestClose += (_, e) => e.Cancel = cancel;
+        page.Add(modal);
+        modal.IsOpen = true;
+        modal.Show();
+        var secondary = (CdsModalButton)footer.Buttons.First();
+        ((IButton)secondary.HitTarget).Clicked();
+        Assert.True(modal.IsOpen);
+        Assert.Equal(0, footerClosed);
+        Assert.Equal(0, footerClose.Executed);
+
+        cancel = false;
+        ((IButton)secondary.HitTarget).Clicked();
+        Assert.False(modal.IsOpen);
+        Assert.Equal(1, footerClosed);
+        Assert.Equal(1, footerClose.Executed);
+
+        // A footer on its own still raises and runs on the secondary button.
+        var lone = new CdsModalFooter { SecondaryButtonText = "Cancel", RequestCloseCommand = footerClose };
+        ((IButton)((CdsModalButton)lone.Buttons.Single()).HitTarget).Clicked();
+        Assert.Equal(2, footerClose.Executed);
+    }
+
+    [Fact]
+    public void A_disabled_close_button_has_no_hover_fill()
+    {
+        Assert.Null(CdsModalTokens.CloseButtonBackground(CdsInteractionState.Disabled | CdsInteractionState.Hover));
+        Assert.Null(CdsModalTokens.CloseButtonBackground(CdsInteractionState.Disabled | CdsInteractionState.Pressed));
+    }
 }

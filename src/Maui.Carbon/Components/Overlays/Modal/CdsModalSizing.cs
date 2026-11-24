@@ -123,9 +123,10 @@ public static class CdsModalSizing
 /// <summary>Maps modal parts and states to Carbon tokens.</summary>
 public static class CdsModalTokens
 {
-    /// <summary>Fill of the 48px close button: transparent, <c>layer-hover-01</c> on hover, <c>layer-active-01</c> pressed.</summary>
+    /// <summary>Fill of the 48px close button: transparent, <c>layer-hover-01</c> on hover, <c>layer-active-01</c> pressed; transparent while disabled.</summary>
     public static string? CloseButtonBackground(CdsInteractionState state) =>
-        state.HasFlag(CdsInteractionState.Pressed) ? CdsColorKeys.LayerActive01
+        state.HasFlag(CdsInteractionState.Disabled) ? null
+        : state.HasFlag(CdsInteractionState.Pressed) ? CdsColorKeys.LayerActive01
         : state.HasFlag(CdsInteractionState.Hover) ? CdsColorKeys.LayerHover01
         : null;
 

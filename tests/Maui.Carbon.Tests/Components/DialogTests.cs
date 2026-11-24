@@ -76,4 +76,37 @@ public class DialogTests
         Assert.All(footer.Buttons, b => Assert.True(b.IsEnabled));
         dialog.IsOpen = false;
     }
+
+    [Fact]
+    public void A_loading_dialog_cannot_be_closed_from_its_chrome()
+    {
+        var page = new VerticalStackLayout();
+        var host = new CdsOverlayHost { Body = page };
+        var dialog = new CdsDialog { Title = "Store entry", IsModal = true, PrimaryButtonText = "Store" };
+        var requested = 0;
+        dialog.RequestClose += (_, _) => requested++;
+        page.Add(dialog);
+        dialog.IsOpen = true;
+        dialog.Show();
+        var header = dialog.Surface!.Header!;
+
+        dialog.LoadingStatus = CdsInlineLoadingStatus.Active;
+        Assert.False(header.CloseTarget.IsEnabled);
+        ((IButton)header.CloseTarget).Clicked();
+        Assert.True(host.RouteKey(new CdsKeyEventArgs(CdsKey.Escape, false)));
+        Assert.False(dialog.TryClose());
+        Assert.True(dialog.IsOpen);
+        Assert.Equal(0, requested);
+
+        dialog.LoadingStatus = CdsInlineLoadingStatus.Inactive;
+        Assert.True(header.CloseTarget.IsEnabled);
+        var cancel = true;
+        dialog.RequestClose += (_, e) => e.Cancel = cancel;
+        Assert.False(dialog.TryClose());
+        Assert.True(dialog.IsOpen);
+        cancel = false;
+        Assert.True(dialog.TryClose());
+        Assert.False(dialog.IsOpen);
+        Assert.Equal(2, requested);
+    }
 }

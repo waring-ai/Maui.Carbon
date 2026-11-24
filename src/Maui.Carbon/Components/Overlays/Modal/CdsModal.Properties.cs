@@ -242,6 +242,8 @@ public partial class CdsModal
     /// stay open while the request runs and the submit cannot run twice. Default <see cref="CdsInlineLoadingStatus.Inactive"/>.
     /// For short waits only; show a <see cref="CdsLoading"/> overlay for long ones. Close the modal on
     /// <see cref="LoadingSuccess"/>, or set the status back to Inactive after an error and show the error inline.
+    /// While it is not Inactive the request cannot be cancelled from the chrome: the header close button is disabled,
+    /// Escape and the scrim do nothing and <see cref="RequestClose"/> is not raised (setting <see cref="IsOpen"/> still closes it).
     /// </summary>
     public CdsInlineLoadingStatus LoadingStatus
     {
@@ -281,7 +283,7 @@ public partial class CdsModal
         set => SetValue(RequestSubmitCommandProperty, value);
     }
 
-    /// <summary>Runs when the modal is asked to close (close button, Escape, secondary button, scrim tap).</summary>
+    /// <summary>Runs when the modal is asked to close (close button, Escape, secondary button, scrim tap), after <see cref="RequestClose"/> unless a handler cancelled it.</summary>
     public ICommand? RequestCloseCommand
     {
         get => (ICommand?)GetValue(RequestCloseCommandProperty);

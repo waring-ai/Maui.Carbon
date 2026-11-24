@@ -83,6 +83,16 @@ public class CdsModalHeader : ContentView
 
     internal VisualElement CloseTarget => _close.HitTarget;
 
+    /// <summary>
+    /// Whether the close button can be used. The modal turns it off while its submit runs (<c>loadingStatus</c>): it
+    /// then draws disabled and its hit target is disabled, so it is not focusable or clickable.
+    /// </summary>
+    internal bool IsCloseEnabled
+    {
+        get => _close.IsEnabled;
+        set => _close.IsEnabled = value;
+    }
+
     void Sync()
     {
         _label.Text = Label;
@@ -282,7 +292,11 @@ public class CdsModalFooter : ContentView
     /// <summary>Raised when the primary button is activated. The modal stays open: close it after validating.</summary>
     public event EventHandler? RequestSubmit;
 
-    /// <summary>Raised when the secondary button is activated and nothing handles <see cref="SecondarySubmit"/>.</summary>
+    /// <summary>
+    /// Raised when the secondary button is activated and nothing handles <see cref="SecondarySubmit"/>. In a
+    /// <see cref="CdsComposedModal"/> it is raised only when the modal agreed to close (no
+    /// <see cref="CdsComposedModal.RequestClose"/> handler cancelled).
+    /// </summary>
     public event EventHandler? RequestClose;
 
     /// <summary>Raised when the secondary button is activated; when it has handlers they replace <see cref="RequestClose"/>.</summary>
@@ -386,7 +400,7 @@ public class CdsModalFooter : ContentView
         set => SetValue(RequestSubmitCommandProperty, value);
     }
 
-    /// <summary>Runs when the secondary button is activated and nothing handles <see cref="SecondarySubmit"/>.</summary>
+    /// <summary>Runs after <see cref="RequestClose"/> (so not when a <see cref="CdsComposedModal"/> cancelled the close).</summary>
     public ICommand? RequestCloseCommand
     {
         get => (ICommand?)GetValue(RequestCloseCommandProperty);
@@ -411,7 +425,20 @@ public class CdsModalFooter : ContentView
         else RaiseClose();
     }
 
+    /// <summary>
+    /// Set by the modal that shows this footer: decides whether a close request goes ahead and, if so, calls the action
+    /// it is given (the footer's own notification) before closing.
+    /// </summary>
+    internal Func<Action, bool>? CloseHandler { get; set; }
+
     internal void RaiseClose()
+    {
+        if (IsLoading) return;
+        if (CloseHandler is { } handler) handler(NotifyClose);
+        else NotifyClose();
+    }
+
+    void NotifyClose()
     {
         RequestClose?.Invoke(this, EventArgs.Empty);
         if (RequestCloseCommand?.CanExecute(null) == true) RequestCloseCommand.Execute(null);

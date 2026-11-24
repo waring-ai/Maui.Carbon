@@ -22,8 +22,9 @@ public abstract class CdsMenuItemBase : BindableObject
         return list;
     }
 
+    // Inherited, like a MAUI logical child: an item given its own BindingContext keeps it.
     internal static void SetInherited(BindableObject child, object? context) =>
-        child.BindingContext = context;
+        SetInheritedBindingContext(child, context);
 
     /// <inheritdoc/>
     protected override void OnBindingContextChanged()

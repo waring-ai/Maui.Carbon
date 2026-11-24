@@ -125,9 +125,6 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     /// <summary>The number of selected rows (what the batch bar counts, including rows hidden by the search).</summary>
     public int SelectedCount => _model.SelectedCount;
 
-    /// <summary>The number of rows that pass the search.</summary>
-    public int VisibleRowCount => _model.VisibleRows.Count;
-
     /// <summary>Clears the selection (what the batch bar's Cancel does).</summary>
     public void ClearSelection()
     {
@@ -176,6 +173,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         {
             foreach (var item in e.NewItems)
             {
+                if (item is BindableObject part) SetInheritedBindingContext(part, BindingContext);
                 switch (item)
                 {
                     case CdsDataTableHeader h: h.Changed += OnPartChanged; break;
@@ -362,6 +360,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
 
     void AfterRows()
     {
+        PublishRowCounts();
         SyncAll();
         UpdateEmpty();
         UpdateAttachedPagination();
@@ -923,7 +922,11 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     void OnEmptyStateChanged(CdsDataTableEmptyState? oldState, CdsDataTableEmptyState? newState)
     {
         if (oldState is not null) oldState.Changed -= OnEmptyChanged;
-        if (newState is not null) newState.Changed += OnEmptyChanged;
+        if (newState is not null)
+        {
+            newState.Changed += OnEmptyChanged;
+            SetInheritedBindingContext(newState, BindingContext);
+        }
         UpdateEmpty();
     }
 
@@ -955,10 +958,36 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         if (!string.IsNullOrEmpty(state.ActionText))
         {
             var action = new CdsButton(state.ActionText, CdsButtonKind.Tertiary) { HorizontalOptions = LayoutOptions.Center, Margin = new Thickness(0, CdsSpacing.Spacing06, 0, 0) };
-            action.Clicked += (_, _) => state.InvokeAction();
+            // The button runs the command itself, so it draws disabled (and its hit target is disabled) while
+            // CanExecute(ActionCommandParameter) is false, and follows CanExecuteChanged, as every CdsButton does.
+            action.Clicked += (_, _) => state.RaiseActionInvoked();
+            action.Command = state.ActionCommand;
+            action.CommandParameter = state.ActionCommandParameter;
             stack.Add(action);
         }
         _empty.Add(stack);
+    }
+
+    /// <summary>The empty-state action button, while it is shown (for tests).</summary>
+    internal CdsButton? EmptyActionButton =>
+        _empty.Children.OfType<VerticalStackLayout>().SelectMany(s => s.Children).OfType<CdsButton>().FirstOrDefault();
+
+    void PublishRowCounts()
+    {
+        if (VisibleRowCount != _model.VisibleRows.Count) SetValue(VisibleRowCountPropertyKey, _model.VisibleRows.Count);
+        if (TotalRowCount != _model.Rows.Count) SetValue(TotalRowCountPropertyKey, _model.Rows.Count);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        // The parts declared inside the table are not in the visual tree: they get its context, as logical children do,
+        // so a binding on a header, batch or row action or the empty state resolves. A context set on a part is kept.
+        foreach (var header in _headers) SetInheritedBindingContext(header, BindingContext);
+        foreach (var action in _batchActions) SetInheritedBindingContext(action, BindingContext);
+        foreach (var action in _rowActions) SetInheritedBindingContext(action, BindingContext);
+        if (EmptyState is { } state) SetInheritedBindingContext(state, BindingContext);
     }
 
     /// <summary>Drops the top border of a <see cref="CdsPagination"/> placed directly under the table.</summary>

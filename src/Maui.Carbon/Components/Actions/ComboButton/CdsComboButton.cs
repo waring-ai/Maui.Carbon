@@ -212,6 +212,17 @@ public class CdsComboButton : CdsControl
         _trigger.IsEnabled = IsEnabled;
     }
 
+    /// <summary>
+    /// Hands this control's binding context to <see cref="Menu"/> and through it to the items, which are not in the
+    /// visual tree, so bindings on items declared inside the control resolve against the page's context. A context set
+    /// on the menu or an item yourself is kept.
+    /// </summary>
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        SetInheritedBindingContext(_menu, BindingContext);
+    }
+
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsComboButton)b).Update();
 
     static void OnCommandChanged(BindableObject b, object? o, object? n)

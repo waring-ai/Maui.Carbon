@@ -56,7 +56,10 @@ public partial class CdsDialog : CdsContainer
     /// <summary>
     /// Raised when the dialog is asked to close: close button, Escape, the secondary button (unless
     /// <see cref="SecondarySubmit"/> has a handler) or a scrim tap on a modal dialog. Set
-    /// <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to keep it open; otherwise <see cref="IsOpen"/> becomes false.
+    /// <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to keep it open; otherwise
+    /// <see cref="RequestCloseCommand"/> runs and <see cref="IsOpen"/> becomes false. Not raised while
+    /// <see cref="LoadingStatus"/> is not <see cref="CdsInlineLoadingStatus.Inactive"/>: the submit is in flight, so the
+    /// close button is disabled and Escape and the scrim do nothing.
     /// </summary>
     public event EventHandler<CdsModalRequestCloseEventArgs>? RequestClose;
 
@@ -111,6 +114,7 @@ public partial class CdsDialog : CdsContainer
             _header.Label = Subtitle;
             _header.Title = Title;
             _header.IconDescription = CloseButtonLabel;
+            _header.IsCloseEnabled = !IsLoading;
         }
         if (_bodyPart is not null) _bodyPart.HasScrollingContent = HasScrollingContent;
         if (_footer is not null && Footer is null)
@@ -183,12 +187,21 @@ public partial class CdsDialog : CdsContainer
         if (IsAlert) CdsModalAlert.Announce(Title, alert);
     }
 
-    void TryClose()
+    /// <summary>True while <see cref="LoadingStatus"/> is not Inactive: the submit is in flight and the dialog cannot be closed from its chrome.</summary>
+    internal bool IsLoading => LoadingStatus != CdsInlineLoadingStatus.Inactive;
+
+    /// <summary>
+    /// Asks to close from the chrome (close button, Escape, secondary button, scrim): refused while loading or when a
+    /// <see cref="RequestClose"/> handler cancels; otherwise runs <see cref="RequestCloseCommand"/> and closes.
+    /// </summary>
+    internal bool TryClose()
     {
+        if (IsLoading) return false;
         var args = new CdsModalRequestCloseEventArgs();
         RequestClose?.Invoke(this, args);
-        if (args.Cancel) return;
+        if (args.Cancel) return false;
         if (RequestCloseCommand?.CanExecute(null) == true) RequestCloseCommand.Execute(null);
         IsOpen = false;
+        return true;
     }
 }

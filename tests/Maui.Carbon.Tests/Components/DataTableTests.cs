@@ -513,9 +513,197 @@ public class DataTableTests
         state.ActionInvoked += (_, _) => raised++;
         var ran = 0;
         state.ActionCommand = new Command(() => ran++);
-        state.InvokeAction();
+        var table = new CdsDataTable { EmptyState = state };
+        ((IButton)table.EmptyActionButton!.AccessibilityTarget!).Clicked();
         Assert.Equal(1, raised);
         Assert.Equal(1, ran);
+    }
+
+    // ----- row counts are observable -----
+
+    [Fact]
+    public void Visible_and_total_row_counts_are_read_only_bindable_properties()
+    {
+        Assert.True(CdsDataTable.VisibleRowCountProperty.IsReadOnly);
+        Assert.True(CdsDataTable.TotalRowCountProperty.IsReadOnly);
+        var empty = new CdsDataTable();
+        Assert.Equal(0, empty.VisibleRowCount);
+        Assert.Equal(0, empty.TotalRowCount);
+
+        var rows = new System.Collections.ObjectModel.ObservableCollection<Cluster>(Clusters);
+        CdsDataTable table = null!;
+        Label shown = null!;
+        // A page binds a label to the counts ("Showing X of N"); bindings need a dispatcher.
+        using var host = FormsTestHost.Load(() =>
+        {
+            table = CreateTable();
+            table.ItemsSource = rows;
+            shown = new Label();
+            shown.SetBinding(Label.TextProperty, new MultiBinding
+            {
+                Bindings =
+                {
+                    new Binding(nameof(CdsDataTable.VisibleRowCount), source: table),
+                    new Binding(nameof(CdsDataTable.TotalRowCount), source: table),
+                },
+                StringFormat = "Showing {0} of {1}",
+            });
+            return new VerticalStackLayout { shown, table };
+        }, out VerticalStackLayout _);
+        Assert.Equal(3, table.VisibleRowCount);
+        Assert.Equal(3, table.TotalRowCount);
+        Assert.Equal("Showing 3 of 3", shown.Text);
+
+        var changed = new List<string?>();
+        table.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        // A search narrows the visible set; the total stays.
+        table.SearchText = "us-";
+        Assert.Equal(2, table.VisibleRowCount);
+        Assert.Equal(3, table.TotalRowCount);
+        Assert.Contains(nameof(CdsDataTable.VisibleRowCount), changed);
+        Assert.DoesNotContain(nameof(CdsDataTable.TotalRowCount), changed);
+        Assert.Equal("Showing 2 of 3", shown.Text);
+
+        // The toolbar search does the same.
+        table.SearchField.Text = "prod";
+        Assert.Equal(1, table.VisibleRowCount);
+        Assert.Equal("Showing 1 of 3", shown.Text);
+
+        // The source changing moves both.
+        changed.Clear();
+        rows.Add(new Cluster("c4", "prod-us-east", "us-east", 4));
+        Assert.Equal(2, table.VisibleRowCount);
+        Assert.Equal(4, table.TotalRowCount);
+        Assert.Contains(nameof(CdsDataTable.TotalRowCount), changed);
+        Assert.Equal("Showing 2 of 4", shown.Text);
+
+        // Unchanged counts raise nothing (sorting reorders but shows the same rows).
+        changed.Clear();
+        table.SortKey = "nodes";
+        table.SortDirection = CdsSortDirection.Ascending;
+        Assert.DoesNotContain(nameof(CdsDataTable.VisibleRowCount), changed);
+
+        table.SearchText = null;
+        table.ItemsSource = null;
+        Assert.Equal(0, table.VisibleRowCount);
+        Assert.Equal(0, table.TotalRowCount);
+        Assert.Equal("Showing 0 of 0", shown.Text);
+    }
+
+    [Fact]
+    public void Virtualized_tables_publish_the_counts_too()
+    {
+        var table = CreateTable();
+        table.StickyHeader = true;
+        Assert.Equal(3, table.VisibleRowCount);
+        table.SearchText = "dev";
+        Assert.Equal(1, table.VisibleRowCount);
+        Assert.Equal(3, table.TotalRowCount);
+    }
+
+    // ----- the empty state's action follows its command -----
+
+    [Fact]
+    public void Empty_state_action_button_follows_CanExecute_with_its_parameter()
+    {
+        var allow = false;
+        object? asked = null;
+        var gate = new Gate(p => { asked = p; return allow; });
+        var state = new CdsDataTableEmptyState
+        {
+            Title = "No keys match",
+            ActionText = "Clear filter",
+            ActionCommand = gate,
+            ActionCommandParameter = "filter",
+        };
+        var invoked = 0;
+        state.ActionInvoked += (_, _) => invoked++;
+        var table = CreateTable();
+        table.EmptyState = state;
+        table.SearchText = "nothing matches this";
+
+        var button = Assert.IsType<CdsButton>(table.EmptyActionButton);
+        var hit = Assert.IsType<CdsHitTarget>(button.AccessibilityTarget);
+        Assert.Equal("filter", asked);
+        Assert.False(button.IsEnabled);
+        Assert.False(hit.IsEnabled);
+        Assert.True(button.State.HasFlag(CdsInteractionState.Disabled));
+        ((IButton)hit).Clicked();
+        Assert.Equal(0, invoked);
+        Assert.Equal(0, gate.Executed);
+
+        // CanExecuteChanged re-evaluates it.
+        allow = true;
+        gate.Raise();
+        Assert.True(button.IsEnabled);
+        Assert.True(hit.IsEnabled);
+        Assert.False(button.State.HasFlag(CdsInteractionState.Disabled));
+        ((IButton)hit).Clicked();
+        Assert.Equal(1, invoked);
+        Assert.Equal(1, gate.Executed);
+
+        // A new command or parameter is picked up.
+        var other = new Gate(p => Equals(p, "other"));
+        state.ActionCommand = other;
+        button = table.EmptyActionButton!;
+        Assert.False(button.IsEnabled);
+        state.ActionCommandParameter = "other";
+        button = table.EmptyActionButton!;
+        Assert.True(button.IsEnabled);
+    }
+
+    [Fact]
+    public void Empty_state_without_a_command_stays_enabled_and_raises_its_event()
+    {
+        var state = new CdsDataTableEmptyState { ActionText = "Create cluster" };
+        var invoked = 0;
+        state.ActionInvoked += (_, _) => invoked++;
+        var table = new CdsDataTable { EmptyState = state };
+        var button = table.EmptyActionButton!;
+        Assert.True(button.IsEnabled);
+        ((IButton)button.AccessibilityTarget!).Clicked();
+        Assert.Equal(1, invoked);
+    }
+
+    sealed record OwnTitle(string Title);
+
+    sealed class EmptyViewModel
+    {
+        public string Title => "No keys yet";
+        public Gate Clear { get; } = new(_ => true);
+    }
+
+    [Fact]
+    public void Table_parts_get_the_table_binding_context()
+    {
+        var vm = new EmptyViewModel();
+        var state = new CdsDataTableEmptyState { ActionText = "Clear filter" };
+        state.SetBinding(CdsDataTableEmptyState.TitleProperty, new Binding(nameof(EmptyViewModel.Title)));
+        state.SetBinding(CdsDataTableEmptyState.ActionCommandProperty, new Binding(nameof(EmptyViewModel.Clear)));
+        var batch = new CdsDataTableBatchAction { Label = "Delete" };
+        batch.SetBinding(CdsDataTableBatchAction.CommandProperty, new Binding(nameof(EmptyViewModel.Clear)));
+        var table = new CdsDataTable { EmptyState = state };
+        table.BatchActions.Add(batch);
+        var page = new ContentPage { Content = table };
+        page.BindingContext = vm;
+        Assert.Same(vm, state.BindingContext);
+        Assert.Equal("No keys yet", state.Title);
+        Assert.Same(vm.Clear, state.ActionCommand);
+        Assert.Same(vm.Clear, batch.Command);
+        ((IButton)table.EmptyActionButton!.AccessibilityTarget!).Clicked();
+        Assert.Equal(1, vm.Clear.Executed);
+
+        // A state set after the context, and one with its own context.
+        var late = new CdsDataTableEmptyState();
+        late.SetBinding(CdsDataTableEmptyState.TitleProperty, new Binding(nameof(EmptyViewModel.Title)));
+        table.EmptyState = late;
+        Assert.Equal("No keys yet", late.Title);
+        var own = new CdsDataTableEmptyState { BindingContext = new OwnTitle("Own") };
+        own.SetBinding(CdsDataTableEmptyState.TitleProperty, new Binding("Title"));
+        table.EmptyState = own;
+        page.BindingContext = new EmptyViewModel();
+        Assert.Equal("Own", own.Title);
     }
 
     // ----- the table primitives -----

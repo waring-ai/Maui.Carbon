@@ -228,8 +228,10 @@ public partial class CdsDialog
     /// <summary>
     /// The submit wait (the footer's <c>loadingStatus</c>): Active, Finished or Error disables the generated footer buttons
     /// and shows a <see cref="CdsInlineLoading"/> with <see cref="LoadingDescription"/> in place of the primary label.
-    /// Default <see cref="CdsInlineLoadingStatus.Inactive"/>. Close the dialog on <see cref="LoadingSuccess"/>. Not used
-    /// with a custom <see cref="Footer"/>.
+    /// Default <see cref="CdsInlineLoadingStatus.Inactive"/>. Close the dialog on <see cref="LoadingSuccess"/>. The footer
+    /// part is not used with a custom <see cref="Footer"/>. In every case, while it is not Inactive the request cannot be
+    /// cancelled from the chrome: the header close button is disabled, Escape and the scrim do nothing and
+    /// <see cref="RequestClose"/> is not raised (setting <see cref="IsOpen"/> still closes it).
     /// </summary>
     public CdsInlineLoadingStatus LoadingStatus
     {
@@ -268,7 +270,7 @@ public partial class CdsDialog
         set => SetValue(RequestSubmitCommandProperty, value);
     }
 
-    /// <summary>Runs when the dialog is asked to close (close button, Escape, secondary button, scrim tap).</summary>
+    /// <summary>Runs when the dialog is asked to close (close button, Escape, secondary button, scrim tap), after <see cref="RequestClose"/> unless a handler cancelled it.</summary>
     public ICommand? RequestCloseCommand
     {
         get => (ICommand?)GetValue(RequestCloseCommandProperty);

@@ -264,3 +264,104 @@ public class MenuTests
         Assert.NotNull(menu.CreatePreview());
     }
 }
+
+public class MenuBindingContextTests
+{
+    sealed class ActionsViewModel(string label)
+    {
+        public int Ran;
+        public string Label { get; } = label;
+        public System.Windows.Input.ICommand Restart => new Command(() => Ran++);
+    }
+
+    static CdsMenuItem Bound()
+    {
+        var item = new CdsMenuItem();
+        item.SetBinding(CdsMenuItem.TextProperty, new Binding(nameof(ActionsViewModel.Label)));
+        item.SetBinding(CdsMenuItem.CommandProperty, new Binding(nameof(ActionsViewModel.Restart)));
+        return item;
+    }
+
+    public static TheoryData<string> Triggers => ["overflow", "menu-button", "combo-button"];
+
+    static (View Trigger, IList<CdsMenuItemBase> Items, CdsMenu Menu) Create(string kind)
+    {
+        switch (kind)
+        {
+            case "overflow":
+                var overflow = new CdsOverflowMenu();
+                return (overflow, overflow.Items, overflow.Menu);
+            case "menu-button":
+                var button = new CdsMenuButton { Label = "Actions" };
+                return (button, button.Items, button.Menu);
+            default:
+                var combo = new CdsComboButton { Label = "Deploy" };
+                return (combo, combo.Items, combo.Menu);
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Triggers))]
+    public void Items_declared_in_a_trigger_bind_to_the_page_context(string kind)
+    {
+        var (trigger, items, menu) = Create(kind);
+        // Items first, context later (the XAML order).
+        var item = Bound();
+        var share = new CdsMenuItem("Share");
+        var nested = Bound();
+        share.Items.Add(nested);
+        var group = new CdsMenuItemGroup { Label = "Lifecycle" };
+        var grouped = Bound();
+        group.Items.Add(grouped);
+        items.Add(item);
+        items.Add(share);
+        items.Add(group);
+        var page = new ContentPage { Content = new VerticalStackLayout { trigger } };
+
+        var first = new ActionsViewModel("Restart");
+        page.BindingContext = first;
+        Assert.Same(first, menu.BindingContext);
+        Assert.Equal("Restart", item.Text);
+        Assert.Equal("Restart", nested.Text);
+        Assert.Equal("Restart", grouped.Text);
+        Assert.True(item.IsActionable);
+        item.Invoke();
+        Assert.Equal(1, first.Ran);
+
+        // The context changes later.
+        var second = new ActionsViewModel("Stop");
+        page.BindingContext = second;
+        Assert.Equal("Stop", item.Text);
+        Assert.Equal("Stop", nested.Text);
+        Assert.Equal("Stop", grouped.Text);
+
+        // An item added after the context gets it too.
+        var late = Bound();
+        items.Add(late);
+        Assert.Equal("Stop", late.Text);
+    }
+
+    [Theory]
+    [MemberData(nameof(Triggers))]
+    public void A_context_set_on_the_menu_or_an_item_is_kept(string kind)
+    {
+        var (trigger, items, menu) = Create(kind);
+        var own = new ActionsViewModel("Own");
+        var pinned = Bound();
+        pinned.BindingContext = own;
+        items.Add(pinned);
+        var plain = Bound();
+        items.Add(plain);
+        var page = new ContentPage { Content = new VerticalStackLayout { trigger } };
+        page.BindingContext = new ActionsViewModel("Page");
+        Assert.Equal("Own", pinned.Text);
+        Assert.Equal("Page", plain.Text);
+
+        // The old workaround (setting the menu's context by hand) still wins.
+        var manual = new ActionsViewModel("Manual");
+        menu.BindingContext = manual;
+        page.BindingContext = new ActionsViewModel("Other");
+        Assert.Equal("Manual", plain.Text);
+        Assert.Equal("Own", pinned.Text);
+    }
+}

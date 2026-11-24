@@ -46,7 +46,7 @@ public class CdsMenu : BindableObject
         _items.CollectionChanged += (_, e) =>
         {
             if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)
-                foreach (CdsMenuItemBase item in e.NewItems) item.BindingContext = BindingContext;
+                foreach (CdsMenuItemBase item in e.NewItems) SetInheritedBindingContext(item, BindingContext);
         };
     }
 
@@ -404,6 +404,6 @@ public class CdsMenu : BindableObject
     protected override void OnBindingContextChanged()
     {
         base.OnBindingContextChanged();
-        foreach (var item in _items) item.BindingContext = BindingContext;
+        foreach (var item in _items) SetInheritedBindingContext(item, BindingContext);
     }
 }
