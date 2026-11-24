@@ -54,7 +54,7 @@ public enum CdsCurrentKind
 /// Tab order, Enter/Space activation, press feedback and a native accessibility element on every platform.
 /// It measures as zero so it never changes the layout; it fills whatever cell it is placed in.
 /// </summary>
-public sealed class CdsHitTarget : Button
+public sealed partial class CdsHitTarget : Button
 {
     /// <summary>Bindable property for <see cref="Role"/>.</summary>
     public static readonly BindableProperty RoleProperty = BindableProperty.Create(

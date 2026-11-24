@@ -221,29 +221,70 @@ public class DatePickerCalendarModelTests
     }
 
     [Theory]
-    [InlineData(DayOfWeek.Sunday, 15, 21)] // Wed 18 March: week of Sun 15 to Sat 21
-    [InlineData(DayOfWeek.Monday, 16, 22)] // Mon 16 to Sun 22
-    public void Home_and_end_go_to_the_ends_of_the_week(DayOfWeek first, int start, int end)
+    [InlineData(DayOfWeek.Sunday)]
+    [InlineData(DayOfWeek.Monday)]
+    public void Home_and_end_go_to_the_first_and_last_day_of_the_month(DayOfWeek first)
     {
+        // CA-27: the reference calendar moves Home to the 1st and End to the month's last day, whatever the week start.
         var model = Model(first);
         model.Show(Today);
-        model.MoveCursor(CdsKey.Home);
-        Assert.Equal(new DateOnly(2026, 3, start), model.Cursor);
-        model.Show(Today);
-        model.MoveCursor(CdsKey.End);
-        Assert.Equal(new DateOnly(2026, 3, end), model.Cursor);
+        Assert.True(model.MoveCursor(CdsKey.Home));
+        Assert.Equal(new DateOnly(2026, 3, 1), model.Cursor);
+        Assert.True(model.MoveCursor(CdsKey.End));
+        Assert.Equal(new DateOnly(2026, 3, 31), model.Cursor);
+        Assert.Equal(new DateOnly(2026, 3, 1), model.VisibleMonth);
     }
 
     [Fact]
-    public void Home_on_the_first_day_of_the_week_stays_and_end_on_the_last_stays()
+    public void End_knows_short_months_and_leap_years()
     {
         var model = Model();
-        model.Show(new DateOnly(2026, 3, 15)); // Sunday
-        model.MoveCursor(CdsKey.Home);
-        Assert.Equal(new DateOnly(2026, 3, 15), model.Cursor);
-        model.Show(new DateOnly(2026, 3, 21)); // Saturday
+        model.Show(new DateOnly(2028, 2, 10));
         model.MoveCursor(CdsKey.End);
-        Assert.Equal(new DateOnly(2026, 3, 21), model.Cursor);
+        Assert.Equal(new DateOnly(2028, 2, 29), model.Cursor);
+        model.Show(new DateOnly(2026, 2, 10));
+        model.MoveCursor(CdsKey.End);
+        Assert.Equal(new DateOnly(2026, 2, 28), model.Cursor);
+        model.MoveCursor(CdsKey.Home);
+        Assert.Equal(new DateOnly(2026, 2, 1), model.Cursor);
+    }
+
+    [Fact]
+    public void Home_and_end_are_clamped_into_min_and_max()
+    {
+        var model = Model();
+        model.Min = new DateOnly(2026, 3, 10);
+        model.Max = new DateOnly(2026, 3, 20);
+        model.Show(Today);
+        model.MoveCursor(CdsKey.Home);
+        Assert.Equal(new DateOnly(2026, 3, 10), model.Cursor);
+        model.MoveCursor(CdsKey.End);
+        Assert.Equal(new DateOnly(2026, 3, 20), model.Cursor);
+    }
+
+    // ---- CA-28: what the screen reader hears for the cursor day ----
+
+    [Fact]
+    public void The_cursor_announcement_is_the_full_date_with_its_state()
+    {
+        var model = Model();
+        model.Show(Today);
+        Assert.Equal(Today.ToString("D", model.Culture), model.CursorAnnouncement());
+        model.SetSelection(Today, null);
+        Assert.Equal(Today.ToString("D", model.Culture) + ", selected", model.CursorAnnouncement());
+        model.IsDisabledDate = d => d.Day == 19;
+        var next = Today.AddDays(1);
+        Assert.Equal(next.ToString("D", model.Culture) + ", unavailable", model.DayAnnouncement(next));
+    }
+
+    [Fact]
+    public void Both_ends_of_a_range_are_announced_as_selected()
+    {
+        var model = Model(range: true);
+        model.SetSelection(new DateOnly(2026, 3, 10), new DateOnly(2026, 3, 14));
+        Assert.EndsWith(", selected", model.DayAnnouncement(new DateOnly(2026, 3, 10)));
+        Assert.EndsWith(", selected", model.DayAnnouncement(new DateOnly(2026, 3, 14)));
+        Assert.DoesNotContain("selected", model.DayAnnouncement(new DateOnly(2026, 3, 12)));
     }
 
     [Fact]

@@ -1,3 +1,5 @@
+using Maui.Carbon.Tests.Foundation;
+
 namespace Maui.Carbon.Tests.Components;
 
 public class FileUploaderTests
@@ -121,5 +123,153 @@ public class FileUploaderTests
         };
         uploader.IsEnabled = false;
         Assert.Equal(CdsSize.Md, uploader.Size);
+    }
+
+    static IEnumerable<Element> Tree(Element e) => ContainerSemanticsAuditTests.Walk(e);
+
+    static void OnScreen(View view) => _ = new Window(new ContentPage { Content = view });
+
+    // ---- CA-33: the invalid glyph ----
+
+    [Fact]
+    public void Invalid_rows_use_the_warning_filled_glyph_like_every_other_form()
+    {
+        var item = new CdsFileUploaderItem { Name = "a.csv", IsInvalid = true, ErrorSubject = "Too large" };
+        var icons = Tree(item).OfType<CdsIcon>().ToList();
+        Assert.Contains(icons, i => i.Icon == CdsIconName.WarningFilled && i.IsVisible);
+        Assert.DoesNotContain(icons, i => i.Icon == CdsIconName.ErrorFilled);
+    }
+
+    // ---- CA-31: the complete check is not color alone ----
+
+    [Fact]
+    public void The_complete_check_is_an_image_named_complete()
+    {
+        var item = new CdsFileUploaderItem { Name = "a.csv", Status = CdsFileStatus.Complete };
+        var check = Tree(item).OfType<CdsIcon>().Single(i => i.Icon == CdsIconName.CheckmarkFilled);
+        Assert.True(check.IsVisible);
+        Assert.Equal("Complete", check.Description);
+        Assert.Equal("Complete", SemanticProperties.GetDescription(check));
+    }
+
+    [Fact]
+    public void Finishing_an_upload_announces_it()
+    {
+        var item = new CdsFileUploaderItem { Name = "a.csv", Status = CdsFileStatus.Uploading };
+        OnScreen(item);
+        using var heard = CdsAnnouncer.Capture();
+        item.Status = CdsFileStatus.Complete;
+        Assert.Equal(new CdsAnnouncement("a.csv uploaded", CdsAnnouncePriority.Polite), Assert.Single(heard.Announcements));
+        item.Status = CdsFileStatus.Edit;
+        item.Status = CdsFileStatus.Complete; // not from uploading: nothing finished
+        Assert.Single(heard.Announcements);
+    }
+
+    // ---- CA-30: the invalid message is an alert ----
+
+    [Fact]
+    public void A_row_that_turns_invalid_announces_its_error_assertively()
+    {
+        var uploader = new CdsFileUploader();
+        var file = new CdsUploadedFile("screen-recording.mov");
+        uploader.Files.Add(file);
+        OnScreen(uploader);
+        using var heard = CdsAnnouncer.Capture();
+        file.IsInvalid = true;
+        file.ErrorSubject = "File size exceeds limit";
+        file.ErrorBody = "500 MB max file size.";
+        Assert.Equal(
+            [new CdsAnnouncement("screen-recording.mov: File size exceeds limit", CdsAnnouncePriority.Assertive),
+             new CdsAnnouncement("screen-recording.mov: File size exceeds limit. 500 MB max file size.", CdsAnnouncePriority.Assertive)],
+            heard.Announcements);
+    }
+
+    [Fact]
+    public void An_invalid_file_added_to_the_list_announces_its_whole_error_once()
+    {
+        var uploader = new CdsFileUploader();
+        OnScreen(uploader);
+        using var heard = CdsAnnouncer.Capture();
+        uploader.Files.Add(new CdsUploadedFile("big.mov") { IsInvalid = true, ErrorSubject = "Too large", ErrorBody = "Under 10 MB" });
+        Assert.Equal(new CdsAnnouncement("big.mov: Too large. Under 10 MB", CdsAnnouncePriority.Assertive), Assert.Single(heard.Announcements));
+    }
+
+    [Fact]
+    public void A_row_built_invalid_announces_when_it_comes_on_screen()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var item = new CdsFileUploaderItem { Name = "a.csv", IsInvalid = true, ErrorSubject = "Too large" };
+        Assert.Empty(heard.Announcements);
+        OnScreen(item);
+        Assert.Equal(new CdsAnnouncement("a.csv: Too large", CdsAnnouncePriority.Assertive), Assert.Single(heard.Announcements));
+    }
+
+    [Fact]
+    public void Without_a_remove_button_the_error_describes_the_name()
+    {
+        var item = new CdsFileUploaderItem { Name = "a.csv", Status = CdsFileStatus.Complete, IsInvalid = true, ErrorSubject = "Too large", ErrorBody = "Under 10 MB" };
+        var name = Tree(item).OfType<CdsText>().Single(t => t.Text == "a.csv");
+        Assert.Equal("Too large. Under 10 MB", SemanticProperties.GetHint(name));
+        item.Status = CdsFileStatus.Edit;
+        Assert.Null(SemanticProperties.GetHint(name)); // the remove button carries it now
+        item.IsInvalid = false;
+        Assert.Null(SemanticProperties.GetHint(name));
+    }
+
+    [Fact]
+    public void Error_texts()
+    {
+        Assert.Null(FileUploaderModel.ErrorText(false, "a", "b"));
+        Assert.Null(FileUploaderModel.ErrorText(true, null, ""));
+        Assert.Equal("a", FileUploaderModel.ErrorText(true, "a", null));
+        Assert.Equal("a. b", FileUploaderModel.ErrorText(true, "a", "b"));
+        Assert.Equal("x.csv: a", FileUploaderModel.InvalidAnnouncement("x.csv", "a"));
+        Assert.Equal("a", FileUploaderModel.InvalidAnnouncement(null, "a"));
+        Assert.Null(FileUploaderModel.InvalidAnnouncement("x.csv", null));
+        Assert.Equal("x.csv uploaded", FileUploaderModel.CompletedAnnouncement("x.csv"));
+    }
+
+    // ---- CA-32: one file by default for the button ----
+
+    [Fact]
+    public void Multiple_defaults_to_one_file_for_the_button_and_several_for_the_drop_container()
+    {
+        Assert.False(new CdsFileUploader().Multiple);
+        Assert.True(new CdsFileUploader { Variant = CdsFileUploaderVariant.Drop }.Multiple);
+        var uploader = new CdsFileUploader { Variant = CdsFileUploaderVariant.Drop };
+        uploader.Variant = CdsFileUploaderVariant.Button;
+        Assert.False(uploader.Multiple);
+    }
+
+    [Fact]
+    public void An_explicit_multiple_wins_over_the_variant_default_in_either_order()
+    {
+        Assert.False(new CdsFileUploader { Variant = CdsFileUploaderVariant.Drop, Multiple = false }.Multiple);
+        Assert.False(new CdsFileUploader { Multiple = false, Variant = CdsFileUploaderVariant.Drop }.Multiple);
+        Assert.True(new CdsFileUploader { Multiple = true }.Multiple);
+        var uploader = new CdsFileUploader { Multiple = true, Variant = CdsFileUploaderVariant.Drop };
+        uploader.Variant = CdsFileUploaderVariant.Button;
+        Assert.True(uploader.Multiple);
+    }
+
+    [Fact]
+    public void A_single_file_uploader_keeps_only_the_latest_file()
+    {
+        var uploader = new CdsFileUploader();
+        uploader.AddResults([new FileResult("/tmp/a.csv"), new FileResult("/tmp/b.csv")]);
+        Assert.Equal("a.csv", Assert.Single(uploader.Files).Name);
+        uploader.AddResults([new FileResult("/tmp/c.csv")]);
+        Assert.Equal("c.csv", Assert.Single(uploader.Files).Name);
+    }
+
+    // ---- CA-34: skeleton ----
+
+    [Fact]
+    public void The_skeleton_is_hidden_from_assistive_technology()
+    {
+        var skeleton = new CdsFileUploaderSkeleton();
+        Assert.False(AutomationProperties.GetIsInAccessibleTree(skeleton) ?? true);
+        Assert.DoesNotContain(Tree(skeleton), e => e is CdsHitTarget);
+        Assert.Equal(3, Tree(skeleton).Count(e => e.GetType().Name == "CdsShimmerView"));
     }
 }

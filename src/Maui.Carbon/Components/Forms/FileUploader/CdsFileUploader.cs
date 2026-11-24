@@ -180,12 +180,12 @@ public partial class CdsFileUploader : CdsControl
         if (sender is CdsUploadedFile file && _rows.TryGetValue(file, out var row)) Sync(row, file);
     }
 
-    static void Sync(CdsFileUploaderItem row, CdsUploadedFile file)
+    static void Sync(CdsFileUploaderItem row, CdsUploadedFile file) => row.Batch(() =>
     {
         row.Name = file.Name;
         row.Status = file.Status;
         row.IsInvalid = file.IsInvalid;
         row.ErrorSubject = file.ErrorSubject;
         row.ErrorBody = file.ErrorBody;
-    }
+    });
 }

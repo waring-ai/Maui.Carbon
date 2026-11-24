@@ -150,6 +150,25 @@ internal static class FileUploaderModel
     public static string RemoveLabel(string? iconDescription, string? fileName) =>
         string.IsNullOrEmpty(fileName) ? iconDescription ?? "Remove file" : $"{iconDescription ?? "Remove file"} - {fileName}";
 
+    /// <summary>
+    /// The error text of an invalid row, "subject. body" (either part may be missing); <c>null</c> when the row is not
+    /// invalid or has no text. It is the row's alert and the remove button's description.
+    /// </summary>
+    public static string? ErrorText(bool isInvalid, string? subject, string? body)
+    {
+        if (!isInvalid) return null;
+        var parts = new[] { subject, body }.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+        return parts.Length == 0 ? null : string.Join(". ", parts);
+    }
+
+    /// <summary>The alert spoken when a row becomes invalid: "name: subject. body" (Carbon: the message is <c>role="alert"</c>).</summary>
+    public static string? InvalidAnnouncement(string? fileName, string? errorText) =>
+        string.IsNullOrEmpty(errorText) ? null : string.IsNullOrEmpty(fileName) ? errorText : $"{fileName}: {errorText}";
+
+    /// <summary>The announcement when a file's upload finishes: "report.csv uploaded".</summary>
+    public static string CompletedAnnouncement(string? fileName) =>
+        string.IsNullOrEmpty(fileName) ? "Upload complete" : $"{fileName} uploaded";
+
     /// <summary>The announcement after adding files: "report.csv added" or "3 files added".</summary>
     public static string AddedAnnouncement(IReadOnlyList<string> names) => names.Count switch
     {

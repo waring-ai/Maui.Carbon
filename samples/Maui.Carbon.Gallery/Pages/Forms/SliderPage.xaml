@@ -27,7 +27,14 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Interactive" Description="Drag the thumb, tap the track, or focus a thumb with Tab: arrows move by one step, Shift+arrow by 4, Home and End jump to the ends. Type a number in the box; a value out of range is flagged until the box loses focus.">
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder of a single slider and of a range.">
+            <VerticalStackLayout Spacing="32" HorizontalOptions="Start" WidthRequest="640">
+                <cds:CdsSliderSkeleton />
+                <cds:CdsSliderSkeleton IsRange="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Drag the thumb, tap the track, or focus a thumb with Tab: arrows move by one step, Shift+arrow, PageUp and PageDown by 4 steps, Home and End jump to the ends. Type a number in the box; a value out of range is flagged until the box loses focus.">
             <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="640">
                 <cds:CdsSlider Label="Memory (GB)" Min="0" Max="64" Step="2" Value="16" ValueChanged="OnValueChanged" />
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="16 GB" />

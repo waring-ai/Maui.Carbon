@@ -83,6 +83,12 @@ internal static class CdsHitTargetStates
         _ => "android.widget.Button",
     };
 
+    /// <summary>
+    /// Puts a target's <see cref="CdsHitTarget.AccessibleValue"/> ahead of its state words ("120 GB, read only");
+    /// <c>null</c> when both are empty.
+    /// </summary>
+    public static string? WithValue(string? value, string? states) => Join(value, states);
+
     static string? Join(params string?[] parts)
     {
         var words = parts.Where(p => !string.IsNullOrEmpty(p)).ToArray();

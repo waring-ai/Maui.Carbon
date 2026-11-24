@@ -1,3 +1,5 @@
+using Maui.Carbon.Tests.Foundation;
+
 namespace Maui.Carbon.Tests.Components;
 
 public class SliderTests
@@ -255,5 +257,132 @@ public class SliderTests
         slider.IsReadOnly = false;
         slider.HideTextInput = false;
         Assert.True(slider.IsRange);
+    }
+
+    // ---- CA-23: PageUp and PageDown ----
+
+    [Fact]
+    public void PageUp_and_PageDown_move_by_step_times_multiplier()
+    {
+        Assert.Equal(54, SliderModel.KeyboardValue(CdsKey.PageUp, false, 50, 0, 100, 1, 4));
+        Assert.Equal(46, SliderModel.KeyboardValue(CdsKey.PageDown, false, 50, 0, 100, 1, 4));
+        Assert.Equal(90, SliderModel.KeyboardValue(CdsKey.PageUp, false, 50, 0, 100, 10, 4));
+        Assert.Equal(100, SliderModel.KeyboardValue(CdsKey.PageUp, false, 98, 0, 100, 1, 4)); // clamped
+        Assert.Equal(0, SliderModel.KeyboardValue(CdsKey.PageDown, true, 2, 0, 100, 1, 4));
+        Assert.Equal(51, SliderModel.KeyboardValue(CdsKey.PageUp, false, 50, 0, 100, 1, 0)); // multiplier below one
+    }
+
+    // ---- CA-24: the thumb's value and assistive-technology adjustment ----
+
+    static CdsHitTarget[] Thumbs(CdsSlider slider) =>
+        [.. ContainerSemanticsAuditTests.Walk(slider).OfType<CdsHitTarget>().Where(h => h.Role == CdsAccessibilityRole.Adjustable)];
+
+    static CdsHitTarget Thumb(CdsSlider slider, string name) =>
+        Thumbs(slider).Single(h => SemanticProperties.GetDescription(h) == name);
+
+    [Fact]
+    public void Thumb_value_is_the_formatted_value_not_a_hint()
+    {
+        var slider = new CdsSlider { Label = "Size (GB)", Min = 20, Max = 2000, Step = 10, Value = 120, ValueFormatter = v => $"{v} GB" };
+        var thumb = Thumb(slider, "Size (GB)");
+        Assert.Equal("120 GB", thumb.AccessibleValue);
+        Assert.Null(SemanticProperties.GetHint(thumb));
+        slider.Value = 300;
+        Assert.Equal("300 GB", thumb.AccessibleValue);
+    }
+
+    [Fact]
+    public void Range_thumbs_carry_their_own_values()
+    {
+        var slider = new CdsSlider { IsRange = true, Min = 0, Max = 50, Value = 3, UpperValue = 24, InputLabel = "Minimum nodes", InputLabelUpper = "Maximum nodes" };
+        Assert.Equal("3", Thumb(slider, "Minimum nodes").AccessibleValue);
+        Assert.Equal("24", Thumb(slider, "Maximum nodes").AccessibleValue);
+    }
+
+    [Fact]
+    public void Screen_reader_increment_and_decrement_step_the_value()
+    {
+        var slider = new CdsSlider { Label = "Volume", Min = 0, Max = 100, Step = 5, Value = 50 };
+        var thumb = Thumb(slider, "Volume");
+        Assert.True(thumb.RequestAdjust(increase: true));
+        Assert.Equal(55, slider.Value);
+        Assert.Equal("55", thumb.AccessibleValue);
+        Assert.True(thumb.RequestAdjust(increase: false));
+        Assert.True(thumb.RequestAdjust(increase: false));
+        Assert.Equal(45, slider.Value);
+    }
+
+    [Fact]
+    public void Screen_reader_adjustment_moves_the_upper_handle_of_a_range_and_keeps_it_ordered()
+    {
+        var slider = new CdsSlider { IsRange = true, Min = 0, Max = 50, Value = 10, UpperValue = 11, InputLabel = "Minimum", InputLabelUpper = "Maximum" };
+        Assert.True(Thumb(slider, "Maximum").RequestAdjust(increase: true));
+        Assert.Equal(12, slider.UpperValue);
+        Thumb(slider, "Maximum").RequestAdjust(increase: false);
+        Thumb(slider, "Maximum").RequestAdjust(increase: false);
+        Thumb(slider, "Maximum").RequestAdjust(increase: false);
+        Assert.Equal(10, slider.UpperValue);
+        Assert.Equal(10, slider.Value); // never below the lower handle
+    }
+
+    [Fact]
+    public void Screen_reader_adjustment_is_refused_when_read_only_or_disabled()
+    {
+        var readOnly = new CdsSlider { Label = "Volume", Value = 50, IsReadOnly = true };
+        Assert.True(Thumb(readOnly, "Volume").IsReadOnly);
+        Assert.False(Thumb(readOnly, "Volume").RequestAdjust(increase: true));
+        Assert.Equal(50, readOnly.Value);
+
+        var disabled = new CdsSlider { Label = "Volume", Value = 50, IsEnabled = false };
+        Assert.False(Thumb(disabled, "Volume").RequestAdjust(increase: true));
+        Assert.Equal(50, disabled.Value);
+    }
+
+    // ---- CA-25: the invalid message is an alert ----
+
+    static CdsNativeEntry Box(CdsSlider slider) =>
+        ContainerSemanticsAuditTests.Walk(slider).OfType<CdsNativeEntry>().Single(e => SemanticProperties.GetDescription(e) == slider.Label);
+
+    [Fact]
+    public void A_typed_out_of_range_value_announces_the_invalid_message_once()
+    {
+        var slider = new CdsSlider { Label = "Size (GB)", Min = 20, Max = 2000, Step = 10, Value = 100 };
+        using var heard = CdsAnnouncer.Capture();
+        Box(slider).Text = "5000";
+        Box(slider).Text = "50000"; // still out of range: the same message is not repeated
+        Assert.Equal(new CdsAnnouncement("Value is out of range", CdsAnnouncePriority.Assertive), Assert.Single(heard.Announcements));
+        Box(slider).Text = "500";   // back in range: the message goes away
+        Box(slider).Text = "5000";  // and is announced again when it returns
+        Assert.Equal(2, heard.Announcements.Count);
+    }
+
+    [Fact]
+    public void Invalid_set_before_the_slider_is_on_screen_is_not_announced_but_later_changes_are()
+    {
+        using var heard = CdsAnnouncer.Capture();
+        var slider = new CdsSlider { Label = "Size", IsInvalid = true, InvalidText = "Too small" };
+        Assert.Empty(heard.Announcements);
+        _ = new Window(new ContentPage { Content = slider });
+        Assert.Empty(heard.Announcements); // present when the page loads: not an alert
+        slider.InvalidText = "Choose at least 20 GB";
+        Assert.Equal(new CdsAnnouncement("Choose at least 20 GB", CdsAnnouncePriority.Assertive), Assert.Single(heard.Announcements));
+        slider.IsInvalid = false;
+        slider.IsInvalid = true;
+        Assert.Equal(2, heard.Announcements.Count);
+    }
+
+    // ---- CA-34: skeleton ----
+
+    [Fact]
+    public void Skeleton_places_one_thumb_in_the_middle_or_two_at_the_quarters()
+    {
+        Assert.Equal([0.5], CdsSliderSkeleton.ThumbPositions(false));
+        Assert.Equal([0.25, 0.75], CdsSliderSkeleton.ThumbPositions(true));
+        var skeleton = new CdsSliderSkeleton { IsRange = true, HideLabel = true };
+        Assert.True(skeleton.IsRange);
+        Assert.False(AutomationProperties.GetIsInAccessibleTree(skeleton) ?? true);
+        Assert.DoesNotContain(ContainerSemanticsAuditTests.Walk(skeleton), e => e is CdsHitTarget);
+        skeleton.IsRange = false;
+        skeleton.HideLabel = false;
     }
 }

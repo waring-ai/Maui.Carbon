@@ -43,6 +43,13 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a label bar over a field bar.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsSelectSkeleton />
+                <cds:CdsSelectSkeleton HideLabel="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Choose a size: the status shows the selected item and its index.">
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsSelect x:Name="Sizes" Label="Node size" SelectedItemChanged="OnSelectedItemChanged" />

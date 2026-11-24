@@ -4,8 +4,10 @@ namespace Maui.Carbon;
 /// A draggable thumb on a 2px track for choosing a number (or, with <see cref="IsRange"/>, a range) between
 /// <see cref="Min"/> and <see cref="Max"/>, with an editable number box. Use it when the relative position matters more
 /// than the exact figure; use a number input for very wide or tiny ranges. Drag a thumb, tap the track (the nearest
-/// handle moves), or use the keyboard: arrows move by <see cref="Step"/>, Shift+arrow by <see cref="Step"/> times
-/// <see cref="StepMultiplier"/>, Home and End jump to the ends. The track is 200 to 640 wide.
+/// handle moves), or use the keyboard: arrows move by <see cref="Step"/>, Shift+arrow, PageUp and PageDown by
+/// <see cref="Step"/> times <see cref="StepMultiplier"/>, Home and End jump to the ends. Each thumb is an adjustable
+/// element whose value is the formatted value, so screen readers can step it too (VoiceOver swipe up and down, TalkBack
+/// scroll forward and backward). The track is 200 to 640 wide.
 /// </summary>
 public partial class CdsSlider : CdsControl
 {
@@ -40,6 +42,8 @@ public partial class CdsSlider : CdsControl
     bool _syncingText;
     bool _lowerOut;
     bool _upperOut;
+    bool _typing;
+    string? _announcedInvalid;
 
     /// <summary>Creates a single slider from 0 to 100.</summary>
     public CdsSlider()
@@ -132,12 +136,24 @@ public partial class CdsSlider : CdsControl
 
         var message = CdsFormMessageResolver.Resolve(boxState, null, InvalidText, WarnText);
         _message.Apply(message);
+        AnnounceInvalid(message);
 
         _lowerHit.IsEnabled = !disabled;
         _upperHit.IsEnabled = !disabled;
         SemanticProperties.SetHint(_lowerEntry, message.Text);
         SemanticProperties.SetHint(_upperEntry, message.Text);
         UpdateThumbs();
+    }
+
+    // The invalid message is role="alert": speak it once, assertively, when it appears or changes. Once the slider is on
+    // screen its CdsFormMessage already does that (CdsMessageAlert). Before then a slider built invalid stays quiet, but a
+    // typed out-of-range value is the user's own edit and is announced here at once.
+    void AnnounceInvalid(CdsFormMessageVisuals message)
+    {
+        var text = message.Kind == CdsFormMessageKind.Invalid ? message.Text : null;
+        if (text == _announcedInvalid) return;
+        _announcedInvalid = text;
+        if (text is not null && _typing && !_message.IsLoaded) CdsAnnouncer.Announce(text, CdsAnnouncePriority.Assertive);
     }
 
     void ApplyBox(CdsFieldChrome box, CdsNativeEntry entry, CdsInteractionState state, SliderHandle handle)
@@ -173,6 +189,8 @@ public partial class CdsSlider : CdsControl
             _lowerBox.Margin = new Thickness(CdsSpacing.Spacing05, 0, 0, 0);
         }
         var showThumbs = !IsReadOnly;
+        _lowerHit.IsReadOnly = IsReadOnly;
+        _upperHit.IsReadOnly = IsReadOnly;
         _lowerWrap.IsVisible = showThumbs;
         _upperWrap.IsVisible = showThumbs && IsRange;
         UpdateTexts();
@@ -203,6 +221,8 @@ public partial class CdsSlider : CdsControl
         _maxText.Text = FormatLabel(Max, MaxLabel);
         SyncBoxText(SliderHandle.Lower);
         SyncBoxText(SliderHandle.Upper);
+        // The formatter and the step also shape the thumbs' value text.
+        UpdateAccessibility();
     }
 
     void UpdateAccessibility()
@@ -211,8 +231,9 @@ public partial class CdsSlider : CdsControl
         var upperName = InputLabelUpper ?? "Upper bound";
         SemanticProperties.SetDescription(_lowerHit, lowerName);
         SemanticProperties.SetDescription(_upperHit, upperName);
-        SemanticProperties.SetHint(_lowerHit, FormatValue(Value));
-        SemanticProperties.SetHint(_upperHit, FormatValue(UpperValue));
+        // aria-valuetext: the element's value, not a hint, so VoiceOver reads it right after the name.
+        _lowerHit.AccessibleValue = FormatValue(Value);
+        _upperHit.AccessibleValue = FormatValue(UpperValue);
         SemanticProperties.SetDescription(_lowerEntry, lowerName ?? Label);
         SemanticProperties.SetDescription(_upperEntry, upperName);
     }
@@ -281,8 +302,19 @@ public partial class CdsSlider : CdsControl
         }
     }
 
+    // A screen reader's increment or decrement steps like the Right and Left arrows; it reads the new value itself.
+    void AdjustFromAssistiveTech(SliderHandle handle, bool increase)
+    {
+        if (IsReadOnly || !IsEnabled) return;
+        var current = handle == SliderHandle.Lower ? Value : UpperValue;
+        if (SliderModel.KeyboardValue(increase ? CdsKey.Right : CdsKey.Left, false, current, Min, Max, Step, StepMultiplier) is { } next)
+            SetFromUser(handle, next);
+    }
+
     void Wire(CdsHitTarget hit, Grid wrap, SliderHandle handle)
     {
+        hit.Incremented += (_, _) => AdjustFromAssistiveTech(handle, increase: true);
+        hit.Decremented += (_, _) => AdjustFromAssistiveTech(handle, increase: false);
         hit.Focused += (_, _) =>
         {
             _focused = handle;
@@ -405,20 +437,28 @@ public partial class CdsSlider : CdsControl
         var out_ = parsed && SliderModel.IsOutOfRange(value, Min, Max);
         if (handle == SliderHandle.Lower) _lowerOut = out_;
         else _upperOut = out_;
-        if (parsed && !out_)
+        _typing = true;
+        try
         {
-            // Accept an in-range number as typed; it is snapped when the box commits.
-            _syncingText = true;
-            try
+            if (parsed && !out_)
             {
-                SetFromUser(handle, value);
+                // Accept an in-range number as typed; it is snapped when the box commits.
+                _syncingText = true;
+                try
+                {
+                    SetFromUser(handle, value);
+                }
+                finally
+                {
+                    _syncingText = false;
+                }
             }
-            finally
-            {
-                _syncingText = false;
-            }
+            RefreshVisuals();
         }
-        RefreshVisuals();
+        finally
+        {
+            _typing = false;
+        }
     }
 
     // On blur or Return: clamp, snap and rewrite the text.

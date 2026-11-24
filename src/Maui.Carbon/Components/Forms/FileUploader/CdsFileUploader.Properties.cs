@@ -24,11 +24,14 @@ public partial class CdsFileUploader
 
     /// <summary>Bindable property for <see cref="Multiple"/>.</summary>
     public static readonly BindableProperty MultipleProperty = BindableProperty.Create(
-        nameof(Multiple), typeof(bool), typeof(CdsFileUploader), true);
+        nameof(Multiple), typeof(bool), typeof(CdsFileUploader), false,
+        // Coercion runs on every set, even of the current value, so it tells an app's choice from the variant default.
+        coerceValue: static (b, v) => ((CdsFileUploader)b).OnMultipleSet(v));
 
     /// <summary>Bindable property for <see cref="Variant"/>.</summary>
     public static readonly BindableProperty VariantProperty = BindableProperty.Create(
-        nameof(Variant), typeof(CdsFileUploaderVariant), typeof(CdsFileUploader), CdsFileUploaderVariant.Button, propertyChanged: OnUploaderChanged);
+        nameof(Variant), typeof(CdsFileUploaderVariant), typeof(CdsFileUploader), CdsFileUploaderVariant.Button,
+        propertyChanged: static (b, _, _) => ((CdsFileUploader)b).OnVariantChanged());
 
     /// <summary>Bindable property for <see cref="ButtonKind"/>.</summary>
     public static readonly BindableProperty ButtonKindProperty = BindableProperty.Create(
@@ -60,7 +63,7 @@ public partial class CdsFileUploader
         set => SetValue(LabelDescriptionProperty, value);
     }
 
-    /// <summary>The button text: a short verb phrase. Default "Add file" (Carbon suggests "Add files" with <see cref="Multiple"/>).</summary>
+    /// <summary>The button text: a short verb phrase. Default "Add file" (the button keeps one file by default; Carbon suggests "Add files" with <see cref="Multiple"/>).</summary>
     public string? ButtonLabel
     {
         get => (string?)GetValue(ButtonLabelProperty);
@@ -81,7 +84,11 @@ public partial class CdsFileUploader
         set => SetValue(AcceptProperty, value);
     }
 
-    /// <summary>Allows several files at once. Default true; false replaces the list with the one chosen file.</summary>
+    /// <summary>
+    /// Allows several files at once; false keeps one file (a new pick replaces it). The default follows
+    /// <see cref="Variant"/> as in Carbon: the drop container allows several, the button keeps one. Setting it overrides
+    /// that default for either variant.
+    /// </summary>
     public bool Multiple
     {
         get => (bool)GetValue(MultipleProperty);
@@ -124,4 +131,31 @@ public partial class CdsFileUploader
     }
 
     static void OnUploaderChanged(BindableObject b, object? o, object? n) => ((CdsFileUploader)b).UpdateLayout();
+
+    // Multiple has a variant-dependent default (drop: several files, button: one) until the app sets it.
+    bool _multipleSetByApp;
+    bool _settingMultipleDefault;
+
+    object OnMultipleSet(object value)
+    {
+        if (!_settingMultipleDefault) _multipleSetByApp = true;
+        return value;
+    }
+
+    void OnVariantChanged()
+    {
+        if (!_multipleSetByApp)
+        {
+            _settingMultipleDefault = true;
+            try
+            {
+                Multiple = Variant == CdsFileUploaderVariant.Drop;
+            }
+            finally
+            {
+                _settingMultipleDefault = false;
+            }
+        }
+        UpdateLayout();
+    }
 }

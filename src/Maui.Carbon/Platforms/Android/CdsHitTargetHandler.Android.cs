@@ -51,6 +51,12 @@ public partial class CdsHitTargetHandler
         view.ExpandedState = target.IsExpanded;
         view.ReadOnlyState = target.IsReadOnly;
         view.CurrentState = target.CurrentKind;
+        var oldValue = view.ValueState;
+        view.ValueState = target.AccessibleValue;
+        view.CanAdjust = target.CanAdjust;
+        // An adjustable target's value changed (aria-valuetext): like a SeekBar, tell TalkBack so it reads the new value.
+        if (oldValue != view.ValueState && view.IsAccessibilityFocused)
+            view.SendAccessibilityEvent(EventTypes.ViewSelected);
     }
 }
 
@@ -68,6 +74,8 @@ internal sealed class CdsAndroidHitTargetView : MaterialButton
     internal bool? ExpandedState { get; set; }
     internal bool ReadOnlyState { get; set; }
     internal CdsCurrentKind CurrentState { get; set; }
+    internal string? ValueState { get; set; }
+    internal bool CanAdjust { get; set; }
 
     CdsHitTarget? Target => Owner is not null && Owner.TryGetTarget(out var t) ? t : null;
 
@@ -88,11 +96,17 @@ internal sealed class CdsAndroidHitTargetView : MaterialButton
         // aria-expanded: TalkBack offers the expand or collapse action and speaks the state.
         if (ExpandedState is { } expanded)
             info.AddAction(expanded ? AccessibilityNodeInfo.AccessibilityAction.ActionCollapse : AccessibilityNodeInfo.AccessibilityAction.ActionExpand);
+        // Adjustable (role="slider"): TalkBack's adjust gestures and volume keys send scroll forward and backward.
+        if (Role == CdsAccessibilityRole.Adjustable && CanAdjust)
+        {
+            info.AddAction(AccessibilityNodeInfo.AccessibilityAction.ActionScrollForward);
+            info.AddAction(AccessibilityNodeInfo.AccessibilityAction.ActionScrollBackward);
+        }
         // Mixed, expanded, current and read-only have no node flag: they go into the state description (compat stores it
         // in the node extras below API 30).
         if (AccessibilityNodeInfoCompat.Wrap(info) is not { } compat) return;
         if (CdsHitTargetStates.AndroidRoleDescription(Role) is { } role) compat.RoleDescription = role;
-        compat.StateDescription = CdsHitTargetStates.AndroidStateDescription(Role, CheckedState, ExpandedState, ReadOnlyState, CurrentState);
+        compat.StateDescription = CdsHitTargetStates.WithValue(ValueState, CdsHitTargetStates.AndroidStateDescription(Role, CheckedState, ExpandedState, ReadOnlyState, CurrentState));
     }
 
     public override bool PerformAccessibilityAction(global::Android.Views.Accessibility.Action action, Bundle? arguments)
@@ -104,6 +118,9 @@ internal sealed class CdsAndroidHitTargetView : MaterialButton
             target.RaiseKeyboardActivation();
             return true;
         }
+        if (action is global::Android.Views.Accessibility.Action.ScrollForward or global::Android.Views.Accessibility.Action.ScrollBackward &&
+            Role == CdsAccessibilityRole.Adjustable)
+            return Target?.RequestAdjust(increase: action == global::Android.Views.Accessibility.Action.ScrollForward) == true;
         return base.PerformAccessibilityAction(action, arguments);
     }
 }

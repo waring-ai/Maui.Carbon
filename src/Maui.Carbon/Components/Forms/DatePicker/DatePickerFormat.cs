@@ -120,6 +120,20 @@ internal static class DatePickerFormat
         _ => string.Empty,
     };
 
+    /// <summary>
+    /// True when <paramref name="newText"/> is <paramref name="oldText"/> with one space typed into it (anywhere): the
+    /// Space key pressed in a field that keeps focus while the calendar is driven by the keyboard.
+    /// </summary>
+    public static bool IsTypedSpace(string? oldText, string? newText)
+    {
+        oldText ??= string.Empty;
+        newText ??= string.Empty;
+        if (newText.Length != oldText.Length + 1) return false;
+        var i = 0;
+        while (i < oldText.Length && oldText[i] == newText[i]) i++;
+        return newText[i] == ' ' && string.CompareOrdinal(oldText, i, newText, i + 1, oldText.Length - i) == 0;
+    }
+
     /// <summary>Converts a nullable <see cref="DateTime"/> to a date.</summary>
     public static DateOnly? ToDate(DateTime? value) => value is { } v ? DateOnly.FromDateTime(v) : null;
 

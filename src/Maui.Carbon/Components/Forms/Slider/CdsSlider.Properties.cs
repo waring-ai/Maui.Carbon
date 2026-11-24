@@ -162,7 +162,7 @@ public partial class CdsSlider
         set => SetValue(StepProperty, value);
     }
 
-    /// <summary>Shift+arrow moves by <see cref="Step"/> times this. Default 4.</summary>
+    /// <summary>Shift+arrow, PageUp and PageDown move by <see cref="Step"/> times this. Default 4.</summary>
     public double StepMultiplier
     {
         get => (double)GetValue(StepMultiplierProperty);

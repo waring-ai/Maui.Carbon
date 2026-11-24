@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Button" Description="The title and description state the limits; Accept filters the platform picker. Rows show every status: uploading (spinner), editable (remove button) and complete (check).">
-            <cds:CdsFileUploader x:Name="ButtonUploader" LabelTitle="Attach logs" LabelDescription="Max file size is 500 MB. Supported types are .log, .txt and .png." ButtonLabel="Add files" Accept=".log, .txt, .png" WidthRequest="400" HorizontalOptions="Start" FilesAdded="OnFilesAdded" />
+            <cds:CdsFileUploader x:Name="ButtonUploader" LabelTitle="Attach logs" LabelDescription="Max file size is 500 MB. Supported types are .log, .txt and .png." ButtonLabel="Add files" Multiple="True" Accept=".log, .txt, .png" WidthRequest="400" HorizontalOptions="Start" FilesAdded="OnFilesAdded" />
         </g:GalleryExample>
 
         <g:GalleryExample Title="Drop container" Description="Drag files onto the dashed box, or click it to open the picker. Dragging over it draws the 2px focus outline.">
@@ -28,6 +28,10 @@
 
         <g:GalleryExample Title="Disabled">
             <cds:CdsFileUploader LabelTitle="Attach logs" LabelDescription="Uploads are paused during maintenance." IsEnabled="False" WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder: heading, description and button bars.">
+            <cds:CdsFileUploaderSkeleton />
         </g:GalleryExample>
 
         <g:GalleryExample Title="Interactive" Description="Add files with the picker: the status reports what was added and removed.">

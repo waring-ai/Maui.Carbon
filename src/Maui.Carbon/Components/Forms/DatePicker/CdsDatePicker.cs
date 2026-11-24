@@ -5,13 +5,16 @@ namespace Maui.Carbon;
 /// <summary>
 /// A date field with a calendar popup: <see cref="CdsDatePickerType.Single"/> picks one date, <see cref="CdsDatePickerType.Range"/>
 /// a start and end date (two fields, one calendar) and <see cref="CdsDatePickerType.Simple"/> is a typed date with no
-/// calendar. Typing always works: Enter or leaving the field applies the date, and text that is not a date in
-/// <see cref="DateFormat"/>, or is outside <see cref="MinDate"/>..<see cref="MaxDate"/> or on a disabled day, shows an error
-/// message. Use a time picker for a time of day and a dropdown of presets for relative periods.
+/// calendar. Typing always works: Enter or leaving the field applies the date. Text that is not a date in
+/// <see cref="DateFormat"/> reverts to the last applied date (Carbon: unparseable text reverts); a date outside
+/// <see cref="MinDate"/>..<see cref="MaxDate"/> or on a disabled day stays and shows an error message. Use a time picker
+/// for a time of day and a dropdown of presets for relative periods.
 /// <para>
-/// The calendar is an overlay under the first field. Clicking or tapping a field (focusing it) opens it. Keyboard: Down moves from the field into the calendar; arrows move by day
-/// and week, PageUp and PageDown by month, Home and End to the first and last day of the week; Enter picks; Escape closes and
-/// returns to the field. Single closes after a pick; range after the second pick.
+/// The calendar is an overlay under the first field. Clicking or tapping a field (focusing it) opens it. Keyboard: Down moves
+/// from the field into the calendar; arrows move by day and week, PageUp and PageDown by month, Home and End to the first and
+/// last day of the month; Enter or Space picks; Escape closes and returns to the field. Single closes after a pick; range after
+/// the second pick. Screen readers hear the day under the keyboard cursor after every move, and the month when the month
+/// buttons change it.
 /// </para>
 /// </summary>
 public partial class CdsDatePicker : CdsFormField
@@ -56,6 +59,7 @@ public partial class CdsDatePicker : CdsFormField
     bool _startStatus;
     bool _endStatus;
     long? _closedAt;
+    readonly Queue<string>[] _queuedTexts = [new(), new()];
     int _activeField;
     CalendarModel? _model;
     CdsCalendarView? _view;
@@ -423,16 +427,8 @@ public partial class CdsDatePicker : CdsFormField
     void SyncEntries()
     {
         var format = DateFormat;
-        _syncing = true;
-        try
-        {
-            StartEntry.Text = DatePickerFormat.ToDate(StartDate) is { } s ? DatePickerFormat.Format(s, format) : string.Empty;
-            EndEntry.Text = DatePickerFormat.ToDate(EndDate) is { } e ? DatePickerFormat.Format(e, format) : string.Empty;
-        }
-        finally
-        {
-            _syncing = false;
-        }
+        SetEntryText(0, DatePickerFormat.ToDate(StartDate) is { } s ? DatePickerFormat.Format(s, format) : string.Empty);
+        SetEntryText(1, DatePickerFormat.ToDate(EndDate) is { } e ? DatePickerFormat.Format(e, format) : string.Empty);
     }
 
     void OnValueChanged(DateTime? value)
@@ -479,7 +475,15 @@ public partial class CdsDatePicker : CdsFormField
 
     void OnEntryTextChanged(int field, TextChangedEventArgs e)
     {
-        if (_syncing) return;
+        if (_syncing || IsQueuedText(field, e.NewTextValue)) return;
+        // Space on the highlighted day picks it (the field keeps focus, so the key arrives as a typed space): pick, and
+        // rewrite the text without the space, so the keyboard stays in the calendar.
+        if (_inCalendar && _model is { } cal && DatePickerFormat.IsTypedSpace(e.OldTextValue, e.NewTextValue))
+        {
+            PickDay(cal.Cursor);
+            SyncEntries();
+            return;
+        }
         _inCalendar = false;
         _overlay?.SetKeys(CdsOverlayKeys.VerticalNavigation);
         // Typing clears a stale error; it is judged again when the date is applied.
@@ -503,7 +507,7 @@ public partial class CdsDatePicker : CdsFormField
 
     void OnEntryCompleted(int field)
     {
-        if (_overlay is not null && _inCalendar && _model is { } m)
+        if (_inCalendar && _model is { } m)
         {
             PickDay(m.Cursor);
             return;
@@ -518,6 +522,18 @@ public partial class CdsDatePicker : CdsFormField
         var (date, error) = DatePickerFormat.Validate(entry.Text, DateFormat, Min, Max, DisabledPredicate);
         if (error == CdsDateEntryError.None && field == 1 && date is { } end && DatePickerFormat.ToDate(StartDate) is { } start && end < start)
             error = CdsDateEntryError.EndBeforeStart;
+
+        // Carbon: unparseable text reverts to the last applied date. Out-of-range and disabled dates keep their text and
+        // show why they were refused.
+        if (error == CdsDateEntryError.Unparseable)
+        {
+            error = CdsDateEntryError.None;
+            if (field == 0) _startError = error;
+            else _endError = error;
+            RevertEntry(field);
+            UpdateChrome();
+            return false;
+        }
 
         if (field == 0) _startError = error;
         else _endError = error;
@@ -534,6 +550,40 @@ public partial class CdsDatePicker : CdsFormField
         }
         UpdateChrome();
         return false;
+    }
+
+    void RevertEntry(int field)
+    {
+        var date = DatePickerFormat.ToDate(field == 0 ? StartDate : EndDate);
+        SetEntryText(field, date is { } d ? DatePickerFormat.Format(d, DateFormat) : string.Empty);
+    }
+
+    // Writes a field's text without treating it as typing. A write made while that entry's own TextChanged is running is
+    // applied by MAUI only after the handler returns (nested sets of one property are queued), when _syncing is already
+    // off: such writes are remembered and their late TextChanged is recognised and ignored.
+    void SetEntryText(int field, string? text)
+    {
+        var entry = field == 0 ? StartEntry : EndEntry;
+        text ??= string.Empty;
+        if ((entry.Text ?? string.Empty) == text) return;
+        _syncing = true;
+        try
+        {
+            entry.Text = text;
+            if ((entry.Text ?? string.Empty) != text) _queuedTexts[field].Enqueue(text);
+        }
+        finally
+        {
+            _syncing = false;
+        }
+    }
+
+    bool IsQueuedText(int field, string? text)
+    {
+        var queue = _queuedTexts[field];
+        if (queue.Count == 0 || queue.Peek() != (text ?? string.Empty)) return false;
+        queue.Dequeue();
+        return true;
     }
 
     // ---- calendar ----
@@ -593,6 +643,26 @@ public partial class CdsDatePicker : CdsFormField
 
     void ShowCalendar()
     {
+        var (_, view) = BuildCalendar();
+        var overlay = CdsOverlayService.Open(view, new CdsOverlayOptions
+        {
+            Anchor = Chrome.Field,
+            Placement = CdsPlacement.BottomStart,
+            Offset = -2,
+            LightDismiss = true,
+            ReturnFocusTo = _activeField == 1 ? EndEntry : StartEntry,
+            // Typing in the field keeps Left/Right/Home/End; once Down moves into the calendar they move the day.
+            Keys = _inCalendar ? CdsOverlayKeys.Navigation : CdsOverlayKeys.VerticalNavigation,
+            KeyHandler = OnCalendarKey,
+        });
+        _overlay = overlay;
+        overlay.Closed += (_, _) => OnCalendarClosed(overlay);
+        if (_inCalendar) CdsAnnouncer.Announce(_model?.CursorAnnouncement());
+    }
+
+    /// <summary>Creates the calendar model and view for the current dates (the overlay is opened by the caller).</summary>
+    internal (CalendarModel Model, CdsCalendarView View) BuildCalendar()
+    {
         var model = new CalendarModel(Culture, TodayProvider(), IsRange)
         {
             Min = Min,
@@ -610,20 +680,7 @@ public partial class CdsDatePicker : CdsFormField
         _inCalendar = _engageOnOpen;
         _engageOnOpen = false;
         view.Render(model, _inCalendar);
-
-        var overlay = CdsOverlayService.Open(view, new CdsOverlayOptions
-        {
-            Anchor = Chrome.Field,
-            Placement = CdsPlacement.BottomStart,
-            Offset = -2,
-            LightDismiss = true,
-            ReturnFocusTo = _activeField == 1 ? EndEntry : StartEntry,
-            // Typing in the field keeps Left/Right/Home/End; once Down moves into the calendar they move the day.
-            Keys = _inCalendar ? CdsOverlayKeys.Navigation : CdsOverlayKeys.VerticalNavigation,
-            KeyHandler = OnCalendarKey,
-        });
-        _overlay = overlay;
-        overlay.Closed += (_, _) => OnCalendarClosed(overlay);
+        return (model, view);
     }
 
     void HideCalendar(bool keepOpenFlag)
@@ -663,9 +720,10 @@ public partial class CdsDatePicker : CdsFormField
     void Navigate(bool previous)
     {
         if (_model is not { } m) return;
-        if (previous) m.GoPrevious();
-        else m.GoNext();
+        var moved = previous ? m.GoPrevious() : m.GoNext();
         RenderCalendar();
+        // The month buttons are not focused by the keyboard; say which month is now shown.
+        if (moved) CdsAnnouncer.Announce(m.MonthLabel);
     }
 
     void PickDay(DateOnly date)
@@ -673,11 +731,13 @@ public partial class CdsDatePicker : CdsFormField
         if (_model is not { } m) return;
         var result = m.Pick(date);
         if (result == CalendarPick.Ignored) return;
+        // Read both ends first: setting StartDate re-renders, which syncs the model from the (still old) EndDate.
+        var (start, end) = (m.Start, m.End);
         _batching = true;
         try
         {
-            StartDate = DatePickerFormat.ToDateTime(m.Start);
-            EndDate = DatePickerFormat.ToDateTime(m.End);
+            StartDate = DatePickerFormat.ToDateTime(start);
+            EndDate = DatePickerFormat.ToDateTime(end);
         }
         finally
         {
@@ -688,7 +748,8 @@ public partial class CdsDatePicker : CdsFormField
         else RenderCalendar();
     }
 
-    bool OnCalendarKey(CdsKeyEventArgs e)
+    /// <summary>The calendar's key handler (internal for tests): moves the cursor, picks, and announces the cursor day.</summary>
+    internal bool OnCalendarKey(CdsKeyEventArgs e)
     {
         if (_model is not { } m) return false;
         switch (e.Key)
@@ -698,12 +759,18 @@ public partial class CdsDatePicker : CdsFormField
                 _inCalendar = true;
                 _overlay?.SetKeys(CdsOverlayKeys.Navigation);
                 RenderCalendar();
+                CdsAnnouncer.Announce(m.CursorAnnouncement());
                 return true;
             case CdsKey.PageUp or CdsKey.PageDown:
             case CdsKey.Left or CdsKey.Right or CdsKey.Up or CdsKey.Down or CdsKey.Home or CdsKey.End when _inCalendar:
                 _inCalendar = true;
                 m.MoveCursor(e.Key);
                 RenderCalendar();
+                // Virtual focus: the day is never focused, so say where the cursor is.
+                CdsAnnouncer.Announce(m.CursorAnnouncement());
+                return true;
+            case CdsKey.Enter or CdsKey.Space when _inCalendar:
+                PickDay(m.Cursor);
                 return true;
             default:
                 // Left, Right, Home and End edit the typed text until the keyboard is in the calendar.

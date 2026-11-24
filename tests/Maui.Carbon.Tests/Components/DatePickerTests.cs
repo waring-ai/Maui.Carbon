@@ -135,23 +135,51 @@ public class DatePickerTests
     }
 
     [Fact]
-    public void Text_that_is_not_a_date_is_invalid_with_a_message_and_keeps_the_text()
+    public void Text_that_is_not_a_date_reverts_to_the_last_applied_date()
     {
+        // CA-29: Carbon reverts unparseable text instead of keeping it with an error.
         var picker = Make();
         picker.StartDate = new DateTime(2026, 3, 4);
         picker.Start.Text = "tomorrow";
         picker.CompleteStart();
-        Assert.True(picker.Invalid);
-        Assert.Equal("Enter a date as mm/dd/yyyy", picker.InvalidMessage);
-        Assert.Equal("tomorrow", picker.Start.Text);
+        Assert.False(picker.Invalid);
+        Assert.Equal("03/04/2026", picker.Start.Text);
         Assert.Equal(new DateTime(2026, 3, 4), picker.StartDate); // unchanged
+    }
+
+    [Fact]
+    public void Text_that_is_not_a_date_reverts_to_empty_when_no_date_was_applied()
+    {
+        var picker = Make(CdsDatePickerType.Range);
+        picker.Start.Text = "soon";
+        picker.CompleteStart();
+        Assert.Equal("", picker.Start.Text);
+        Assert.Null(picker.StartDate);
+        picker.EndDate = new DateTime(2026, 3, 9);
+        picker.End.Text = "03/0x/2026";
+        picker.CompleteEnd();
+        Assert.Equal("03/09/2026", picker.End.Text);
+        Assert.False(picker.Invalid);
+    }
+
+    [Fact]
+    public void Reverting_clears_the_consumers_invalid_state_only_when_it_was_ours()
+    {
+        var picker = Make();
+        picker.IsInvalid = true;
+        picker.InvalidText = "Required";
+        picker.Start.Text = "nope";
+        picker.CompleteStart();
+        Assert.True(picker.Invalid); // the app's own validation is untouched
+        Assert.Equal("Required", picker.InvalidMessage);
     }
 
     [Fact]
     public void Typing_again_clears_the_error()
     {
         var picker = Make();
-        picker.Start.Text = "tomorrow";
+        picker.MinDate = new DateTime(2026, 3, 1);
+        picker.Start.Text = "02/01/2026";
         picker.CompleteStart();
         Assert.True(picker.Invalid);
         picker.Start.Text = "03/0";
@@ -162,7 +190,8 @@ public class DatePickerTests
     public void A_valid_date_after_an_error_clears_it()
     {
         var picker = Make();
-        picker.Start.Text = "tomorrow";
+        picker.MinDate = new DateTime(2026, 3, 1);
+        picker.Start.Text = "02/01/2026";
         picker.CompleteStart();
         picker.Start.Text = "03/04/2026";
         picker.CompleteStart();
@@ -289,4 +318,94 @@ public class DatePickerTests
         skeleton.Range = false;
         Assert.False(skeleton.Range);
     }
+
+    // ---- calendar keyboard (CA-26, CA-27, CA-28) ----
+
+    static TestPicker WithCalendar(CdsDatePickerType type = CdsDatePickerType.Single)
+    {
+        var picker = Make(type);
+        picker.StartDate = new DateTime(2026, 3, 18);
+        picker.BuildCalendar();
+        return picker;
+    }
+
+    [Fact]
+    public void Down_enters_the_calendar_and_announces_the_cursor_day()
+    {
+        var picker = WithCalendar();
+        using var heard = CdsAnnouncer.Capture();
+        Assert.True(picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Down)));
+        var day = new DateOnly(2026, 3, 18).ToString("D", picker.Culture);
+        Assert.Equal(new CdsAnnouncement(day + ", selected", CdsAnnouncePriority.Polite), Assert.Single(heard.Announcements));
+    }
+
+    [Fact]
+    public void Every_cursor_move_announces_the_day()
+    {
+        var picker = WithCalendar();
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Down));
+        using var heard = CdsAnnouncer.Capture();
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Right));
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.End));
+        Assert.Equal(
+            [new DateOnly(2026, 3, 19).ToString("D", picker.Culture), new DateOnly(2026, 3, 31).ToString("D", picker.Culture)],
+            heard.Announcements.Select(a => a.Text));
+    }
+
+    [Fact]
+    public void Left_and_home_edit_the_text_until_the_keyboard_is_in_the_calendar()
+    {
+        var picker = WithCalendar();
+        Assert.False(picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Home)));
+        Assert.False(picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Space)));
+    }
+
+    [Fact]
+    public void Space_typed_on_the_highlighted_day_picks_it_and_leaves_no_space()
+    {
+        var picker = WithCalendar();
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Down));
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Right));
+        picker.Start.Text += " "; // the field keeps focus, so Space arrives as typed text
+        Assert.Equal(new DateTime(2026, 3, 19), picker.StartDate);
+        Assert.Equal("03/19/2026", picker.Start.Text);
+    }
+
+    [Fact]
+    public void Space_in_a_range_calendar_keeps_the_keyboard_in_the_calendar()
+    {
+        var picker = Make(CdsDatePickerType.Range);
+        picker.StartDate = new DateTime(2026, 3, 10);
+        picker.EndDate = new DateTime(2026, 3, 12);
+        picker.BuildCalendar();
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Down)); // cursor on the 10th
+        picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Right));
+        picker.Start.Text += " "; // first pick: starts a new range on the 11th
+        Assert.Equal(new DateTime(2026, 3, 11), picker.StartDate);
+        Assert.Null(picker.EndDate);
+        Assert.True(picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Right))); // still navigating the calendar
+        Assert.True(picker.OnCalendarKey(new CdsKeyEventArgs(CdsKey.Space))); // Space from the key router also picks
+        Assert.Equal(new DateTime(2026, 3, 11), picker.StartDate);
+        Assert.Equal(new DateTime(2026, 3, 12), picker.EndDate);
+    }
+
+    [Fact]
+    public void A_space_typed_while_not_in_the_calendar_is_just_text()
+    {
+        var picker = WithCalendar();
+        picker.Start.Text = "03/18/2026 ";
+        Assert.Equal("03/18/2026 ", picker.Start.Text);
+    }
+
+    [Theory]
+    [InlineData("", " ", true)]
+    [InlineData("03/18", "03/18 ", true)]
+    [InlineData("03/18", "03 /18", true)]
+    [InlineData(null, " ", true)]
+    [InlineData("03/18", "03/181", false)]
+    [InlineData("03/18", "03/18  ", false)]
+    [InlineData("03/18", "03/1", false)]
+    [InlineData("03/18", "03/19 ", false)]
+    public void Typed_space_detection(string? before, string? after, bool expected) =>
+        Assert.Equal(expected, DatePickerFormat.IsTypedSpace(before, after));
 }

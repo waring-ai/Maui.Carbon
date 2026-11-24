@@ -108,4 +108,15 @@ public class SelectTests
         select.IsEnabled = false;
         Assert.Equal(CdsSize.Sm, select.Size);
     }
+
+    [Fact]
+    public void The_skeleton_has_a_label_bar_that_can_be_hidden()
+    {
+        // CA-34: Carbon's SelectSkeleton (hideLabel).
+        var skeleton = new CdsSelectSkeleton();
+        Assert.False(skeleton.HideLabel);
+        Assert.False(AutomationProperties.GetIsInAccessibleTree(skeleton) ?? true);
+        skeleton.HideLabel = true;
+        Assert.True(skeleton.HideLabel);
+    }
 }

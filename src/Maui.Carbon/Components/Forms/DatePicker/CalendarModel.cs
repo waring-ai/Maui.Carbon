@@ -30,8 +30,8 @@ internal enum CalendarPick
 /// <summary>
 /// The pure model of the date picker's calendar: the visible month and its six-by-seven grid (first day of the week from
 /// the culture, leading and trailing days), today, the keyboard cursor, single and range selection, min/max clamping and
-/// disabled days, and keyboard movement (arrows by day and week, PageUp and PageDown by month, Home and End to the week's
-/// ends). The calendar view only renders it.
+/// disabled days, and keyboard movement (arrows by day and week, PageUp and PageDown by month, Home and End to the first
+/// and last day of the month). The calendar view only renders it.
 /// </summary>
 internal sealed class CalendarModel
 {
@@ -168,8 +168,8 @@ internal sealed class CalendarModel
 
     /// <summary>
     /// Moves the keyboard cursor: Left and Right by a day, Up and Down by a week, PageUp and PageDown by a month, Home and End
-    /// to the start and end of the week. The result is clamped into min..max and the visible month follows. Returns true when
-    /// the key is a calendar key (even when clamping kept the cursor in place).
+    /// to the first and last day of the month. The result is clamped into min..max and the visible month follows. Returns
+    /// true when the key is a calendar key (even when clamping kept the cursor in place).
     /// </summary>
     public bool MoveCursor(CdsKey key)
     {
@@ -182,8 +182,8 @@ internal sealed class CalendarModel
             case CdsKey.Down: target = AddDays(Cursor, 7); break;
             case CdsKey.PageUp: target = AddMonths(Cursor, -1); break;
             case CdsKey.PageDown: target = AddMonths(Cursor, 1); break;
-            case CdsKey.Home: target = AddDays(Cursor, -DaysFromWeekStart(Cursor)); break;
-            case CdsKey.End: target = AddDays(Cursor, 6 - DaysFromWeekStart(Cursor)); break;
+            case CdsKey.Home: target = FirstOfMonth(Cursor); break;
+            case CdsKey.End: target = new DateOnly(Cursor.Year, Cursor.Month, DateTime.DaysInMonth(Cursor.Year, Cursor.Month)); break;
             default: return false;
         }
         Cursor = Clamp(target);
@@ -249,6 +249,22 @@ internal sealed class CalendarModel
         }
         return CalendarPick.Completed;
     }
+
+    /// <summary>
+    /// What a screen reader hears when the keyboard cursor lands on a day (the calendar uses virtual focus, so the day is
+    /// never focused itself): the full date in the culture ("Wednesday, 18 March 2026"), then "selected" for the selected
+    /// day or either end of the range, and "unavailable" for a disabled day.
+    /// </summary>
+    public string DayAnnouncement(DateOnly date)
+    {
+        var text = date.ToString("D", Culture);
+        if ((Start is { } s && date == s) || (End is { } e && date == e)) text += ", selected";
+        if (IsDisabled(date)) text += ", unavailable";
+        return text;
+    }
+
+    /// <summary>The announcement for the day under the keyboard cursor (see <see cref="DayAnnouncement"/>).</summary>
+    public string CursorAnnouncement() => DayAnnouncement(Cursor);
 
     /// <summary>Picks the day under the keyboard cursor.</summary>
     public CalendarPick PickCursor() => Pick(Cursor);

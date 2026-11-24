@@ -60,16 +60,19 @@ internal static class SliderModel
 
     /// <summary>
     /// The value after a key press, or <c>null</c> when the key is not a slider key. Arrows move by one step (times the
-    /// multiplier with Shift); Home and End jump to the ends.
+    /// multiplier with Shift); PageUp and PageDown move by the step times the multiplier; Home and End jump to the ends.
     /// </summary>
     public static double? KeyboardValue(CdsKey key, bool shift, double value, double min, double max, double step, double multiplier)
     {
         var unit = step > 0 ? step : (max - min) / 100;
-        var amount = shift ? unit * Math.Max(multiplier, 1) : unit;
+        var large = unit * Math.Max(multiplier, 1);
+        var amount = shift ? large : unit;
         return key switch
         {
             CdsKey.Left or CdsKey.Down => Snap(value - amount, min, max, step),
             CdsKey.Right or CdsKey.Up => Snap(value + amount, min, max, step),
+            CdsKey.PageDown => Snap(value - large, min, max, step),
+            CdsKey.PageUp => Snap(value + large, min, max, step),
             CdsKey.Home => min,
             CdsKey.End => max,
             _ => null,

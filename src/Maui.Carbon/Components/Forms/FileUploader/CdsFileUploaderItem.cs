@@ -13,15 +13,20 @@ public partial class CdsFileUploaderItem : CdsControl
     readonly Grid _root = new() { RowSpacing = 0, ColumnSpacing = 0 };
     readonly CdsText _name = new() { LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing03, 0) };
     readonly HorizontalStackLayout _state = new() { Spacing = 0, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(0, 0, CdsSpacing.Spacing04, 0) };
-    readonly CdsIcon _errorIcon = new(CdsIconName.ErrorFilled, 16) { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing02, 0) };
+    readonly CdsIcon _errorIcon = new(CdsIconName.WarningFilled, 16) { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing02, 0) };
     readonly CdsFileSpinner _spinner = new() { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing02, 0) };
     readonly CdsFieldIconButton _remove = new(CdsIconName.Close, CdsFieldButtonKind.Plain, 24, 24) { IsVisible = false };
-    readonly CdsIcon _complete = new(CdsIconName.CheckmarkFilled, 16) { IsVisible = false };
+    // Status is never color alone: the check is an image named "Complete", like the spinner's "Uploading".
+    readonly CdsIcon _complete = new(CdsIconName.CheckmarkFilled, 16) { IsVisible = false, Description = "Complete" };
     readonly VerticalStackLayout _message = new() { Spacing = 0, IsVisible = false };
     readonly BoxView _divider = new() { HeightRequest = 1, InputTransparent = true };
     readonly CdsText _title = new() { TypeStyle = CdsTypeStyle.Label01, Margin = new Thickness(CdsSpacing.Spacing05, 0) };
     readonly CdsText _supplement = new() { TypeStyle = CdsTypeStyle.Label01, Margin = new Thickness(CdsSpacing.Spacing05, 0) };
     readonly CdsFocusRing _outline = new(CdsFocusRingStyle.Inset);
+    string? _errorText;
+    bool _alertPending;
+    bool _batching;
+    CdsFileStatus? _lastStatus;
 
     /// <summary>Creates a 48 high row.</summary>
     public CdsFileUploaderItem()
@@ -54,6 +59,7 @@ public partial class CdsFileUploaderItem : CdsControl
             if (DeleteCommand?.CanExecute(CommandParameter) == true) DeleteCommand.Execute(CommandParameter);
         };
         HorizontalOptions = LayoutOptions.Fill;
+        Loaded += (_, _) => OnRowLoaded();
         SetChrome(new CdsMaxWidthBox(_root, FileUploaderModel.MaxRowWidth));
         UpdateRow();
     }
@@ -77,9 +83,25 @@ public partial class CdsFileUploaderItem : CdsControl
         _remove.IsEnabled = IsEnabled;
     }
 
+    /// <summary>Applies several property changes as one update, so a row that turns invalid announces its whole message once.</summary>
+    internal void Batch(Action changes)
+    {
+        _batching = true;
+        try
+        {
+            changes();
+        }
+        finally
+        {
+            _batching = false;
+        }
+        UpdateRow();
+    }
+
     /// <summary>Re-applies sizes, texts and status after a property change.</summary>
     protected virtual void UpdateRow()
     {
+        if (_batching) return;
         var height = FileUploaderModel.RowHeight(Size);
         var invalid = IsInvalid && !string.IsNullOrEmpty(ErrorSubject);
         var padding = IsInvalid ? FileUploaderModel.InvalidRowPadding(Size) : 0;
@@ -101,9 +123,43 @@ public partial class CdsFileUploaderItem : CdsControl
         _message.IsVisible = invalid;
         _divider.Margin = new Thickness(0, 0, 0, FileUploaderModel.InvalidMessageGap(Size));
 
+        var error = FileUploaderModel.ErrorText(IsInvalid, ErrorSubject, ErrorBody);
         _remove.Description = FileUploaderModel.RemoveLabel(IconDescription, Name);
         SemanticProperties.SetDescription(_name, Name);
-        SemanticProperties.SetHint(_remove, invalid ? string.Join(". ", new[] { ErrorSubject, ErrorBody }.Where(s => !string.IsNullOrEmpty(s))) : null);
+        // aria-describedby: the error describes the remove button, or the name when there is no remove button.
+        SemanticProperties.SetHint(_remove, error);
+        SemanticProperties.SetHint(_name, _remove.IsVisible ? null : error);
+        AnnounceError(error);
+        AnnounceStatus();
         RefreshVisuals();
+    }
+
+    // The row's message is role="alert": speak it, assertively, when it appears or changes while the row is on screen. A
+    // row that is invalid before it is on screen (an invalid file just added) is an inserted alert: it speaks once loaded.
+    void AnnounceError(string? error)
+    {
+        if (error == _errorText) return;
+        _errorText = error;
+        _alertPending = error is not null && !IsLoaded;
+        if (error is not null && IsLoaded) SpeakError();
+    }
+
+    void OnRowLoaded()
+    {
+        if (!_alertPending) return;
+        _alertPending = false;
+        SpeakError();
+    }
+
+    void SpeakError() =>
+        CdsAnnouncer.Announce(FileUploaderModel.InvalidAnnouncement(Name, _errorText), CdsAnnouncePriority.Assertive);
+
+    // Uploading to complete: the spinner's "Uploading" image is replaced by the check; say the upload finished.
+    void AnnounceStatus()
+    {
+        var previous = _lastStatus;
+        _lastStatus = Status;
+        if (previous == CdsFileStatus.Uploading && Status == CdsFileStatus.Complete && IsLoaded)
+            CdsAnnouncer.Announce(FileUploaderModel.CompletedAnnouncement(Name));
     }
 }

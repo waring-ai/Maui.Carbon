@@ -48,11 +48,13 @@ public partial class CdsHitTargetHandler
         var oldChecked = view.CheckedState;
         var oldExpanded = view.ExpandedState;
         var oldSelected = view.SelectedState;
+        var oldValue = view.ValueState;
         view.Role = target.Role;
         view.CheckedState = target.IsChecked;
         view.SelectedState = target.IsSelected;
         view.ExpandedState = target.IsExpanded;
         view.ReadOnlyState = target.IsReadOnly;
+        view.ValueState = target.AccessibleValue;
         // aria-current has no UIA property of its own; Narrator reads the item status after the name and role.
         if (CdsHitTargetStates.CurrentWord(target.CurrentKind) is { } current) WAutomationProperties.SetItemStatus(view, current);
         else view.ClearValue(WAutomationProperties.ItemStatusProperty);
@@ -65,6 +67,8 @@ public partial class CdsHitTargetHandler
             peer.RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, CdsHitTargetAutomationPeer.ToExpandCollapseState(oldExpanded), peer.ExpandCollapseState);
         if (oldSelected != view.SelectedState)
             peer.RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, oldSelected, view.SelectedState);
+        if (oldValue != view.ValueState)
+            peer.RaisePropertyChangedEvent(ValuePatternIdentifiers.ValueProperty, oldValue ?? string.Empty, view.ValueState ?? string.Empty);
     }
 }
 
@@ -77,6 +81,7 @@ internal sealed partial class CdsWindowsHitTargetView : WButton
     internal bool SelectedState { get; set; }
     internal bool? ExpandedState { get; set; }
     internal bool ReadOnlyState { get; set; }
+    internal string? ValueState { get; set; }
 
     internal CdsHitTarget? Target => Owner is not null && Owner.TryGetTarget(out var t) ? t : null;
 
@@ -121,7 +126,8 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
         if (patternInterface == PatternInterface.ExpandCollapse && IsExpandable) return this;
         if (patternInterface == PatternInterface.SelectionItem && IsSelectionItem) return this;
         // Read-only (aria-readonly): UIA carries it on the Value pattern, which Narrator reads as "read only".
-        if (patternInterface == PatternInterface.Value && _owner.ReadOnlyState) return this;
+        // An adjustable target's value (aria-valuetext) is its UIA value too.
+        if (patternInterface == PatternInterface.Value && (_owner.ReadOnlyState || _owner.ValueState is not null)) return this;
         return base.GetPatternCore(patternInterface);
     }
 
@@ -168,7 +174,7 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
 
     bool WValueProvider.IsReadOnly => true;
 
-    string WValueProvider.Value => CdsHitTargetStates.CheckedWord(_owner.Role, _owner.CheckedState) ?? string.Empty;
+    string WValueProvider.Value => _owner.ValueState ?? CdsHitTargetStates.CheckedWord(_owner.Role, _owner.CheckedState) ?? string.Empty;
 
     void WValueProvider.SetValue(string value)
     {
