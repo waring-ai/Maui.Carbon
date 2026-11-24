@@ -60,4 +60,42 @@ public class MenuButtonTests
         button.IsOpen = true;
         button.IsOpen = false;
     }
+
+    [Fact]
+    public void Focus_leaving_the_trigger_closes_the_menu_without_pulling_focus_back()
+    {
+        var button = ActionTestHost.SampleButton();
+        var host = ActionTestHost.Show(button);
+        var hit = ((CdsActionFace)button.Content).Hit;
+        hit.ReportFocus(true, fromKeyboard: true);
+        button.IsOpen = true;
+        var overlay = host.TopOverlay;
+        Assert.NotNull(overlay);
+
+        hit.ReportFocus(false, fromKeyboard: true);
+        Assert.False(button.Menu.IsOpen);
+        Assert.False(button.IsOpen);
+        Assert.Null(host.TopOverlay);
+        Assert.False(overlay!.Options.ReturnFocus);
+    }
+
+    [Fact]
+    public void An_open_menu_lets_Tab_through_so_focus_can_leave()
+    {
+        var button = ActionTestHost.SampleButton();
+        var host = ActionTestHost.Show(button);
+        button.IsOpen = true;
+        Assert.False(host.RouteKey(new CdsKeyEventArgs(CdsKey.Tab)));
+    }
+
+    [Fact]
+    public void The_menu_background_token_reaches_the_menu_when_it_opens()
+    {
+        var button = ActionTestHost.SampleButton();
+        Assert.Equal(CdsMenuBackgroundToken.Layer, button.MenuBackgroundToken);
+        button.MenuBackgroundToken = CdsMenuBackgroundToken.Background;
+        ActionTestHost.Show(button);
+        button.IsOpen = true;
+        Assert.Equal(CdsMenuBackgroundToken.Background, button.Menu.BackgroundToken);
+    }
 }

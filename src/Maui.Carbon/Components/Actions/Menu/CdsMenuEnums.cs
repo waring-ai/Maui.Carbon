@@ -10,6 +10,18 @@ public enum CdsMenuItemKind
 }
 
 /// <summary>
+/// The surface color of a menu (Carbon's <c>backgroundToken</c>): <see cref="Layer"/> (default) for menus over the page
+/// background, <see cref="Background"/> for a menu that opens over a <c>layer-01</c> surface and must stand apart from it.
+/// </summary>
+public enum CdsMenuBackgroundToken
+{
+    /// <summary>The <c>layer-01</c> fill (default); it follows the anchor's layer.</summary>
+    Layer,
+    /// <summary>The <c>background</c> fill, whatever layer the anchor sits on.</summary>
+    Background,
+}
+
+/// <summary>
 /// Where a menu opens relative to the button that triggers it (Carbon's <c>menuAlignment</c>). With <see cref="Bottom"/>
 /// and <see cref="Top"/> the menu starts at the trigger's start edge and is never narrower than the trigger; the
 /// <c>Start</c>/<c>End</c> variants use the menu's own width, aligned to that edge of the trigger.

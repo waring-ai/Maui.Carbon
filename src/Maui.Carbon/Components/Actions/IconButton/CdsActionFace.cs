@@ -153,6 +153,9 @@ internal sealed class CdsActionFace : CdsControl
     /// <summary>Count in the badge: <c>null</c> none, 0 a dot, otherwise the number.</summary>
     public int? BadgeCount { get => _badgeCount; set { _badgeCount = value; UpdateLayout(); } }
 
+    /// <summary>The accessible description the badge adds to the hit target: its count text while a count shows, else null.</summary>
+    internal string? BadgeHint => _badgeCount is > 0 && IsEnabled ? CdsIconButtonTokens.BadgeText(_badgeCount) : null;
+
     /// <inheritdoc/>
     protected override void OnActivated() => Activated?.Invoke(this, EventArgs.Empty);
 
@@ -251,7 +254,7 @@ internal sealed class CdsActionFace : CdsControl
             else
             {
                 _badgeText.IsVisible = true;
-                _badgeText.Text = count.ToString();
+                _badgeText.Text = CdsIconButtonTokens.BadgeText(count);
                 _badge.Padding = new Thickness(4, 0, 4, 2);
                 _badge.WidthRequest = -1;
                 _badge.HeightRequest = -1;
@@ -266,6 +269,10 @@ internal sealed class CdsActionFace : CdsControl
         }
 
         SemanticProperties.SetDescription(_hit, _name);
+        // The count is announced after the name (Carbon ties the badge to the button with aria-describedby); a dot has
+        // no text, so its meaning belongs in the label.
+        if (BadgeHint is { } hint) SemanticProperties.SetHint(_hit, hint);
+        else _hit.ClearValue(SemanticProperties.HintProperty);
         _hit.Role = _role;
         _hit.IsChecked = _role == CdsAccessibilityRole.ToggleButton ? _isSelected : false;
         _hit.IsExpanded = _expandable ? _isOpen : null;

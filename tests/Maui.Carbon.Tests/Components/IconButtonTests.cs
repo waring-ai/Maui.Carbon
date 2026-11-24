@@ -64,6 +64,9 @@ public class IconButtonTests
     [InlineData(-3, null)]
     [InlineData(0, "")]
     [InlineData(7, "7")]
+    [InlineData(999, "999")]
+    [InlineData(1000, "999+")]
+    [InlineData(1500, "999+")]
     public void Badge_text(int? count, string? text) => Assert.Equal(text, CdsIconButtonTokens.BadgeText(count));
 
     [Fact]
@@ -86,6 +89,26 @@ public class IconButtonTests
         button.IsEnabled = false;
         button.IsEnabled = true;
         Assert.False(button.IsTooltipOpen);
+    }
+
+    [Fact]
+    public void The_badge_count_is_the_hint_of_the_hit_target_and_a_dot_adds_nothing()
+    {
+        var button = new CdsIconButton(CdsIconName.Notification, "Notifications", CdsIconButtonKind.Ghost) { BadgeCount = 12 };
+        var face = (CdsActionFace)button.Content;
+        Assert.Equal("Notifications", SemanticProperties.GetDescription(face.Hit));
+        Assert.Equal("12", SemanticProperties.GetHint(face.Hit));
+        button.BadgeCount = 1500;
+        Assert.Equal("999+", SemanticProperties.GetHint(face.Hit));
+        button.BadgeCount = 0;
+        Assert.Null(SemanticProperties.GetHint(face.Hit));
+        button.BadgeCount = 4;
+        button.IsEnabled = false;
+        Assert.Null(SemanticProperties.GetHint(face.Hit));
+        button.IsEnabled = true;
+        Assert.Equal("4", SemanticProperties.GetHint(face.Hit));
+        button.BadgeCount = null;
+        Assert.Null(SemanticProperties.GetHint(face.Hit));
     }
 
     [Fact]

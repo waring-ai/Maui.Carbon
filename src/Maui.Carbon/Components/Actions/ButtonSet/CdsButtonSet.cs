@@ -34,6 +34,7 @@ public class CdsButtonSet : CdsControl
     readonly CdsItemCollection<CdsButton> _items = [];
     readonly Grid _grid = new() { ColumnSpacing = 0, RowSpacing = 0 };
     readonly CdsEqualWidthRow _row = new();
+    readonly CdsMaxWidthBox _box = new();
     readonly List<(BoxView Line, int Index)> _separators = [];
     bool _fluidStacked;
 
@@ -128,18 +129,17 @@ public class CdsButtonSet : CdsControl
             return;
         }
 
-        if (Content != _grid) SetChrome(_grid);
+        _grid.HorizontalOptions = LayoutOptions.Fill;
         if (IsFluid)
         {
+            Show(_grid, maxWidth: null);
             HorizontalOptions = LayoutOptions.Fill;
-            _grid.HorizontalOptions = LayoutOptions.Fill;
-            _grid.MaximumWidthRequest = double.PositiveInfinity;
         }
         else
         {
+            // A stacked set is as wide as one button may be (12.25rem), not as its widest label; narrower space shrinks it.
+            Show(_grid, ButtonSetModel.MaxSetWidth(buttons.Count, stacked, expressive));
             HorizontalOptions = LayoutOptions.Start;
-            _grid.HorizontalOptions = LayoutOptions.Fill;
-            _grid.MaximumWidthRequest = ButtonSetModel.MaxSetWidth(buttons.Count, stacked, expressive);
         }
 
         // Stacked sets list the primary first.
@@ -193,10 +193,13 @@ public class CdsButtonSet : CdsControl
 
     List<CdsButton> _orderedForSeparators = [];
 
-    /// <summary>A plain horizontal set: equal cells as wide as the widest label needs, each at most the Carbon maximum.</summary>
+    /// <summary>
+    /// A plain horizontal set: equal cells of the Carbon maximum (12.25rem, 20rem when expressive), shrinking equally when
+    /// the space is narrower. With unbounded width (inside a horizontal stack) the cells are as wide as the widest label.
+    /// </summary>
     void BuildRow(List<CdsButton> buttons, bool expressive)
     {
-        if (Content != _row) SetChrome(_row);
+        Show(_row, ButtonSetModel.MaxSetWidth(buttons.Count, stacked: false, expressive));
         HorizontalOptions = LayoutOptions.Start;
         _row.MaxCellWidth = expressive ? ButtonSetModel.MaxExpressiveButtonWidth : ButtonSetModel.MaxButtonWidth;
         for (var i = 0; i < buttons.Count; i++)
@@ -215,6 +218,27 @@ public class CdsButtonSet : CdsControl
         _orderedForSeparators = buttons;
         UpdateSeparators();
     }
+
+    /// <summary>
+    /// Makes <paramref name="content"/> the chrome: inside a box that fills the available width up to
+    /// <paramref name="maxWidth"/> (start aligned), or directly when there is no maximum (fluid sets).
+    /// </summary>
+    void Show(View content, double? maxWidth)
+    {
+        if (maxWidth is { } max)
+        {
+            if (Content != _box) SetChrome(_box);
+            _box.MaxContentWidth = max;
+            if (_box.Content != content) _box.Content = content;
+            return;
+        }
+        if (_box.Content == content) _box.Content = null;
+        if (Content != content) SetChrome(content);
+    }
+
+    /// <summary>The view the buttons are laid out in (the equal-width row or the grid) and the box around it, if any (tests).</summary>
+    internal (View Layout, CdsMaxWidthBox? Box) LayoutParts =>
+        Content == _box ? (_box.Content!, _box) : ((View)Content!, null);
 
     void ApplyFluidWidths()
     {

@@ -140,8 +140,9 @@ public class CdsIconButton : CdsControl
     }
 
     /// <summary>
-    /// Badge: <c>null</c> none, <c>0</c> a dot, a positive number its count. Carbon allows it only on ghost buttons at
-    /// size lg; it is hidden while disabled.
+    /// Badge: <c>null</c> none, <c>0</c> a dot, a positive number its count (above 999 it reads <c>999+</c>). Carbon
+    /// allows it only on ghost buttons at size lg; it is hidden while disabled. Screen readers hear the count after the
+    /// label (as the button's hint); a dot has no text, so put its meaning in <see cref="Label"/> ("Notifications, new activity").
     /// </summary>
     public int? BadgeCount
     {

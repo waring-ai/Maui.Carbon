@@ -47,15 +47,28 @@ internal static class ButtonSetModel
     public static bool ShouldStack(double width, int count) =>
         count > 0 && width > 0 && width <= FluidMinButtonWidth * Math.Min(count, 4);
 
+    /// <summary>Fluid sets of two buttons split 50/50 up to this width (44rem).</summary>
+    public const double FluidHalfSplitMaxWidth = 704;
+
+    /// <summary>A fluid set of one button fills the set up to this width (33rem).</summary>
+    public const double FluidFullWidthMaxWidth = 528;
+
     /// <summary>
     /// Widths of the buttons of a horizontal fluid set, in display order: non-ghost buttons take 25% of the set clamped to
     /// 11..14.5rem, ghost buttons share what is left; the group is right-aligned (the first button starts after
-    /// the returned <paramref name="offset"/>).
+    /// the returned <paramref name="offset"/>). Carbon's container rules override that in narrow sets: two buttons in a
+    /// set of at most 44rem take 50% each, and a single button in a set of at most 33rem takes all of it, with no maximum.
     /// </summary>
     public static double[] FluidWidths(double width, IReadOnlyList<bool> isGhost, out double offset)
     {
         var count = isGhost.Count;
         var widths = new double[count];
+        if ((count == 2 && width <= FluidHalfSplitMaxWidth) || (count == 1 && width <= FluidFullWidthMaxWidth))
+        {
+            Array.Fill(widths, Math.Max(0, width) / count);
+            offset = 0;
+            return widths;
+        }
         var fixedWidth = Math.Clamp(width * 0.25, FluidMinButtonWidth, FluidMaxButtonWidth);
         var ghosts = isGhost.Count(g => g);
         var remaining = Math.Max(0, width - fixedWidth * (count - ghosts));

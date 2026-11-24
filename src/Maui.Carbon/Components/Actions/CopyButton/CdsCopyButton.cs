@@ -1,7 +1,10 @@
+using System.Windows.Input;
+
 namespace Maui.Carbon;
 
 /// <summary>
-/// An icon button with the copy glyph. On activation it writes <see cref="Text"/> to the clipboard, switches its tooltip to
+/// An icon button with the copy glyph. On activation it raises <see cref="Clicked"/> and runs <see cref="Command"/>, then
+/// writes <see cref="Text"/> to the clipboard, switches its tooltip to
 /// the <see cref="Feedback"/> text ("Copied!") for <see cref="FeedbackTimeout"/> milliseconds, announces it to screen
 /// readers and raises <see cref="Copied"/>. Use it next to one value people paste elsewhere (an ID, key or URL); for code
 /// blocks use a code snippet, for any other action an <see cref="CdsIconButton"/>. It sits on <c>layer-01</c>.
@@ -34,6 +37,14 @@ public class CdsCopyButton : CdsControl
     public static readonly BindableProperty TooltipPlacementProperty = BindableProperty.Create(
         nameof(TooltipPlacement), typeof(CdsPlacement), typeof(CdsCopyButton), CdsPlacement.Bottom, propertyChanged: OnChanged);
 
+    /// <summary>Bindable property for <see cref="Command"/>.</summary>
+    public static readonly BindableProperty CommandProperty = BindableProperty.Create(
+        nameof(Command), typeof(ICommand), typeof(CdsCopyButton), null, propertyChanged: OnCommandChanged);
+
+    /// <summary>Bindable property for <see cref="CommandParameter"/>.</summary>
+    public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
+        nameof(CommandParameter), typeof(object), typeof(CdsCopyButton), null, propertyChanged: OnCommandChanged);
+
     /// <summary>Bindable property for <see cref="IsCopied"/>.</summary>
     public static readonly BindableProperty IsCopiedProperty = BindableProperty.Create(
         nameof(IsCopied), typeof(bool), typeof(CdsCopyButton), false, propertyChanged: OnIsCopiedChanged);
@@ -52,7 +63,7 @@ public class CdsCopyButton : CdsControl
         _face.Mode = CdsActionFaceMode.IconOnly;
         _face.RingStyle = CdsFocusRingStyle.Inset;
         _face.Resolver = CdsCopyButtonTokens.Resolve;
-        _face.Activated += (_, _) => _ = CopyAsync();
+        _face.Activated += (_, _) => OnFaceActivated();
         _face.StateChanged += (_, _) => _tooltip.StateChanged(_face);
         SetChrome(_face);
         TrackFocus(_face.Hit, () => _face.Hit.IsFocusFromKeyboard);
@@ -65,10 +76,20 @@ public class CdsCopyButton : CdsControl
         Update();
     }
 
+    /// <summary>
+    /// Raised on activation (click, tap, Enter or Space), before <see cref="Command"/> runs and before the copy. Set
+    /// <see cref="Text"/> here to supply the value at click time (Carbon's <c>onClick</c>), or write the clipboard yourself
+    /// and set <see cref="IsCopied"/> to show the feedback.
+    /// </summary>
+    public event EventHandler? Clicked;
+
     /// <summary>Raised after the text was written to the clipboard.</summary>
     public event EventHandler? Copied;
 
-    /// <summary>The text written to the clipboard on activation.</summary>
+    /// <summary>
+    /// The text written to the clipboard on activation. While it is <c>null</c> or empty there is nothing to copy:
+    /// activation leaves the clipboard alone and shows no "Copied!" feedback.
+    /// </summary>
     public string? Text
     {
         get => (string?)GetValue(TextProperty);
@@ -110,6 +131,20 @@ public class CdsCopyButton : CdsControl
         set => SetValue(TooltipPlacementProperty, value);
     }
 
+    /// <summary>Executed on activation, after <see cref="Clicked"/> and before the copy; <c>CanExecute</c> drives <c>IsEnabled</c>.</summary>
+    public ICommand? Command
+    {
+        get => (ICommand?)GetValue(CommandProperty);
+        set => SetValue(CommandProperty, value);
+    }
+
+    /// <summary>Parameter for <see cref="Command"/>.</summary>
+    public object? CommandParameter
+    {
+        get => GetValue(CommandParameterProperty);
+        set => SetValue(CommandParameterProperty, value);
+    }
+
     /// <summary>
     /// True while the feedback is showing. Set it to <c>true</c> to render the button in its feedback state (it reverts
     /// after <see cref="FeedbackTimeout"/> like a real copy).
@@ -120,13 +155,17 @@ public class CdsCopyButton : CdsControl
         set => SetValue(IsCopiedProperty, value);
     }
 
-    /// <summary>Writes <see cref="Text"/> to the clipboard and shows the feedback. Called on activation.</summary>
+    /// <summary>
+    /// Writes <see cref="Text"/> to the clipboard and shows the feedback. Called on activation. Does nothing while the
+    /// control is disabled or <see cref="Text"/> is <c>null</c> or empty, so the feedback never claims a copy that did
+    /// not happen.
+    /// </summary>
     public async Task CopyAsync()
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled || string.IsNullOrEmpty(Text)) return;
         try
         {
-            await Clipboard.Default.SetTextAsync(Text ?? string.Empty);
+            await Clipboard.Default.SetTextAsync(Text);
         }
         catch (Exception ex) when (ex is FeatureNotSupportedException or PermissionException or InvalidOperationException)
         {
@@ -134,6 +173,13 @@ public class CdsCopyButton : CdsControl
         }
         Copied?.Invoke(this, EventArgs.Empty);
         ShowFeedback();
+    }
+
+    void OnFaceActivated()
+    {
+        Clicked?.Invoke(this, EventArgs.Empty);
+        ExecuteCommand();
+        _ = CopyAsync();
     }
 
     void ShowFeedback()
@@ -165,6 +211,12 @@ public class CdsCopyButton : CdsControl
     }
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsCopyButton)b).Update();
+
+    static void OnCommandChanged(BindableObject b, object? o, object? n)
+    {
+        var button = (CdsCopyButton)b;
+        button.SetCommand(button.Command, button.CommandParameter);
+    }
 
     static void OnIsCopiedChanged(BindableObject b, object? o, object? n)
     {

@@ -47,15 +47,19 @@ public static class CdsIconButtonTokens
     /// <summary>The square size of an icon button: xs 24, sm 32, md 40, lg 48. Larger sizes clamp to lg.</summary>
     public static double Side(CdsSize size) => (size > CdsSize.Lg ? CdsSize.Lg : size).Height();
 
+    /// <summary>The largest count a badge shows; higher counts read <c>999+</c> (Carbon's BadgeIndicator).</summary>
+    public const int MaxBadgeCount = 999;
+
     /// <summary>
     /// The text of the badge for a count: <c>null</c> when there is no badge, an empty string for a dot (count 0),
-    /// otherwise the number. Negative counts mean no badge.
+    /// otherwise the number, capped at <c>999+</c>. Negative counts mean no badge.
     /// </summary>
     public static string? BadgeText(int? count) => count switch
     {
         null => null,
         < 0 => null,
         0 => string.Empty,
-        var n => n.ToString(),
+        > MaxBadgeCount => $"{MaxBadgeCount}+",
+        int n => n.ToString(System.Globalization.CultureInfo.CurrentCulture),
     };
 }

@@ -13,7 +13,8 @@ namespace Maui.Carbon;
 /// <see cref="Open"/>. It uses <b>virtual focus</b>: focus stays on the anchor while Up/Down/Home/End move a
 /// highlight (skipping disabled items and dividers, wrapping at the ends), Enter or Space chooses, Right opens a
 /// submenu, Left or Escape closes it, and Escape on the root closes the menu and returns focus to the anchor.
-/// Choosing any item closes the whole menu first, then runs the item.
+/// Choosing any item closes the whole menu first, then runs the item. Because focus stays on the anchor, the highlighted
+/// item is announced to screen readers (label, state and position) when the menu opens and as the highlight moves.
 /// </para>
 /// </summary>
 [ContentProperty(nameof(Items))]
@@ -31,6 +32,10 @@ public class CdsMenu : BindableObject
     /// <summary>Bindable property for <see cref="HasBorder"/>.</summary>
     public static readonly BindableProperty HasBorderProperty = BindableProperty.Create(
         nameof(HasBorder), typeof(bool), typeof(CdsMenu), false);
+
+    /// <summary>Bindable property for <see cref="BackgroundToken"/>.</summary>
+    public static readonly BindableProperty BackgroundTokenProperty = BindableProperty.Create(
+        nameof(BackgroundToken), typeof(CdsMenuBackgroundToken), typeof(CdsMenu), CdsMenuBackgroundToken.Layer);
 
     readonly CdsItemCollection<CdsMenuItemBase> _items = [];
     Level? _root;
@@ -70,6 +75,17 @@ public class CdsMenu : BindableObject
     {
         get => (bool)GetValue(HasBorderProperty);
         set => SetValue(HasBorderProperty, value);
+    }
+
+    /// <summary>
+    /// The surface fill: <see cref="CdsMenuBackgroundToken.Layer"/> (<c>layer-01</c>, default) or
+    /// <see cref="CdsMenuBackgroundToken.Background"/> (<c>background</c>), for a menu that opens over a <c>layer-01</c>
+    /// surface. Pair it with <see cref="HasBorder"/> so the edge stays visible. Submenus use the same fill.
+    /// </summary>
+    public CdsMenuBackgroundToken BackgroundToken
+    {
+        get => (CdsMenuBackgroundToken)GetValue(BackgroundTokenProperty);
+        set => SetValue(BackgroundTokenProperty, value);
     }
 
     /// <summary>The items, in order. Order by frequency or task sequence; destructive items last, after a divider.</summary>
@@ -118,11 +134,30 @@ public class CdsMenu : BindableObject
             Closed?.Invoke(this, EventArgs.Empty);
         };
         Opened?.Invoke(this, EventArgs.Empty);
+        // Opening focuses the first item (Carbon); with virtual focus that item is announced instead.
+        Announce(level, previous: -1, CdsAnnouncePriority.Polite);
         return overlay;
     }
 
     /// <summary>Closes the menu and any open submenu; focus returns to the anchor.</summary>
     public void Close() => _root?.Overlay?.Close();
+
+    /// <summary>
+    /// Closes the menu because keyboard focus left its trigger (Tab, or a click elsewhere that took focus): Carbon closes
+    /// a menu when focus leaves it. Focus is not returned to the anchor, so it stays where it went.
+    /// </summary>
+    internal void CloseForFocusLoss()
+    {
+        if (_root?.Overlay is not { IsOpen: true } overlay) return;
+        overlay.Options.ReturnFocus = false;
+        overlay.Close();
+    }
+
+    /// <summary>The rows of the open root menu (dividers are null), for tests.</summary>
+    internal IReadOnlyList<CdsMenuRow?> OpenRows => _root?.Rows ?? [];
+
+    /// <summary>The highlighted row index of the innermost open level, or -1.</summary>
+    internal int ActiveHighlight => ActiveLevel()?.Model.Highlighted ?? -1;
 
     /// <summary>
     /// Builds the menu surface as an ordinary view without showing an overlay: for documentation, previews and
@@ -167,7 +202,7 @@ public class CdsMenu : BindableObject
             MaximumWidthRequest = CdsMenuTokens.MaxWidth,
             Content = stack,
         };
-        CdsTokens.SetColor(surface, VisualElement.BackgroundColorProperty, CdsColorKeys.Layer01);
+        CdsTokens.SetColor(surface, VisualElement.BackgroundColorProperty, CdsMenuTokens.SurfaceBackground(BackgroundToken));
         if (HasBorder) CdsTokens.SetBrush(surface, Border.StrokeProperty, CdsColorKeys.BorderSubtle01);
         CdsTokens.SetShadow(surface, CdsColorKeys.Shadow, offsetY: 2, radius: 6);
         CdsSemantics.SetGroup(surface, Label, CdsSemanticGroupKind.List);
@@ -319,6 +354,7 @@ public class CdsMenu : BindableObject
     bool OnKey(CdsKeyEventArgs e)
     {
         if (ActiveLevel() is not { } level) return false;
+        var before = level.Model.Highlighted;
         var result = level.Model.HandleKey(e.Key, level.Parent is null);
         switch (result.Action)
         {
@@ -326,8 +362,13 @@ public class CdsMenu : BindableObject
                 if (level.Model.HighlightedRow is { } row) Activate(row);
                 return true;
             case MenuAction.OpenSubmenu:
+                var existing = level.Child;
                 if (level.Model.Highlighted >= 0) OpenSubmenu(level, level.Model.Highlighted, keyboard: true);
-                if (level.Child is { } child) Refresh(child);
+                if (level.Child is { } child)
+                {
+                    Refresh(child);
+                    if (!ReferenceEquals(child, existing)) Announce(child, previous: -1, CdsAnnouncePriority.Assertive);
+                }
                 return result.Handled;
             case MenuAction.CloseSubmenu:
                 if (level.Parent is { } parent)
@@ -335,6 +376,7 @@ public class CdsMenu : BindableObject
                     CloseChild(parent);
                     parent.KeyboardFocus = true;
                     Refresh(parent);
+                    Announce(parent, previous: -1, CdsAnnouncePriority.Assertive);
                 }
                 return true;
             case MenuAction.Close:
@@ -345,8 +387,17 @@ public class CdsMenu : BindableObject
         {
             level.KeyboardFocus = true;
             Refresh(level);
+            // Moving the highlight stands in for moving focus, which a screen reader speaks at once.
+            if (level.Model.Highlighted != before) Announce(level, before, CdsAnnouncePriority.Assertive);
         }
         return result.Handled;
+    }
+
+    /// <summary>Tells screen readers which row of a level is highlighted: its label, state and position.</summary>
+    static void Announce(Level level, int previous, CdsAnnouncePriority priority)
+    {
+        if (level.Model.Highlighted < 0) return;
+        CdsAnnouncer.Announce(level.Model.Describe(level.Model.Highlighted, previous), priority);
     }
 
     /// <inheritdoc/>

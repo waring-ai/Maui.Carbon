@@ -83,6 +83,9 @@ public class CdsComboButton : CdsControl
         };
         SetChrome(_row);
         TrackFocus(_primary.Hit, () => _primary.Hit.IsFocusFromKeyboard);
+        // Focus leaving either half (Tab, Shift+Tab to the action, a click elsewhere) closes the menu.
+        _primary.Hit.Unfocused += (_, _) => _menu.CloseForFocusLoss();
+        _trigger.Hit.Unfocused += (_, _) => _menu.CloseForFocusLoss();
         Loaded += (_, _) =>
         {
             if (_openPending) Dispatcher.Dispatch(() => OnIsOpenChanged(true));

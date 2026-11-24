@@ -90,4 +90,41 @@ public class CopyButtonTests
         button.IconDescription = "Copy key ID";
         button.IsEnabled = false;
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task Copying_with_no_text_leaves_the_clipboard_alone_and_claims_no_copy(string? text)
+    {
+        var button = new CdsCopyButton { Text = text };
+        var copied = 0;
+        button.Copied += (_, _) => copied++;
+        using var heard = CdsAnnouncer.Capture();
+        await button.CopyAsync();
+        Assert.Equal(0, copied);
+        Assert.False(button.IsCopied);
+        Assert.Empty(heard.Announcements);
+    }
+
+    [Fact]
+    public void Activation_raises_Clicked_then_runs_the_command()
+    {
+        var calls = new List<string>();
+        var button = new CdsCopyButton { CommandParameter = "key-123" };
+        button.Command = new Command(p => calls.Add($"command {p}"));
+        button.Clicked += (_, _) => calls.Add("clicked");
+        using var heard = CdsAnnouncer.Capture();
+        ((CdsActionFace)button.Content).Hit.RaiseKeyboardActivation();
+        Assert.Equal(["clicked", "command key-123"], calls);
+        // No Text was supplied, so nothing was copied and no feedback is claimed.
+        Assert.False(button.IsCopied);
+        Assert.Empty(heard.Announcements);
+    }
+
+    [Fact]
+    public void A_command_that_cannot_execute_disables_the_copy_button()
+    {
+        var button = new CdsCopyButton { Command = new Command(() => { }, () => false) };
+        Assert.False(button.IsEnabled);
+    }
 }

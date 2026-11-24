@@ -61,4 +61,22 @@ public class ComboButtonTests
         var button = new CdsComboButton { Command = new Command(() => { }, () => false) };
         Assert.False(button.IsEnabled);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public void Focus_leaving_either_half_closes_the_menu(int half)
+    {
+        var combo = new CdsComboButton { Label = "Deploy" };
+        combo.Items.Add(new CdsMenuItem("Deploy to staging"));
+        var host = ActionTestHost.Show(combo);
+        var hit = ((Layout)combo.Content).Children.OfType<CdsActionFace>().ElementAt(half).Hit;
+        hit.ReportFocus(true, fromKeyboard: true);
+        combo.IsOpen = true;
+        Assert.True(combo.Menu.IsOpen);
+        hit.ReportFocus(false, fromKeyboard: true);
+        Assert.False(combo.Menu.IsOpen);
+        Assert.False(combo.IsOpen);
+        Assert.Null(host.TopOverlay);
+    }
 }

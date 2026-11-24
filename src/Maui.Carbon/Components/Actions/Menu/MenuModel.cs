@@ -149,12 +149,40 @@ internal sealed class MenuModel
                 return isRoot ? MenuKeyResult.Ignored : new(true, MenuAction.CloseSubmenu);
             case CdsKey.Escape:
                 return new(true, isRoot ? MenuAction.Close : MenuAction.CloseSubmenu);
-            case CdsKey.Tab:
-                // Tab leaves the menu and closes it; the key still moves focus.
-                return new(false, MenuAction.Close);
             default:
+                // Tab is not a menu key: it moves focus off the trigger, and the trigger closes the menu when it loses focus.
                 return MenuKeyResult.Ignored;
         }
+    }
+
+    /// <summary>
+    /// What a screen reader hears when the row at <paramref name="index"/> is highlighted (the menu keeps focus on its
+    /// trigger, so the highlight is announced instead of focused): the group label when the highlight enters a group from
+    /// outside it (<paramref name="previous"/> is the row highlighted before, or -1), the label, the state (checked or not
+    /// checked, submenu, unavailable) and the position among the level's items ("Sort by, Name, checked, 1 of 5").
+    /// Empty for dividers and indices out of range.
+    /// </summary>
+    public string Describe(int index, int previous = -1)
+    {
+        if (index < 0 || index >= Rows.Count || Rows[index].Kind == MenuRowKind.Divider) return string.Empty;
+        var row = Rows[index];
+        var parts = new List<string>(5);
+        var previousGroup = previous >= 0 && previous < Rows.Count ? Rows[previous].GroupLabel : null;
+        if (!string.IsNullOrEmpty(row.GroupLabel) && row.GroupLabel != previousGroup) parts.Add(row.GroupLabel);
+        if (!string.IsNullOrEmpty(row.Text)) parts.Add(row.Text);
+        if (row.Kind is MenuRowKind.Selectable or MenuRowKind.Radio) parts.Add(row.IsSelected ? "checked" : "not checked");
+        if (row.HasSubmenu) parts.Add("submenu");
+        if (!row.IsEnabled) parts.Add("unavailable");
+
+        int position = 0, count = 0;
+        for (var i = 0; i < Rows.Count; i++)
+        {
+            if (Rows[i].Kind == MenuRowKind.Divider) continue;
+            count++;
+            if (i == index) position = count;
+        }
+        parts.Add($"{position} of {count}");
+        return string.Join(", ", parts);
     }
 
     bool Land(int index)

@@ -68,4 +68,21 @@ public class OverflowMenuTests
         menu.IsOpen = true;
         menu.IsOpen = false;
     }
+
+    [Fact]
+    public void Focus_leaving_the_trigger_closes_the_menu()
+    {
+        var menu = new CdsOverflowMenu { IconDescription = "Actions for ci-deploy" };
+        menu.Items.Add(new CdsMenuItem("Edit"));
+        menu.Items.Add(new CdsMenuItem("Delete") { Kind = CdsMenuItemKind.Danger });
+        var host = ActionTestHost.Show(menu);
+        var hit = ((CdsActionFace)menu.Content).Hit;
+        hit.ReportFocus(true, fromKeyboard: true);
+        menu.IsOpen = true;
+        Assert.True(menu.Menu.IsOpen);
+        hit.ReportFocus(false, fromKeyboard: true);
+        Assert.False(menu.Menu.IsOpen);
+        Assert.False(menu.IsOpen);
+        Assert.Null(host.TopOverlay);
+    }
 }

@@ -185,11 +185,56 @@ public class MenuModelTests
     }
 
     [Fact]
-    public void Tab_closes_the_menu_without_consuming_the_key()
+    public void Tab_is_not_a_menu_key_so_it_moves_focus_and_the_trigger_closes_the_menu()
     {
-        var result = Sample().HandleKey(CdsKey.Tab, true);
-        Assert.False(result.Handled);
-        Assert.Equal(MenuAction.Close, result.Action);
+        Assert.Equal(MenuKeyResult.Ignored, Sample().HandleKey(CdsKey.Tab, true));
+        Assert.Equal(MenuKeyResult.Ignored, Sample().HandleKey(CdsKey.Tab, false));
+    }
+
+    [Fact]
+    public void Describe_gives_the_label_state_and_position_among_the_items()
+    {
+        var model = Sample();
+        Assert.Equal("Open, 1 of 5", model.Describe(0));
+        Assert.Equal("Save, unavailable, 2 of 5", model.Describe(1));
+        Assert.Equal("Share, 3 of 5", model.Describe(3));
+        Assert.Equal("Delete, 5 of 5", model.Describe(5));
+    }
+
+    [Fact]
+    public void Describe_is_empty_for_dividers_and_out_of_range_rows()
+    {
+        var model = Sample();
+        Assert.Equal(string.Empty, model.Describe(2));
+        Assert.Equal(string.Empty, model.Describe(-1));
+        Assert.Equal(string.Empty, model.Describe(6));
+    }
+
+    [Fact]
+    public void Describe_reports_submenus_and_checked_state()
+    {
+        var model = new MenuModel(new CdsMenuItemBase[]
+        {
+            Item("Share", true, Item("Copy link")),
+            new CdsMenuItemSelectable { Text = "Show hidden", IsSelected = true },
+            new CdsMenuItemSelectable { Text = "Wrap lines" },
+        });
+        Assert.Equal("Share, submenu, 1 of 3", model.Describe(0));
+        Assert.Equal("Show hidden, checked, 2 of 3", model.Describe(1));
+        Assert.Equal("Wrap lines, not checked, 3 of 3", model.Describe(2));
+    }
+
+    [Fact]
+    public void Describe_names_the_group_only_when_the_highlight_enters_it()
+    {
+        var sort = new CdsMenuItemRadioGroup { Label = "Sort by", SelectedItem = "Name" };
+        sort.Items.Add("Name");
+        sort.Items.Add("Date");
+        var model = new MenuModel(new CdsMenuItemBase[] { Item("Refresh"), new CdsMenuItemDivider(), sort });
+        Assert.Equal("Sort by, Name, checked, 2 of 3", model.Describe(2, previous: 0));
+        Assert.Equal("Sort by, Name, checked, 2 of 3", model.Describe(2));
+        Assert.Equal("Date, not checked, 3 of 3", model.Describe(3, previous: 2));
+        Assert.Equal("Refresh, 1 of 3", model.Describe(0, previous: 3));
     }
 
     [Fact]

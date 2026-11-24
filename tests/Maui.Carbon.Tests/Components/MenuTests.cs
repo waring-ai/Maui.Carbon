@@ -1,5 +1,30 @@
 namespace Maui.Carbon.Tests.Components;
 
+/// <summary>Puts a view on a page in a window, so it is loaded and its overlays can open without a platform.</summary>
+internal static class ActionTestHost
+{
+    public static CdsOverlayHost Show(View view)
+    {
+        var host = new CdsOverlayHost { Body = view };
+        _ = new Window(new ContentPage { Content = host });
+        Assert.True(view.IsLoaded);
+        return host;
+    }
+
+    /// <summary>A menu button with rows Restart, divider, Show hidden (selected) and Share (a submenu with Copy link).</summary>
+    public static CdsMenuButton SampleButton()
+    {
+        var button = new CdsMenuButton { Label = "Actions" };
+        button.Items.Add(new CdsMenuItem("Restart"));
+        button.Items.Add(new CdsMenuItemDivider());
+        button.Items.Add(new CdsMenuItemSelectable { Text = "Show hidden", IsSelected = true });
+        var share = new CdsMenuItem("Share");
+        share.Items.Add(new CdsMenuItem("Copy link"));
+        button.Items.Add(share);
+        return button;
+    }
+}
+
 public class MenuTests
 {
     [Theory]
@@ -167,5 +192,75 @@ public class MenuTests
         menu.Items.Add(new CdsMenuItem("Delete") { Kind = CdsMenuItemKind.Danger });
         Assert.NotNull(menu.CreatePreview());
         Assert.NotNull(menu.CreatePreview(highlightedIndex: 0));
+    }
+
+    [Fact]
+    public void Opening_announces_the_first_item_politely()
+    {
+        var button = ActionTestHost.SampleButton();
+        ActionTestHost.Show(button);
+        using var heard = CdsAnnouncer.Capture();
+        button.IsOpen = true;
+        Assert.True(button.Menu.IsOpen);
+        Assert.Equal([new CdsAnnouncement("Restart, 1 of 3", CdsAnnouncePriority.Polite)], heard.Announcements);
+    }
+
+    [Fact]
+    public void Moving_the_highlight_announces_the_item_its_state_and_position()
+    {
+        var button = ActionTestHost.SampleButton();
+        var host = ActionTestHost.Show(button);
+        button.IsOpen = true;
+        using var heard = CdsAnnouncer.Capture();
+
+        Assert.True(host.RouteKey(new CdsKeyEventArgs(CdsKey.Down)));
+        Assert.Equal(new CdsAnnouncement("Show hidden, checked, 2 of 3", CdsAnnouncePriority.Assertive), heard.Announcements[^1]);
+        Assert.True(host.RouteKey(new CdsKeyEventArgs(CdsKey.End)));
+        Assert.Equal("Share, submenu, 3 of 3", heard.Announcements[^1].Text);
+
+        // A key that leaves the highlight where it is says nothing new.
+        var count = heard.Announcements.Count;
+        host.RouteKey(new CdsKeyEventArgs(CdsKey.End));
+        Assert.Equal(count, heard.Announcements.Count);
+    }
+
+    [Fact]
+    public void Opening_and_closing_a_submenu_from_the_keyboard_announces_where_the_highlight_went()
+    {
+        var button = ActionTestHost.SampleButton();
+        var host = ActionTestHost.Show(button);
+        button.IsOpen = true;
+        host.RouteKey(new CdsKeyEventArgs(CdsKey.End));
+        using var heard = CdsAnnouncer.Capture();
+
+        Assert.True(host.RouteKey(new CdsKeyEventArgs(CdsKey.Right)));
+        Assert.Equal(new CdsAnnouncement("Copy link, 1 of 1", CdsAnnouncePriority.Assertive), heard.Announcements[^1]);
+        Assert.True(host.RouteKey(new CdsKeyEventArgs(CdsKey.Left)));
+        Assert.Equal("Share, submenu, 3 of 3", heard.Announcements[^1].Text);
+        Assert.True(button.Menu.IsOpen);
+    }
+
+    [Fact]
+    public void Menu_rows_are_not_tab_stops_and_keep_their_full_label_as_a_tooltip()
+    {
+        var button = ActionTestHost.SampleButton();
+        ActionTestHost.Show(button);
+        button.IsOpen = true;
+        var rows = button.Menu.OpenRows.OfType<CdsMenuRow>().ToList();
+        Assert.Equal(3, rows.Count);
+        Assert.All(rows, r => Assert.False(r.Hit.IsTabStop));
+        Assert.Equal(["Restart", "Show hidden", "Share"], rows.Select(r => ToolTipProperties.GetText(r.Hit) as string));
+    }
+
+    [Fact]
+    public void The_surface_is_layer_01_by_default_and_background_with_the_background_token()
+    {
+        Assert.Equal(CdsColorKeys.Layer01, CdsMenuTokens.SurfaceBackground(CdsMenuBackgroundToken.Layer));
+        Assert.Equal(CdsColorKeys.Background, CdsMenuTokens.SurfaceBackground(CdsMenuBackgroundToken.Background));
+        var menu = new CdsMenu();
+        Assert.Equal(CdsMenuBackgroundToken.Layer, menu.BackgroundToken);
+        menu.BackgroundToken = CdsMenuBackgroundToken.Background;
+        menu.Items.Add(new CdsMenuItem("Edit"));
+        Assert.NotNull(menu.CreatePreview());
     }
 }

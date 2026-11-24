@@ -34,6 +34,10 @@ public static class CdsMenuTokens
         return new(null, CdsColorKeys.TextSecondary, CdsColorKeys.TextSecondary);
     }
 
+    /// <summary>The surface fill for a background token: <c>layer-01</c> (default) or <c>background</c>.</summary>
+    public static string SurfaceBackground(CdsMenuBackgroundToken token) =>
+        token == CdsMenuBackgroundToken.Background ? CdsColorKeys.Background : CdsColorKeys.Layer01;
+
     /// <summary>The row height of a menu size: xs 24, sm 32 (default), md 40, lg 48. Larger sizes clamp to lg.</summary>
     public static double RowHeight(CdsSize size) => Coerce(size).Height();
 

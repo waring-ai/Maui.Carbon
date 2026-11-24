@@ -63,6 +63,8 @@ public class CdsOverflowMenu : CdsControl
         };
         SetChrome(_face);
         TrackFocus(_face.Hit, () => _face.Hit.IsFocusFromKeyboard);
+        // Tabbing away (or any focus move off the trigger) closes the menu, so its keys stop acting on it.
+        _face.Hit.Unfocused += (_, _) => _menu.CloseForFocusLoss();
         Loaded += (_, _) =>
         {
             if (_openPending) Dispatcher.Dispatch(() => OnIsOpenChanged(true));

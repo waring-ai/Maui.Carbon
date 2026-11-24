@@ -68,7 +68,11 @@ internal sealed class CdsMenuRow : CdsControl
             MenuRowKind.Radio => CdsAccessibilityRole.Radio,
             _ => CdsAccessibilityRole.MenuItem,
         });
+        // Virtual focus: the trigger keeps keyboard focus, so rows are never tab stops (Carbon: tabindex="-1").
+        _hit.IsTabStop = false;
         SemanticProperties.SetDescription(_hit, info.Text);
+        // Labels past the 18rem maximum truncate; the tooltip keeps the full text reachable (Carbon's title).
+        if (!string.IsNullOrEmpty(info.Text)) ToolTipProperties.SetText(_hit, info.Text);
         if (!string.IsNullOrEmpty(info.GroupLabel)) SemanticProperties.SetHint(_hit, info.GroupLabel);
         if (info.Kind is MenuRowKind.Selectable or MenuRowKind.Radio) _hit.IsChecked = info.IsSelected;
         if (info.HasSubmenu) _hit.IsExpanded = false;
@@ -82,6 +86,9 @@ internal sealed class CdsMenuRow : CdsControl
     }
 
     public MenuRowInfo Info { get; }
+
+    /// <summary>The row's hit target (tests, focus checks).</summary>
+    internal CdsHitTarget Hit => _hit;
 
     /// <summary>Raised when the pointer enters the row.</summary>
     public event EventHandler? HoverEntered;

@@ -29,6 +29,10 @@ public class CdsMenuButton : CdsControl
     public static readonly BindableProperty HasMenuBorderProperty = BindableProperty.Create(
         nameof(HasMenuBorder), typeof(bool), typeof(CdsMenuButton), false);
 
+    /// <summary>Bindable property for <see cref="MenuBackgroundToken"/>.</summary>
+    public static readonly BindableProperty MenuBackgroundTokenProperty = BindableProperty.Create(
+        nameof(MenuBackgroundToken), typeof(CdsMenuBackgroundToken), typeof(CdsMenuButton), CdsMenuBackgroundToken.Layer);
+
     /// <summary>Bindable property for <see cref="IsOpen"/>.</summary>
     public static readonly BindableProperty IsOpenProperty = BindableProperty.Create(
         nameof(IsOpen), typeof(bool), typeof(CdsMenuButton), false, BindingMode.TwoWay,
@@ -60,6 +64,8 @@ public class CdsMenuButton : CdsControl
         };
         SetChrome(_face);
         TrackFocus(_face.Hit, () => _face.Hit.IsFocusFromKeyboard);
+        // Tabbing away (or any focus move off the trigger) closes the menu, so its keys stop acting on it.
+        _face.Hit.Unfocused += (_, _) => _menu.CloseForFocusLoss();
         Loaded += (_, _) =>
         {
             if (_openPending) Dispatcher.Dispatch(() => OnIsOpenChanged(true));
@@ -112,6 +118,16 @@ public class CdsMenuButton : CdsControl
         set => SetValue(HasMenuBorderProperty, value);
     }
 
+    /// <summary>
+    /// The menu's fill: <see cref="CdsMenuBackgroundToken.Layer"/> (<c>layer-01</c>, default) or
+    /// <see cref="CdsMenuBackgroundToken.Background"/> when the button sits on a <c>layer-01</c> surface.
+    /// </summary>
+    public CdsMenuBackgroundToken MenuBackgroundToken
+    {
+        get => (CdsMenuBackgroundToken)GetValue(MenuBackgroundTokenProperty);
+        set => SetValue(MenuBackgroundTokenProperty, value);
+    }
+
     /// <summary>Whether the menu is open. Two-way; setting it before the control is on screen opens the menu once it loads.</summary>
     public bool IsOpen
     {
@@ -149,6 +165,7 @@ public class CdsMenuButton : CdsControl
         _menu.Size = Size;
         _menu.Label = Label;
         _menu.HasBorder = HasMenuBorder;
+        _menu.BackgroundToken = MenuBackgroundToken;
         _menu.OpenCore(_face, MenuAlignment.ToPlacement(), MenuAlignment.FillsTrigger() ? _face.Width : 0);
     }
 
