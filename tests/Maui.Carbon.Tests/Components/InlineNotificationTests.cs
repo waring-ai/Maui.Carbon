@@ -323,10 +323,7 @@ public class NotificationEscapeTests
     }
 }
 
-[CollectionDefinition(nameof(FocusTrackerCollection), DisableParallelization = true)]
-public class FocusTrackerCollection;
-
-[Collection(nameof(FocusTrackerCollection))]
+[Collection(FocusTrackerCollection.Name)]
 public class NotificationFocusAfterCloseTests
 {
     static CdsHitTarget Hit(CdsControl control) => (CdsHitTarget)control.AccessibilityTarget!;

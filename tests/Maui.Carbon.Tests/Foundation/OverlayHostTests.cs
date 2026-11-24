@@ -2,8 +2,9 @@ namespace Maui.Carbon.Tests.Foundation;
 
 /// <summary>
 /// The page overlay host's key routing, toast stacking, focus return and motion (design-conformance review CO-01, CO-07,
-/// CO-04, CO-13). One class, so the tests that set the global focus tracker never run in parallel with each other.
+/// CO-04, CO-13). It sets the process-wide focus tracker, so it runs in the non-parallel focus collection.
 /// </summary>
+[Collection(FocusTrackerCollection.Name)]
 public class OverlayHostTests
 {
     static (CdsOverlayHost Host, VerticalStackLayout Page) NewPage()

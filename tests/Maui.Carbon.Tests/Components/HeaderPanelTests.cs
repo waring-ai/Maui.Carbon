@@ -90,11 +90,8 @@ public class HeaderPanelTests
     }
 }
 
-[CollectionDefinition(nameof(HeaderPanelFocusTests), DisableParallelization = true)]
-public sealed class HeaderPanelFocusCollection;
-
 /// <summary>Uses the process-wide focus tracker, so it runs on its own.</summary>
-[Collection(nameof(HeaderPanelFocusTests))]
+[Collection(FocusTrackerCollection.Name)]
 public class HeaderPanelFocusTests
 {
     static CdsHitTarget Hit(CdsControl control) => (CdsHitTarget)control.AccessibilityTarget!;
