@@ -154,7 +154,7 @@ public class CdsMenu : BindableObject
     }
 
     /// <summary>The rows of the open root menu (dividers are null), for tests.</summary>
-    internal IReadOnlyList<CdsMenuRow?> OpenRows => _root?.Rows ?? [];
+    internal CdsMenuRow?[] OpenRows => _root?.Rows ?? [];
 
     /// <summary>The highlighted row index of the innermost open level, or -1.</summary>
     internal int ActiveHighlight => ActiveLevel()?.Model.Highlighted ?? -1;

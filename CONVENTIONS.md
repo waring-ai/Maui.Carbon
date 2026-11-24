@@ -152,18 +152,39 @@ public CdsButtonKind Kind
   fill, `CdsTokens.SetShadow`).
 - Menus and list boxes use **virtual focus**: keep focus on the trigger, track a highlighted index, and pass
   `Keys = CdsOverlayKeys.Navigation | CdsOverlayKeys.Activation` plus a `KeyHandler` in the options. Escape closes by default.
-- Composite controls that move focus with arrows (tabs, radio groups, content switcher, tree view) override
-  `WantsNavigationKeys => true` and `OnKeyDown(CdsKeyEventArgs e)`.
+- Composite controls that move focus with arrows (tabs, radio and tile groups, content switcher, structured list,
+  tree view) override `WantsNavigationKeys => true` and `OnKeyDown(CdsKeyEventArgs e)`, and keep one Tab stop with
+  `CdsRovingFocus` (`RemembersFocus = false` and `PreferredIndex` = the selected index when selection follows focus).
+  Secondary buttons inside them (tab scroll arrows, number steppers) set `IsTabStop = false`.
+- A virtual-focus menu or list closes when its trigger loses focus, with `ReturnFocus = false` so the Tab that moved
+  focus is not undone. It announces the highlighted item (label, state, "2 of 5") through `CdsAnnouncer` on open and
+  on every keyboard move.
+- Overlays that take no keys (toasts) are passive: key routing skips them, so they never take Escape or arrows from a
+  modal or menu. Modals and dialogs without `ReturnFocusTo` return focus to the control focused before they opened.
+- Decide a responsive layout while measuring (a custom layout, or `CdsContextKeys.ViewportWidth`), never by changing a
+  Grid's rows or columns from `SizeChanged`: the new structure is arranged with the old measure.
 - `CdsOverlayService` needs a page host (every ContentPage gets one automatically). Open overlays only when
   `IsLoaded` is true.
 
 ## 9. Accessibility checklist
 
 - Every control has a name (`SemanticProperties.SetDescription` on the hit target / native input), a role
-  (`CdsAccessibilityRole`), and its state (`IsChecked`, `IsSelected`, `IsExpanded`).
-- Helper / error text → `SemanticProperties.SetHint` on the input.
+  (`CdsAccessibilityRole`), and its state (`IsChecked`, `IsSelected`, `IsExpanded` (false, not null, while the panel
+  or menu a trigger opens is closed), `IsReadOnly`, `CurrentKind` for the current page instead of `IsSelected`).
+- Name a group (radio, checkbox or tile group, form group, toolbar, tab row, list, menu or list-box surface, dialog
+  surface, nav or header landmark) with `CdsSemantics.SetGroup(view, name, kind, hint)`. Never put
+  `SemanticProperties.Description` or `Hint` on a layout, Border, ScrollView or ContentView with interactive
+  descendants: on iOS and Mac Catalyst it becomes one VoiceOver element and hides them. `ContainerSemanticsAuditTests`
+  enforces this. A Description an app sets on a Cds control is forwarded by `CdsControl` to its hit target.
+- Name row-level controls by their row ("Select row, <name>"); a screen reader has no table context.
+- Helper / error text → `SemanticProperties.SetHint` on the input. Error and warning messages are alerts: spoken once,
+  assertively, when they appear on a loaded control (`CdsMessageAlert`; `CdsFieldChrome` and `CdsFormMessage` do it).
+- Adjustable controls set `CdsHitTarget.AccessibleValue` to the formatted value (never a hint) and step on
+  `Incremented`/`Decremented` as the arrow keys do.
 - Headings: `SemanticProperties.SetHeadingLevel(label, SemanticHeadingLevel.Level2)` where Carbon renders a heading.
-- Live regions (counts, toasts, inline loading) → `SemanticScreenReader.Announce(text)` when they change.
+- Live regions (counts, notifications, inline loading) → `CdsAnnouncer.Announce(text)` (polite) or
+  `CdsAnnouncer.Announce(text, CdsAnnouncePriority.Assertive)` for alerts, never `SemanticScreenReader.Announce`.
+  Announce only while the element is effectively shown (loaded, every ancestor visible), and coalesce related changes.
 - Disabled controls are not focusable (`IsEnabled = false` does it); read-only controls stay focusable.
 - Icon-only controls require a description; decorative icons stay out of the tree (`CdsIcon` default).
 - Never use color alone: status = icon + text.
@@ -191,6 +212,10 @@ public CdsButtonKind Kind
 - the token resolver for each kind × state that the README specifies (e.g. disabled primary → `ButtonDisabled`);
 - every model (pure logic) thoroughly: edge cases, clamping, keyboard index movement;
 - constructing the control and setting each property must not throw (controls can be created without a platform).
+- announcements: `using var heard = CdsAnnouncer.Capture();`, then assert on `heard.Announcements`.
+- a loaded control (for `IsLoaded`-gated behaviour and overlays): `new Window(new ContentPage { Content = view })`.
+  Keep the root in a variable for the whole test; an element holds its parent weakly.
+- tests that set the process-wide `CdsFocusTracker` join `[Collection(FocusTrackerCollection.Name)]`.
 
 ## 12. Build and verify
 

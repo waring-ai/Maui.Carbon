@@ -49,20 +49,42 @@ public class ControlSemanticsForwardingTests
     }
 
     [Fact]
-    public void A_control_with_several_targets_is_named_as_a_group()
+    public void A_multi_line_code_snippet_forwards_the_name_to_its_code_area()
     {
-        // Waring Management sets the Description on multi-line code snippets (copy and show-more buttons inside).
+        // Waring Management sets the Description on multi-line code snippets. The code area is the snippet's one focus
+        // target (the copy and show-more buttons are controls of their own), so it takes the name, like Label.
         var snippet = new CdsCodeSnippet { Type = CdsCodeSnippetType.Multi, Code = "line 1\nline 2" };
-        SemanticProperties.SetDescription(snippet, "Legend");
-        Assert.Equal("Legend", CdsSemantics.GetGroupName(snippet));
+        SemanticProperties.SetDescription(snippet, "Deployment log");
+        Assert.Same(snippet.CodeArea, snippet.SemanticForwardTarget);
+        Assert.Equal("Deployment log", SemanticProperties.GetDescription(snippet.CodeArea!));
         Assert.Null(Platform(snippet)?.Description);
-        Assert.Null(snippet.SemanticForwardTarget);
-        // The audit reads the attached value, which the snippet still holds; only the snippet itself may show up, and its
-        // platform semantics (above) carry no Description.
-        Assert.DoesNotContain(ContainerSemanticsAuditTests.Violations(snippet, "snippet"), v => !v.StartsWith("snippet: CdsCodeSnippet ", StringComparison.Ordinal));
 
         SemanticProperties.SetDescription(snippet, null);
-        Assert.Null(CdsSemantics.GetGroupName(snippet));
+        Assert.Equal("line 1\nline 2", SemanticProperties.GetDescription(snippet.CodeArea!));
+    }
+
+    sealed class TwoTargetControl : CdsControl
+    {
+        public TwoTargetControl()
+        {
+            var first = CreateHitTarget();
+            var second = CreateHitTarget();
+            TrackFocus(second);
+            SetChrome(new HorizontalStackLayout { first, second });
+        }
+    }
+
+    [Fact]
+    public void A_control_with_several_targets_is_named_as_a_group()
+    {
+        var control = new TwoTargetControl();
+        SemanticProperties.SetDescription(control, "Legend");
+        Assert.Equal("Legend", CdsSemantics.GetGroupName(control));
+        Assert.Null(Platform(control)?.Description);
+        Assert.Null(control.SemanticForwardTarget);
+
+        SemanticProperties.SetDescription(control, null);
+        Assert.Null(CdsSemantics.GetGroupName(control));
     }
 
     [Fact]
