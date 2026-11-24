@@ -383,8 +383,7 @@ public class CdsTable : CdsControl
         // A text cell's label is updated in place; a cell drawn without one (a body, or not built yet) rebuilds.
         if (sender is CdsTableCell cell && _cellLabels.TryGetValue(cell, out var label))
         {
-            var text = cell.Text ?? string.Empty;
-            if (label.Text != text) label.Text = text;
+            SetCellText(label, cell.Text);
             return;
         }
         if (_building || _binding) return;
@@ -701,7 +700,7 @@ public class CdsTable : CdsControl
         }
         // The cells were detached while parked: catch up with their text.
         foreach (var cell in visual.TextCells)
-            if (_cellLabels.TryGetValue(cell, out var label)) label.Text = cell.Text ?? string.Empty;
+            if (_cellLabels.TryGetValue(cell, out var label)) SetCellText(label, cell.Text);
         if (visual.ChildHost is not null) SetChildContent(visual, visual.Source);
         _rowVisuals.Add(visual);
         _visualByRow[visual.Source] = visual;
@@ -752,6 +751,7 @@ public class CdsTable : CdsControl
         {
             var cell = c < source.CellList.Count ? source.CellList[c] : null;
             var headerAlign = head is not null && c < head.Count ? head[c].Align : CdsTableAlignment.Start;
+            var columnName = head is not null && c < head.Count && !head[c].IsFlush ? head[c].Text : null;
             var align = cell?.Align ?? headerAlign;
             var flush = cell?.IsFlush == true;
             var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
@@ -766,6 +766,8 @@ public class CdsTable : CdsControl
                     host.Padding = new Thickness(CdsTableTokens.CellPaddingX, _padTop, CdsTableTokens.CellPaddingX, _padBottom);
                 }
                 if (cell.RevealOnHover) visual.RevealViews.Add((cell, body));
+                // A custom cell is a group named by its column, so a screen reader entering it hears the header first.
+                CdsSemantics.SetGroupName(host, columnName);
             }
             else if (cell is not null)
             {
@@ -777,6 +779,8 @@ public class CdsTable : CdsControl
                     InputTransparent = true,
                 };
                 if (fixedHeight) label.LineBreakMode = LineBreakMode.TailTruncation;
+                label.SetValue(ColumnNameProperty, columnName);
+                SetCellText(label, cell.Text);
                 visual.Labels.Add(label);
                 visual.TextCells.Add(cell);
                 _cellLabels[cell] = label;
@@ -1197,6 +1201,30 @@ public class CdsTable : CdsControl
             });
         };
         view.GestureRecognizers.Add(pointer);
+    }
+
+    // The column header of a text cell's label: the cell is read as "<header>: <value>" (the web's scope="col").
+    static readonly BindableProperty ColumnNameProperty = BindableProperty.CreateAttached(
+        "CdsColumnName", typeof(string), typeof(CdsTable), null);
+
+    /// <summary>Shows a text cell's text and names it with its column header.</summary>
+    static void SetCellText(CdsText label, string? text)
+    {
+        text ??= string.Empty;
+        if (label.Text != text) label.Text = text;
+        var name = CellName((string?)label.GetValue(ColumnNameProperty), text);
+        if (name is null) label.ClearValue(SemanticProperties.DescriptionProperty);
+        else SemanticProperties.SetDescription(label, name);
+    }
+
+    /// <summary>
+    /// The accessible name of a text cell: "&lt;header&gt;: &lt;value&gt;", so a cell reached on its own still says which column it
+    /// is in. <c>null</c> (the label reads its own text) when the column has no header text or the cell is empty.
+    /// </summary>
+    internal static string? CellName(string? header, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(header)) return null;
+        return $"{header}: {text}";
     }
 
     sealed class HeaderVisual

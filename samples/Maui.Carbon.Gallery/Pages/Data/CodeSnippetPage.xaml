@@ -20,20 +20,20 @@
 
         <g:GalleryExample Title="Single line" Description="One line with a 40px copy button; long commands scroll sideways under a fade.">
             <VerticalStackLayout Spacing="16">
-                <cds:CdsCodeSnippet Code="cloud login --sso --region us-east" SemanticProperties.Description="Log in command" Feedback="Copied to clipboard" />
-                <cds:CdsCodeSnippet x:Name="LongSingle" SemanticProperties.Description="Add worker nodes with the API" Feedback="Copied to clipboard" />
+                <cds:CdsCodeSnippet Code="cloud login --sso --region us-east" Label="Log in command" Feedback="Copied to clipboard" />
+                <cds:CdsCodeSnippet x:Name="LongSingle" Label="Add worker nodes with the API" Feedback="Copied to clipboard" />
             </VerticalStackLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Multi-line" Description="Twenty-six lines collapse to fifteen with Show more; Show less collapses them again.">
-            <cds:CdsCodeSnippet x:Name="Manifest" Type="Multi" SemanticProperties.Description="Deployment manifest" Feedback="Copied to clipboard" />
+            <cds:CdsCodeSnippet x:Name="Manifest" Type="Multi" Label="Deployment manifest" Feedback="Copied to clipboard" />
         </g:GalleryExample>
 
         <g:GalleryExample Title="Expanded, short, wrapped, no copy" Description="An expanded snippet, a short one that wraps long lines (no Show more), and one without a copy button.">
             <VerticalStackLayout Spacing="16">
-                <cds:CdsCodeSnippet x:Name="ExpandedManifest" Type="Multi" IsExpanded="True" SemanticProperties.Description="Deployment manifest, expanded" />
-                <cds:CdsCodeSnippet x:Name="Wrapped" Type="Multi" IsWrapText="True" SemanticProperties.Description="Environment variables" />
-                <cds:CdsCodeSnippet x:Name="Output" Type="Multi" HideCopyButton="True" SemanticProperties.Description="Command output" />
+                <cds:CdsCodeSnippet x:Name="ExpandedManifest" Type="Multi" IsExpanded="True" Label="Deployment manifest, expanded" />
+                <cds:CdsCodeSnippet x:Name="Wrapped" Type="Multi" IsWrapText="True" Label="Environment variables" />
+                <cds:CdsCodeSnippet x:Name="Output" Type="Multi" HideCopyButton="True" Label="Command output" />
             </VerticalStackLayout>
         </g:GalleryExample>
 
@@ -46,7 +46,7 @@
 
         <g:GalleryExample Title="Interactive" Description="Clicking copy writes to the clipboard and shows the feedback for two seconds.">
             <VerticalStackLayout Spacing="16">
-                <cds:CdsCodeSnippet Code="cloud ks cluster config --cluster prod-us-east-1" Clicked="OnCopied" SemanticProperties.Description="Download cluster configuration" />
+                <cds:CdsCodeSnippet Code="cloud ks cluster config --cluster prod-us-east-1" Clicked="OnCopied" Label="Download cluster configuration" />
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Nothing copied yet" />
             </VerticalStackLayout>
         </g:GalleryExample>

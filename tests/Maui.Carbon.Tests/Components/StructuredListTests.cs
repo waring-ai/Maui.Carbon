@@ -62,6 +62,76 @@ public class StructuredListTests
     }
 
     [Fact]
+    public void Condensed_wins_over_the_selection_side_padding()
+    {
+        // .cds--structured-list--condensed (padding: 0.5rem) outranks .cds--structured-list--selection (padding-inline: 1rem).
+        Assert.Equal(new Thickness(8, 8, 8, 8), CdsStructuredListModel.CellPadding(false, true, false, true, true));
+        Assert.Equal(new Thickness(8, 8, 8, 8), CdsStructuredListModel.CellPadding(true, true, false, true, false));
+        Assert.Equal(new Thickness(16, 16, 16, 24), CdsStructuredListModel.CellPadding(false, false, false, true, true));
+        // Flush still wins over condensed.
+        Assert.Equal(new Thickness(0, 8, 16, 8), CdsStructuredListModel.CellPadding(false, true, true, false, true));
+    }
+
+    static CdsStructuredList SelectableList(params bool[] enabled)
+    {
+        var list = new CdsStructuredList { IsSelectable = true, Label = "Flavors" };
+        list.Columns.Add(new CdsStructuredListColumn { Header = "Flavor" });
+        for (var i = 0; i < enabled.Length; i++)
+            list.Rows.Add(new CdsStructuredListRow($"flavor-{i}") { Label = $"flavor {i}", IsEnabled = enabled[i] });
+        return list;
+    }
+
+    static int[] Stops(CdsStructuredList list) =>
+        list.RowTargets.Select((h, i) => (h, i)).Where(p => p.h.IsTabStop).Select(p => p.i).ToArray();
+
+    [Fact]
+    public void Selectable_rows_are_one_tab_stop_on_the_selected_row()
+    {
+        var list = SelectableList(true, true, true);
+        Assert.Equal(3, list.RowTargets.Count);
+        Assert.Equal([0], Stops(list));     // nothing selected: the first row
+        list.SelectedIndex = 2;
+        Assert.Equal([2], Stops(list));
+    }
+
+    [Fact]
+    public void Disabled_rows_never_take_the_tab_stop()
+    {
+        var list = SelectableList(false, true, true);
+        Assert.Equal([1], Stops(list));
+    }
+
+    [Fact]
+    public void Arrow_keys_move_the_selection_and_the_tab_stop_and_skip_disabled_rows()
+    {
+        var list = SelectableList(true, false, true);
+        list.SelectedIndex = 0;
+        list.RowTargets[0].ReportFocus(true, fromKeyboard: true);
+        Assert.True(list.OnKeyDown(new CdsKeyEventArgs(CdsKey.Down)));
+        Assert.Equal(2, list.SelectedIndex);
+        Assert.Equal([2], Stops(list));
+        // Headlessly Focus() does nothing: move the platform focus by hand.
+        list.RowTargets[0].ReportFocus(false, fromKeyboard: true);
+        list.RowTargets[2].ReportFocus(true, fromKeyboard: true);
+        Assert.True(list.OnKeyDown(new CdsKeyEventArgs(CdsKey.Down))); // wraps like a radio group
+        Assert.Equal(0, list.SelectedIndex);
+        Assert.False(list.OnKeyDown(new CdsKeyEventArgs(CdsKey.Enter)));
+    }
+
+    [Fact]
+    public void Header_cells_wrap_unless_the_column_does_not_wrap()
+    {
+        var list = new CdsStructuredList();
+        list.Columns.Add(new CdsStructuredListColumn { Header = "Best for" });
+        list.Columns.Add(new CdsStructuredListColumn { Header = "vCPU / memory", IsNoWrap = true });
+        list.Rows.Add(new CdsStructuredListRow("General web apps", "4 vCPU"));
+        var headers = Maui.Carbon.Tests.Foundation.ContainerSemanticsAuditTests.Walk(list).OfType<CdsText>()
+            .Where(t => t.TypeStyle == CdsTypeStyle.HeadingCompact01).ToDictionary(t => t.Text);
+        Assert.Equal(LineBreakMode.WordWrap, headers["Best for"].LineBreakMode);
+        Assert.Equal(LineBreakMode.NoWrap, headers["vCPU / memory"].LineBreakMode);
+    }
+
+    [Fact]
     public void Flush_removes_the_start_padding_and_selection_pads_both_sides()
     {
         Assert.Equal(new Thickness(0, 16, 16, 24), CdsStructuredListModel.CellPadding(false, false, true, false, true));

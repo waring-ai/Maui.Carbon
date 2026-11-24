@@ -33,6 +33,8 @@ public partial class CdsHitTargetHandler
         {
             CdsAccessibilityRole.Link => UIAccessibilityTrait.Link,
             CdsAccessibilityRole.Adjustable => UIAccessibilityTrait.Adjustable,
+            // A text area, not a button: VoiceOver reads its label and value without "button".
+            CdsAccessibilityRole.TextBox => UIAccessibilityTrait.StaticText,
             _ => UIAccessibilityTrait.Button,
         };
         var role = target.Role;

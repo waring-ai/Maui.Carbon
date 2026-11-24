@@ -41,7 +41,8 @@ public class ListMarkerTests
         Assert.Equal(24, CdsListMarkers.MarkerWidth(true, false));
         Assert.Equal(16, CdsListMarkers.MarkerWidth(false, false));
         Assert.Equal(12, CdsListMarkers.MarkerWidth(false, true));
-        Assert.Equal(0, CdsListMarkers.LeftMargin(true, false));
+        // A top-level ordered list hangs its marker 24 before its box (outside it, as in Carbon).
+        Assert.Equal(-24, CdsListMarkers.LeftMargin(true, false));
         Assert.Equal(0, CdsListMarkers.LeftMargin(false, false));
         // Nested text starts 32 + 4 after the parent's text; the marker hangs before it.
         Assert.Equal(36, CdsListMarkers.LeftMargin(false, true) + CdsListMarkers.MarkerWidth(false, true));
@@ -87,5 +88,25 @@ public class ListControlTests
         };
         Assert.Equal(2, list.Items.Count);
         Assert.Equal("–", list.MarkerFor(0));
+    }
+
+    [Fact]
+    public void Native_and_nested_ordered_markers_end_before_the_text()
+    {
+        Assert.False(CdsListMarkers.IsMarkerEndAligned(true, false, false)); // Carbon counter at the column start
+        Assert.True(CdsListMarkers.IsMarkerEndAligned(true, false, true));   // native decimal
+        Assert.True(CdsListMarkers.IsMarkerEndAligned(true, true, false));   // nested lower-latin
+        Assert.False(CdsListMarkers.IsMarkerEndAligned(false, false, true)); // bullets never
+    }
+
+    [Fact]
+    public void Ordered_lists_can_use_native_markers()
+    {
+        var list = new CdsOrderedList { IsNative = true };
+        list.Items.Add(new CdsListItem("Install the CLI"));
+        Assert.True(list.IsNative);
+        Assert.True(list.IsNativeMarkers);
+        Assert.False(new CdsOrderedList().IsNativeMarkers);
+        Assert.Equal("1.", list.MarkerFor(0));
     }
 }

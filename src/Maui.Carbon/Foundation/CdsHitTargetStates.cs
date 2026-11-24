@@ -66,6 +66,7 @@ internal static class CdsHitTargetStates
         CdsAccessibilityRole.Tab => "tab",
         CdsAccessibilityRole.MenuItem => "menu item",
         CdsAccessibilityRole.Option => "option",
+        CdsAccessibilityRole.TextBox => "text box",
         _ => null,
     };
 
@@ -79,7 +80,7 @@ internal static class CdsHitTargetStates
         CdsAccessibilityRole.Adjustable => "android.widget.SeekBar",
         CdsAccessibilityRole.ComboBox => "android.widget.Spinner",
         // No widget class: a plain view with a role description, so TalkBack does not call them buttons.
-        CdsAccessibilityRole.Link or CdsAccessibilityRole.Tab or CdsAccessibilityRole.MenuItem or CdsAccessibilityRole.Option => "android.view.View",
+        CdsAccessibilityRole.Link or CdsAccessibilityRole.Tab or CdsAccessibilityRole.MenuItem or CdsAccessibilityRole.Option or CdsAccessibilityRole.TextBox => "android.view.View",
         _ => "android.widget.Button",
     };
 

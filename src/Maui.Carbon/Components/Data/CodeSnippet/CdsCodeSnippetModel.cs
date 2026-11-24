@@ -60,6 +60,39 @@ public static class CdsCodeSnippetModel
     /// <summary>Rotation of the expand chevron: 0 collapsed, 180 expanded.</summary>
     public static double ChevronRotation(bool expanded) => expanded ? 180 : 0;
 
+    /// <summary>How far an arrow key scrolls the focused code area (40, like a browser's arrow-key step).</summary>
+    public const double KeyScrollStep = 40;
+
+    /// <summary>
+    /// Where a key scrolls the focused code area, or <c>null</c> when the key does not scroll it. Up and Down (and Page Up /
+    /// Page Down, by a viewport less one step) scroll code that overflows vertically, Left and Right code that overflows
+    /// sideways; Home and End go to the top and bottom, or to the start and end of a single line. The result is clamped to
+    /// the content, so at an edge the key is still taken (it does not scroll the page behind).
+    /// </summary>
+    public static (double X, double Y)? ScrollOffset(CdsKey key, double x, double y, double viewportWidth, double viewportHeight, double contentWidth, double contentHeight)
+    {
+        var maxX = Math.Max(0, contentWidth - viewportWidth);
+        var maxY = Math.Max(0, contentHeight - viewportHeight);
+        var vertical = maxY > 0.5;
+        var horizontal = maxX > 0.5;
+        var page = Math.Max(KeyScrollStep, viewportHeight - KeyScrollStep);
+        (double X, double Y)? to = key switch
+        {
+            CdsKey.Up when vertical => (x, y - KeyScrollStep),
+            CdsKey.Down when vertical => (x, y + KeyScrollStep),
+            CdsKey.Left when horizontal => (x - KeyScrollStep, y),
+            CdsKey.Right when horizontal => (x + KeyScrollStep, y),
+            CdsKey.PageUp when vertical => (x, y - page),
+            CdsKey.PageDown when vertical => (x, y + page),
+            CdsKey.Home when vertical => (x, 0),
+            CdsKey.End when vertical => (x, maxY),
+            CdsKey.Home when horizontal => (0, y),
+            CdsKey.End when horizontal => (maxX, y),
+            _ => null,
+        };
+        return to is { } t ? (Math.Clamp(t.X, 0, maxX), Math.Clamp(t.Y, 0, maxY)) : null;
+    }
+
     /// <summary>The text that is copied: <paramref name="copyText"/> when set, otherwise the code.</summary>
     public static string TextToCopy(string? code, string? copyText) => copyText ?? code ?? string.Empty;
 }

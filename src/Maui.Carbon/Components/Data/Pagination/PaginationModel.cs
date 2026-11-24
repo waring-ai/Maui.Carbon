@@ -28,17 +28,6 @@ internal static class PaginationModel
     /// <summary>The first visible item's zero-based index on a page.</summary>
     public static int FirstIndex(int page, int pageSize) => Math.Max(0, (page - 1) * Math.Max(1, pageSize));
 
-    /// <summary>
-    /// The page to show after the page size changed, keeping the first visible item on screen: the page that contains the
-    /// item that was first before.
-    /// </summary>
-    public static int PageAfterSizeChange(int page, int oldSize, int newSize, int totalItems)
-    {
-        if (newSize <= 0) return 1;
-        var next = FirstIndex(page, oldSize) / newSize + 1;
-        return ClampPage(next, PageCount(totalItems, newSize));
-    }
-
     /// <summary>Whether the previous button is enabled.</summary>
     public static bool CanGoBack(int page) => page > 1;
 

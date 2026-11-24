@@ -52,22 +52,17 @@ public class PaginationTests
         Assert.Equal("of 1 page", PaginationModel.PageRangeText(1));
     }
 
-    [Theory]
-    [InlineData(1, 10, 20, 103, 1)]
-    [InlineData(3, 10, 20, 103, 2)] // item 21 is on page 2 of 20
-    [InlineData(2, 10, 50, 103, 1)] // item 11 is on page 1 of 50
-    [InlineData(11, 10, 50, 103, 3)] // item 101 is on page 3 of 50
-    [InlineData(3, 20, 10, 103, 5)] // item 41 is on page 5 of 10
-    [InlineData(5, 10, 10, 103, 5)]
-    [InlineData(2, 10, 0, 103, 1)]
-    public void Changing_the_page_size_keeps_the_first_visible_item(int page, int oldSize, int newSize, int total, int expected) =>
-        Assert.Equal(expected, PaginationModel.PageAfterSizeChange(page, oldSize, newSize, total));
-
     [Fact]
-    public void Page_size_change_never_lands_past_the_last_page()
+    public void Changing_the_page_size_returns_to_page_1()
     {
-        Assert.Equal(1, PaginationModel.PageAfterSizeChange(5, 10, 50, 40));
-        Assert.Equal(2, PaginationModel.PageAfterSizeChange(5, 10, 40, 60));
+        var pagination = new CdsPagination { TotalItems = 103, PageSize = 10, Page = 5 };
+        CdsPaginationChangedEventArgs? change = null;
+        pagination.PageChanged += (_, e) => change = e;
+        pagination.ChangePageSize(20);
+        Assert.Equal(1, pagination.Page);
+        Assert.Equal(20, pagination.PageSize);
+        Assert.Equal(1, change!.Page);
+        Assert.Equal(20, change.PageSize);
     }
 
     [Fact]

@@ -9,6 +9,11 @@ namespace Maui.Carbon;
 /// that needs it), the type is <c>code-01</c> mono. The copy button writes the code (or <see cref="CopyText"/>) to the
 /// clipboard and shows <see cref="Feedback"/> for <see cref="FeedbackTimeout"/> ms. Snippets are read-only: use a text input
 /// when people must edit the value. <c>IsEnabled="False"</c> blocks copying.
+/// <para>
+/// The code area of single and multi-line snippets is a focusable, read-only text box named by <see cref="Label"/>: keyboard
+/// users Tab to it and scroll it with the arrow keys, Page Up / Page Down and Home / End. Changing only
+/// <see cref="Code"/> updates the text in place (the scroll position, focus and tooltip stay), so a snippet can show a live log.
+/// </para>
 /// </summary>
 [ContentProperty(nameof(Code))]
 public partial class CdsCodeSnippet : CdsControl
@@ -18,9 +23,11 @@ public partial class CdsCodeSnippet : CdsControl
     readonly CdsText _code = new() { TypeStyle = CdsTypeStyle.Code01 };
     readonly CdsEdgeFade _fade = new(CdsColorKeys.Layer01, false, 32, 0) { IsVisible = false };
     readonly Border _inlineBox = new() { StrokeThickness = 1, StrokeShape = new RoundRectangle { CornerRadius = 4 }, Padding = 0, InputTransparent = true };
+    readonly CdsFocusRing _codeRing = new(CdsFocusRingStyle.Inset);
     CdsSnippetAction? _copy;
     CdsSnippetAction? _expand;
     CdsHitTarget? _inlineHit;
+    CdsHitTarget? _codeHit;
     DateTime _feedbackUntil = DateTime.MinValue;
 
     /// <summary>Creates an empty single-line snippet.</summary>
@@ -32,6 +39,8 @@ public partial class CdsCodeSnippet : CdsControl
             if (e.PropertyName == ScrollView.ContentSizeProperty.PropertyName) { UpdateFade(); UpdateMulti(); }
         };
         _scroller.SizeChanged += (_, _) => UpdateFade();
+        // The code is read through the code area's text box; the label inside the scroller would only repeat it.
+        AutomationProperties.SetExcludedWithChildren(_scroller, true);
         Loaded += (_, _) => ApplySemantics();
         Unloaded += (_, _) => _tip.Hide();
         Rebuild();
@@ -40,14 +49,46 @@ public partial class CdsCodeSnippet : CdsControl
     /// <summary>Raised after the code was copied (the standard click of the web version), before <see cref="CdsCodeSnippet.Command"/> runs.</summary>
     public event EventHandler? Clicked;
 
+    /// <summary>
+    /// Raised when writing to the clipboard failed (no clipboard, a sandbox or permission refused it). The snippet shows and
+    /// announces <see cref="CopyFailedFeedback"/> instead of <see cref="Feedback"/>, and neither <see cref="Clicked"/> nor
+    /// <see cref="Command"/> runs.
+    /// </summary>
+    public event EventHandler? CopyFailed;
+
+    /// <summary>Writes the text to the clipboard. A seam for tests; the default is <c>Clipboard.Default.SetTextAsync</c>.</summary>
+    internal Func<string, Task> WriteClipboard { get; set; } = static text => Clipboard.Default.SetTextAsync(text);
+
+    /// <summary>The focusable code area of a single or multi-line snippet (<c>null</c> for inline snippets).</summary>
+    internal CdsHitTarget? CodeArea => _codeHit;
+
     /// <inheritdoc/>
-    protected override void OnActivated() => _ = CopyAsync(this);
+    protected override void OnActivated()
+    {
+        // Only the inline snippet copies when activated; Enter or Space on the code area does nothing.
+        if (_inlineHit is not null) _ = CopyAsync(this);
+    }
+
+    /// <inheritdoc/>
+    protected internal override bool WantsNavigationKeys => _codeHit is not null;
+
+    /// <inheritdoc/>
+    protected internal override bool OnKeyDown(CdsKeyEventArgs e)
+    {
+        if (_codeHit is not { IsFocused: true }) return false;
+        var to = CdsCodeSnippetModel.ScrollOffset(e.Key, _scroller.ScrollX, _scroller.ScrollY,
+            _scroller.Width, _scroller.Height, _scroller.ContentSize.Width, _scroller.ContentSize.Height);
+        if (to is not { } offset) return false;
+        e.Handled = true;
+        _ = _scroller.ScrollToAsync(offset.X, offset.Y, false);
+        return true;
+    }
 
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
         var disabled = Is(CdsInteractionState.Disabled) || !IsEnabled;
-        SetColor(_code, Label.TextColorProperty, CdsCodeSnippetTokens.Text(disabled));
+        SetColor(_code, CdsText.TextColorProperty, CdsCodeSnippetTokens.Text(disabled));
         if (Type == CdsCodeSnippetType.Inline)
         {
             var plain = HideCopyButton || disabled;
@@ -56,6 +97,20 @@ public partial class CdsCodeSnippet : CdsControl
         }
         if (_copy is not null) _copy.IsEnabled = !disabled;
         if (_expand is not null) _expand.IsEnabled = !disabled;
+        // Disabled removes the code area from the tab order.
+        if (_codeHit is not null) _codeHit.IsEnabled = !disabled;
+        _codeRing.IsActive = _codeHit is not null && Is(CdsInteractionState.FocusVisible);
+        UpdateFade();
+    }
+
+    // Updates only the text: the layout, the native scroll view (and its offset), the buttons, their focus and the tooltip stay.
+    void OnCodeChanged()
+    {
+        _code.Text = Code;
+        if (Type == CdsCodeSnippetType.Multi && !IsWrapText) _code.MaxLines = Math.Max(1, CdsCodeSnippetModel.LineCount(Code));
+        ApplySemantics();
+        UpdateMulti();
+        UpdateFade();
     }
 
     /// <inheritdoc/>
@@ -74,12 +129,14 @@ public partial class CdsCodeSnippet : CdsControl
         _copy = null;
         _expand = null;
         _inlineHit = null;
+        _codeHit = null;
         // Free the shared parts from the previous layout before they are placed in the next one.
         _scroller.Content = null;
         _inlineBox.Content = null;
         Detach(_scroller);
         Detach(_fade);
         Detach(_inlineBox);
+        Detach(_codeRing);
 
         View chrome = Type switch
         {
@@ -127,10 +184,15 @@ public partial class CdsCodeSnippet : CdsControl
         var root = new Grid { HeightRequest = CdsSizing.Medium };
         root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         CdsTokens.SetColor(root, BackgroundColorProperty, CdsColorKeys.Layer01);
+        // The code area: [text box][scroller][fade][focus ring]. The text box sits under the scroller so the pointer and
+        // trackpad still scroll it; Tab and the screen reader reach it.
         var codeArea = new Grid();
+        codeArea.Add(NewCodeHit());
         codeArea.Add(_scroller);
         codeArea.Add(_fade);
         _fade.Margin = new Thickness(CdsSpacing.Spacing05, 0, 0, 0);
+        _codeRing.Margin = 0;
+        codeArea.Add(_codeRing);
         root.Add(codeArea);
         if (!HideCopyButton)
         {
@@ -157,13 +219,19 @@ public partial class CdsCodeSnippet : CdsControl
         _code.Padding = new Thickness(0, 0, HideCopyButton ? 0 : CdsSpacing.Spacing06, CdsCodeSnippetModel.CodeBottomPadding);
         _scroller.Orientation = IsWrapText ? ScrollOrientation.Vertical : ScrollOrientation.Both;
         _scroller.VerticalOptions = LayoutOptions.Start;
-        _scroller.Margin = new Thickness(CdsSpacing.Spacing05);
+        _scroller.Margin = 0;
         _scroller.Content = _code;
         _fade.Margin = new Thickness(0, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05);
 
         var root = new Grid();
         CdsTokens.SetColor(root, BackgroundColorProperty, CdsColorKeys.Layer01);
-        root.Add(_scroller);
+        // The code area inside the 16 padding: [text box][scroller][focus ring drawn just outside it (outline-offset 0)].
+        var codeArea = new Grid { Margin = new Thickness(CdsSpacing.Spacing05), VerticalOptions = LayoutOptions.Start };
+        codeArea.Add(NewCodeHit());
+        codeArea.Add(_scroller);
+        _codeRing.Margin = new Thickness(-2);
+        codeArea.Add(_codeRing);
+        root.Add(codeArea);
         root.Add(_fade);
         if (!HideCopyButton)
         {
@@ -181,8 +249,17 @@ public partial class CdsCodeSnippet : CdsControl
         };
         _expand.IsExpanded = IsExpanded;
         _expand.Clicked += (_, _) => IsExpanded = !IsExpanded;
+        _expand.StateChanged += (_, _) => UpdateFade();
         root.Add(_expand);
         return new CdsMaxWidthBox(root, 768);
+    }
+
+    // The read-only text box of the code area (role="textbox", aria-readonly): a tab stop that the arrow keys scroll.
+    CdsHitTarget NewCodeHit()
+    {
+        var hit = _codeHit = CreateHitTarget(CdsAccessibilityRole.TextBox);
+        hit.IsReadOnly = true;
+        return hit;
     }
 
     static void Detach(View view)
@@ -200,6 +277,7 @@ public partial class CdsCodeSnippet : CdsControl
         button.Clicked += (_, _) => _ = CopyAsync(button);
         button.StateChanged += (_, _) =>
         {
+            UpdateFade();
             var active = button.Is(CdsInteractionState.Hover) || button.Is(CdsInteractionState.FocusVisible);
             if (DateTime.UtcNow < _feedbackUntil) return;
             if (active && IsEnabled) _tip.Show(button, CopyButtonDescription, FeedbackPlacement, 0);
@@ -210,23 +288,27 @@ public partial class CdsCodeSnippet : CdsControl
 
     void ApplySemantics()
     {
-        var name = SemanticProperties.GetDescription(this);
         if (_copy is not null) _copy.Description = CopyButtonDescription;
-        if (_inlineHit is not null)
+        // The inline button, or the code area's text box: named by Label (aria-label) and described by the code; without a
+        // Label the code itself is the name.
+        if ((_inlineHit ?? _codeHit) is { } target)
         {
-            SemanticProperties.SetDescription(_inlineHit, string.IsNullOrEmpty(name) ? Code : name);
-            SemanticProperties.SetHint(_inlineHit, Code);
-            ToolTipProperties.SetText(_inlineHit, CopyButtonDescription);
+            var label = Label;
+            var named = !string.IsNullOrEmpty(label);
+            SemanticProperties.SetDescription(target, named ? label : Code);
+            if (named) SemanticProperties.SetHint(target, Code);
+            else target.ClearValue(SemanticProperties.HintProperty);
         }
-        else
-        {
-            SemanticProperties.SetDescription(_scroller, string.IsNullOrEmpty(name) ? Code : name);
-        }
+        if (_inlineHit is not null) ToolTipProperties.SetText(_inlineHit, CopyButtonDescription);
     }
+
+    // Focus anywhere in the snippet (the code area or one of its buttons) removes the fade (Carbon's :focus-within).
+    bool HasFocusWithin =>
+        Is(CdsInteractionState.Focused) || _copy?.Is(CdsInteractionState.Focused) == true || _expand?.Is(CdsInteractionState.Focused) == true;
 
     void UpdateFade()
     {
-        _fade.IsVisible = Type != CdsCodeSnippetType.Inline && !(Type == CdsCodeSnippetType.Multi && IsWrapText)
+        _fade.IsVisible = Type != CdsCodeSnippetType.Inline && !(Type == CdsCodeSnippetType.Multi && IsWrapText) && !HasFocusWithin
             && _scroller.ContentSize.Width > _scroller.Width + 0.5 && _scroller.Width > 0;
     }
 
@@ -248,18 +330,28 @@ public partial class CdsCodeSnippet : CdsControl
     {
         if (!IsEnabled || Is(CdsInteractionState.Disabled)) return;
         if (Type == CdsCodeSnippetType.Inline && HideCopyButton) return;
+        var placement = Type == CdsCodeSnippetType.Inline ? CdsPlacement.Bottom : FeedbackPlacement;
         try
         {
-            await Clipboard.Default.SetTextAsync(CdsCodeSnippetModel.TextToCopy(Code, CopyText));
+            await WriteClipboard(CdsCodeSnippetModel.TextToCopy(Code, CopyText));
         }
         catch (Exception)
         {
-            // No clipboard (unit tests, a sandboxed platform): still show the feedback so the interaction is complete.
+            // No clipboard, or the platform refused the write: never claim the code was copied.
+            ShowFeedback(anchor, CopyFailedFeedback, placement);
+            CdsAnnouncer.Announce(CopyFailedFeedback, CdsAnnouncePriority.Assertive);
+            CopyFailed?.Invoke(this, EventArgs.Empty);
+            return;
         }
         Clicked?.Invoke(this, EventArgs.Empty);
         ExecuteCommand();
-        if (FeedbackTimeout > 0) _feedbackUntil = DateTime.UtcNow.AddMilliseconds(FeedbackTimeout);
-        _tip.Show(anchor, Feedback, Type == CdsCodeSnippetType.Inline ? CdsPlacement.Bottom : FeedbackPlacement, FeedbackTimeout);
+        ShowFeedback(anchor, Feedback, placement);
         CdsAnnouncer.Announce(Feedback);
+    }
+
+    void ShowFeedback(VisualElement anchor, string? text, CdsPlacement placement)
+    {
+        if (FeedbackTimeout > 0) _feedbackUntil = DateTime.UtcNow.AddMilliseconds(FeedbackTimeout);
+        _tip.Show(anchor, text ?? string.Empty, placement, FeedbackTimeout);
     }
 }

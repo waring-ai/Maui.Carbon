@@ -47,6 +47,9 @@ public abstract class CdsList : ContentView
     /// <summary>True for numbered lists.</summary>
     protected abstract bool IsOrdered { get; }
 
+    /// <summary>True when the top-level markers are the platform-style ones of <see cref="CdsOrderedList.IsNative"/>.</summary>
+    internal virtual bool IsNativeMarkers => false;
+
     /// <summary>The list's marker for the item at <paramref name="index"/>.</summary>
     internal string MarkerFor(int index) => CdsListMarkers.Marker(IsOrdered, IsNested, index);
 
@@ -60,6 +63,9 @@ public abstract class CdsList : ContentView
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => _rebuild.Request();
 
+    /// <summary>Lays the items out again, once after the current batch of changes.</summary>
+    internal void RequestRebuild() => _rebuild.Request();
+
     void Rebuild()
     {
         _rebuild.Cancel();
@@ -68,9 +74,10 @@ public abstract class CdsList : ContentView
         _stack.Margin = new Thickness(CdsListMarkers.LeftMargin(IsOrdered, nested), 0, 0, 0);
         var width = CdsListMarkers.MarkerWidth(IsOrdered, nested);
         var expressive = IsExpressive || _parentExpressive;
+        var markerAtEnd = CdsListMarkers.IsMarkerEndAligned(IsOrdered, nested, IsNativeMarkers);
         for (var i = 0; i < _items.Count; i++)
         {
-            _items[i].Configure(MarkerFor(i), width, expressive, _depth, IsOrdered);
+            _items[i].Configure(MarkerFor(i), width, expressive, _depth, IsOrdered, markerAtEnd);
             _stack.Add(_items[i]);
         }
     }
@@ -78,12 +85,31 @@ public abstract class CdsList : ContentView
 
 /// <summary>
 /// A numbered list for steps or ranked items where order matters. Top-level items are numbered <c>1.</c>, <c>2.</c> with the
-/// marker 24 before the text; nested lists use lower-case letters (<c>a.</c>, <c>b.</c>). Items wrap under the text.
+/// marker placed 24 before the text, outside the list's box as in Carbon: the text lines up with the content around the
+/// list, so leave 24 of space before it (or pad the container). Nested lists use lower-case letters (<c>a.</c>, <c>b.</c>).
+/// Items wrap under the text.
 /// </summary>
 public class CdsOrderedList : CdsList
 {
+    /// <summary>Bindable property for <see cref="IsNative"/>.</summary>
+    public static readonly BindableProperty IsNativeProperty = BindableProperty.Create(
+        nameof(IsNative), typeof(bool), typeof(CdsOrderedList), false,
+        propertyChanged: static (b, _, _) => ((CdsOrderedList)b).RequestRebuild());
+
     /// <inheritdoc/>
     protected override bool IsOrdered => true;
+
+    /// <summary>
+    /// Uses native-style <c>decimal</c> markers (Carbon's <c>native</c>): the numbers end just before the text, so they line up
+    /// on the dot past 9, instead of Carbon's counters that start 24 before the text. Default <c>false</c>.
+    /// </summary>
+    public bool IsNative
+    {
+        get => (bool)GetValue(IsNativeProperty);
+        set => SetValue(IsNativeProperty, value);
+    }
+
+    internal override bool IsNativeMarkers => IsNative;
 }
 
 /// <summary>

@@ -1,7 +1,138 @@
+using Maui.Carbon.Tests.Foundation;
+
 namespace Maui.Carbon.Tests.Components;
 
 public class DataTableTests
 {
+    // ----- CN-11: row controls are named by their row -----
+
+    [Fact]
+    public void Row_checkboxes_and_menus_are_named_by_the_first_cell()
+    {
+        var table = CreateTable();
+        table.Selection = CdsDataTableSelection.Multi;
+        table.RowActions.Add(new CdsDataTableRowAction { Label = "Delete" });
+        var names = table.Table.Rows.Select(r => ((CdsCheckbox)r.Cells[0].Body!).Label ?? "").ToArray();
+        Assert.Equal(["Select row, prod-eu-de-1", "Select row, staging-us-east", "Select row, dev-sandbox"], names);
+        Assert.Equal("Options for prod-eu-de-1", ((CdsOverflowMenu)table.Table.Rows[0].Cells[^1].Body!).IconDescription);
+    }
+
+    [Fact]
+    public void Row_names_can_come_from_a_selector_and_follow_sorting()
+    {
+        var table = CreateTable();
+        table.Selection = CdsDataTableSelection.Radio;
+        table.RowNameSelector = r => $"cluster {((Cluster)r).Id}";
+        Assert.Equal("Select row, cluster c1", ((CdsRadioButton)table.Table.Rows[0].Cells[0].Body!).Label);
+        table.SortKey = "nodes";
+        table.SortDirection = CdsSortDirection.Ascending;
+        Assert.Equal("Select row, cluster c3", ((CdsRadioButton)table.Table.Rows[0].Cells[0].Body!).Label);
+        // An empty name falls back to the first cell.
+        table.RowNameSelector = _ => "";
+        Assert.Equal("Select row, dev-sandbox", ((CdsRadioButton)table.Table.Rows[0].Cells[0].Body!).Label);
+    }
+
+    // ----- CN-12: text cells carry their column header -----
+
+    [Fact]
+    public void Text_cells_are_read_with_their_column_header()
+    {
+        Assert.Equal("Region: eu-de", CdsTable.CellName("Region", "eu-de"));
+        Assert.Null(CdsTable.CellName(null, "eu-de"));
+        Assert.Null(CdsTable.CellName("Region", ""));
+
+        var table = CreateTable();
+        var descriptions = ContainerSemanticsAuditTests.Walk(table.Table).OfType<CdsText>()
+            .Select(SemanticProperties.GetDescription).Where(d => d is not null).ToList();
+        Assert.Contains("Name: prod-eu-de-1", descriptions);
+        Assert.Contains("Region: us-east", descriptions);
+        Assert.Contains("Nodes: 12", descriptions);
+    }
+
+    [Fact]
+    public void A_cell_text_change_updates_its_name()
+    {
+        var table = new CdsTable();
+        var head = new CdsTableHead();
+        head.Headers.Add(new CdsTableHeader { Text = "Status" });
+        table.Head = head;
+        var cell = new CdsTableCell { Text = "Running" };
+        var row = new CdsTableRow();
+        row.Cells.Add(cell);
+        table.Rows.Add(row);
+        cell.Text = "Stopped";
+        Assert.Contains(ContainerSemanticsAuditTests.Walk(table).OfType<CdsText>(), l => SemanticProperties.GetDescription(l) == "Status: Stopped");
+    }
+
+    // ----- CN-14: actions follow Command.CanExecute -----
+
+    sealed class Gate(Func<object?, bool> canExecute) : System.Windows.Input.ICommand
+    {
+        public int Executed;
+        public event EventHandler? CanExecuteChanged;
+        public bool CanExecute(object? parameter) => canExecute(parameter);
+        public void Execute(object? parameter) => Executed++;
+        public void Raise() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    [Fact]
+    public void Batch_buttons_are_disabled_while_their_command_cannot_run_for_the_selection()
+    {
+        var allow = false;
+        var gate = new Gate(p => allow && p is IReadOnlyList<object> { Count: > 0 });
+        var table = CreateTable();
+        table.Selection = CdsDataTableSelection.Multi;
+        table.BatchActions.Add(new CdsDataTableBatchAction { Label = "Restart", Command = gate });
+        table.SelectedRows = new List<object> { Clusters[0] };
+        var button = ContainerSemanticsAuditTests.Walk(table).OfType<CdsBatchBarButton>()
+            .Single(b => ContainerSemanticsAuditTests.Walk(b).OfType<CdsHitTarget>().Any(h => SemanticProperties.GetDescription(h) == "Restart"));
+        Assert.False(button.IsEnabled);
+        allow = true;
+        gate.Raise();
+        Assert.True(button.IsEnabled);
+        // CanExecute is asked again with the new selection.
+        table.ClearSelection();
+        Assert.False(button.IsEnabled);
+    }
+
+    [Fact]
+    public void Row_menu_items_are_disabled_for_rows_their_command_cannot_run_for()
+    {
+        var gate = new Gate(r => r is Cluster { Nodes: > 5 });
+        var action = new CdsDataTableRowAction { Label = "Resize", Command = gate };
+        var invoked = new List<object>();
+        action.Invoked += (_, e) => invoked.Add(e.Row);
+        var table = CreateTable();
+        table.RowActions.Add(action);
+        CdsMenuItem Item(int row) => (CdsMenuItem)((CdsOverflowMenu)table.Table.Rows[row].Cells[^1].Body!).Items[0];
+        Assert.True(Item(0).IsActionable);   // prod-eu-de-1, 12 nodes
+        Assert.False(Item(1).IsActionable);  // staging-us-east, 3 nodes
+        Item(0).Invoke();
+        Item(1).Invoke();
+        Assert.Equal([Clusters[0]], invoked.Where(r => ReferenceEquals(r, Clusters[0])));
+        Assert.Equal(1, gate.Executed);
+        // The item follows the row it is bound to now.
+        table.SortKey = "nodes";
+        table.SortDirection = CdsSortDirection.Descending;
+        Assert.True(Item(0).IsActionable);
+        Assert.False(Item(2).IsActionable);
+    }
+
+    // ----- CN-15: title heading level -----
+
+    [Fact]
+    public void The_title_is_a_level_4_heading_like_the_page_header_and_can_be_changed()
+    {
+        var table = CreateTable();
+        table.Title = "Clusters";
+        var title = ContainerSemanticsAuditTests.Walk(table).OfType<CdsText>().Single(t => t.Text == "Clusters");
+        Assert.Equal(SemanticHeadingLevel.Level4, SemanticProperties.GetHeadingLevel(title));
+        table.TitleHeadingLevel = 2;
+        Assert.Equal(SemanticHeadingLevel.Level2, SemanticProperties.GetHeadingLevel(title));
+        table.TitleHeadingLevel = 9;
+        Assert.Equal(6, table.TitleHeadingLevel);
+    }
+
     // ----- tokens -----
 
     [Fact]

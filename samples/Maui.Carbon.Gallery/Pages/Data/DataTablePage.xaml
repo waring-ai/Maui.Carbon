@@ -92,7 +92,7 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="With pagination" Description="A Pagination directly under the table drops its top border. Changing the page size keeps the first visible row on screen.">
+        <g:GalleryExample Title="With pagination" Description="A Pagination directly under the table drops its top border. Changing the page size returns to page 1.">
             <VerticalStackLayout Spacing="0">
                 <cds:CdsDataTable x:Name="PagedTable" Title="Clusters" IsSortable="True" Size="Md" />
                 <cds:CdsPagination x:Name="Pager" PageSizes="5, 10" PageSize="5" TotalItems="14" PageChanged="OnPageChanged" />

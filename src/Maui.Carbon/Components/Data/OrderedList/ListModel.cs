@@ -48,11 +48,20 @@ public static class CdsListMarkers
         ordered ? CdsSpacing.Spacing06 : nested ? CdsSpacing.Spacing04 : CdsSpacing.Spacing05;
 
     /// <summary>
-    /// The left margin of a list. Top-level lists start at 0 (their marker column is the indent); a nested list's text starts
-    /// 32 plus 4 of item padding after its parent's text, and its marker hangs before that.
+    /// The left margin of a list. A top-level ordered list hangs its 24 marker column before its box (Carbon places the
+    /// number 1.5rem before the item, outside the box), so its text starts at the list's edge. A top-level unordered list
+    /// starts at 0: Carbon's 1rem start margin is its marker column. A nested list's text starts 32 plus 4 of item padding
+    /// after its parent's text, and its marker hangs before that.
     /// </summary>
     public static double LeftMargin(bool ordered, bool nested) =>
-        nested ? NestedIndent + NestedItemPadding - MarkerWidth(ordered, nested) : 0;
+        nested ? NestedIndent + NestedItemPadding - MarkerWidth(ordered, nested) : ordered ? -MarkerWidth(ordered, nested) : 0;
+
+    /// <summary>
+    /// Whether the marker is aligned to the end of its column, just before the text: the native-style markers of nested
+    /// ordered lists (<c>lower-latin</c>) and of <see cref="CdsOrderedList.IsNative"/> lists (<c>decimal</c>). Carbon's
+    /// counters and bullets start at the column's start.
+    /// </summary>
+    public static bool IsMarkerEndAligned(bool ordered, bool nested, bool native) => ordered && (nested || native);
 
     /// <summary>The type style: <c>body-01</c> (14/20) or <c>body-02</c> (16/24) when expressive.</summary>
     public static CdsTypeStyle TypeStyle(bool expressive) => expressive ? CdsTypeStyle.Body02 : CdsTypeStyle.Body01;

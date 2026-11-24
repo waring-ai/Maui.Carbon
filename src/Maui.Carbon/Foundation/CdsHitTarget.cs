@@ -27,6 +27,11 @@ public enum CdsAccessibilityRole
     Expander,
     /// <summary>An adjustable value such as a slider thumb.</summary>
     Adjustable,
+    /// <summary>
+    /// A focusable text area that is not a native input (the web's <c>role="textbox"</c>), such as the scrollable code of a
+    /// code snippet. Set <see cref="CdsHitTarget.IsReadOnly"/> when the text cannot be edited (<c>aria-readonly</c>).
+    /// </summary>
+    TextBox,
 }
 
 /// <summary>

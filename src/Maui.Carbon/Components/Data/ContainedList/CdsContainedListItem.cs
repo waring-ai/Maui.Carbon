@@ -17,6 +17,11 @@ public class CdsContainedListItem : CdsContainer
         nameof(Text), typeof(string), typeof(CdsContainedListItem), null,
         propertyChanged: static (b, _, _) => ((CdsContainedListItem)b).Rebuild());
 
+    /// <summary>Bindable property for <see cref="Label"/>.</summary>
+    public static readonly BindableProperty LabelProperty = BindableProperty.Create(
+        nameof(Label), typeof(string), typeof(CdsContainedListItem), null,
+        propertyChanged: static (b, _, _) => ((CdsContainedListItem)b).ApplyName());
+
     /// <summary>Bindable property for <see cref="Icon"/>.</summary>
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
         nameof(Icon), typeof(CdsIconName?), typeof(CdsContainedListItem), null,
@@ -80,6 +85,23 @@ public class CdsContainedListItem : CdsContainer
         set => SetValue(TextProperty, value);
     }
 
+    /// <summary>
+    /// The accessible name of a clickable item (a button takes its name from its content). Default: <see cref="Text"/>, else
+    /// the text of the labels in <see cref="CdsContainer.Body"/>. Set it when the body has no text (an image, a tag) or when
+    /// the text alone does not say what the button does.
+    /// </summary>
+    public string? Label
+    {
+        get => (string?)GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
+    }
+
+    /// <summary>The name screen readers hear for a clickable item (see <see cref="Label"/>); <c>null</c> when it has none.</summary>
+    internal string? AccessibleName =>
+        !string.IsNullOrWhiteSpace(Label) ? Label
+        : !string.IsNullOrWhiteSpace(Text) ? Text
+        : CdsContainedListModel.TextOf(Body);
+
     /// <summary>A decorative 16px icon before the text. Use it on every item or none.</summary>
     public CdsIconName? Icon
     {
@@ -130,6 +152,16 @@ public class CdsContainedListItem : CdsContainer
     {
         _bodySlot.Content = newBody;
         Rebuild();
+    }
+
+    void ApplyName()
+    {
+        if (!Clickable) return;
+        var name = AccessibleName;
+        SemanticProperties.SetDescription(_hit, name);
+        // An unnamed button is unusable with a screen reader: say so while developing.
+        if (string.IsNullOrWhiteSpace(name))
+            System.Diagnostics.Debug.WriteLine("CdsContainedListItem: a clickable item has no accessible name; set Text or Label.");
     }
 
     /// <inheritdoc/>
@@ -199,8 +231,8 @@ public class CdsContainedListItem : CdsContainer
         {
             _root.Add(_ring);
             _root.Add(_hit);
-            SemanticProperties.SetDescription(_hit, Text);
             _hit.Role = CdsAccessibilityRole.Button;
+            ApplyName();
         }
         if (hasAction)
         {

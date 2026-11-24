@@ -6,8 +6,8 @@
                x:Class="Maui.Carbon.Gallery.Pages.Data.OrderedListPage">
     <VerticalStackLayout Spacing="48">
 
-        <g:GalleryExample Title="Ordered list" Description="Steps or ranked items where order matters. Numbers sit 24 before the text; nested lists indent 32 and use lowercase letters. Go no deeper than two levels.">
-            <cds:CdsOrderedList MaximumWidthRequest="560" HorizontalOptions="Start">
+        <g:GalleryExample Title="Ordered list" Description="Steps or ranked items where order matters. Numbers hang 24 before the text, outside the list, so leave that space (here a 24 margin); nested lists indent 32 and use lowercase letters. Go no deeper than two levels.">
+            <cds:CdsOrderedList MaximumWidthRequest="560" HorizontalOptions="Start" Margin="24,0,0,0">
                 <cds:CdsListItem Text="Install the CLI and log in" />
                 <cds:CdsListItem Text="Target your cluster">
                     <cds:CdsListItem.NestedList>
@@ -19,6 +19,21 @@
                     </cds:CdsListItem.NestedList>
                 </cds:CdsListItem>
                 <cds:CdsListItem Text="Apply the deployment file" />
+            </cds:CdsOrderedList>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Native markers" Description="IsNative uses decimal markers that end just before the text, so the numbers line up on the dot past nine.">
+            <cds:CdsOrderedList IsNative="True" MaximumWidthRequest="560" HorizontalOptions="Start" Margin="24,0,0,0">
+                <cds:CdsListItem Text="Create the namespace" />
+                <cds:CdsListItem Text="Add the pull secret" />
+                <cds:CdsListItem Text="Install the operator" />
+                <cds:CdsListItem Text="Create the database" />
+                <cds:CdsListItem Text="Run the migrations" />
+                <cds:CdsListItem Text="Deploy the API" />
+                <cds:CdsListItem Text="Deploy the web app" />
+                <cds:CdsListItem Text="Configure the ingress" />
+                <cds:CdsListItem Text="Add the DNS record" />
+                <cds:CdsListItem Text="Run the smoke tests" />
             </cds:CdsOrderedList>
         </g:GalleryExample>
 
@@ -53,7 +68,7 @@
 
         <g:GalleryExample Title="Expressive" Description="IsExpressive uses body-02 (16/24) instead of body-01 (14/20); nested lists follow their parent.">
             <HorizontalStackLayout Spacing="64">
-                <cds:CdsOrderedList IsExpressive="True" WidthRequest="280">
+                <cds:CdsOrderedList IsExpressive="True" WidthRequest="280" Margin="24,0,0,0">
                     <cds:CdsListItem Text="Choose a plan" />
                     <cds:CdsListItem Text="Create your account">
                         <cds:CdsListItem.NestedList>

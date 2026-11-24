@@ -182,7 +182,7 @@ public class CdsDataTableBatchAction : BindableObject
 
     /// <summary>Bindable property for <see cref="Command"/>.</summary>
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
-        nameof(Command), typeof(ICommand), typeof(CdsDataTableBatchAction), null);
+        nameof(Command), typeof(ICommand), typeof(CdsDataTableBatchAction), null, propertyChanged: OnChanged);
 
     internal event EventHandler? Changed;
 
@@ -203,7 +203,10 @@ public class CdsDataTableBatchAction : BindableObject
         set => SetValue(IconProperty, value);
     }
 
-    /// <summary>A command run with an <c>IReadOnlyList&lt;object&gt;</c> of the selected rows as its parameter.</summary>
+    /// <summary>
+    /// A command run with an <c>IReadOnlyList&lt;object&gt;</c> of the selected rows as its parameter. While its
+    /// <c>CanExecute</c> is false for the selected rows the batch button is disabled.
+    /// </summary>
     public ICommand? Command
     {
         get => (ICommand?)GetValue(CommandProperty);
@@ -278,7 +281,10 @@ public class CdsDataTableRowAction : BindableObject
         set => SetValue(IsEnabledProperty, value);
     }
 
-    /// <summary>A command run with the row object as its parameter.</summary>
+    /// <summary>
+    /// A command run with the row object as its parameter. While its <c>CanExecute</c> is false for a row, the item is
+    /// disabled in that row's menu (checked each time the menu opens).
+    /// </summary>
     public ICommand? Command
     {
         get => (ICommand?)GetValue(CommandProperty);
@@ -400,16 +406,29 @@ internal sealed class CdsBatchBarButton : CdsControl
 
     public event EventHandler? Clicked;
 
+    /// <summary>Makes the button follow <paramref name="gate"/>'s <c>CanExecute</c> (disabled while it cannot run).</summary>
+    public void SetAvailability(ICommand? gate) => SetCommand(gate, null);
+
+    /// <summary>Asks the gate's <c>CanExecute</c> again (its answer depends on the selected rows).</summary>
+    public void RefreshAvailability() => RefreshIsEnabledProperty();
+
     protected override void OnActivated() => Clicked?.Invoke(this, EventArgs.Empty);
+
+    protected override void OnPropertyChanged(string? propertyName = null)
+    {
+        base.OnPropertyChanged(propertyName);
+        if (propertyName == IsEnabledProperty.PropertyName) RefreshVisuals();
+    }
 
     protected override void ApplyVisuals()
     {
+        var disabled = !IsEnabled;
         var pressed = Is(CdsInteractionState.Pressed);
         var hover = Is(CdsInteractionState.Hover);
-        SetColor(_fill, BoxView.ColorProperty, pressed ? CdsColorKeys.ButtonPrimaryActive : CdsColorKeys.ButtonPrimaryHover);
-        _fill.IsVisible = pressed || hover;
-        SetColor(_label, CdsText.TextColorProperty, CdsTableTokens.BatchText);
-        SetColor(_icon, CdsIcon.ColorProperty, CdsColorKeys.IconOnColor);
+        SetColor(_fill, BoxView.ColorProperty, CdsTableTokens.BatchButtonFill(pressed, disabled));
+        _fill.IsVisible = disabled || pressed || hover;
+        SetColor(_label, CdsText.TextColorProperty, disabled ? CdsColorKeys.TextOnColorDisabled : CdsTableTokens.BatchText);
+        SetColor(_icon, CdsIcon.ColorProperty, disabled ? CdsColorKeys.IconOnColorDisabled : CdsColorKeys.IconOnColor);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
     }
 }

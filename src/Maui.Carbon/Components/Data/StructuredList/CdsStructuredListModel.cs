@@ -30,14 +30,15 @@ public static class CdsStructuredListModel
     }
 
     /// <summary>
-    /// Padding of a content cell. Header cells have 8 below instead of 24; condensed cells have 8 all round; a selectable
-    /// list pads cells 16 on both sides; flush removes the start padding (and pads 16 at the end); otherwise the first
-    /// cell has 16 at the start and the others 8.
+    /// Padding of a content cell, following Carbon's cascade. Header cells have 8 below instead of 24. Condensed cells have 8
+    /// all round, also in a selectable list (condensed wins over the selection's 16 side padding). The first cell of a
+    /// non-selectable row keeps 16 at the start, condensed or not. Otherwise a selectable list pads cells 16 on both sides
+    /// and other cells have 8. Flush removes the start padding (and pads 16 at the end) and wins over everything.
     /// </summary>
     public static Thickness CellPadding(bool header, bool condensed, bool flush, bool selection, bool first)
     {
-        var left = flush ? 0 : selection ? 16 : first ? 16 : 8;
-        var right = flush ? 16 : selection ? 16 : 8;
+        var left = flush ? 0 : first && !selection ? 16 : condensed ? 8 : selection ? 16 : 8;
+        var right = flush ? 16 : condensed ? 8 : selection ? 16 : 8;
         var top = condensed ? 8 : 16;
         var bottom = condensed ? 8 : header ? 8 : 24;
         return new Thickness(left, top, right, bottom);

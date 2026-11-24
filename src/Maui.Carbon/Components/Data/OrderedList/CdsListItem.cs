@@ -69,11 +69,14 @@ public class CdsListItem : ContentView
         set => SetValue(NestedListProperty, value);
     }
 
-    internal void Configure(string marker, double markerWidth, bool expressive, int depth, bool announceMarker)
+    internal void Configure(string marker, double markerWidth, bool expressive, int depth, bool announceMarker, bool markerAtEnd = false)
     {
         _expressive = expressive;
         _depth = depth;
         _marker.Text = marker;
+        // Native-style markers end a small gap (the marker's trailing space) before the text.
+        _marker.HorizontalTextAlignment = markerAtEnd ? TextAlignment.End : TextAlignment.Start;
+        _marker.Padding = markerAtEnd ? new Thickness(0, 0, CdsSpacing.Spacing02, 0) : new Thickness(0);
         _row.ColumnDefinitions[0].Width = new GridLength(markerWidth);
         Refresh();
         if (announceMarker && !string.IsNullOrEmpty(Text)) SemanticProperties.SetDescription(_text, $"{marker} {Text}");

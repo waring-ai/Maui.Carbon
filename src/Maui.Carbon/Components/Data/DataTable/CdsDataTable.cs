@@ -55,7 +55,6 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
 
         // Title block.
         CdsTokens.SetColor(_titleBlock, BackgroundColorProperty, CdsTableTokens.Background);
-        SemanticProperties.SetHeadingLevel(_title, SemanticHeadingLevel.Level2);
         _titleBlock.Add(_title);
         _titleBlock.Add(_description);
         _description.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
@@ -514,19 +513,23 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
             }
             var selected = _model.IsSelected(data.Key);
             row.IsSelected = selected;
+            // Every row control is named by its row: a screen reader has no table context to tell the rows apart.
+            var selectName = $"Select row, {RowName(data)}";
             if (r.Check is { } check)
             {
+                check.Label = selectName;
                 check.IsEnabled = !data.IsDisabled;
                 if (check.IsChecked != selected) check.IsChecked = selected;
             }
             if (r.Radio is { } radio)
             {
+                radio.Label = selectName;
                 radio.IsEnabled = !data.IsDisabled;
                 if (radio.IsChecked != selected) radio.IsChecked = selected;
             }
             if (r.Menu is { } menu)
             {
-                menu.IconDescription = $"Options for {FirstCellText(data)}";
+                menu.IconDescription = $"Options for {RowName(data)}";
                 if (RowActionsProvider is { } provider && data.Item is not null) FillMenu(menu, r, provider(data.Item));
             }
             SyncExpansion(data.Key, r, animate: false);
@@ -550,8 +553,10 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
             _refs.Remove(data.Key);
     }
 
-    string FirstCellText(DataTableRowData data)
+    /// <summary>The row's accessible name: <see cref="RowNameSelector"/>, else its first non-empty cell text, else its key.</summary>
+    string RowName(DataTableRowData data)
     {
+        if (data.Item is not null && RowNameSelector?.Invoke(data.Item) is { Length: > 0 } name) return name;
         foreach (var text in data.Texts)
             if (!string.IsNullOrEmpty(text)) return text;
         return data.Key;
@@ -583,11 +588,13 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         menu.Items.Clear();
         foreach (var action in actions)
         {
-            var item = new CdsMenuItem(action.Label ?? string.Empty, action.Icon) { Kind = action.Kind, IsEnabled = action.IsEnabled };
-            var captured = action;
-            item.Clicked += (_, _) =>
+            // The item's command acts on the row bound at the time; the menu reads its CanExecute when it opens, so an action
+            // whose command cannot run for this row is shown disabled instead of doing nothing.
+            var item = new CdsMenuItem(action.Label ?? string.Empty, action.Icon)
             {
-                if (reference.Data?.Item is { } target) captured.Invoke(target);
+                Kind = action.Kind,
+                IsEnabled = action.IsEnabled,
+                Command = new RowActionCommand(action, reference),
             };
             menu.Items.Add(item);
         }
@@ -831,6 +838,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     void UpdateChrome()
     {
         _title.Text = Title;
+        SemanticProperties.SetHeadingLevel(_title, CdsHeadingStyles.ToSemantic(TitleHeadingLevel));
         _description.Text = Description;
         _title.IsVisible = !string.IsNullOrEmpty(Title);
         _description.IsVisible = !string.IsNullOrEmpty(Description);
@@ -878,6 +886,8 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
             var button = new CdsBatchBarButton(action.Label ?? string.Empty, action.Icon, height);
             var captured = action;
             button.Clicked += (_, _) => captured.Invoke(ItemsOf(_model.SelectedRows));
+            // The button is disabled while the action's command cannot run for the selected rows.
+            if (action.Command is not null) button.SetAvailability(new BatchActionCommand(action, this));
             _batchActionsHost.Add(button);
         }
         var divider = new BoxView { WidthRequest = 1, HeightRequest = CdsSpacing.Spacing05, VerticalOptions = LayoutOptions.Center, InputTransparent = true };
@@ -896,6 +906,9 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         var show = BatchAvailable && _model.SelectedCount > 0;
         _batchText.Text = DataTableModel.BatchText(_model.SelectedCount);
         if (_batchActionsHost.Children.Count == 0 && _batchActions.Count > 0) RebuildBatchBar();
+        // CanExecute takes the selected rows, so it is asked again whenever the selection changes.
+        foreach (var child in _batchActionsHost.Children)
+            if (child is CdsBatchBarButton button) button.RefreshAvailability();
         if (show == _batchShown) return;
         _batchShown = show;
         _batchBar.IsVisible = show;
@@ -962,6 +975,53 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     {
         base.OnParentSet();
         UpdateAttachedPagination();
+    }
+
+    /// <summary>The selected row objects, as the batch actions receive them.</summary>
+    internal IReadOnlyList<object> SelectedRowItems => ItemsOf(_model.SelectedRows);
+
+    /// <summary>
+    /// Gates a batch button on its action's command: <c>CanExecute</c> with the selected rows, re-asked when the command
+    /// raises <c>CanExecuteChanged</c> (the button subscribes weakly while it is on screen). Running is the button's click.
+    /// </summary>
+    sealed class BatchActionCommand(CdsDataTableBatchAction action, CdsDataTable table) : System.Windows.Input.ICommand
+    {
+        readonly WeakReference<CdsDataTable> _table = new(table);
+
+        public event EventHandler? CanExecuteChanged
+        {
+            add { if (action.Command is { } command) command.CanExecuteChanged += value; }
+            remove { if (action.Command is { } command) command.CanExecuteChanged -= value; }
+        }
+
+        public bool CanExecute(object? parameter) =>
+            action.Command is not { } command || !_table.TryGetTarget(out var t) || command.CanExecute(t.SelectedRowItems);
+
+        public void Execute(object? parameter)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The command of a row menu item: it can run when the action's command can run for the row bound now, and running it
+    /// invokes the action with that row.
+    /// </summary>
+    sealed class RowActionCommand(CdsDataTableRowAction action, RowRef reference) : System.Windows.Input.ICommand
+    {
+        // The menu asks CanExecute each time it opens; nothing listens between openings.
+        public event EventHandler? CanExecuteChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public bool CanExecute(object? parameter) =>
+            reference.Data?.Item is { } row && (action.Command?.CanExecute(row) ?? true);
+
+        public void Execute(object? parameter)
+        {
+            if (reference.Data?.Item is { } row) action.Invoke(row);
+        }
     }
 
     sealed class RowRef

@@ -80,7 +80,7 @@ public partial class CdsPagination
         set => SetValue(TotalItemsProperty, value);
     }
 
-    /// <summary>The items per page (two-way). It follows <see cref="PageSizes"/>: a size that is not listed becomes the first size. Changing it keeps the first visible item on screen.</summary>
+    /// <summary>The items per page (two-way). It follows <see cref="PageSizes"/>: a size that is not listed becomes the first size. When the user picks a size the page returns to 1.</summary>
     public int PageSize
     {
         get => (int)GetValue(PageSizeProperty);

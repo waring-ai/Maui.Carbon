@@ -117,6 +117,7 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
         CdsAccessibilityRole.ComboBox => AutomationControlType.ComboBox,
         CdsAccessibilityRole.Link => AutomationControlType.Hyperlink,
         CdsAccessibilityRole.Adjustable => AutomationControlType.Slider,
+        CdsAccessibilityRole.TextBox => AutomationControlType.Edit,
         _ => AutomationControlType.Button,
     };
 

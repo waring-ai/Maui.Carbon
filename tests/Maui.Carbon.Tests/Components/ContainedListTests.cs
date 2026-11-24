@@ -57,7 +57,8 @@ public class ContainedListTests
         Assert.Equal(CdsColorKeys.TextPrimary, CdsContainedListTokens.ItemText(false));
         Assert.Equal(CdsColorKeys.TextDisabled, CdsContainedListTokens.ItemText(true));
         Assert.Equal(CdsColorKeys.IconPrimary, CdsContainedListTokens.ItemIcon(false));
-        Assert.Equal(CdsColorKeys.IconDisabled, CdsContainedListTokens.ItemIcon(true));
+        // Icons are decorative: a disabled item keeps icon-primary (only its text turns text-disabled).
+        Assert.Equal(CdsColorKeys.IconPrimary, CdsContainedListTokens.ItemIcon(true));
         Assert.Equal(CdsColorKeys.BorderSubtle01, CdsContainedListTokens.Divider);
     }
 
@@ -81,5 +82,25 @@ public class ContainedListTests
         list.Search = null;
         Assert.Equal(0, clicked);
         Assert.Equal(2, list.Items.Count);
+    }
+
+    [Fact]
+    public void A_clickable_item_is_named_by_its_label_then_text_then_body_text()
+    {
+        var item = new CdsContainedListItem { IsClickable = true, Body = new VerticalStackLayout { new Label { Text = "usage-march.csv" }, new Label { Text = "2 MB" } } };
+        var hit = Maui.Carbon.Tests.Foundation.ContainerSemanticsAuditTests.Walk(item).OfType<CdsHitTarget>().Single();
+        Assert.Equal("usage-march.csv 2 MB", SemanticProperties.GetDescription(hit));
+        item.Text = "Usage for March";
+        Assert.Equal("Usage for March", SemanticProperties.GetDescription(hit));
+        item.Label = "Open usage report for March";
+        Assert.Equal("Open usage report for March", SemanticProperties.GetDescription(hit));
+    }
+
+    [Fact]
+    public void Body_text_ignores_hidden_labels()
+    {
+        Assert.Equal("a", CdsContainedListModel.TextOf(new HorizontalStackLayout { new Label { Text = "a" }, new Label { Text = "b", IsVisible = false } }));
+        Assert.Null(CdsContainedListModel.TextOf(new BoxView()));
+        Assert.Null(CdsContainedListModel.TextOf(null));
     }
 }

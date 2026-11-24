@@ -43,9 +43,11 @@ internal static class PaginationNavModel
     public static int ClampPage(int page, int totalPages) => Math.Clamp(page, 0, Math.Max(0, totalPages - 1));
 
     /// <summary>
-    /// Builds the strip for the current page. The first and last page always show; everything that does not fit collapses
-    /// into overflow slots, each listing a hidden range of at least two pages (a hidden range of one shows that page
-    /// instead). The strip never starts or ends with an overflow, and the current page is always a button.
+    /// Builds the strip for the current page, in exactly <paramref name="itemsShown"/> slots once the pages do not all fit.
+    /// The first and last page show, and everything that does not fit collapses into overflow slots, each listing a hidden
+    /// range of at least two pages (a hidden range of one shows that page instead); the current page is always a button.
+    /// The strip never ends with an overflow and starts with one only in the one case where four slots cannot hold
+    /// first, overflow, page, overflow and last: then, as in Carbon, the first page joins the front overflow.
     /// </summary>
     public static IReadOnlyList<NavSlot> Build(int page, int totalPages, int itemsShown)
     {
@@ -77,7 +79,16 @@ internal static class PaginationNavModel
         else
         {
             // In the middle: first, overflow, a window around the page, overflow, last.
-            var width = Math.Max(1, itemsShown - 4);
+            var width = itemsShown - 4;
+            if (width < 1)
+            {
+                // Four slots: overflow (the first page up to the one before), page, overflow, last.
+                AddHidden(slots, 0, page - 1);
+                slots.Add(NavSlot.Page(page));
+                AddHidden(slots, page + 1, last - 1);
+                slots.Add(NavSlot.Page(last));
+                return slots;
+            }
             windowStart = page - (width - 1) / 2;
             windowEnd = windowStart + width - 1;
         }

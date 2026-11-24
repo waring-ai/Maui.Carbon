@@ -153,10 +153,16 @@ public partial class CdsPagination : CdsControl
 
     void OnSizePicked(object? sender, SelectedItemChangedEventArgs e)
     {
-        if (_syncing || e.SelectedItem is not int size || size == PageSize) return;
-        var page = PaginationModel.PageAfterSizeChange(Page, PageSize, size, TotalItems);
+        if (_syncing || e.SelectedItem is not int size) return;
+        ChangePageSize(size);
+    }
+
+    /// <summary>The user picked a page size: Carbon returns to page 1 and reports both in one change.</summary>
+    internal void ChangePageSize(int size)
+    {
+        if (size == PageSize) return;
         PageSize = size;
-        Page = page;
+        Page = 1;
         PageChanged?.Invoke(this, new CdsPaginationChangedEventArgs(Page, PageSize));
     }
 

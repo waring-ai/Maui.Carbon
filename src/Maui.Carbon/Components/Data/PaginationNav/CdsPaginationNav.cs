@@ -9,8 +9,20 @@ public static class CdsPaginationNavTokens
     /// <summary>The bar under the active page: <c>border-interactive</c>.</summary>
     public static string ActiveBar => CdsColorKeys.BorderInteractive;
 
-    /// <summary>Page label and arrow glyph: <c>text-primary</c>, <c>text-disabled</c> when disabled.</summary>
-    public static string Text(bool disabled) => disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary;
+    /// <summary>
+    /// Page label and arrow glyph: <c>text-primary</c>; a disabled item (an arrow at the end) is <c>text-secondary</c> drawn
+    /// at <see cref="DisabledOpacity"/>, as Carbon's PaginationNav specifies.
+    /// </summary>
+    public static string Text(bool disabled) => disabled ? CdsColorKeys.TextSecondary : CdsColorKeys.TextPrimary;
+
+    /// <summary>The opacity of a disabled item's label or glyph (Carbon: <c>text-secondary</c> at 50%).</summary>
+    public const double DisabledOpacity = 0.5;
+
+    /// <summary>
+    /// The "…" glyph of an overflow select: <c>text-primary</c>, <c>icon-disabled</c> when the overflow is disabled
+    /// (Carbon's <c>select:disabled</c> icon rule).
+    /// </summary>
+    public static string OverflowGlyph(bool disabled) => disabled ? CdsColorKeys.IconDisabled : CdsColorKeys.TextPrimary;
 
     /// <summary>The nav height: sm 32, md 40, lg 48 (default). Other sizes clamp to the nearest.</summary>
     public static double Height(CdsSize size) => CdsPaginationTokens.Height(size);
@@ -56,7 +68,7 @@ public class CdsPaginationNav : CdsControl
     public static readonly BindableProperty PageProperty = BindableProperty.Create(
         nameof(Page), typeof(int), typeof(CdsPaginationNav), 0, BindingMode.TwoWay,
         coerceValue: static (b, v) => PaginationNavModel.ClampPage((int)v, ((CdsPaginationNav)b).TotalItems),
-        propertyChanged: OnChanged);
+        propertyChanged: static (b, _, _) => ((CdsPaginationNav)b).OnPageChanged());
 
     /// <summary>Bindable property for <see cref="ItemsShown"/>.</summary>
     public static readonly BindableProperty ItemsShownProperty = BindableProperty.Create(
@@ -79,8 +91,8 @@ public class CdsPaginationNav : CdsControl
         nameof(Label), typeof(string), typeof(CdsPaginationNav), "pagination", propertyChanged: OnChanged);
 
     readonly HorizontalStackLayout _row = new() { Spacing = 0 };
-    readonly CdsPageButton _previous = new() { HoverKey = CdsPaginationNavTokens.Hover };
-    readonly CdsPageButton _next = new() { HoverKey = CdsPaginationNavTokens.Hover };
+    readonly CdsPageButton _previous = new() { HoverKey = CdsPaginationNavTokens.Hover, UsesNavDisabledStyle = true };
+    readonly CdsPageButton _next = new() { HoverKey = CdsPaginationNavTokens.Hover, UsesNavDisabledStyle = true };
     readonly List<(NavSlot Slot, CdsPageButton? Button)> _slots = [];
     bool _userChange;
 
@@ -172,10 +184,17 @@ public class CdsPaginationNav : CdsControl
             _userChange = false;
         }
         PageChanged?.Invoke(this, new CdsPageChangedEventArgs(Page));
-        CdsAnnouncer.Announce(PaginationNavModel.Announcement(Page, TotalItems));
     }
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsPaginationNav)b).Rebuild();
+
+    // Every change of the current page is announced (the web's polite live region), whether the user or a binding made it;
+    // not before the nav is on screen, where it would be read out at page load.
+    void OnPageChanged()
+    {
+        Rebuild();
+        if (IsLoaded) CdsAnnouncer.Announce(PaginationNavModel.Announcement(Page, TotalItems));
+    }
 
     /// <inheritdoc/>
     protected override void ApplyVisuals()
@@ -232,6 +251,8 @@ public class CdsPaginationNav : CdsControl
     {
         var host = new Grid { WidthRequest = height, HeightRequest = height };
         var fill = new BoxView { InputTransparent = true };
+        // The native picker's own focus visuals are stripped: draw Carbon's 2px inset focus outline while it has focus.
+        var ring = new CdsFocusRing(CdsFocusRingStyle.Inset);
         CdsTokens.SetColor(fill, BoxView.ColorProperty, null);
         var picker = new CdsNativePicker
         {
@@ -241,7 +262,9 @@ public class CdsPaginationNav : CdsControl
             ItemsSource = Enumerable.Range(slot.Start, slot.Count).Select(p => (p + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)).ToList(),
             IsEnabled = !IsOverflowDisabled,
         };
-        picker.SetDynamicResource(Picker.TitleColorProperty, CdsPaginationNavTokens.Text(IsOverflowDisabled));
+        picker.SetDynamicResource(Picker.TitleColorProperty, CdsPaginationNavTokens.OverflowGlyph(IsOverflowDisabled));
+        picker.Focused += (_, _) => ring.IsActive = true;
+        picker.Unfocused += (_, _) => ring.IsActive = false;
         SemanticProperties.SetDescription(picker, "Select Page number");
         picker.SelectedIndexChanged += (_, _) =>
         {
@@ -256,6 +279,7 @@ public class CdsPaginationNav : CdsControl
         host.GestureRecognizers.Add(pointer);
         host.Add(fill);
         host.Add(picker);
+        host.Add(ring);
         return host;
     }
 }

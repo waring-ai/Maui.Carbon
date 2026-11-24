@@ -58,6 +58,14 @@ public static class CdsTableTokens
     /// <summary>The batch bar text and icons: <c>text-on-color</c>.</summary>
     public static string BatchText => CdsColorKeys.TextOnColor;
 
+    /// <summary>
+    /// Fill of a batch bar button while it is drawn (hovered, pressed or disabled): <c>button-primary-hover</c>, pressed
+    /// <c>button-primary-active</c>, and <c>button-disabled</c> while its command cannot run (its text and icon then use the
+    /// <c>-on-color-disabled</c> tokens).
+    /// </summary>
+    public static string BatchButtonFill(bool pressed, bool disabled) =>
+        disabled ? CdsColorKeys.ButtonDisabled : pressed ? CdsColorKeys.ButtonPrimaryActive : CdsColorKeys.ButtonPrimaryHover;
+
     /// <summary>The toolbar fill: <c>layer-01</c>.</summary>
     public static string Toolbar => CdsColorKeys.Layer01;
 

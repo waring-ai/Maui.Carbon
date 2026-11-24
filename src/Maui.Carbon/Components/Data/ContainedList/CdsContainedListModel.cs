@@ -9,6 +9,36 @@ public enum CdsContainedListKind
     Disclosed,
 }
 
+/// <summary>Pure helpers of the contained list.</summary>
+internal static class CdsContainedListModel
+{
+    /// <summary>
+    /// The text a view shows, for naming a clickable item whose content is a custom body: the texts of its labels (and
+    /// spans), in visual-tree order, joined with spaces; <c>null</c> when there is none.
+    /// </summary>
+    public static string? TextOf(Element? view)
+    {
+        if (view is null) return null;
+        var parts = new List<string>();
+        Collect(view, parts);
+        return parts.Count == 0 ? null : string.Join(" ", parts);
+    }
+
+    static void Collect(Element element, List<string> parts)
+    {
+        if (element is VisualElement { IsVisible: false }) return;
+        if (element is Label label)
+        {
+            var text = label.FormattedText is { } formatted ? string.Concat(formatted.Spans.Select(s => s.Text)) : label.Text;
+            if (!string.IsNullOrWhiteSpace(text)) parts.Add(text.Trim());
+            return;
+        }
+        if (element is IVisualTreeElement tree)
+            foreach (var child in tree.GetVisualChildren())
+                if (child is Element e) Collect(e, parts);
+    }
+}
+
 /// <summary>Measurements of the contained list (from <c>packages/styles/scss/components/contained-list</c>).</summary>
 public static class CdsContainedListMetrics
 {
@@ -68,8 +98,11 @@ public static class CdsContainedListTokens
     /// <summary>Item text: <c>text-primary</c>, <c>text-disabled</c> when disabled.</summary>
     public static string ItemText(bool disabled) => disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary;
 
-    /// <summary>Item icon: <c>icon-primary</c> (decorative), <c>icon-disabled</c> when disabled.</summary>
-    public static string ItemIcon(bool disabled) => disabled ? CdsColorKeys.IconDisabled : CdsColorKeys.IconPrimary;
+    /// <summary>
+    /// Item icon: <c>icon-primary</c>. Icons are decorative, so a disabled item keeps it; only its text turns
+    /// <c>text-disabled</c>.
+    /// </summary>
+    public static string ItemIcon(bool disabled) => CdsColorKeys.IconPrimary;
 
     /// <summary>The 1px divider between items.</summary>
     public static string Divider => CdsColorKeys.BorderSubtle01;

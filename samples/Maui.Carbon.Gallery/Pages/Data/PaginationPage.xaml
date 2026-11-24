@@ -6,7 +6,7 @@
                x:Class="Maui.Carbon.Gallery.Pages.Data.PaginationPage">
     <VerticalStackLayout Spacing="48">
 
-        <g:GalleryExample Title="Default" Description="Items per page, the range, a page select with 'of N pages' and previous and next buttons. Changing the page size keeps the first visible item on screen.">
+        <g:GalleryExample Title="Default" Description="Items per page, the range, a page select with 'of N pages' and previous and next buttons. Changing the page size returns to page 1.">
             <VerticalStackLayout Spacing="12">
                 <cds:CdsPagination x:Name="Interactive" TotalItems="103" PageSizes="10, 20, 50" PageSize="10" Page="2" PageChanged="OnChanged" />
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="Showing items 11 to 20 (page 2, 10 per page)." />

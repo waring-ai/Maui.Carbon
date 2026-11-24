@@ -14,6 +14,16 @@ public partial class CdsDataTable
     public static readonly BindableProperty RowKeySelectorProperty = BindableProperty.Create(
         nameof(RowKeySelector), typeof(Func<object, string>), typeof(CdsDataTable), null, propertyChanged: OnDataChanged);
 
+    /// <summary>Bindable property for <see cref="RowNameSelector"/>.</summary>
+    public static readonly BindableProperty RowNameSelectorProperty = BindableProperty.Create(
+        nameof(RowNameSelector), typeof(Func<object, string?>), typeof(CdsDataTable), null, propertyChanged: OnDataChanged);
+
+    /// <summary>Bindable property for <see cref="TitleHeadingLevel"/>.</summary>
+    public static readonly BindableProperty TitleHeadingLevelProperty = BindableProperty.Create(
+        nameof(TitleHeadingLevel), typeof(int), typeof(CdsDataTable), 4,
+        coerceValue: static (_, v) => Math.Clamp((int)v, 1, CdsHeadingStyles.MaxLevel),
+        propertyChanged: OnChromeChanged);
+
     /// <summary>Bindable property for <see cref="IsRowDisabled"/>.</summary>
     public static readonly BindableProperty IsRowDisabledProperty = BindableProperty.Create(
         nameof(IsRowDisabled), typeof(Func<object, bool>), typeof(CdsDataTable), null, propertyChanged: OnDataChanged);
@@ -141,6 +151,28 @@ public partial class CdsDataTable
     {
         get => (Func<object, string>?)GetValue(RowKeySelectorProperty);
         set => SetValue(RowKeySelectorProperty, value);
+    }
+
+    /// <summary>
+    /// Returns a row's accessible name, which the row's controls include so a screen reader can tell the rows apart: the
+    /// selection checkbox or radio is "Select row, &lt;name&gt;" and the row menu "Options for &lt;name&gt;". Default (or when it
+    /// returns null or empty): the row's first non-empty cell text.
+    /// </summary>
+    public Func<object, string?>? RowNameSelector
+    {
+        get => (Func<object, string?>?)GetValue(RowNameSelectorProperty);
+        set => SetValue(RowNameSelectorProperty, value);
+    }
+
+    /// <summary>
+    /// The heading level screen readers report for <see cref="Title"/> (1 to 6). Default 4, as in Carbon, where the table
+    /// title and the <see cref="CdsPageHeader"/> title are both <c>h4</c>, so a table never outranks the page title. Set it
+    /// to fit the page's outline (one below the heading of the section the table is in). The look stays <c>heading-03</c>.
+    /// </summary>
+    public int TitleHeadingLevel
+    {
+        get => (int)GetValue(TitleHeadingLevelProperty);
+        set => SetValue(TitleHeadingLevelProperty, value);
     }
 
     /// <summary>A predicate for rows that cannot be selected (<c>row.disabled</c>): their checkbox or radio is disabled and select-all skips them.</summary>

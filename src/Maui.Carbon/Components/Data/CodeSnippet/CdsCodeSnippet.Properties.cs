@@ -7,7 +7,16 @@ public partial class CdsCodeSnippet
     /// <summary>Bindable property for <see cref="Code"/>.</summary>
     public static readonly BindableProperty CodeProperty = BindableProperty.Create(
         nameof(Code), typeof(string), typeof(CdsCodeSnippet), null,
-        propertyChanged: static (b, _, _) => ((CdsCodeSnippet)b).Rebuild());
+        propertyChanged: static (b, _, _) => ((CdsCodeSnippet)b).OnCodeChanged());
+
+    /// <summary>Bindable property for <see cref="Label"/>.</summary>
+    public static readonly BindableProperty LabelProperty = BindableProperty.Create(
+        nameof(Label), typeof(string), typeof(CdsCodeSnippet), null,
+        propertyChanged: static (b, _, _) => ((CdsCodeSnippet)b).ApplySemantics());
+
+    /// <summary>Bindable property for <see cref="CopyFailedFeedback"/>.</summary>
+    public static readonly BindableProperty CopyFailedFeedbackProperty = BindableProperty.Create(
+        nameof(CopyFailedFeedback), typeof(string), typeof(CdsCodeSnippet), "Copy failed");
 
     /// <summary>Bindable property for <see cref="CopyText"/>.</summary>
     public static readonly BindableProperty CopyTextProperty = BindableProperty.Create(
@@ -95,6 +104,28 @@ public partial class CdsCodeSnippet
     {
         get => (string?)GetValue(CodeProperty);
         set => SetValue(CodeProperty, value);
+    }
+
+    /// <summary>
+    /// The accessible name (<c>aria-label</c>) of the code area, or for an inline snippet of its copy button: say what the code
+    /// is ("Log in command"); the code is then read as its description. Without a label the code itself is the name. Use this
+    /// rather than <c>SemanticProperties.Description</c> on the snippet, which on iOS and Mac Catalyst turns the whole snippet,
+    /// copy and Show more buttons included, into one element.
+    /// </summary>
+    public string? Label
+    {
+        get => (string?)GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
+    }
+
+    /// <summary>
+    /// What the snippet shows and announces when the clipboard write fails, instead of <see cref="Feedback"/>. Default
+    /// <c>Copy failed</c>.
+    /// </summary>
+    public string CopyFailedFeedback
+    {
+        get => (string)GetValue(CopyFailedFeedbackProperty);
+        set => SetValue(CopyFailedFeedbackProperty, value);
     }
 
     /// <summary>Replaces what is copied (otherwise the code itself).</summary>

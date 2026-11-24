@@ -31,12 +31,13 @@ public class PaginationNavTests
     {
         for (var total = 1; total <= 40; total++)
         {
-            for (var shown = 5; shown <= 10; shown++)
+            for (var shown = 4; shown <= 10; shown++)
             {
                 for (var page = 0; page < total; page++)
                 {
                     var slots = PaginationNavModel.Build(page, total, shown);
                     Assert.True(slots.Count <= Math.Max(shown, total <= shown ? total : shown), $"{total}/{shown}/{page}: {Describe(slots)}");
+                    if (total > shown) Assert.Equal(shown, slots.Count);
                 }
             }
         }
@@ -47,7 +48,7 @@ public class PaginationNavTests
     {
         for (var total = 2; total <= 40; total++)
         {
-            for (var shown = 4; shown <= 10; shown++)
+            for (var shown = 5; shown <= 10; shown++)
             {
                 for (var page = 0; page < total; page++)
                 {
@@ -141,7 +142,11 @@ public class PaginationNavTests
         Assert.Equal(CdsColorKeys.BackgroundHover, CdsPaginationNavTokens.Hover);
         Assert.Equal(CdsColorKeys.BorderInteractive, CdsPaginationNavTokens.ActiveBar);
         Assert.Equal(CdsColorKeys.TextPrimary, CdsPaginationNavTokens.Text(false));
-        Assert.Equal(CdsColorKeys.TextDisabled, CdsPaginationNavTokens.Text(true));
+        // Disabled nav items are text-secondary at 50% (not text-disabled); a disabled overflow glyph is icon-disabled.
+        Assert.Equal(CdsColorKeys.TextSecondary, CdsPaginationNavTokens.Text(true));
+        Assert.Equal(0.5, CdsPaginationNavTokens.DisabledOpacity);
+        Assert.Equal(CdsColorKeys.TextPrimary, CdsPaginationNavTokens.OverflowGlyph(false));
+        Assert.Equal(CdsColorKeys.IconDisabled, CdsPaginationNavTokens.OverflowGlyph(true));
         Assert.Equal(16, CdsPaginationNavTokens.ActiveBarWidth);
         Assert.Equal(32, CdsPaginationNavTokens.Height(CdsSize.Sm));
         Assert.Equal(40, CdsPaginationNavTokens.Height(CdsSize.Md));
@@ -174,5 +179,57 @@ public class PaginationNavTests
         Assert.Equal(4, nav.Page);
         nav.Page = 99;
         Assert.Equal(4, nav.Page);
+    }
+
+    [Theory]
+    [InlineData(0, "1 2 [3-9] 10")]
+    [InlineData(1, "1 2 [3-9] 10")]
+    [InlineData(2, "[1-2] 3 [4-9] 10")]
+    [InlineData(5, "[1-5] 6 [7-9] 10")]
+    [InlineData(7, "[1-7] 8 9 10")]
+    [InlineData(8, "1 [2-8] 9 10")]
+    [InlineData(9, "1 [2-8] 9 10")]
+    public void Four_slots_show_four_slots(int page, string expected) =>
+        Assert.Equal(expected, Describe(PaginationNavModel.Build(page, 10, 4)));
+
+    [Fact]
+    public void Four_slots_keep_the_last_page_and_the_current_page()
+    {
+        for (var total = 5; total <= 30; total++)
+        {
+            for (var page = 0; page < total; page++)
+            {
+                var slots = PaginationNavModel.Build(page, total, 4);
+                Assert.Equal(4, slots.Count);
+                Assert.Equal(NavSlot.Page(total - 1), slots[^1]);
+                Assert.Contains(NavSlot.Page(page), slots);
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_page_change_is_announced_once_the_nav_is_on_screen()
+    {
+        var nav = new CdsPaginationNav { TotalItems = 14 };
+        using var heard = CdsAnnouncer.Capture();
+        nav.Page = 2; // not on screen: nothing is read out
+        Assert.Empty(heard.Announcements);
+        _ = new Window(new ContentPage { Content = nav });
+        nav.Page = 5; // a bound change, not the user's
+        Assert.Equal([new CdsAnnouncement("Page 6 of 14", CdsAnnouncePriority.Polite)], heard.Announcements);
+    }
+
+    [Fact]
+    public void Overflow_selects_draw_a_focus_ring()
+    {
+        var nav = new CdsPaginationNav { TotalItems = 14, ItemsShown = 7 };
+        var picker = Maui.Carbon.Tests.Foundation.ContainerSemanticsAuditTests.Walk(nav).OfType<CdsNativePicker>().First();
+        var host = Assert.IsType<Grid>(picker.Parent);
+        var ring = Assert.Single(host.Children.OfType<CdsFocusRing>());
+        Assert.False(ring.IsActive);
+        ((IView)picker).IsFocused = true;
+        Assert.True(ring.IsActive);
+        ((IView)picker).IsFocused = false;
+        Assert.False(ring.IsActive);
     }
 }

@@ -29,6 +29,7 @@ internal sealed class CdsPageButton : CdsControl
     readonly CdsHitTarget _hit;
     string _hoverKey = CdsColorKeys.LayerHover01;
     bool _active;
+    bool _navDisabledStyle;
 
     public CdsPageButton()
     {
@@ -56,6 +57,20 @@ internal sealed class CdsPageButton : CdsControl
         set
         {
             _hoverKey = value;
+            RefreshVisuals();
+        }
+    }
+
+    /// <summary>
+    /// Draw the disabled state the PaginationNav way (<c>text-secondary</c> at 50%) instead of the Pagination way
+    /// (<c>icon-disabled</c> / <c>text-disabled</c>).
+    /// </summary>
+    public bool UsesNavDisabledStyle
+    {
+        get => _navDisabledStyle;
+        set
+        {
+            _navDisabledStyle = value;
             RefreshVisuals();
         }
     }
@@ -110,8 +125,19 @@ internal sealed class CdsPageButton : CdsControl
         SetColor(_fill, BoxView.ColorProperty, CdsPageButtonTokens.Fill(hover, disabled, _hoverKey));
         SetColor(_divider, BoxView.ColorProperty, CdsColorKeys.BorderSubtle01);
         SetColor(_bar, BoxView.ColorProperty, CdsColorKeys.BorderInteractive);
-        SetColor(_icon, CdsIcon.ColorProperty, CdsPageButtonTokens.Icon(disabled));
-        SetColor(_label, CdsText.TextColorProperty, CdsPageButtonTokens.Text(disabled));
+        if (_navDisabledStyle)
+        {
+            SetColor(_icon, CdsIcon.ColorProperty, CdsPaginationNavTokens.Text(disabled));
+            SetColor(_label, CdsText.TextColorProperty, CdsPaginationNavTokens.Text(disabled));
+            var opacity = disabled ? CdsPaginationNavTokens.DisabledOpacity : 1;
+            _icon.Opacity = opacity;
+            _label.Opacity = opacity;
+        }
+        else
+        {
+            SetColor(_icon, CdsIcon.ColorProperty, CdsPageButtonTokens.Icon(disabled));
+            SetColor(_label, CdsText.TextColorProperty, CdsPageButtonTokens.Text(disabled));
+        }
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
         _bar.IsVisible = _active && !disabled;
         // Carbon drops the divider while a button has keyboard focus so the ring is not cut.

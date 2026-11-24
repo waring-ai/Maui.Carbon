@@ -59,6 +59,9 @@ public class CdsStructuredList : CdsControl
     readonly List<BoxView> _rules = [];
     readonly List<ContentView> _wrappers = [];
     readonly CdsCoalescedAction _rebuild;
+    // One tab stop for the rows, like a native radio group: Tab enters on the selected row (else the first enabled one) and
+    // the arrow keys move the selection.
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Both, wraps: true) { RemembersFocus = false, HandlesHomeEnd = false };
     bool _syncing;
 
     /// <summary>Creates an empty list.</summary>
@@ -70,6 +73,8 @@ public class CdsStructuredList : CdsControl
         CdsTokens.SetColor(_grid, BackgroundColorProperty, CdsStructuredListTokens.Background);
         _columns.CollectionChanged += OnColumnsChanged;
         _rows.CollectionChanged += OnRowsChanged;
+        _roving.PreferredIndex = () => SelectedIndex;
+        _roving.Navigated += (_, index) => Select(index);
         SetChrome(_grid);
     }
 
@@ -139,16 +144,11 @@ public class CdsStructuredList : CdsControl
     {
         if (!IsSelectable) return false;
         _rebuild.Flush();
-        var delta = e.Key is CdsKey.Down or CdsKey.Right ? 1 : e.Key is CdsKey.Up or CdsKey.Left ? -1 : 0;
-        if (delta == 0) return false;
-        var focused = _visuals.FindIndex(v => v.Hit?.IsFocused == true);
-        var from = focused >= 0 ? focused : SelectedIndex;
-        var next = CdsStructuredListModel.Move(from, delta, _rows.Select(r => r.IsEnabled).ToArray());
-        if (next < 0 || next == SelectedIndex && next == focused) return true;
-        Select(next);
-        _visuals[next].Hit?.Focus();
-        return true;
+        return _roving.HandleKey(e);
     }
+
+    /// <summary>The row hit targets in order (for tests); empty unless the list is selectable.</summary>
+    internal IReadOnlyList<CdsHitTarget> RowTargets => _roving.Items;
 
     /// <inheritdoc/>
     protected override void ApplyVisuals()
@@ -220,6 +220,7 @@ public class CdsStructuredList : CdsControl
             SelectedItem = index >= 0 && index < _rows.Count ? _rows[index] : null;
             _syncing = false;
         }
+        _roving.Refresh();
         RefreshVisuals();
         SelectionChanged?.Invoke(this, EventArgs.Empty);
         if (IsSelectable && index >= 0 && index < _rows.Count)
@@ -255,6 +256,7 @@ public class CdsStructuredList : CdsControl
         _grid.ColumnDefinitions.Clear();
         _visuals.Clear();
         _rules.Clear();
+        _roving.Clear();
 
         var selection = IsSelectable;
         var offset = selection ? 1 : 0;
@@ -283,10 +285,12 @@ public class CdsStructuredList : CdsControl
             }
             for (var c = 0; c < columnCount; c++)
             {
+                // Header text wraps like body text ("Long text wraps inside its cell"); no-wrap columns stay on one line.
+                var headerNoWrap = IsNoWrap || (c < _columns.Count && _columns[c].IsNoWrap);
                 var label = new CdsText(c < _columns.Count ? _columns[c].Header ?? string.Empty : string.Empty, CdsTypeStyle.HeadingCompact01)
                 {
                     Padding = CdsStructuredListModel.CellPadding(true, IsCondensed, IsFlush && !selection, selection, c == 0),
-                    LineBreakMode = LineBreakMode.TailTruncation,
+                    LineBreakMode = headerNoWrap ? LineBreakMode.NoWrap : LineBreakMode.WordWrap,
                 };
                 SemanticProperties.SetHeadingLevel(label, SemanticHeadingLevel.None);
                 _grid.Add(label, c + offset, row);
@@ -386,6 +390,7 @@ public class CdsStructuredList : CdsControl
         }
 
         CdsSemantics.SetGroupName(_grid, Label);
+        _roving.SetItems(_visuals.Where(v => v.Hit is not null).Select(v => v.Hit!));
         RefreshVisuals();
     }
 
