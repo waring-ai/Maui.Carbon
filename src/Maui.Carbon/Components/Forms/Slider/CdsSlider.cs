@@ -102,7 +102,7 @@ public partial class CdsSlider : CdsControl
         if (SliderModel.KeyboardValue(e.Key, e.Shift, current, Min, Max, Step, StepMultiplier) is not { } next) return false;
         SetFromUser(handle, next);
         e.Handled = true;
-        SemanticScreenReader.Announce(FormatValue(handle == SliderHandle.Lower ? Value : UpperValue));
+        CdsAnnouncer.Announce(FormatValue(handle == SliderHandle.Lower ? Value : UpperValue));
         return true;
     }
 

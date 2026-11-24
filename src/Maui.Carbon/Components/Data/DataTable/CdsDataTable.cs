@@ -67,7 +67,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         _toolbarRow.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _toolbarRow.Add(_search, 1, 0);
         _toolbarRow.Add(_toolbarContentHost, 2, 0);
-        SemanticProperties.SetDescription(_toolbarRow, "data table toolbar");
+        CdsSemantics.SetGroupName(_toolbarRow, "data table toolbar");
         _toolbar.Add(_toolbarRow);
         _toolbar.Add(_batchBar);
         _search.TextChanged += (_, e) => OnToolbarSearchChanged(e.NewTextValue);
@@ -836,7 +836,9 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         _description.IsVisible = !string.IsNullOrEmpty(Description);
         _titleBlock.IsVisible = _title.IsVisible || _description.IsVisible;
         _table.Label = Title ?? Label;
-        SemanticProperties.SetHint(_table, Description);
+        // Shown as text above the table; also the table body's group hint. Never a Hint on the table itself: that makes
+        // the whole table one VoiceOver element.
+        _table.AccessibleHint = Description;
     }
 
     bool BatchAvailable => Selection == CdsDataTableSelection.Multi && _batchActions.Count > 0;

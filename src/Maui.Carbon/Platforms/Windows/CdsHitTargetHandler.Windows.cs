@@ -1,9 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
+using WAutomationProperties = Microsoft.UI.Xaml.Automation.AutomationProperties;
 using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Automation.Provider;
 using Microsoft.UI.Xaml.Markup;
 using WButton = Microsoft.UI.Xaml.Controls.Button;
+using WValueProvider = Microsoft.UI.Xaml.Automation.Provider.IValueProvider;
 using WControlTemplate = Microsoft.UI.Xaml.Controls.ControlTemplate;
 using WSolidColorBrush = Microsoft.UI.Xaml.Media.SolidColorBrush;
 
@@ -43,10 +45,26 @@ public partial class CdsHitTargetHandler
     partial void UpdateAccessibility(CdsHitTarget target)
     {
         if (PlatformView is not CdsWindowsHitTargetView view) return;
+        var oldChecked = view.CheckedState;
+        var oldExpanded = view.ExpandedState;
+        var oldSelected = view.SelectedState;
         view.Role = target.Role;
         view.CheckedState = target.IsChecked;
         view.SelectedState = target.IsSelected;
         view.ExpandedState = target.IsExpanded;
+        view.ReadOnlyState = target.IsReadOnly;
+        // aria-current has no UIA property of its own; Narrator reads the item status after the name and role.
+        if (CdsHitTargetStates.CurrentWord(target.CurrentKind) is { } current) WAutomationProperties.SetItemStatus(view, current);
+        else view.ClearValue(WAutomationProperties.ItemStatusProperty);
+
+        // Tell UI Automation clients about state changes of a peer that already exists.
+        if (FrameworkElementAutomationPeer.FromElement(view) is not CdsHitTargetAutomationPeer peer) return;
+        if (oldChecked != view.CheckedState)
+            peer.RaisePropertyChangedEvent(TogglePatternIdentifiers.ToggleStateProperty, CdsHitTargetAutomationPeer.ToToggleState(oldChecked), peer.ToggleState);
+        if (oldExpanded != view.ExpandedState)
+            peer.RaisePropertyChangedEvent(ExpandCollapsePatternIdentifiers.ExpandCollapseStateProperty, CdsHitTargetAutomationPeer.ToExpandCollapseState(oldExpanded), peer.ExpandCollapseState);
+        if (oldSelected != view.SelectedState)
+            peer.RaisePropertyChangedEvent(SelectionItemPatternIdentifiers.IsSelectedProperty, oldSelected, view.SelectedState);
     }
 }
 
@@ -58,6 +76,7 @@ internal sealed partial class CdsWindowsHitTargetView : WButton
     internal bool? CheckedState { get; set; }
     internal bool SelectedState { get; set; }
     internal bool? ExpandedState { get; set; }
+    internal bool ReadOnlyState { get; set; }
 
     internal CdsHitTarget? Target => Owner is not null && Owner.TryGetTarget(out var t) ? t : null;
 
@@ -70,7 +89,7 @@ internal sealed partial class CdsWindowsHitTargetView : WButton
     protected override AutomationPeer OnCreateAutomationPeer() => new CdsHitTargetAutomationPeer(this);
 }
 
-internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer, IToggleProvider, IExpandCollapseProvider, ISelectionItemProvider
+internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer, IToggleProvider, IExpandCollapseProvider, ISelectionItemProvider, WValueProvider
 {
     readonly CdsWindowsHitTargetView _owner;
 
@@ -80,7 +99,8 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
 
     bool IsSelectionItem => _owner.Role is CdsAccessibilityRole.Tab or CdsAccessibilityRole.Option or CdsAccessibilityRole.Radio;
 
-    bool IsExpandable => _owner.Role is CdsAccessibilityRole.ComboBox or CdsAccessibilityRole.Expander;
+    // Anything with an expanded state is a disclosure (a header action that opens a panel, a menu button).
+    bool IsExpandable => _owner.ExpandedState is not null || _owner.Role is CdsAccessibilityRole.ComboBox or CdsAccessibilityRole.Expander;
 
     protected override AutomationControlType GetAutomationControlTypeCore() => _owner.Role switch
     {
@@ -100,20 +120,26 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
         if (patternInterface == PatternInterface.Toggle && IsToggle) return this;
         if (patternInterface == PatternInterface.ExpandCollapse && IsExpandable) return this;
         if (patternInterface == PatternInterface.SelectionItem && IsSelectionItem) return this;
+        // Read-only (aria-readonly): UIA carries it on the Value pattern, which Narrator reads as "read only".
+        if (patternInterface == PatternInterface.Value && _owner.ReadOnlyState) return this;
         return base.GetPatternCore(patternInterface);
     }
 
-    public ToggleState ToggleState => _owner.CheckedState switch
+    public ToggleState ToggleState => ToToggleState(_owner.CheckedState);
+
+    internal static ToggleState ToToggleState(bool? isChecked) => isChecked switch
     {
         true => ToggleState.On,
         false => ToggleState.Off,
         null => ToggleState.Indeterminate,
     };
 
+    internal static ExpandCollapseState ToExpandCollapseState(bool? isExpanded) =>
+        isExpanded == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
+
     public void Toggle() => _owner.Target?.RaiseKeyboardActivation();
 
-    public ExpandCollapseState ExpandCollapseState =>
-        _owner.ExpandedState == true ? ExpandCollapseState.Expanded : ExpandCollapseState.Collapsed;
+    public ExpandCollapseState ExpandCollapseState => ToExpandCollapseState(_owner.ExpandedState);
 
     public void Expand()
     {
@@ -138,5 +164,14 @@ internal sealed partial class CdsHitTargetAutomationPeer : ButtonAutomationPeer,
     public void Select()
     {
         if (!IsSelected) _owner.Target?.RaiseKeyboardActivation();
+    }
+
+    bool WValueProvider.IsReadOnly => true;
+
+    string WValueProvider.Value => CdsHitTargetStates.CheckedWord(_owner.Role, _owner.CheckedState) ?? string.Empty;
+
+    void WValueProvider.SetValue(string value)
+    {
+        // Read-only: the value cannot be changed.
     }
 }

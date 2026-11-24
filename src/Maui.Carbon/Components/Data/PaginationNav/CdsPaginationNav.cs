@@ -224,7 +224,7 @@ public class CdsPaginationNav : CdsControl
             }
         }
         _row.Add(_next);
-        SemanticProperties.SetDescription(_row, Label);
+        CdsSemantics.SetGroup(_row, Label, CdsSemanticGroupKind.Navigation);
         if (hadFocus && current is not null) Dispatcher.Dispatch(() => current.Focus());
     }
 

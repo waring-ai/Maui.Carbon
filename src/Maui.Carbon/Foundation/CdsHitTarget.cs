@@ -30,6 +30,26 @@ public enum CdsAccessibilityRole
 }
 
 /// <summary>
+/// What a <see cref="CdsHitTarget"/> is the current one of (the web's <c>aria-current</c>): the page a navigation link
+/// points to, the step of a progress indicator, the location in a breadcrumb.
+/// </summary>
+public enum CdsCurrentKind
+{
+    /// <summary>Not current (default).</summary>
+    None,
+    /// <summary>The current page (<c>aria-current="page"</c>): side nav, header menu and pagination links.</summary>
+    Page,
+    /// <summary>The current step of a process (<c>aria-current="step"</c>).</summary>
+    Step,
+    /// <summary>The current location (<c>aria-current="location"</c>), for example in a breadcrumb.</summary>
+    Location,
+    /// <summary>The current date (<c>aria-current="date"</c>) in a calendar.</summary>
+    Date,
+    /// <summary>The current item of a set (<c>aria-current="true"</c>).</summary>
+    Item,
+}
+
+/// <summary>
 /// An invisible native button laid over a control's drawn visuals. It gives Carbon controls real keyboard focus,
 /// Tab order, Enter/Space activation, press feedback and a native accessibility element on every platform.
 /// It measures as zero so it never changes the layout; it fills whatever cell it is placed in.
@@ -51,6 +71,14 @@ public sealed class CdsHitTarget : Button
     /// <summary>Bindable property for <see cref="IsExpanded"/>.</summary>
     public static readonly BindableProperty IsExpandedProperty = BindableProperty.Create(
         nameof(IsExpanded), typeof(bool?), typeof(CdsHitTarget), null);
+
+    /// <summary>Bindable property for <see cref="IsReadOnly"/>.</summary>
+    public static readonly BindableProperty IsReadOnlyProperty = BindableProperty.Create(
+        nameof(IsReadOnly), typeof(bool), typeof(CdsHitTarget), false);
+
+    /// <summary>Bindable property for <see cref="CurrentKind"/>.</summary>
+    public static readonly BindableProperty CurrentKindProperty = BindableProperty.Create(
+        nameof(CurrentKind), typeof(CdsCurrentKind), typeof(CdsHitTarget), CdsCurrentKind.None);
 
     /// <summary>Bindable property for <see cref="IsTabStop"/>.</summary>
     public static readonly BindableProperty IsTabStopProperty = BindableProperty.Create(
@@ -85,18 +113,43 @@ public sealed class CdsHitTarget : Button
         set => SetValue(IsCheckedProperty, value);
     }
 
-    /// <summary>Selected state for tab and option roles.</summary>
+    /// <summary>Selected state for tab and option roles (reported for any role that sets it).</summary>
     public bool IsSelected
     {
         get => (bool)GetValue(IsSelectedProperty);
         set => SetValue(IsSelectedProperty, value);
     }
 
-    /// <summary>Expanded state for combo box and expander roles; <c>null</c> when not applicable.</summary>
+    /// <summary>
+    /// Expanded state (<c>aria-expanded</c>) of anything that opens or shows more content: combo boxes, expanders, and
+    /// buttons or links that open a panel or menu. <c>null</c> (default) when the target controls nothing that expands;
+    /// set <c>false</c>, not <c>null</c>, while such a panel is closed. Reported for every role.
+    /// </summary>
     public bool? IsExpanded
     {
         get => (bool?)GetValue(IsExpandedProperty);
         set => SetValue(IsExpandedProperty, value);
+    }
+
+    /// <summary>
+    /// Read-only state (<c>aria-readonly</c>): the control shows a value the user cannot change. It stays enabled and
+    /// focusable (Carbon: read-only controls stay in the Tab order), and screen readers report "read only"; the owning
+    /// control ignores activation. Do not use it for disabled controls (<c>IsEnabled = false</c>).
+    /// </summary>
+    public bool IsReadOnly
+    {
+        get => (bool)GetValue(IsReadOnlyProperty);
+        set => SetValue(IsReadOnlyProperty, value);
+    }
+
+    /// <summary>
+    /// Marks the target as the current one of its set (<c>aria-current</c>): the link of the page being shown, the step
+    /// in progress. Default <see cref="CdsCurrentKind.None"/>. Screen readers report "current page", "current step"…
+    /// </summary>
+    public CdsCurrentKind CurrentKind
+    {
+        get => (CdsCurrentKind)GetValue(CurrentKindProperty);
+        set => SetValue(CurrentKindProperty, value);
     }
 
     /// <summary>

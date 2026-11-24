@@ -226,7 +226,7 @@ public class CdsRadioButtonGroup : CdsControl
     {
         _legend.Text = Legend;
         _legend.IsVisible = !string.IsNullOrEmpty(Legend);
-        SemanticProperties.SetDescription(_root, Legend);
+        CdsSemantics.SetGroupName(_root, Legend);
         RebuildItems();
         RefreshVisuals();
     }

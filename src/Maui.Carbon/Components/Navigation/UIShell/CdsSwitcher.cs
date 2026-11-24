@@ -108,7 +108,7 @@ public class CdsSwitcher : CdsControl
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsSwitcher), null,
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsSwitcher)b, (string?)n));
+        propertyChanged: static (b, _, n) => CdsSemantics.SetGroup((CdsSwitcher)b, (string?)n, CdsSemanticGroupKind.List));
 
     /// <summary>Bindable property for <see cref="IsExpanded"/>.</summary>
     public static readonly BindableProperty IsExpandedProperty = BindableProperty.Create(

@@ -73,7 +73,7 @@ internal sealed class CdsModalSurface : Grid
     public event EventHandler? BackdropTapped;
 
     /// <summary>Gives the container its accessible name.</summary>
-    public void SetName(string? name) => SemanticProperties.SetDescription(_box, name);
+    public void SetName(string? name) => CdsSemantics.SetGroupName(_box, name);
 
     /// <summary>Follows the size of the page host.</summary>
     public void Attach(CdsOverlayHost? host)

@@ -183,7 +183,7 @@ public partial class CdsMultiSelect : CdsListBox
         var items = new List<object?>(_selection.Items);
         SelectionChanged?.Invoke(this, new CdsListBoxSelectionChangedEventArgs(items.Count > 0 ? items[0] : null, items));
         if (Handler is not null)
-            SemanticScreenReader.Announce(items.Count == 0 ? "No items selected" : $"{items.Count} items selected");
+            CdsAnnouncer.Announce(items.Count == 0 ? "No items selected" : $"{items.Count} items selected");
     }
 
     void UpdateTag()

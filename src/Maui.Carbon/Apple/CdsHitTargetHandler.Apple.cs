@@ -35,30 +35,29 @@ public partial class CdsHitTargetHandler
             CdsAccessibilityRole.Adjustable => UIAccessibilityTrait.Adjustable,
             _ => UIAccessibilityTrait.Button,
         };
-        string? value = null;
-        switch (target.Role)
-        {
-            case CdsAccessibilityRole.Checkbox:
-            case CdsAccessibilityRole.Radio:
-            case CdsAccessibilityRole.ToggleButton:
-                value = target.IsChecked switch { true => "checked", false => "not checked", null => "mixed" };
-                if (target.IsChecked == true) traits |= UIAccessibilityTrait.Selected;
-                break;
-            case CdsAccessibilityRole.Switch:
-                value = target.IsChecked == true ? "on" : "off";
-                break;
-            case CdsAccessibilityRole.Tab:
-            case CdsAccessibilityRole.Option:
-                if (target.IsSelected) traits |= UIAccessibilityTrait.Selected;
-                break;
-            case CdsAccessibilityRole.ComboBox:
-            case CdsAccessibilityRole.Expander:
-                value = target.IsExpanded switch { true => "expanded", false => "collapsed", null => null };
-                break;
-        }
+        var role = target.Role;
+        if (role is CdsAccessibilityRole.Checkbox or CdsAccessibilityRole.Radio or CdsAccessibilityRole.ToggleButton && target.IsChecked == true)
+            traits |= UIAccessibilityTrait.Selected;
+        // Selected tabs and options, and the current page or step (aria-current), carry the selected trait.
+        if (target.IsSelected || target.CurrentKind != CdsCurrentKind.None) traits |= UIAccessibilityTrait.Selected;
         if (!target.IsEnabled) traits |= UIAccessibilityTrait.NotEnabled;
+
+        // iOS 18 and Mac Catalyst 18 report expansion natively ("expanded"/"collapsed" after the role); before that it
+        // goes into the value. Every role reports it: a header action or menu button that opens a panel is a disclosure.
+        var nativeExpanded = OperatingSystem.IsIOSVersionAtLeast(18) || OperatingSystem.IsMacCatalystVersionAtLeast(18);
+        if (OperatingSystem.IsIOSVersionAtLeast(18) || OperatingSystem.IsMacCatalystVersionAtLeast(18))
+        {
+            PlatformView.AccessibilityExpandedStatus = target.IsExpanded switch
+            {
+                true => UIAccessibilityExpandedStatus.Expanded,
+                false => UIAccessibilityExpandedStatus.Collapsed,
+                null => UIAccessibilityExpandedStatus.Unsupported,
+            };
+        }
         PlatformView.AccessibilityTraits = traits;
-        PlatformView.AccessibilityValue = value;
+        // Read-only stays enabled and focusable; VoiceOver hears "read only" in the value.
+        PlatformView.AccessibilityValue = CdsHitTargetStates.AppleValue(
+            role, target.IsChecked, target.IsExpanded, target.IsReadOnly, target.CurrentKind, nativeExpanded);
     }
 }
 

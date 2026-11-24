@@ -14,6 +14,8 @@ public partial class CdsHitTargetHandler : ButtonHandler
             [nameof(CdsHitTarget.IsChecked)] = MapAccessibility,
             [nameof(CdsHitTarget.IsSelected)] = MapAccessibility,
             [nameof(CdsHitTarget.IsExpanded)] = MapAccessibility,
+            [nameof(CdsHitTarget.IsReadOnly)] = MapAccessibility,
+            [nameof(CdsHitTarget.CurrentKind)] = MapAccessibility,
             [nameof(IView.IsEnabled)] = MapIsEnabled,
             [nameof(CdsHitTarget.IsTabStop)] = static (h, t) => h.UpdateTabStop(t),
         };

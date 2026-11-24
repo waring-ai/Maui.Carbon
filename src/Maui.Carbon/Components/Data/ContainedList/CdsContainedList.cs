@@ -168,7 +168,7 @@ public class CdsContainedList : CdsControl
             _list.Add(_items[i]);
         }
 
-        if (!string.IsNullOrEmpty(Label)) SemanticProperties.SetDescription(_list, Label);
+        CdsSemantics.SetGroup(_list, Label, CdsSemanticGroupKind.List);
         RefreshVisuals();
     }
 }

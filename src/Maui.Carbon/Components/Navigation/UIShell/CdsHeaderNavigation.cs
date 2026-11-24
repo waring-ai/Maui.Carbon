@@ -15,7 +15,7 @@ public class CdsHeaderNavigation : CdsControl
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsHeaderNavigation), "Navigation",
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsHeaderNavigation)b, (string?)n));
+        propertyChanged: static (b, _, n) => CdsSemantics.SetGroupName((CdsHeaderNavigation)b, (string?)n));
 
     readonly CdsItemCollection<View> _items = [];
     readonly HorizontalStackLayout _row = new() { Spacing = 0 };
@@ -33,7 +33,7 @@ public class CdsHeaderNavigation : CdsControl
         _root.Add(divider);
         _root.Add(_row);
         SetChrome(_root);
-        SemanticProperties.SetDescription(this, Label);
+        CdsSemantics.SetGroup(this, Label, CdsSemanticGroupKind.Navigation);
         _items.CollectionChanged += OnItemsChanged;
         _watcher = new CdsBreakpointWatcher(this, Sync);
         Sync();

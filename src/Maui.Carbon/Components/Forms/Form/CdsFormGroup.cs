@@ -87,14 +87,16 @@ public class CdsFormGroup : CdsContainer
         _message.IsVisible = !string.IsNullOrEmpty(MessageText);
         SetColor(_message, Microsoft.Maui.Controls.Label.TextColorProperty,
             disabled ? CdsColorKeys.TextDisabled : IsInvalid ? CdsColorKeys.TextError : CdsColorKeys.TextHelper);
-        SemanticProperties.SetHint(_root, MessageText);
+        // Group semantics, not a Description or Hint: those make the group one VoiceOver element and hide its fields.
+        // The message stays visible (and readable) under the group; Narrator and TalkBack also get it as the group hint.
+        CdsSemantics.SetGroupHint(_root, MessageText);
     }
 
     void OnLegendChanged(string? legend)
     {
         _legend.Text = legend;
         _legend.IsVisible = !string.IsNullOrEmpty(legend);
-        SemanticProperties.SetDescription(_root, legend);
+        CdsSemantics.SetGroupName(_root, legend);
     }
 
     void Disable()

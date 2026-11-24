@@ -109,6 +109,6 @@ public class CdsBreadcrumb : CdsControl
             shown[i].Configure(Size, !(last && NoTrailingSlash));
             _row.Add(shown[i]);
         }
-        SemanticProperties.SetDescription(_row, Label);
+        CdsSemantics.SetGroup(_row, Label, CdsSemanticGroupKind.Navigation);
     }
 }

@@ -25,7 +25,7 @@ public class CdsHeaderPanel : CdsContainer
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsHeaderPanel), null,
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsHeaderPanel)b, (string?)n));
+        propertyChanged: static (b, _, n) => CdsSemantics.SetGroupName((CdsHeaderPanel)b, (string?)n));
 
     /// <summary>Bindable property for <see cref="ClosesOnOutsideTap"/>.</summary>
     public static readonly BindableProperty ClosesOnOutsideTapProperty = BindableProperty.Create(

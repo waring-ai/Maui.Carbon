@@ -312,7 +312,7 @@ public class CdsHeaderMenu : CdsShellItem
         };
         CdsTokens.SetColor(surface, BackgroundColorProperty, CdsColorKeys.Layer01);
         CdsTokens.SetShadow(surface, CdsColorKeys.Shadow, offsetY: 4, radius: 8);
-        SemanticProperties.SetDescription(surface, MenuLabel ?? Label);
+        CdsSemantics.SetGroup(surface, MenuLabel ?? Label, CdsSemanticGroupKind.List);
         return surface;
     }
 

@@ -156,20 +156,3 @@ internal sealed class CdsModalPanel : Layout
         }
     }
 }
-
-/// <summary>Announces text to screen readers, ignoring platforms (and unit tests) without an implementation.</summary>
-internal static class CdsAnnouncer
-{
-    public static void Announce(string? text)
-    {
-        if (string.IsNullOrEmpty(text)) return;
-        try
-        {
-            SemanticScreenReader.Announce(text);
-        }
-        catch (Exception)
-        {
-            // No screen reader implementation on this platform.
-        }
-    }
-}

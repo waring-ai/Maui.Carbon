@@ -82,6 +82,7 @@ public class CdsTable : CdsControl
     // Virtualized body (a row source with a sticky header): a pool of row slots positioned in an absolute layout.
     const int Overscan = 6;
     readonly AbsoluteLayout _virtualBody = new();
+    string? _accessibleHint;
     readonly Dictionary<View, RowVisual> _slotByRoot = [];
     readonly Dictionary<object, double> _childHeights = [];
     ICdsTableRowSource? _source;
@@ -513,12 +514,29 @@ public class CdsTable : CdsControl
         RefreshVisuals();
     }
 
+    /// <summary>
+    /// Extra information about the table for assistive technology (the data table's description). Kept as a group hint on
+    /// the body: a Hint on the body (like a Description) would make it one VoiceOver element and hide every row.
+    /// </summary>
+    internal string? AccessibleHint
+    {
+        get => _accessibleHint;
+        set
+        {
+            if (_accessibleHint == value) return;
+            _accessibleHint = value;
+            UpdateAccessibility();
+        }
+    }
+
     void UpdateAccessibility()
     {
-        SemanticProperties.SetDescription(_bodyGrid, Label);
-        SemanticProperties.SetDescription(_virtualBody, Label);
+        // Group semantics, not a Description: the rows, their checkboxes and expand buttons stay reachable.
+        CdsSemantics.SetGroup(_bodyGrid, Label, hint: _accessibleHint);
         // Only the rows in view exist, so say how many there are.
-        SemanticProperties.SetHint(_virtualBody, IsVirtual ? (_source!.Count == 1 ? "1 row" : $"{_source.Count} rows") : null);
+        var count = IsVirtual ? (_source!.Count == 1 ? "1 row" : $"{_source.Count} rows") : null;
+        var hint = string.IsNullOrEmpty(_accessibleHint) ? count : count is null ? _accessibleHint : $"{_accessibleHint}. {count}";
+        CdsSemantics.SetGroup(_virtualBody, Label, hint: hint);
     }
 
     /// <summary>Rebuilds the whole grid from the head and rows.</summary>
@@ -1145,7 +1163,15 @@ public class CdsTable : CdsControl
     static void SetHeaderName(CdsTableHeader header)
     {
         // Non-sortable headers are plain text; a hidden-text header carries its name for screen readers.
-        if (header.Body is { } body) SemanticProperties.SetDescription(body, header.Description ?? header.Text);
+        if (header.Body is not { } body) return;
+        // A control in the header (the select-all checkbox) names its own hit target: a Description on the control would
+        // make it one VoiceOver element and hide the hit target with its role and checked state.
+        if (body is CdsControl { AccessibilityTarget: { } target })
+        {
+            if (string.IsNullOrEmpty(SemanticProperties.GetDescription(target))) SemanticProperties.SetDescription(target, header.Description ?? header.Text);
+            return;
+        }
+        SemanticProperties.SetDescription(body, header.Description ?? header.Text);
     }
 
     void WireRowHover(View view, RowVisual visual)

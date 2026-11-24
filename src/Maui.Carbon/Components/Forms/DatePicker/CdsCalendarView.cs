@@ -161,7 +161,7 @@ internal sealed class CdsCalendarView : CdsControl
         };
         CdsTokens.SetColor(_surface, BackgroundColorProperty, CdsColorKeys.Layer01);
         CdsTokens.SetShadow(_surface, CdsColorKeys.Shadow, offsetY: 2, radius: 6);
-        SemanticProperties.SetDescription(_surface, "Choose date");
+        CdsSemantics.SetGroupName(_surface, "Choose date");
         SetColor(_month, Label.TextColorProperty, CdsColorKeys.TextPrimary);
         foreach (var label in _weekdayLabels) SetColor(label, Label.TextColorProperty, CdsColorKeys.TextPrimary);
         SetChrome(_surface);

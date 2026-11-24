@@ -5,7 +5,8 @@ namespace Maui.Carbon;
 /// <summary>
 /// The vertical container of a Carbon form: fields stack 32 apart (<see cref="IsTight"/>: 24). Put
 /// <see cref="CdsFormGroup"/>s and fields inside, with the actions last (primary action last, Cancel before it). Give
-/// the form an accessible name with <c>SemanticProperties.Description</c> when the page has several forms. On a failed
+/// the form an accessible name with <see cref="CdsSemantics.GroupNameProperty"/> when the page has several forms (not
+/// <c>SemanticProperties.Description</c>, which hides the fields from VoiceOver). On a failed
 /// submit, move focus to the first invalid field.
 /// </summary>
 public class CdsForm : VerticalStackLayout

@@ -158,14 +158,7 @@ public class CdsLoading : CdsControl
 
     void Announce()
     {
-        try
-        {
-            SemanticScreenReader.Announce(Description);
-        }
-        catch (Exception)
-        {
-            // No screen reader service on this platform.
-        }
+        CdsAnnouncer.Announce(Description);
     }
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsLoading)b).Update();

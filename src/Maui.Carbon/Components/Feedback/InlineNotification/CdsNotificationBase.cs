@@ -183,14 +183,7 @@ public abstract class CdsNotificationBase : CdsControl
         if (AnnouncedRole == CdsNotificationRole.None) return;
         var text = AnnouncementText;
         if (text.Length == 0) return;
-        try
-        {
-            SemanticScreenReader.Announce(text);
-        }
-        catch (Exception)
-        {
-            // No screen reader service on this platform (tests, unsupported hosts): nothing to announce.
-        }
+        CdsAnnouncer.Announce(text);
     }
 
     /// <inheritdoc/>

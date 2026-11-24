@@ -19,7 +19,7 @@ internal sealed class CdsBreadcrumbMenu : Border
         MaximumWidthRequest = 288;
         CdsTokens.SetColor(this, BackgroundColorProperty, CdsColorKeys.Layer01);
         CdsTokens.SetShadow(this, CdsColorKeys.Shadow);
-        SemanticProperties.SetDescription(this, "Breadcrumb levels");
+        CdsSemantics.SetGroup(this, "Breadcrumb levels", CdsSemanticGroupKind.List);
 
         var stack = new VerticalStackLayout { Spacing = 0 };
         for (var i = 0; i < items.Count; i++)

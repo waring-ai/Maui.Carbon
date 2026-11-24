@@ -27,8 +27,8 @@ public class CdsButtonSet : CdsControl
         propertyChanged: static (b, _, n) =>
         {
             var set = (CdsButtonSet)b;
-            SemanticProperties.SetDescription(set._grid, (string?)n);
-            SemanticProperties.SetDescription(set._row, (string?)n);
+            CdsSemantics.SetGroupName(set._grid, (string?)n);
+            CdsSemantics.SetGroupName(set._row, (string?)n);
         });
 
     readonly CdsItemCollection<CdsButton> _items = [];

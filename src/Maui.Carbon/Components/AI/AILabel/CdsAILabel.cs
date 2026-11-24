@@ -224,7 +224,7 @@ public class CdsAILabel : CdsControl
         // The caret takes the callout fill (Carbon: --cds-ai-popover-background).
         if (surface.Children.OfType<Polygon>().FirstOrDefault() is { } caret)
             CdsTokens.SetBrush(caret, Shape.FillProperty, CdsAiTokens.CalloutBackground);
-        SemanticProperties.SetDescription(surface, CdsAILabelTokens.AccessibleName(AiText, Label, TextLabel, Kind));
+        CdsSemantics.SetGroupName(surface, CdsAILabelTokens.AccessibleName(AiText, Label, TextLabel, Kind));
         return surface;
     }
 

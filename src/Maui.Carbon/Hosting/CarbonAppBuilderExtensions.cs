@@ -21,6 +21,7 @@ public static class CarbonAppBuilderExtensions
         });
 
         builder.ConfigureMauiHandlers(CdsHandlerRegistry.Register);
+        CdsSemantics.RegisterMapper();
         CdsHandlerRegistry.ConfigureLifecycle(builder);
         return builder;
     }

@@ -385,7 +385,7 @@ public class CdsStructuredList : CdsControl
             _rules.Remove(closing);
         }
 
-        SemanticProperties.SetDescription(_grid, Label);
+        CdsSemantics.SetGroupName(_grid, Label);
         RefreshVisuals();
     }
 

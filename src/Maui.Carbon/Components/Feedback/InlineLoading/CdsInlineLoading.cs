@@ -186,13 +186,6 @@ public class CdsInlineLoading : CdsControl
     void AnnounceText()
     {
         if (!IsLoaded || string.IsNullOrEmpty(Description)) return;
-        try
-        {
-            SemanticScreenReader.Announce(Description);
-        }
-        catch (Exception)
-        {
-            // No screen reader service on this platform.
-        }
+        CdsAnnouncer.Announce(Description);
     }
 }

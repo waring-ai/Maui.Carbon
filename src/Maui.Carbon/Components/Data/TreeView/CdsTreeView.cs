@@ -66,6 +66,7 @@ public class CdsTreeView : CdsControl
     readonly VerticalStackLayout _rowsHost = new() { Spacing = 0 };
     readonly List<CdsTreeNode> _selected = [];
     readonly List<RowVisual> _visuals = [];
+    readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Vertical);
     List<TreeRow> _rows = [];
     CdsTreeNode? _tabStop;
     int _hover = -1;
@@ -80,6 +81,10 @@ public class CdsTreeView : CdsControl
         _root.Add(_rowsHost);
         SemanticProperties.SetHeadingLevel(_label, SemanticHeadingLevel.None);
         _nodes.CollectionChanged += OnNodesChanged;
+        // One tab stop: the node focused last, else the active node, else the first selected, else the first enabled one.
+        // The tree moves focus itself (TreeViewModel.HandleKey); the roving helper keeps the tab stops.
+        _roving.CanFocus = i => i < _rows.Count && !_rows[i].Node.IsDisabled;
+        _roving.PreferredIndex = PreferredTabStop;
         SetChrome(_root);
         UpdateLabel();
         Rebuild();
@@ -209,17 +214,16 @@ public class CdsTreeView : CdsControl
     {
         if (index < 0 || index >= _visuals.Count) return;
         _tabStop = (CdsTreeNode)_rows[index].Node;
-        ApplyTabStops();
-        _visuals[index].Hit.Focus();
+        // A disabled row cannot take focus; the stop then stays where PreferredTabStop puts it.
+        if (!_roving.FocusIndex(index)) _roving.Refresh();
     }
 
-    void ApplyTabStops()
-    {
-        var stop = _tabStop is not null && TreeViewModel.IndexOf(_rows, _tabStop) is var i and >= 0 && !_tabStop.IsDisabled
+    int PreferredTabStop() =>
+        _tabStop is not null && TreeViewModel.IndexOf(_rows, _tabStop) is var i and >= 0 && !_tabStop.IsDisabled
             ? i
             : TreeViewModel.TabStopIndex(_rows, ActiveNode, n => _selected.Contains((CdsTreeNode)n));
-        for (var r = 0; r < _visuals.Count; r++) _visuals[r].Hit.IsTabStop = r == stop;
-    }
+
+    void ApplyTabStops() => _roving.Refresh();
 
     // ----- selection -----
 
@@ -316,7 +320,8 @@ public class CdsTreeView : CdsControl
     {
         _label.Text = Label;
         _label.IsVisible = !HideLabel && !string.IsNullOrEmpty(Label);
-        SemanticProperties.SetDescription(_rowsHost, Label);
+        // Named as a group, not with a Description: that would make the rows host one VoiceOver element and hide the rows.
+        CdsSemantics.SetGroup(_rowsHost, Label, CdsSemanticGroupKind.List);
     }
 
     void Rebuild()
@@ -339,7 +344,7 @@ public class CdsTreeView : CdsControl
         // Selection and active node refer to nodes: forget those that left the tree.
         var all = Descendants(_nodes).ToHashSet();
         _selected.RemoveAll(n => !all.Contains(n));
-        ApplyTabStops();
+        _roving.SetItems(_visuals.Select(v => v.Hit));
         RefreshVisuals();
         if (focusNode is not null && TreeViewModel.IndexOf(_rows, focusNode) is var index and >= 0)
             Dispatcher.Dispatch(() => FocusRow(index));

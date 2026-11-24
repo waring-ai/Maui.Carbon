@@ -16,7 +16,7 @@ public class CdsHeader : CdsControl
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsHeader), null,
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsHeader)b, (string?)n));
+        propertyChanged: static (b, _, n) => CdsSemantics.SetGroup((CdsHeader)b, (string?)n, CdsSemanticGroupKind.Banner));
 
     readonly CdsItemCollection<View> _items = [];
     readonly Grid _row = new() { ColumnSpacing = 0 };

@@ -32,7 +32,7 @@ internal sealed class CdsListBoxList
         };
         CdsTokens.SetColor(Surface, VisualElement.BackgroundColorProperty, CdsColorKeys.Layer01);
         CdsTokens.SetShadow(Surface, CdsColorKeys.Shadow, offsetY: 2, radius: 6);
-        SemanticProperties.SetDescription(Surface, accessibleName);
+        CdsSemantics.SetGroup(Surface, accessibleName, CdsSemanticGroupKind.List);
     }
 
     /// <summary>The list surface, ready to hand to the overlay service.</summary>

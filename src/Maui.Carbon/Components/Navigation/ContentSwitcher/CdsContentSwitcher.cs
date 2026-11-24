@@ -200,7 +200,7 @@ public class CdsContentSwitcher : CdsControl
             _grid.FixedCellWidth = IsIconOnly ? height : -1;
             HorizontalOptions = IsIconOnly ? LayoutOptions.Start : LayoutOptions.Fill;
             _frame.HeightRequest = height;
-            SemanticProperties.SetDescription(_frame, Label);
+            CdsSemantics.SetGroup(_frame, Label, CdsSemanticGroupKind.List);
             var coerced = _items.Count == 0 ? -1 : Math.Clamp(SelectedIndex, 0, _items.Count - 1);
             if (coerced >= 0 && coerced != SelectedIndex) SelectedIndex = coerced;
             _applied = coerced;

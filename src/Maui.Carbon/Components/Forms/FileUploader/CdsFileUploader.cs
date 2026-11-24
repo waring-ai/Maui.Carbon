@@ -99,7 +99,7 @@ public partial class CdsFileUploader : CdsControl
         if (added.Count == 0) return;
         if (!Multiple) Files.Clear();
         foreach (var file in added) Files.Add(file);
-        SemanticScreenReader.Announce(FileUploaderModel.AddedAnnouncement([.. added.Select(f => f.Name ?? string.Empty)]));
+        CdsAnnouncer.Announce(FileUploaderModel.AddedAnnouncement([.. added.Select(f => f.Name ?? string.Empty)]));
         FilesAdded?.Invoke(this, new CdsFilesAddedEventArgs(added));
     }
 

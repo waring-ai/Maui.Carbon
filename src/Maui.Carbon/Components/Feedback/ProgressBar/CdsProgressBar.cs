@@ -355,14 +355,7 @@ public class CdsProgressBar : CdsControl
 
     static void AnnounceStatus(CdsProgressStatus status)
     {
-        try
-        {
-            SemanticScreenReader.Announce(status == CdsProgressStatus.Finished ? "Done" : "Error");
-        }
-        catch (Exception)
-        {
-            // No screen reader service on this platform.
-        }
+        CdsAnnouncer.Announce(status == CdsProgressStatus.Finished ? "Done" : "Error");
     }
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsProgressBar)b).Update();

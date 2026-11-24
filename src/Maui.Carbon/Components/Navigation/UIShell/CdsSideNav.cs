@@ -15,7 +15,7 @@ public class CdsSideNav : CdsContainer
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsSideNav), "Side navigation",
-        propertyChanged: static (b, _, n) => SemanticProperties.SetDescription((CdsSideNav)b, (string?)n));
+        propertyChanged: static (b, _, n) => CdsSemantics.SetGroupName((CdsSideNav)b, (string?)n));
 
     /// <summary>Bindable property for <see cref="IsExpanded"/>.</summary>
     public static readonly BindableProperty IsExpandedProperty = BindableProperty.Create(
@@ -75,7 +75,7 @@ public class CdsSideNav : CdsContainer
         _clip.Add(fill);
         _clip.Add(_panel);
         SetChrome(_clip);
-        SemanticProperties.SetDescription(this, Label);
+        CdsSemantics.SetGroup(this, Label, CdsSemanticGroupKind.Navigation);
         _watcher = new CdsBreakpointWatcher(this, () => ApplyWidth(animate: _initialized));
         Loaded += (_, _) =>
         {

@@ -218,7 +218,7 @@ public partial class CdsTabs : CdsControl
                 _row.ColumnDefinitions.Add(new ColumnDefinition(_fullWidthActive ? GridLength.Star : GridLength.Auto));
                 _row.Add(view, i);
             }
-            SemanticProperties.SetDescription(_row, Label);
+            CdsSemantics.SetGroup(_row, Label, CdsSemanticGroupKind.List);
             _left.Refresh();
             _right.Refresh();
         }

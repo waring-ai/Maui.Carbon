@@ -141,7 +141,7 @@ public class CdsCopyButton : CdsControl
         var token = _feedback.Start();
         SetValue(IsCopiedProperty, true);
         _tooltip.Pin(FeedbackTimeout);
-        if (!string.IsNullOrEmpty(Feedback)) SemanticScreenReader.Announce(Feedback);
+        CdsAnnouncer.Announce(Feedback);
         _ = Task.Delay(FeedbackTimeout).ContinueWith(_ => Dispatcher.Dispatch(() =>
         {
             if (_feedback.Expire(token)) SetValue(IsCopiedProperty, false);

@@ -170,7 +170,7 @@ public class CdsMenu : BindableObject
         CdsTokens.SetColor(surface, VisualElement.BackgroundColorProperty, CdsColorKeys.Layer01);
         if (HasBorder) CdsTokens.SetBrush(surface, Border.StrokeProperty, CdsColorKeys.BorderSubtle01);
         CdsTokens.SetShadow(surface, CdsColorKeys.Shadow, offsetY: 2, radius: 6);
-        SemanticProperties.SetDescription(surface, Label);
+        CdsSemantics.SetGroup(surface, Label, CdsSemanticGroupKind.List);
 
         var level = new Level { Model = model, Surface = surface, Rows = rows, Parent = parent, ParentIndex = parentIndex };
 
