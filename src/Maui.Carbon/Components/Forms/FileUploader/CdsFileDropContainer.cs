@@ -2,10 +2,15 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Maui.Carbon;
 
+/// <summary>A file handed to the uploader by the picker or a drop: its full path and the platform access held for it.</summary>
+internal sealed record CdsFileGrant(string Path, IDisposable? Access);
+
 /// <summary>
 /// The dashed drop target of a file uploader: 96 high, a 1px dashed <c>border-strong-01</c> box with <c>link-primary</c>
 /// text. It is a real button (click, Enter or Space open the picker); dragging files over it draws a 2px <c>focus</c>
-/// outline. Dropped files are collected best-effort per platform (Mac Catalyst, iOS and Windows hand over file paths).
+/// outline. Dropped files are collected best-effort per platform: Mac Catalyst and iOS hand over the original file (its
+/// security-scoped access held until the uploader lets the file go), or a copy when the source only offers one; Windows
+/// hands over storage-item paths; Android offers no files.
 /// </summary>
 internal sealed class CdsFileDropContainer : CdsControl
 {
@@ -37,8 +42,11 @@ internal sealed class CdsFileDropContainer : CdsControl
         {
             SetDragOver(false);
             if (!IsEnabled) return;
-            var paths = await CollectPathsAsync(e);
-            if (paths.Count > 0) FilesDropped?.Invoke(this, paths);
+            // Handled before the first await: otherwise MAUI goes on to read the drop as its own text or image package,
+            // which a drop from another app does not have (it throws and logs a warning).
+            e.Handled = true;
+            var files = await CollectFilesAsync(e);
+            if (files.Count > 0) FilesDropped?.Invoke(this, files);
         };
         _root.GestureRecognizers.Add(drop);
 
@@ -49,8 +57,8 @@ internal sealed class CdsFileDropContainer : CdsControl
     /// <summary>Raised when the container is activated: open the picker.</summary>
     public event EventHandler? Activated;
 
-    /// <summary>Raised with the paths of files dropped on the container.</summary>
-    public event EventHandler<IReadOnlyList<string>>? FilesDropped;
+    /// <summary>Raised with the files dropped on the container.</summary>
+    public event EventHandler<IReadOnlyList<CdsFileGrant>>? FilesDropped;
 
     public string? Text
     {
@@ -83,9 +91,9 @@ internal sealed class CdsFileDropContainer : CdsControl
         RefreshVisuals();
     }
 
-    static async Task<IReadOnlyList<string>> CollectPathsAsync(DropEventArgs e)
+    static async Task<IReadOnlyList<CdsFileGrant>> CollectFilesAsync(DropEventArgs e)
     {
-        var paths = new List<string>();
+        var files = new List<CdsFileGrant>();
 #if WINDOWS
         try
         {
@@ -95,7 +103,7 @@ internal sealed class CdsFileDropContainer : CdsControl
                 var items = await view.GetStorageItemsAsync();
                 foreach (var item in items)
                 {
-                    if (!string.IsNullOrEmpty(item.Path)) paths.Add(item.Path);
+                    if (!string.IsNullOrEmpty(item.Path)) files.Add(new CdsFileGrant(item.Path, null));
                 }
             }
         }
@@ -106,17 +114,14 @@ internal sealed class CdsFileDropContainer : CdsControl
 #elif IOS || MACCATALYST
         try
         {
-            var session = e.PlatformArgs?.DropSession;
-            if (session is not null)
+            if (e.PlatformArgs?.DropSession is { } session)
             {
-                foreach (var item in session.Items)
+                // Every item is requested now, while UIKit performs the drop: it serves item data only to requests made
+                // then, so loading one item after another would lose all but the first.
+                var loads = session.Items.Select(item => CdsDocumentPicker.LoadDroppedFileAsync(item.ItemProvider)).ToArray();
+                foreach (var file in await Task.WhenAll(loads))
                 {
-                    // NSUrl reads a dropped file as its file URL (LoadItem("public.file-url"), which did the same by
-                    // type identifier, is obsolete from the iOS/Mac Catalyst 27 SDK).
-                    if (!item.ItemProvider.CanLoadObject(typeof(Foundation.NSUrl))) continue;
-
-                    var url = await item.ItemProvider.LoadObjectAsync<Foundation.NSUrl>();
-                    if (url is { IsFileUrl: true, Path: { Length: > 0 } path }) paths.Add(path);
+                    if (file is not null) files.Add(file);
                 }
             }
         }
@@ -129,6 +134,6 @@ internal sealed class CdsFileDropContainer : CdsControl
         await Task.CompletedTask;
         _ = e;
 #endif
-        return paths;
+        return files;
     }
 }

@@ -32,7 +32,8 @@ public class FileUploaderTests
         var accept = FileUploaderModel.ParseAccept(".log, .txt, .png, image/*, .weird");
         Assert.Equal([".log", ".txt", ".png", ".weird"], FileUploaderModel.Extensions(accept));
         Assert.Equal(["text/plain", "image/png", "image/*", "*/*"], FileUploaderModel.MimeTypes(accept));
-        Assert.Equal(["public.plain-text", "public.png", "public.image"], FileUploaderModel.UniformTypes(accept));
+        // ".weird" has no known type: it stays an extension, which the picker resolves to that extension's dynamic type.
+        Assert.Equal(["public.plain-text", "public.png", "public.image", ".weird"], FileUploaderModel.UniformTypes(accept));
     }
 
     [Fact]

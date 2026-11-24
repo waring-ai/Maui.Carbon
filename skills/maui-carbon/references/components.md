@@ -109,7 +109,7 @@ Links below are relative to this file in the repository. When copying the skill 
 | ComboBox | `CdsComboBox` | [source](../../../src/Maui.Carbon/Components/Forms/ComboBox/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
 | DatePicker | `CdsDatePicker`, `CdsDatePickerSkeleton` | [source](../../../src/Maui.Carbon/Components/Forms/DatePicker/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
 | Dropdown | `CdsDropdown`, `CdsDropdownSkeleton` | [source](../../../src/Maui.Carbon/Components/Forms/Dropdown/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
-| FileUploader | `CdsFileUploader`, `CdsFileUploaderItem`, `CdsUploadedFile` | [source](../../../src/Maui.Carbon/Components/Forms/FileUploader/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
+| FileUploader | `CdsFileUploader`, `CdsFileUploaderItem`, `CdsUploadedFile`, `CdsFileUploaderSkeleton` (also the MVVM local-file picker: `FilePath`/`FilePaths`, `AccessMode="Path"`) | [source](../../../src/Maui.Carbon/Components/Forms/FileUploader/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
 | Form | `CdsForm`, `CdsFormGroup`, `CdsFormItem`, `CdsFormLabel` | [source](../../../src/Maui.Carbon/Components/Forms/Form/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
 | MultiSelect | `CdsMultiSelect` | [source](../../../src/Maui.Carbon/Components/Forms/MultiSelect/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |
 | NumberInput | `CdsNumberInput` | [source](../../../src/Maui.Carbon/Components/Forms/NumberInput/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Forms/) |

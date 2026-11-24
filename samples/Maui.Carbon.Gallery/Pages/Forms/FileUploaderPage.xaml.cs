@@ -1,4 +1,5 @@
 using Maui.Carbon.Gallery.Infrastructure;
+using Maui.Carbon.Gallery.Pages.Forms.Data;
 
 namespace Maui.Carbon.Gallery.Pages.Forms;
 
@@ -24,6 +25,9 @@ public partial class FileUploaderPage : GalleryPage
             ErrorBody = "Choose a file under 500 MB.",
         });
         InvalidUploader.Files.Add(new CdsUploadedFile("audit.log") { Status = CdsFileStatus.Complete });
+
+        // Choose a local file: the view model owns the path and its validation.
+        LocalFileExample.BindingContext = new GLocalFileForm();
     }
 
     void OnFilesAdded(object? sender, CdsFilesAddedEventArgs e)

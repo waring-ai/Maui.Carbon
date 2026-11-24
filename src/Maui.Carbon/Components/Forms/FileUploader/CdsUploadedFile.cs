@@ -16,6 +16,35 @@ public enum CdsFileStatus
     Complete,
 }
 
+/// <summary>
+/// How a <see cref="CdsFileUploader"/> gives the app access to the files people choose. The difference is on iOS and
+/// Mac Catalyst, where the system document picker grants access to a file outside the app's sandbox only through a
+/// security-scoped URL.
+/// </summary>
+public enum CdsFileAccessMode
+{
+    /// <summary>
+    /// Read each file through <see cref="CdsUploadedFile.OpenReadAsync"/> (or its <see cref="CdsUploadedFile.Result"/>):
+    /// the default, for uploads. The picker is MAUI's: on iOS and Mac Catalyst it opens the original file in place (no
+    /// copy) but holds its security-scoped access only while a stream from <c>OpenReadAsync</c> is open, so a sandboxed
+    /// app may not be able to open <see cref="CdsUploadedFile.Path"/> directly. On Android the path can be a copy in the
+    /// app's cache.
+    /// </summary>
+    Stream,
+
+    /// <summary>
+    /// Keep access to the original file at <see cref="CdsUploadedFile.Path"/>, for "choose a local file to read in place"
+    /// (an import that streams a large archive, a certificate). On iOS and Mac Catalyst the uploader opens the document
+    /// picker in open-in-place mode itself and holds each file's security-scoped access from the pick (or drop) until the
+    /// file leaves <see cref="CdsFileUploader.Files"/> (removed, replaced by a new choice, or cleared), so
+    /// <c>File.OpenRead(path)</c> and APIs that take a path work on the original, never on a copy. Open the file while it
+    /// is chosen: a stream already open keeps working after access ends, a new open does not. Access does not outlive the
+    /// app process (persisting it needs a security-scoped bookmark, which the app owns). Windows: the same as
+    /// <see cref="Stream"/> (the picker returns the original path). Android: the same as <see cref="Stream"/>.
+    /// </summary>
+    Path,
+}
+
 /// <summary>Whether a <see cref="CdsFileUploader"/> picks files with a button or a dashed drop container.</summary>
 public enum CdsFileUploaderVariant
 {
@@ -26,7 +55,10 @@ public enum CdsFileUploaderVariant
     Drop,
 }
 
-/// <summary>A file in a <see cref="CdsFileUploader"/>: its name, upload status and error. Drive <see cref="Status"/> yourself.</summary>
+/// <summary>
+/// A file in a <see cref="CdsFileUploader"/>: its name, full path, upload status and error. Drive <see cref="Status"/>
+/// yourself. Create one for a known file with <see cref="FromPath"/>.
+/// </summary>
 public sealed class CdsUploadedFile : INotifyPropertyChanged
 {
     CdsFileStatus _status = CdsFileStatus.Edit;
@@ -35,11 +67,30 @@ public sealed class CdsUploadedFile : INotifyPropertyChanged
     string? _errorBody;
     string? _name;
 
-    /// <summary>Creates a file entry.</summary>
+    /// <summary>Creates a file entry; its <see cref="Path"/> is the result's full path.</summary>
     public CdsUploadedFile(string name, FileResult? result = null)
     {
         _name = name;
         Result = result;
+        Path = result?.FullPath is { Length: > 0 } path ? path : null;
+    }
+
+    CdsUploadedFile(string name, string path, FileResult? result)
+    {
+        _name = name;
+        Result = result;
+        Path = path;
+    }
+
+    /// <summary>
+    /// Creates the entry of a file at a full path (a default the app pre-fills, a path it remembered). The name is the
+    /// path's file name. The file does not have to exist: validate it and mark the entry invalid if it is missing.
+    /// </summary>
+    public static CdsUploadedFile FromPath(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        var name = System.IO.Path.GetFileName(path);
+        return new CdsUploadedFile(string.IsNullOrEmpty(name) ? path : name, path, null);
     }
 
     /// <inheritdoc/>
@@ -48,8 +99,36 @@ public sealed class CdsUploadedFile : INotifyPropertyChanged
     /// <summary>A unique id for the entry.</summary>
     public string Id { get; } = Guid.NewGuid().ToString("N");
 
-    /// <summary>The platform file, when the entry came from the picker or a drop.</summary>
+    /// <summary>The platform file, when the entry came from the picker or a drop (<c>null</c> for <see cref="FromPath"/>).</summary>
     public FileResult? Result { get; }
+
+    /// <summary>
+    /// The file's full path, or <c>null</c> for an entry created from a name only. With
+    /// <see cref="CdsFileAccessMode.Path"/> it is the original file, readable while the entry is in the uploader.
+    /// </summary>
+    public string? Path { get; }
+
+    /// <summary>
+    /// Opens the file for reading: through <see cref="Result"/> (which holds the platform's access for the stream's
+    /// lifetime) or else from <see cref="Path"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The entry has neither a result nor a path.</exception>
+    public Task<Stream> OpenReadAsync()
+    {
+        if (Result is not null) return Result.OpenReadAsync();
+        if (Path is null) throw new InvalidOperationException($"The file entry '{Name}' has no path to read.");
+        return Task.FromResult<Stream>(File.OpenRead(Path));
+    }
+
+    /// <summary>The platform access held for the file while it is chosen (a security-scoped URL on iOS and Mac Catalyst).</summary>
+    internal IDisposable? Access { get; set; }
+
+    /// <summary>Ends the access held for the file, if any.</summary>
+    internal void ReleaseAccess()
+    {
+        Access?.Dispose();
+        Access = null;
+    }
 
     /// <summary>The file name shown in the row.</summary>
     public string? Name

@@ -3,6 +3,7 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
                xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Forms.Data"
                x:Class="Maui.Carbon.Gallery.Pages.Forms.FileUploaderPage">
     <VerticalStackLayout Spacing="48">
 
@@ -38,6 +39,18 @@
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsFileUploader x:Name="LiveUploader" LabelTitle="Attach files" LabelDescription="Pick any file; it is marked complete after a moment." FilesAdded="OnLiveAdded" FileRemoved="OnLiveRemoved" />
                 <cds:CdsText x:Name="Status" Tone="Secondary" Text="No files yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Choose a local file" Description="An MVVM form field that chooses a file to read in place rather than upload. FilePath, IsInvalid, ErrorSubject and ErrorBody are bound to the view model, which pre-fills a default path and reports a missing or unreadable file as an invalid row. AccessMode=&quot;Path&quot; keeps the original file readable at its path (no copy); once a file is chosen the button says Change file.">
+            <VerticalStackLayout x:Name="LocalFileExample" x:DataType="data:GLocalFileForm" Spacing="16" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsFileUploader LabelTitle="Domain list" LabelDescription="A .zip export. It is read in place, never unpacked or copied."
+                                     ButtonLabel="Choose file" ChosenButtonLabel="Change file" ButtonKind="Tertiary" Size="Md"
+                                     Accept=".zip" AccessMode="Path"
+                                     FilePath="{Binding ArchivePath}" IsInvalid="{Binding IsInvalid}"
+                                     ErrorSubject="{Binding ErrorSubject}" ErrorBody="{Binding ErrorBody}" />
+                <cds:CdsButton Text="Use default export" Kind="Ghost" Size="Sm" Command="{Binding UseDefaultCommand}" />
+                <cds:CdsText Tone="Secondary" Text="{Binding Summary}" />
             </VerticalStackLayout>
         </g:GalleryExample>
 
