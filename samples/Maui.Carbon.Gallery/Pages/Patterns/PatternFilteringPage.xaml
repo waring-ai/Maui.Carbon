@@ -41,7 +41,7 @@
 
                     <VerticalStackLayout Grid.Column="1" Spacing="0">
                         <cds:CdsSearch x:Name="Search" Label="Search clusters" Placeholder="Search clusters by name" Size="Lg" TextChanged="OnSearchTextChanged" />
-                        <FlexLayout x:Name="AppliedRow" Wrap="Wrap" AlignItems="Center" Margin="0,16,0,8" MinimumHeightRequest="40" />
+                        <g:WrapLayout x:Name="AppliedRow" AlignItems="Center" Margin="0,16,0,8" MinimumHeightRequest="40" />
                         <cds:CdsDataTable x:Name="ResultsTable" Label="Clusters, filtered" Size="Md" IsSortable="True" />
                     </VerticalStackLayout>
                 </Grid>

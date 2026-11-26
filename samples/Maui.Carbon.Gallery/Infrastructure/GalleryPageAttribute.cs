@@ -8,6 +8,7 @@ public enum GalleryCategory
     Forms,
     FluidForms,
     Data,
+    Charts,
     Navigation,
     Containers,
     Overlays,

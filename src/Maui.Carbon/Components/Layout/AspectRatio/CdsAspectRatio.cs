@@ -68,6 +68,8 @@ public class CdsAspectRatio : Layout
     public CdsAspectRatio()
     {
         IsClippedToBounds = true;
+        // In a row of boxes (a horizontal stack, a grid row) a Fill box would be stretched to the tallest neighbour.
+        VerticalOptions = LayoutOptions.Start;
     }
 
     /// <summary>The named ratio. Default <see cref="CdsRatio.Ratio1x1"/>.</summary>
@@ -112,8 +114,12 @@ sealed class CdsAspectRatioLayoutManager(CdsAspectRatio box) : LayoutManager(box
 
     public override Size ArrangeChildren(Rect bounds)
     {
+        // The ratio holds whatever height the parent hands out: children fill a box the given width wide and as tall as
+        // the ratio makes it, so a box a parent stretches (VerticalOptions="Fill") keeps its shape.
+        var height = Math.Min(bounds.Height, CdsAspectRatioModel.HeightFor(bounds.Width, box.EffectiveRatio));
+        var frame = new Rect(bounds.X, bounds.Y, bounds.Width, height);
         foreach (var child in box.Where(c => c.Visibility != Visibility.Collapsed))
-            child.Arrange(bounds);
-        return bounds.Size;
+            child.Arrange(frame);
+        return new Size(bounds.Width, height);
     }
 }

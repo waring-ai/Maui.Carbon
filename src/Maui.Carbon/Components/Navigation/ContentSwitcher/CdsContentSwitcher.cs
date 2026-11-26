@@ -59,6 +59,8 @@ public class CdsContentSwitcher : CdsControl
     public CdsContentSwitcher()
     {
         _frame.Content = _grid;
+        // Text switchers fill the width offered (see Rebuild); icon-only ones hug their segments.
+        HorizontalOptions = LayoutOptions.Start;
         SetChrome(_frame);
         _roving.CanFocus = i => i >= 0 && i < _items.Count && _items[i].IsEnabled;
         _roving.PreferredIndex = () => _applied;
@@ -190,7 +192,7 @@ public class CdsContentSwitcher : CdsControl
                 _grid.Add(view);
             }
             _grid.FixedCellWidth = IsIconOnly ? height : -1;
-            HorizontalOptions = IsIconOnly ? LayoutOptions.Start : LayoutOptions.Fill;
+            SetChrome(_frame, fillsWidth: !IsIconOnly);
             _frame.HeightRequest = height;
             CdsSemantics.SetGroup(_frame, Label, CdsSemanticGroupKind.List);
             var coerced = _items.Count == 0 ? -1 : Math.Clamp(SelectedIndex, 0, _items.Count - 1);

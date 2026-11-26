@@ -37,6 +37,45 @@ Links below are relative to this file in the repository. When copying the skill 
 | MenuButton | `CdsMenuButton` | [source](../../../src/Maui.Carbon/Components/Actions/MenuButton/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Actions/) |
 | OverflowMenu | `CdsOverflowMenu` | [source](../../../src/Maui.Carbon/Components/Actions/OverflowMenu/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Actions/) |
 
+## Charts
+
+Every chart takes `Data` (mostly `CdsChartPoint`s: Group, Key, Date, X, Value, Low/High, Size; hierarchy, flow, network, bullet, map and parallel charts have their own item types), a `Title`, legend, toolbar and tooltip options, and `HeightRequest` for the whole chart (default 400). Axis charts take `LeftAxis`/`BottomAxis`/`RightAxis`/`TopAxis` (`CdsChartAxis`): the labels or time axis is the domain; put the labels axis on the left for horizontal charts. Choose a chart with `design/carbon/choosing-components.md` (Charts) and `design/carbon/data-visualization.md`.
+
+| Family | Components and companion types | Source | Gallery |
+|---|---|---|---|
+| Shared | `CdsChartPoint`, `CdsChartAxis`, `CdsChartThreshold`, `CdsChartExportingEventArgs`, `CdsChartSelectedGroupsChangedEventArgs` (bases: `CdsChart`, `CdsCartesianChart`) | [source](../../../src/Maui.Carbon/Components/Charts/Core/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| AlluvialChart | `CdsAlluvialChart`, `CdsAlluvialLink`, `CdsAlluvialNode` | [source](../../../src/Maui.Carbon/Components/Charts/AlluvialChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| AreaChart | `CdsAreaChart` | [source](../../../src/Maui.Carbon/Components/Charts/AreaChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| BoxplotChart | `CdsBoxplotChart` | [source](../../../src/Maui.Carbon/Components/Charts/BoxplotChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| BubbleChart | `CdsBubbleChart` | [source](../../../src/Maui.Carbon/Components/Charts/BubbleChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| BulletChart | `CdsBulletChart`, `CdsBulletChartItem` | [source](../../../src/Maui.Carbon/Components/Charts/BulletChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ChoroplethChart | `CdsChoroplethChart`, `CdsGeoBounds` | [source](../../../src/Maui.Carbon/Components/Charts/ChoroplethChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| CirclePackChart | `CdsCirclePackChart` | [source](../../../src/Maui.Carbon/Components/Charts/CirclePackChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ComboChart | `CdsComboChart`, `CdsComboChartType` | [source](../../../src/Maui.Carbon/Components/Charts/ComboChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ConnectionMap | `CdsConnectionMap`, `CdsGeoConnection` | [source](../../../src/Maui.Carbon/Components/Charts/ConnectionMap/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| DonutChart | `CdsDonutChart` | [source](../../../src/Maui.Carbon/Components/Charts/DonutChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| GaugeChart | `CdsGaugeChart` | [source](../../../src/Maui.Carbon/Components/Charts/GaugeChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| GroupedBarChart | `CdsGroupedBarChart` | [source](../../../src/Maui.Carbon/Components/Charts/GroupedBarChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| HeatmapChart | `CdsHeatmapChart` | [source](../../../src/Maui.Carbon/Components/Charts/HeatmapChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| Hierarchy | `CdsChartNode` | [source](../../../src/Maui.Carbon/Components/Charts/Hierarchy/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| HistogramChart | `CdsHistogramChart` | [source](../../../src/Maui.Carbon/Components/Charts/HistogramChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| LineChart | `CdsLineChart` | [source](../../../src/Maui.Carbon/Components/Charts/LineChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| LollipopChart | `CdsLollipopChart` | [source](../../../src/Maui.Carbon/Components/Charts/LollipopChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| MeterChart | `CdsMeterChart`, `CdsMeterStatusRange` | [source](../../../src/Maui.Carbon/Components/Charts/MeterChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| NetworkDiagram | `CdsNetworkDiagram`, `CdsNetworkEdge`, `CdsNetworkNode` | [source](../../../src/Maui.Carbon/Components/Charts/NetworkDiagram/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ParallelCoordinatesChart | `CdsParallelCoordinatesChart`, `CdsParallelDimension`, `CdsParallelFilter`, `CdsParallelRecord` | [source](../../../src/Maui.Carbon/Components/Charts/ParallelCoordinatesChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| PieChart | `CdsPieChart` | [source](../../../src/Maui.Carbon/Components/Charts/PieChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ProportionalSymbolMap | `CdsGeoPoint`, `CdsProportionalSymbolMap` | [source](../../../src/Maui.Carbon/Components/Charts/ProportionalSymbolMap/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| RadarChart | `CdsRadarChart` | [source](../../../src/Maui.Carbon/Components/Charts/RadarChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| ScatterChart | `CdsScatterChart` | [source](../../../src/Maui.Carbon/Components/Charts/ScatterChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| SimpleBarChart | `CdsSimpleBarChart` | [source](../../../src/Maui.Carbon/Components/Charts/SimpleBarChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| SparklineChart | `CdsSparklineChart` | [source](../../../src/Maui.Carbon/Components/Charts/SparklineChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| StackedAreaChart | `CdsStackedAreaChart` | [source](../../../src/Maui.Carbon/Components/Charts/StackedAreaChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| StackedBarChart | `CdsStackedBarChart` | [source](../../../src/Maui.Carbon/Components/Charts/StackedBarChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| TreeChart | `CdsTreeChart` | [source](../../../src/Maui.Carbon/Components/Charts/TreeChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| TreemapChart | `CdsTreemapChart` | [source](../../../src/Maui.Carbon/Components/Charts/TreemapChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| WordCloudChart | `CdsWordCloudChart` | [source](../../../src/Maui.Carbon/Components/Charts/WordCloudChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+
 ## Containers
 
 | Family | Components and companion types | Source | Gallery |

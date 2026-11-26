@@ -98,6 +98,9 @@ public partial class CdsSlider : CdsControl
     /// <inheritdoc/>
     protected internal override bool WantsNavigationKeys => true;
 
+    /// <summary>The message row under the slider (for tests).</summary>
+    internal CdsFormMessage Message => _message;
+
     /// <inheritdoc/>
     protected internal override bool OnKeyDown(CdsKeyEventArgs e)
     {
@@ -134,7 +137,9 @@ public partial class CdsSlider : CdsControl
         ApplyBox(_lowerBox, _lowerEntry, boxState, SliderHandle.Lower);
         ApplyBox(_upperBox, _upperEntry, boxState, SliderHandle.Upper);
 
-        var message = CdsFormMessageResolver.Resolve(boxState, null, InvalidText, WarnText);
+        // The status icon belongs to the number box; the message under the slider is text only (Carbon's
+        // cds--slider__validation-msg has no icon).
+        var message = CdsFormMessageResolver.Resolve(boxState, null, InvalidText, WarnText) with { Icon = null, IconColor = null };
         _message.Apply(message);
         AnnounceInvalid(message);
 

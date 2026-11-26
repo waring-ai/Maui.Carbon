@@ -183,7 +183,9 @@ public class CdsHeaderMenu : CdsShellItem
         var sideNav = _presentation == CdsShellPresentation.SideNav;
         _label.TypeStyle = sideNav ? CdsTypeStyle.HeadingCompact01 : CdsTypeStyle.BodyCompact01;
         _triggerRow.HeightRequest = sideNav ? UIShellModel.SideNavRowHeight : UIShellModel.HeaderHeight;
-        HorizontalOptions = sideNav ? LayoutOptions.Fill : LayoutOptions.Start;
+        // In the side nav the menu is a full-width row; in the header it hugs its label. Decided while measuring, so the
+        // app's HorizontalOptions are never overwritten.
+        SetChrome(_root, fillsWidth: sideNav);
         _inline.IsVisible = sideNav && IsExpanded;
         SemanticProperties.SetDescription(_hit, Label);
         SemanticProperties.SetHint(_hit, MenuLabel ?? Label);

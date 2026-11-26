@@ -14,11 +14,11 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Toast layout" Description="288 wide with a shadow; the tertiary action sits under the text, aligned with the title. It stays until dismissed.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <cds:CdsActionableNotification Kind="Error" Role="Status" HasFocus="False" Title="Node unreachable" Subtitle="worker-3 stopped responding." Caption="2 minutes ago" ActionButtonLabel="Restart node" Margin="0,0,24,24" />
                 <cds:CdsActionableNotification Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Disk almost full" Subtitle="orders-db is at 91% of 500 GB." Caption="Just now" ActionButtonLabel="Add storage" Margin="0,0,24,24" />
                 <cds:CdsActionableNotification Kind="Success" IsLowContrast="True" Role="Status" HasFocus="False" Title="Import complete" Subtitle="1,204 records were added." ActionButtonLabel="View records" Margin="0,0,24,24" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Interactive" Description="ActionClicked fires on the action; the default role is alertdialog, which moves focus to the action unless HasFocus is false.">
@@ -33,8 +33,8 @@
                 <g:ThemeStrip.Template>
                     <DataTemplate>
                         <VerticalStackLayout Spacing="16">
-                            <cds:CdsActionableNotification Kind="Error" Role="Status" HasFocus="False" Title="Node unreachable" Subtitle="worker-3 stopped." ActionButtonLabel="Restart node" WidthRequest="240" MaximumWidthRequest="240" />
-                            <cds:CdsActionableNotification Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Disk almost full" Subtitle="91% of 500 GB." ActionButtonLabel="Add storage" WidthRequest="240" MaximumWidthRequest="240" />
+                            <cds:CdsActionableNotification Kind="Error" Role="Status" HasFocus="False" Title="Node unreachable" Subtitle="worker-3 stopped." ActionButtonLabel="Restart node" />
+                            <cds:CdsActionableNotification Kind="Warning" IsLowContrast="True" Role="Status" HasFocus="False" Title="Disk almost full" Subtitle="91% of 500 GB." ActionButtonLabel="Add storage" />
                         </VerticalStackLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>

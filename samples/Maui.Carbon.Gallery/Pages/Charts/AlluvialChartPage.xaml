@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.AlluvialChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Categorised columns with units" Description="Column headers come from each node's category; links take their source's color at 80%. Hover a link to raise it, or a node to raise every path through it.">
+            <cds:CdsAlluvialChart x:Name="Interactive" Title="Leads by source, stage and outcome (Q3)" Data="{x:Static data:PackageDSamples.Leads}" Nodes="{x:Static data:PackageDSamples.LeadNodes}" Units="leads" HeightRequest="460" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Monochrome and gradient links" Description="IsMonochrome gives every link the first palette color; IsGradientEnabled fades each link from its source to its target color in ColorScale.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsAlluvialChart Title="Leads, monochrome links" Data="{x:Static data:PackageDSamples.Leads}" Nodes="{x:Static data:PackageDSamples.LeadNodes}" Units="leads" IsMonochrome="True" />
+                <cds:CdsAlluvialChart Grid.Column="1" Title="Electricity generation to demand (TWh)" Data="{x:Static data:PackageDSamples.Energy}" Nodes="{x:Static data:PackageDSamples.EnergyNodes}" Units="TWh" IsGradientEnabled="True" ColorScale="{x:Static data:PackageDSamples.EnergyColors}" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                </HorizontalStackLayout>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                    <cds:CdsAlluvialChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                    <cds:CdsAlluvialChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageDSamples.NoLinks}" HeightRequest="300" />
+                </Grid>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsAlluvialChart Title="Electricity (TWh)" Data="{x:Static data:PackageDSamples.Energy}" Nodes="{x:Static data:PackageDSamples.EnergyNodes}" Units="TWh" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsAlluvialChart Title="Electricity (TWh)" Data="{x:Static data:PackageDSamples.Energy}" Nodes="{x:Static data:PackageDSamples.EnergyNodes}" Units="TWh" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

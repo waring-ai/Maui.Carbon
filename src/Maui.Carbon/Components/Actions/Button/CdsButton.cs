@@ -5,7 +5,8 @@ namespace Maui.Carbon;
 /// <summary>
 /// Triggers an action. Use one <see cref="CdsButtonKind.Primary"/> button per view, <c>Secondary</c> or <c>Tertiary</c>
 /// for supporting actions, <c>Ghost</c> for low emphasis and the danger kinds for destructive steps. Labels are
-/// left-aligned; the icon is pinned to the end edge. Buttons are square and at most 320 wide.
+/// left-aligned; the icon is pinned to the end edge. Buttons are square and at most 320 wide, except that
+/// <c>HorizontalOptions="Fill"</c> makes a full-width button (login forms, modal footers) with no maximum.
 /// </summary>
 public partial class CdsButton : CdsControl
 {
@@ -17,6 +18,7 @@ public partial class CdsButton : CdsControl
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap };
     readonly CdsIcon _icon = new() { IsVisible = false };
     readonly CdsHitTarget _hit;
+    readonly CdsButtonOutline _outline = new();
     CdsFocusRing _ring;
 
     /// <summary>Creates a large primary button.</summary>
@@ -33,10 +35,11 @@ public partial class CdsButton : CdsControl
         _hit = CreateHitTarget();
         _ring = new CdsFocusRing(CdsFocusRingStyle.Button);
         _root.Add(_box);
+        _root.Add(_outline);
         _root.Add(_ring);
         _root.Add(_hit);
-        _root.MaximumWidthRequest = MaxWidth;
         HorizontalOptions = LayoutOptions.Start;
+        UpdateMaxWidth();
 
         SetChrome(_root);
         UpdateLayout();
@@ -48,6 +51,19 @@ public partial class CdsButton : CdsControl
         Text = text;
         Kind = kind;
     }
+
+    /// <inheritdoc/>
+    protected override void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+    {
+        base.OnPropertyChanged(propertyName);
+        if (propertyName == HorizontalOptionsProperty.PropertyName) UpdateMaxWidth();
+    }
+
+    // A button is at most 20rem wide (inline-size: max-content; max-inline-size: 20rem). An app that fills a button asks for a
+    // full-width one (Carbon's inline-size: 100%; max-inline-size: none in login forms, modal footers and fluid sets): the
+    // cap would stop it short and MAUI would centre it in the space.
+    void UpdateMaxWidth() =>
+        _root.MaximumWidthRequest = HorizontalOptions.Alignment == LayoutAlignment.Fill ? double.PositiveInfinity : MaxWidth;
 
     /// <summary>Raised on activation (click, tap, Enter or Space), before <see cref="Command"/> runs.</summary>
     public event EventHandler? Clicked;
@@ -68,8 +84,13 @@ public partial class CdsButton : CdsControl
         var state = State;
         if (IsSelected == true) state |= CdsInteractionState.Selected;
         var v = CdsButtonTokens.Resolve(Kind, state);
-        SetColor(_box, BackgroundColorProperty, v.Background);
-        SetBrush(_box, Border.StrokeProperty, v.Border);
+        // The fill goes on the root, which covers the whole box: on Mac Catalyst a Border paints its background and stroke
+        // half a point inside its frame, so a filled face drew 1pt smaller than its layout box (a 2pt gap in combo buttons).
+        SetColor(_root, BackgroundColorProperty, v.Background);
+        // The outline is drawn by hairlines on the box edge, for the same reason; the Border keeps its 1px (transparent)
+        // stroke so the label and icon keep their inset.
+        SetBrush(_box, Border.StrokeProperty, null);
+        SetColor(_outline, CdsButtonOutline.ColorProperty, v.Border);
         SetColor(_label, Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);

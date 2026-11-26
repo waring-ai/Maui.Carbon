@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.SimpleBarChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="One bar per category, from zero. Each point's group is its legend item and color; bars are at most 16px thick.">
+            <cds:CdsSimpleBarChart Title="Units by stock status (vertical)" Data="{x:Static data:ChartSamples.Sales}">
+                <cds:CdsSimpleBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Units" />
+                </cds:CdsSimpleBarChart.LeftAxis>
+                <cds:CdsSimpleBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsSimpleBarChart.BottomAxis>
+            </cds:CdsSimpleBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal" Description="Put the labels axis on the left and the value axis at the bottom.">
+            <cds:CdsSimpleBarChart Title="Units by stock status (horizontal)" Data="{x:Static data:ChartSamples.Sales}">
+                <cds:CdsSimpleBarChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsSimpleBarChart.LeftAxis>
+                <cds:CdsSimpleBarChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Units" />
+                </cds:CdsSimpleBarChart.BottomAxis>
+            </cds:CdsSimpleBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Floating bars" Description="Points with Low and High span a range instead of starting at zero.">
+            <cds:CdsSimpleBarChart Title="Daily temperature range (floating bars)" Data="{x:Static data:ChartSamples.Temperatures}">
+                <cds:CdsSimpleBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="°C" />
+                </cds:CdsSimpleBarChart.LeftAxis>
+                <cds:CdsSimpleBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsSimpleBarChart.BottomAxis>
+            </cds:CdsSimpleBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Negative values and a threshold" Description="Negative bars grow down from the zero line. ColorScale gives every bar one color when the bars are one measure; the dashed threshold names its value on hover.">
+            <cds:CdsSimpleBarChart Title="Net change in subscribers, with a target" Data="{x:Static data:ChartSamples.SubscriberChange}"
+                                   ColorScale="{x:Static data:ChartSamples.OneColor}" IsLegendEnabled="False">
+                <cds:CdsSimpleBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Subscribers">
+                        <cds:CdsChartAxis.Thresholds>
+                            <cds:CdsChartThreshold Value="4000" Label="Target" />
+                        </cds:CdsChartAxis.Thresholds>
+                    </cds:CdsChartAxis>
+                </cds:CdsSimpleBarChart.LeftAxis>
+                <cds:CdsSimpleBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" Title="Month" />
+                </cds:CdsSimpleBarChart.BottomAxis>
+            </cds:CdsSimpleBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate series (click more to add, the last to reset). Tab to the graph and use the arrow keys to move through the bars; Show as table lists every value.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsSimpleBarChart x:Name="Interactive" Title="Units by stock status" Data="{x:Static data:ChartSamples.Sales}"
+                                       SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsSimpleBarChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsSimpleBarChart Grid.Column="1" Title="No data" Data="{x:Static data:ChartSamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Grid, axes, labels and the pairing palette follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSimpleBarChart Title="Units" Data="{x:Static data:ChartSamples.Sales}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop and surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsSimpleBarChart Title="Units" Data="{x:Static data:ChartSamples.Sales}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

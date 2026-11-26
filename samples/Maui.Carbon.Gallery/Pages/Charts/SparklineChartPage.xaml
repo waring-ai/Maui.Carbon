@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.SparklineChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="In cards" Description="No axes, grid, legend, toolbar or points; the backdrop is transparent so the sparkline sits on its card. The area type fades the series color from 60%; the line type draws the line alone; ColorPairingOption picks another single-series color.">
+<Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="32" RowSpacing="32">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart Title="Revenue, last 30 days (k USD)" Data="{x:Static data:PackageBSamples.Revenue}" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+<ContentView Grid.Column="1">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart Title="Errors per day" Data="{x:Static data:PackageBSamples.Errors}" Type="Line" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+</ContentView>
+<ContentView Grid.Row="1">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart Title="Sign-ups per day" Data="{x:Static data:PackageBSamples.SignUps}" ColorPairingOption="3" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+</ContentView>
+<ContentView Grid.Row="1" Grid.Column="1">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart Title="Loading" IsLoading="True" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+</ContentView>
+</Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Next to its number" Description="Pair the sparkline with the current value and unit as text: the sparkline only shows shape. Hover for the dashed ruler with the date and value.">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<Grid ColumnDefinitions="Auto,*" ColumnSpacing="24">
+<VerticalStackLayout Spacing="4" VerticalOptions="Center">
+<cds:CdsText Text="Revenue today" TypeStyle="Label01" Tone="Secondary" />
+<cds:CdsText x:Name="RevenueValue" TypeStyle="Heading04" />
+</VerticalStackLayout>
+<cds:CdsSparklineChart x:Name="RevenueTrend" Grid.Column="1" Data="{x:Static data:PackageBSamples.Revenue}" Curve="MonotoneX" HeightRequest="80" />
+</Grid>
+</Grid>
+</cds:CdsLayer>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Switch the type, or turn the ruler off for purely decorative use.">
+<VerticalStackLayout Spacing="16">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart x:Name="Interactive" Title="Sign-ups per day" Data="{x:Static data:PackageBSamples.SignUps}" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+<HorizontalStackLayout Spacing="16">
+<cds:CdsButton Text="Toggle type" Kind="Tertiary" Size="Sm" Clicked="OnTypeClicked" />
+<cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+<cds:CdsText x:Name="Status" Text="Area, ruler on" VerticalTextAlignment="Center" />
+</HorizontalStackLayout>
+</VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Empty" Description="Empty data shows one horizontal line across the middle.">
+<cds:CdsLayer WithBackground="True">
+<Grid Padding="16">
+<cds:CdsSparklineChart Title="No data yet" Data="{x:Static data:PackageBSamples.Empty}" HeightRequest="120" />
+</Grid>
+</cds:CdsLayer>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The gradient and line take each theme's single-series color.">
+<g:ThemeStrip>
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsSparklineChart Title="Revenue" Data="{x:Static data:PackageBSamples.Revenue}" HeightRequest="120" />
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="The transparent backdrop lets the layer show through.">
+<g:ThemeStrip Layered="True">
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsSparklineChart Title="Revenue" Data="{x:Static data:PackageBSamples.Revenue}" HeightRequest="120" />
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

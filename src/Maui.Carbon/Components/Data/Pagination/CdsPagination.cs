@@ -18,7 +18,7 @@ public partial class CdsPagination : CdsControl
     readonly CdsText _perPageText = new() { TypeStyle = CdsTypeStyle.BodyCompact01, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, 1, 0), LineBreakMode = LineBreakMode.NoWrap };
     readonly CdsSelect _sizeSelect = new() { IsInline = true, HideLabel = true, VerticalOptions = LayoutOptions.Fill, MinimumWidthRequest = 72 };
     readonly BoxView _sizeDivider = new() { WidthRequest = 1, InputTransparent = true };
-    readonly CdsText _rangeText = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.Secondary, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0), LineBreakMode = LineBreakMode.NoWrap };
+    readonly CdsText _rangeText = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.Secondary, VerticalOptions = LayoutOptions.Center, Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0), LineBreakMode = LineBreakMode.NoWrap, HorizontalOptions = LayoutOptions.Start };
     readonly BoxView _rightDivider = new() { WidthRequest = 1, InputTransparent = true };
     readonly CdsSelect _pageSelect = new() { IsInline = true, HideLabel = true, VerticalOptions = LayoutOptions.Fill, MinimumWidthRequest = 72 };
     readonly CdsNativeEntry _pageEntry = new() { Keyboard = Keyboard.Numeric, HorizontalTextAlignment = TextAlignment.Center, WidthRequest = 56, VerticalOptions = LayoutOptions.Center, IsVisible = false };
@@ -181,9 +181,29 @@ public partial class CdsPagination : CdsControl
         _syncing = false;
     }
 
-    void UpdateCompact()
+    /// <inheritdoc/>
+    protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
     {
-        var compact = CdsPaginationTokens.IsCompact(Width);
+        // Switch before the groups are measured: switching from SizeChanged left them measured at their old widths, so
+        // the arrows were drawn over the range.
+        var width = WidthRequest >= 0 ? Math.Min(WidthRequest, widthConstraint) : widthConstraint;
+        width = Math.Min(width, MaximumWidthRequest) - Margin.HorizontalThickness;
+        if (width > 0 && !double.IsInfinity(width))
+        {
+            SetCompact(CdsPaginationTokens.IsCompact(width));
+            // The range sits in a stack, which measures it unconstrained: cap it so a long range truncates in a narrow
+            // bar instead of squeezing the arrows.
+            var cap = CdsPaginationTokens.CompactRangeWidth(_compact, width, CdsPaginationTokens.Height(CdsPaginationTokens.Coerce(Size)), _rangeText.Margin.HorizontalThickness);
+            if (Math.Abs(_rangeText.MaximumWidthRequest - cap) > 0.5 && !(double.IsPositiveInfinity(cap) && double.IsPositiveInfinity(_rangeText.MaximumWidthRequest)))
+                _rangeText.MaximumWidthRequest = cap;
+        }
+        return base.MeasureOverride(widthConstraint, heightConstraint);
+    }
+
+    void UpdateCompact() => SetCompact(CdsPaginationTokens.IsCompact(Width));
+
+    void SetCompact(bool compact)
+    {
         if (compact == _compact) return;
         _compact = compact;
         UpdateAll();
@@ -252,7 +272,11 @@ public partial class CdsPagination : CdsControl
         _pageEntry.IsVisible &= !_compact;
         _pageText.IsVisible &= !_compact;
         _pageRangeText.IsVisible &= !_compact;
-        _rangeText.Margin = new Thickness(_compact ? CdsSpacing.Spacing05 : CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0);
+        _rightDivider.IsVisible = !_compact; // the back button draws its own start border
+        // Compact: the range takes the free width and the arrows sit at the end.
+        _root.ColumnDefinitions[0].Width = _compact ? GridLength.Star : GridLength.Auto;
+        _root.ColumnDefinitions[1].Width = _compact ? new GridLength(0) : GridLength.Star;
+        _rangeText.LineBreakMode = _compact ? LineBreakMode.TailTruncation : LineBreakMode.NoWrap;
 
         SyncSelects(count);
         RefreshAttachment();

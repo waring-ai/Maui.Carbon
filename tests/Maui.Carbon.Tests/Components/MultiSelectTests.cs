@@ -240,4 +240,17 @@ public class MultiSelectTests
         Assert.True(multi.IsRowChosen(multi.AllRows[2]));
         Assert.False(multi.IsRowChosen(multi.AllRows[0]));
     }
+
+    [Fact]
+    public void Read_only_keeps_the_high_contrast_tag_but_blocks_clearing()
+    {
+        var multi = new CdsMultiSelect { Label = "Notify me about", ItemsSource = Statuses, SelectedItems = new List<string> { "Failed", "Queued" }, IsReadOnly = true };
+        var tag = (CdsListBoxSelectionTag)typeof(CdsMultiSelect).GetField("_tag", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(multi)!;
+        Assert.False(tag.Muted);
+        Assert.True(tag.IsReadOnly);
+        multi.IsReadOnly = false;
+        multi.IsEnabled = false;
+        Assert.True(tag.Muted);
+        Assert.False(tag.IsReadOnly);
+    }
 }

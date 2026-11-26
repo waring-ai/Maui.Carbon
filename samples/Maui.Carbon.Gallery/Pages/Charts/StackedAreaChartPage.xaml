@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.StackedAreaChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Stacked over time" Description="Groups stack in data order from the bottom; the top edge is the total. The ruler tooltip lists each source's raw value and the total.">
+<cds:CdsStackedAreaChart Title="Electricity generation by source" Data="{x:Static data:PackageBSamples.Generation}">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" Title="2024" />
+</cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsStackedAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Generation (TWh)" />
+</cds:CdsStackedAreaChart.LeftAxis>
+</cds:CdsStackedAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="100% stacked" Description="IsPercentage on the value axis rescales every month to its share; the axis is fixed to 0 to 100.">
+<cds:CdsStackedAreaChart Title="Generation mix (100% stacked)" Data="{x:Static data:PackageBSamples.Generation}">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsStackedAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Share of generation (%)" IsPercentage="True" />
+</cds:CdsStackedAreaChart.LeftAxis>
+</cds:CdsStackedAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Curved bands on a labels axis" Description="Curve MonotoneX smooths the bands without overshooting the data.">
+<cds:CdsStackedAreaChart Title="Open tickets by priority this week" Data="{x:Static data:PackageBSamples.Tickets}" Curve="MonotoneX">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Labels" />
+</cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsStackedAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Tickets" />
+</cds:CdsStackedAreaChart.LeftAxis>
+</cds:CdsStackedAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate sources: the rest restack from the bottom. Tab to the graph and use the arrow keys to step through the months.">
+<VerticalStackLayout Spacing="16">
+<cds:CdsStackedAreaChart x:Name="Interactive" Title="Electricity generation by source" Data="{x:Static data:PackageBSamples.Generation}" SelectedGroupsChanged="OnSelectedGroupsChanged">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsStackedAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Generation (TWh)" />
+</cds:CdsStackedAreaChart.LeftAxis>
+</cds:CdsStackedAreaChart>
+<HorizontalStackLayout Spacing="16">
+<cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+<cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+</HorizontalStackLayout>
+</VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading state" Description="IsLoading shows the shimmering grid skeleton.">
+<cds:CdsStackedAreaChart Title="Loading state" IsLoading="True" HeightRequest="300" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The bands take the four-color pairing of each theme.">
+<g:ThemeStrip>
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsStackedAreaChart Title="Generation" Data="{x:Static data:PackageBSamples.Generation}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsStackedAreaChart.BottomAxis>
+</cds:CdsStackedAreaChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop steps up with it.">
+<g:ThemeStrip Layered="True">
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsStackedAreaChart Title="Generation" Data="{x:Static data:PackageBSamples.Generation}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsStackedAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsStackedAreaChart.BottomAxis>
+</cds:CdsStackedAreaChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

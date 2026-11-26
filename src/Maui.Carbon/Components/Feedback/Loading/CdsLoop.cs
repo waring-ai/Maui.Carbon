@@ -18,6 +18,17 @@ internal static class CdsLoop
     static readonly ConditionalWeakTable<VisualElement, Dictionary<string, Loop>> Running = new();
     static readonly ConditionalWeakTable<IAnimationManager, Clock> Clocks = new();
 
+    static CdsLoop() => CdsMeter.ObserveActiveLoops(CountRunning);
+
+    // For CdsMetrics.ActiveLoops: read from the listener's thread, so a count taken mid-change may be off by one.
+    static int CountRunning()
+    {
+        var count = 0;
+        foreach (var (_, clock) in Clocks)
+            if (!clock.HasFinished) count += clock.Count;
+        return count;
+    }
+
     /// <summary>Starts a looping animation on <paramref name="owner"/> (a no-op without a platform handler).</summary>
     /// <param name="owner">The element that owns the animation (and its lifetime).</param>
     /// <param name="name">Animation name; one loop per name and owner.</param>
@@ -98,6 +109,8 @@ internal static class CdsLoop
         Loop[] _snapshot = [];
         bool _changed;
 
+        public int Count => _loops.Count;
+
         public void Add(Loop loop)
         {
             _loops.Add(loop);
@@ -115,6 +128,7 @@ internal static class CdsLoop
 
         protected override void OnTick(double millisecondsSinceLastUpdate)
         {
+            var start = CdsMeter.Start(CdsMeter.LoopTick);
             // A callback may start or stop loops; iterate a snapshot and skip the ones stopped meanwhile.
             if (_changed)
             {
@@ -123,6 +137,7 @@ internal static class CdsLoop
             }
             foreach (var loop in _snapshot)
                 if (!loop.IsStopped) loop.Advance(millisecondsSinceLastUpdate);
+            CdsMeter.Stop(CdsMeter.LoopTick, start);
         }
     }
 }

@@ -304,4 +304,33 @@ public class DataTableModelTests
         m.SetSort("name", CdsSortDirection.Ascending);
         Assert.True(m.IsExpanded("a"));
     }
+
+    // ----- batch bar -----
+
+    [Fact]
+    public void Batch_actions_keep_their_labels_while_the_bar_has_room()
+    {
+        Assert.False(DataTableModel.BatchIconsOnly(800, "1 item selected", [("Restart", true), ("Delete", true)]));
+    }
+
+    [Fact]
+    public void Batch_actions_drop_their_labels_for_icons_in_a_narrow_bar()
+    {
+        Assert.True(DataTableModel.BatchIconsOnly(186, "1 item selected", [("Restart", true)]));
+    }
+
+    [Fact]
+    public void Batch_actions_without_icons_always_keep_their_labels()
+    {
+        Assert.False(DataTableModel.BatchIconsOnly(186, "1 item selected", [("Restart", false)]));
+    }
+
+    [Fact]
+    public void Body_compact_text_is_measured_with_its_tracking()
+    {
+        Assert.Equal(0, DataTableModel.BodyCompactWidth(null));
+        var cancel = DataTableModel.BodyCompactWidth("Cancel");
+        Assert.InRange(cancel, 40, 50);
+        Assert.True(DataTableModel.BodyCompactWidth("1 item selected") > cancel);
+    }
 }

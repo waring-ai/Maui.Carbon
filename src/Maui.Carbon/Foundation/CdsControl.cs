@@ -1,7 +1,7 @@
 namespace Maui.Carbon;
 
 /// <summary>
-/// Base class of interactive Carbon controls. A control builds its own visual tree with <see cref="SetChrome"/>,
+/// Base class of interactive Carbon controls. A control builds its own visual tree with <see cref="SetChrome(View)"/>,
 /// tracks its <see cref="State"/> (hover, pressed, focus, disabled, selection, validation), and re-applies token
 /// colors in <see cref="ApplyVisuals"/> whenever the state changes. Interaction comes from a <see cref="CdsHitTarget"/>
 /// (see <see cref="CreateHitTarget"/>) or a native input (see <see cref="TrackFocus"/>).
@@ -48,6 +48,7 @@ public abstract class CdsControl : ContentView, IView
     bool _forwardedGroup;
     bool _forwardsOnLoad;
     Semantics? _platformSemantics;
+    CdsMaxWidthBox? _fillBox;
 
     /// <summary>Initializes the control: context tracking.</summary>
     protected CdsControl()
@@ -137,10 +138,32 @@ public abstract class CdsControl : ContentView, IView
     /// <inheritdoc/>
     protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
     {
-        var size = base.MeasureOverride(widthConstraint, heightConstraint);
-        // ContentView measures its content even when that content is hidden, so a control that hides its chrome (the header
-        // navigation below lg) would keep its old size in an Auto row or column. Hidden chrome takes no space.
-        return Content is { IsVisible: false } ? Size.Zero : size;
+        var start = CdsMeter.Start(CdsMeter.Measure);
+        try
+        {
+            var size = base.MeasureOverride(widthConstraint, heightConstraint);
+            // ContentView measures its content even when that content is hidden, so a control that hides its chrome (the
+            // header navigation below lg) would keep its old size in an Auto row or column. Hidden chrome takes no space.
+            return Content is { IsVisible: false } ? Size.Zero : size;
+        }
+        finally
+        {
+            CdsMeter.Stop(CdsMeter.Measure, start, this);
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override Size ArrangeOverride(Rect bounds)
+    {
+        var start = CdsMeter.Start(CdsMeter.Arrange);
+        try
+        {
+            return base.ArrangeOverride(bounds);
+        }
+        finally
+        {
+            CdsMeter.Stop(CdsMeter.Arrange, start, this);
+        }
     }
 
     /// <summary>Re-applies token colors and other state-driven visuals. Called on every state change.</summary>
@@ -157,7 +180,21 @@ public abstract class CdsControl : ContentView, IView
             return;
         }
         _visualsApplied = true;
-        ApplyVisuals();
+        ApplyVisualsMeasured();
+    }
+
+    // Every ApplyVisuals goes through here, so CdsMetrics.VisualsDuration counts them all.
+    void ApplyVisualsMeasured()
+    {
+        var start = CdsMeter.Start(CdsMeter.Visuals);
+        try
+        {
+            ApplyVisuals();
+        }
+        finally
+        {
+            CdsMeter.Stop(CdsMeter.Visuals, start, this);
+        }
     }
 
     /// <inheritdoc/>
@@ -175,8 +212,34 @@ public abstract class CdsControl : ContentView, IView
     void ApplyVisualsOnce()
     {
         _visualsApplied = true;
-        ApplyVisuals();
+        ApplyVisualsMeasured();
     }
+
+    /// <summary>
+    /// Sets the control's visual tree and whether it is as wide as the space it is offered (Carbon's block-level
+    /// <c>inline-size: 100%</c>: fluid button sets, equally spaced progress steps, fluid fields). The control decides its
+    /// width this way, while measuring, and never by assigning its own <see cref="View.HorizontalOptions"/> after
+    /// construction: that would overwrite the app's alignment whenever the control rebuilds. An app's
+    /// <c>WidthRequest</c> or <c>MaximumWidthRequest</c> still caps a filling control, and its alignment places it.
+    /// </summary>
+    protected void SetChrome(View chrome, bool fillsWidth)
+    {
+        if (!fillsWidth)
+        {
+            if (_fillBox?.Content == chrome) _fillBox.Content = null;
+            if (Content != chrome) SetChrome(chrome);
+            return;
+        }
+        _fillBox ??= new CdsMaxWidthBox();
+        if (Content != _fillBox) SetChrome(_fillBox);
+        if (_fillBox.Content != chrome) _fillBox.Content = chrome;
+    }
+
+    /// <summary>True while the chrome fills the offered width (see <see cref="SetChrome(View, bool)"/>; for tests).</summary>
+    internal bool FillsWidth => _fillBox is not null && Content == _fillBox;
+
+    /// <summary>The chrome inside the filling box while <see cref="FillsWidth"/> (for tests).</summary>
+    internal View? FillingChrome => FillsWidth ? _fillBox!.Content : null;
 
     /// <summary>Sets the control's visual tree. Controls never let consumers assign <c>Content</c> directly.</summary>
     protected void SetChrome(View chrome)
@@ -196,7 +259,7 @@ public abstract class CdsControl : ContentView, IView
         {
             _visualsPending = false;
             _visualsApplied = true;
-            ApplyVisuals();
+            ApplyVisualsMeasured();
         }
     }
 
@@ -260,7 +323,16 @@ public abstract class CdsControl : ContentView, IView
         target.Clicked += (_, _) =>
         {
             SetState(CdsInteractionState.Pressed, false);
-            if (IsEnabled) OnActivated();
+            if (!IsEnabled) return;
+            var start = CdsMeter.Start(CdsMeter.Activation);
+            try
+            {
+                OnActivated();
+            }
+            finally
+            {
+                CdsMeter.Stop(CdsMeter.Activation, start, this);
+            }
         };
         TrackFocus(target, () => target.IsFocusFromKeyboard);
         return target;

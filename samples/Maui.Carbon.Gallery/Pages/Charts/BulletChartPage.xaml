@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.BulletChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Normalized KPIs" Description="Measures in different units, normalized to % of target. Each row shades its poor, satisfactory and great areas, draws the value bar, the target line and quartile ticks.">
+            <cds:CdsBulletChart Title="Q3 KPIs (% of target)" Data="{x:Static data:PackageASamples.Kpis}" HeightRequest="340">
+                <cds:CdsBulletChart.BottomAxis>
+                    <cds:CdsChartAxis Title="% of target" />
+                </cds:CdsBulletChart.BottomAxis>
+                <cds:CdsBulletChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsBulletChart.LeftAxis>
+            </cds:CdsBulletChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom performance areas" Description="PerformanceAreaTitles names the areas in the tooltip and table; AreaLegendTitles and QuartileLegendTitle name the legend keys. Click On track or Behind to isolate a group.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsBulletChart Title="Regional sales against quota (USD K)" Data="{x:Static data:PackageASamples.SalesReps}" HeightRequest="340"
+                                    PerformanceAreaTitles="{x:Static data:PackageASamples.PlanTitles}" AreaLegendTitles="{x:Static data:PackageASamples.PlanTitles}" QuartileLegendTitle="Quartiles of quota"
+                                    SelectedGroupsChanged="OnSelectedGroupsChanged" x:Name="Interactive">
+                    <cds:CdsBulletChart.BottomAxis>
+                        <cds:CdsChartAxis Title="Sales (USD K)" />
+                    </cds:CdsBulletChart.BottomAxis>
+                    <cds:CdsBulletChart.LeftAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsBulletChart.LeftAxis>
+                </cds:CdsBulletChart>
+                <cds:CdsText x:Name="Status" Text="All groups shown" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsBulletChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsBulletChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Zone fills and the target and quartile strokes follow each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsBulletChart Title="Sales against quota" Data="{x:Static data:PackageASamples.SalesReps}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Bullets on a layered grid backdrop.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsBulletChart Title="Sales against quota" Data="{x:Static data:PackageASamples.SalesReps}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -32,9 +32,9 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     readonly Grid _toolbarRow = new() { ColumnSpacing = 0 };
     readonly ContentView _toolbarContentHost = new();
     readonly CdsSearch _search = new();
-    readonly Grid _batchBar = new() { IsVisible = false, ColumnSpacing = 0 };
-    readonly CdsText _batchText = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.OnColor, VerticalOptions = LayoutOptions.Center };
+    readonly CdsText _batchText = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.OnColor, VerticalOptions = LayoutOptions.Center, LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1 };
     readonly HorizontalStackLayout _batchActionsHost = new() { Spacing = 0 };
+    readonly CdsBatchBarRow _batchBar;
     readonly Grid _empty = new() { IsVisible = false, Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing08) };
     readonly CdsCheckbox _headerCheck = new() { Label = "Select all rows", HideLabel = true };
     readonly Dictionary<string, RowRef> _refs = [];
@@ -52,6 +52,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     {
         HorizontalOptions = LayoutOptions.Fill;
         VerticalOptions = LayoutOptions.Start;
+        _batchBar = new CdsBatchBarRow(_batchText, _batchActionsHost) { IsVisible = false, ColumnSpacing = 0 };
 
         // Title block.
         CdsTokens.SetColor(_titleBlock, BackgroundColorProperty, CdsTableTokens.Background);
@@ -891,7 +892,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         }
         var divider = new BoxView { WidthRequest = 1, HeightRequest = CdsSpacing.Spacing05, VerticalOptions = LayoutOptions.Center, InputTransparent = true };
         CdsTokens.SetColor(divider, BoxView.ColorProperty, CdsTableTokens.BatchText);
-        var cancel = new CdsBatchBarButton("Cancel", null, height);
+        var cancel = new CdsBatchBarButton(DataTableModel.BatchCancelText, null, height);
         cancel.Clicked += (_, _) => ClearSelection();
         var cancelHost = new Grid();
         cancelHost.Add(cancel);

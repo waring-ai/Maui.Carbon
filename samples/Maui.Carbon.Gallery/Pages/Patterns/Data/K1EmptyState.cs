@@ -29,7 +29,12 @@ public sealed class K1EmptyState : ContentView
         });
 
         var row = new HorizontalStackLayout { Spacing = CdsSpacing.Spacing06, Margin = new Thickness(0, CdsSpacing.Spacing06, 0, 0) };
-        foreach (var action in actions) row.Add(action);
+        foreach (var action in actions)
+        {
+            // Centre each action on the row so a link lines up with the button beside it.
+            action.VerticalOptions = LayoutOptions.Center;
+            row.Add(action);
+        }
         if (row.Children.Count > 0) stack.Add(row);
 
         Padding = padding;

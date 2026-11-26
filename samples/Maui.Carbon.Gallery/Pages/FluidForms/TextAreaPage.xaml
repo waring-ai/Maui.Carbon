@@ -36,7 +36,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -46,7 +46,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTextArea Label="Description" Rows="2" Text="Production workloads" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

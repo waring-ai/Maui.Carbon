@@ -97,7 +97,9 @@ public partial class PatternSettingsPage : GalleryPage
         text.Add(new CdsText(title, CdsTypeStyle.BodyCompact01));
         text.Add(new CdsText(description, CdsTypeStyle.HelperText01, CdsTextTone.Helper) { MaximumWidthRequest = 360, HorizontalOptions = LayoutOptions.Start });
 
-        var toggle = new CdsToggle { LabelText = title, HideLabel = true, Size = CdsToggleSize.Sm, IsToggled = on, HorizontalOptions = LayoutOptions.End };
+        // The row title names the toggle for screen readers; beside the switch it shows only its state (Off / On).
+        var toggle = new CdsToggle { Size = CdsToggleSize.Sm, IsToggled = on, HorizontalOptions = LayoutOptions.End };
+        SemanticProperties.SetDescription(toggle, title);
         var feedback = new CdsInlineLoading { Description = "Saved", Status = CdsInlineLoadingStatus.Finished, SuccessDelay = 600000, IsVisible = savedAtOpen, HorizontalOptions = LayoutOptions.End, MinimumHeightRequest = CdsSpacing.Spacing05 };
 
         var end = new VerticalStackLayout { Spacing = CdsSpacing.Spacing02, MinimumWidthRequest = 160, VerticalOptions = LayoutOptions.Start };

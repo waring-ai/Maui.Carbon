@@ -93,7 +93,7 @@
                 <g:ThemeStrip.Template>
                     <DataTemplate>
                         <VerticalStackLayout Spacing="16">
-                            <cds:CdsOrderedList>
+                            <cds:CdsOrderedList Margin="24,0,0,0">
                                 <cds:CdsListItem Text="Install the CLI" />
                                 <cds:CdsListItem Text="Target your cluster">
                                     <cds:CdsListItem.NestedList>

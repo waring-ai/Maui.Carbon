@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.DonutChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Total in the center" Description="The center shows the sum of the shown values over CenterLabel; name the unit there. It follows legend filtering.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsDonutChart Title="Storage used by type (GB)" Data="{x:Static data:PackageCSamples.Storage}" CenterLabel="GB used" />
+                <cds:CdsDonutChart Grid.Column="1" Title="New leads by channel" Data="{x:Static data:PackageCSamples.Leads}" CenterLabel="Leads this quarter" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Formatter, custom figure and center alignment" Description="CenterNumberFormatter formats the figure; CenterNumber sets it, and an empty CenterLabel centers it alone. Alignment centers the donut.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsDonutChart x:Name="Budget" Title="Operating budget (USD M)" Data="{x:Static data:PackageCSamples.Budget}"
+                                   Alignment="Center" CenterLabel="Total budget" />
+                <cds:CdsDonutChart Grid.Column="1" Title="Delivery vans (count)" Data="{x:Static data:PackageCSamples.Fleet}"
+                                   Alignment="Center" CenterLabel="" CenterNumber="204" ShowLabels="False" LegendAlignment="Center" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate slices: the total in the center follows. Hover or use the arrow keys for each slice's value.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsDonutChart x:Name="Interactive" Title="Storage used by type (GB)" Data="{x:Static data:PackageCSamples.Storage}"
+                                   CenterLabel="GB used" SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="Loading shows a shimmering ring; empty data a still ring without center text.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsDonutChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsDonutChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageCSamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Slices take the pairing palette of each theme; the center text is text-secondary.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDonutChart Title="Storage (GB)" Data="{x:Static data:PackageCSamples.Storage}" CenterLabel="GB used" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the donut keeps its colors; the tooltip steps up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsDonutChart Title="Storage (GB)" Data="{x:Static data:PackageCSamples.Storage}" CenterLabel="GB used" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

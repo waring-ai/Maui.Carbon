@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.TreeChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Tree and dendrogram" Description="Click a group (or move the data cursor to it and press Enter) to collapse or expand it. A dendrogram lines every leaf up in the last column.">
+            <VerticalStackLayout Spacing="16">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                    <cds:CdsTreeChart x:Name="Interactive" Title="Service catalog (click a group to collapse it)" Data="{x:Static data:PackageDSamples.Catalog}" RootTitle="Cloud" HeightRequest="440" NodeClicked="OnNodeClicked" />
+                    <cds:CdsTreeChart Grid.Column="1" Title="Service catalog as a dendrogram" Data="{x:Static data:PackageDSamples.Catalog}" RootTitle="Cloud" TreeType="Dendrogram" HeightRequest="440" />
+                </Grid>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="Every group expanded" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTreeChart Title="Data and AI services" Data="{x:Static data:PackageDSamples.CatalogSmall}" RootTitle="Cloud" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTreeChart Title="Data and AI services" Data="{x:Static data:PackageDSamples.CatalogSmall}" RootTitle="Cloud" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

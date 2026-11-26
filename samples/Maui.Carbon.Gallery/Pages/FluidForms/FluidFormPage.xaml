@@ -47,7 +47,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320">
+                        <cds:CdsFluidForm>
                             <cds:CdsFluidTextInput Label="Deployment name" Text="payments-api" />
                             <cds:CdsFluidTextInput Label="Image tag" Text="latest" IsInvalid="True" InvalidText="Tag not found." />
                         </cds:CdsFluidForm>

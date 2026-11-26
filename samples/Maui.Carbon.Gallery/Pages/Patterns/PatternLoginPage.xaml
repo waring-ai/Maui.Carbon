@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Step 1: user ID" Description="Continue routes to SSO for company domains, or to the password step. Remember sits under the field; alternative logins come after the primary button. Leave the field to validate it, or press Continue.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
                     <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
                         <VerticalStackLayout>
@@ -30,19 +30,19 @@
                         </HorizontalStackLayout>
                     </Grid>
                 </Border>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Step 2: password" Description="The ID is confirmed with a way back. An empty field shows its error when it loses focus. Log in with a password to see the failed-attempt flow.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
                     <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
                         <VerticalStackLayout>
                             <cds:CdsText Text="Log in" TypeStyle="Heading04" Margin="0,0,0,8" />
-                            <FlexLayout Wrap="Wrap" AlignItems="Center">
+                            <g:WrapLayout AlignItems="Center">
                                 <cds:CdsText Text="Logging in as ana.silva@northwind.dev." TypeStyle="BodyCompact01" Margin="0,0,4,0" />
                                 <cds:CdsLink Text="Not you?" IsInline="True" Clicked="OnNotYouClicked" />
-                            </FlexLayout>
+                            </g:WrapLayout>
                             <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" Margin="0,24" />
                             <cds:CdsPasswordInput x:Name="PasswordInput" Label="Password" IsInvalid="True" InvalidText="Enter your password." />
                             <cds:CdsLink Text="Forgot password?" Size="Sm" HorizontalOptions="Start" Margin="0,8,0,24" />
@@ -54,11 +54,11 @@
                         </HorizontalStackLayout>
                     </Grid>
                 </Border>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="After a failed login" Description="The page returns to step 1 with the ID kept, the password cleared and one generic error that doesn't reveal which part was wrong. Focus goes to the ID field.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <Border StrokeThickness="1" Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsBackground}" WidthRequest="394" HeightRequest="672" Margin="0,0,24,24">
                     <Grid RowDefinitions="Auto,*,Auto" Padding="24,48,24,24">
                         <VerticalStackLayout>
@@ -83,7 +83,7 @@
                         </HorizontalStackLayout>
                     </Grid>
                 </Border>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <cds:CdsText x:Name="Status" Tone="Secondary" Text="Waiting for input" />

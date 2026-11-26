@@ -96,8 +96,10 @@ public static class CdsListBoxTokens
 
         string? background;
         if (pressed) background = CdsColorKeys.LayerSelected01;
-        else if (selected && !multi) background = hover ? CdsColorKeys.LayerSelectedHover01 : CdsColorKeys.LayerSelected01;
-        else if (hover) background = CdsColorKeys.LayerHover01;
+        // The highlighted row (the list's virtual focus) takes the hover fill as well as the focus outline, so the keyboard
+        // position reads like the pointer's.
+        else if (selected && !multi) background = hover || highlighted ? CdsColorKeys.LayerSelectedHover01 : CdsColorKeys.LayerSelected01;
+        else if (hover || highlighted) background = CdsColorKeys.LayerHover01;
         else background = null;
 
         var text = multi || selected || highlighted || hover ? CdsColorKeys.TextPrimary : CdsColorKeys.TextSecondary;

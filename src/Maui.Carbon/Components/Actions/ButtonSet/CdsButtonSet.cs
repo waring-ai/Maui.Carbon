@@ -35,6 +35,7 @@ public class CdsButtonSet : CdsControl
     readonly Grid _grid = new() { ColumnSpacing = 0, RowSpacing = 0 };
     readonly CdsEqualWidthRow _row = new();
     readonly CdsMaxWidthBox _box = new();
+    readonly CdsFluidButtonRow _fluidRow = new();
     readonly List<(BoxView Line, int Index)> _separators = [];
     bool _fluidStacked;
 
@@ -43,7 +44,8 @@ public class CdsButtonSet : CdsControl
     {
         HorizontalOptions = LayoutOptions.Start;
         _items.CollectionChanged += OnItemsChanged;
-        _grid.SizeChanged += (_, _) => OnGridSizeChanged();
+        _grid.SizeChanged += (_, _) => OnFluidSizeChanged(_grid.Width);
+        _fluidRow.SizeChanged += (_, _) => OnFluidSizeChanged(_fluidRow.Width);
         SetChrome(_grid);
         Rebuild();
     }
@@ -89,19 +91,14 @@ public class CdsButtonSet : CdsControl
 
     void OnButtonStateChanged(object? sender, EventArgs e) => UpdateSeparators();
 
-    void OnGridSizeChanged()
+    // Stacking reorders the buttons (primary first), so it rebuilds; the widths of a fluid row are the row's own layout.
+    void OnFluidSizeChanged(double width)
     {
-        if (!IsFluid || _grid.Width <= 0) return;
-        var stack = ButtonSetModel.ShouldStack(_grid.Width, _items.Count);
-        if (stack != _fluidStacked)
-        {
-            _fluidStacked = stack;
-            Rebuild();
-        }
-        else if (!stack)
-        {
-            ApplyFluidWidths();
-        }
+        if (!IsFluid || width <= 0) return;
+        var stack = ButtonSetModel.ShouldStack(width, _items.Count);
+        if (stack == _fluidStacked) return;
+        _fluidStacked = stack;
+        Rebuild();
     }
 
     List<CdsButton> Ordered()
@@ -114,6 +111,7 @@ public class CdsButtonSet : CdsControl
     void Rebuild()
     {
         _row.Clear();
+        _fluidRow.Clear();
         _grid.Children.Clear();
         _grid.ColumnDefinitions.Clear();
         _grid.RowDefinitions.Clear();
@@ -123,9 +121,16 @@ public class CdsButtonSet : CdsControl
         var stacked = Stacked;
         var expressive = buttons.Any(b => b.IsExpressive);
 
+        // The set never assigns its own HorizontalOptions: the app's alignment survives every rebuild (a fluid set given a
+        // WidthRequest and Start stays at the start). How wide the set is comes from what it shows.
         if (!IsFluid && !stacked)
         {
             BuildRow(buttons, expressive);
+            return;
+        }
+        if (IsFluid && !stacked)
+        {
+            BuildFluidRow(buttons);
             return;
         }
 
@@ -133,62 +138,72 @@ public class CdsButtonSet : CdsControl
         if (IsFluid)
         {
             Show(_grid, maxWidth: null);
-            HorizontalOptions = LayoutOptions.Fill;
         }
         else
         {
             // A stacked set is as wide as one button may be (12.25rem), not as its widest label; narrower space shrinks it.
             Show(_grid, ButtonSetModel.MaxSetWidth(buttons.Count, stacked, expressive));
-            HorizontalOptions = LayoutOptions.Start;
         }
 
         // Stacked sets list the primary first.
-        if (stacked && IsFluid) buttons.Reverse();
+        if (IsFluid) buttons.Reverse();
 
         for (var i = 0; i < buttons.Count; i++)
         {
             var button = buttons[i];
             button.HorizontalOptions = LayoutOptions.Fill;
-            if (stacked)
-            {
-                _grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-                _grid.Add(button, 0, i);
-            }
-            else
-            {
-                _grid.ColumnDefinitions.Add(new ColumnDefinition(IsFluid ? GridLength.Auto : GridLength.Star));
-                _grid.Add(button, i, 0);
-            }
+            _grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            _grid.Add(button, 0, i);
         }
-        if (stacked) _grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+        _grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
 
-        // Separators sit on the leading edge of every button after the first.
+        // Separators sit on the top edge of every button after the first.
         for (var i = 1; i < buttons.Count; i++)
         {
-            var line = new BoxView { InputTransparent = true };
+            var line = new BoxView
+            {
+                InputTransparent = true,
+                HeightRequest = 1,
+                VerticalOptions = LayoutOptions.Start,
+                HorizontalOptions = LayoutOptions.Fill,
+                Margin = new Thickness(0, -1, 0, 0),
+            };
             AutomationProperties.SetIsInAccessibleTree(line, false);
-            if (stacked)
-            {
-                line.HeightRequest = 1;
-                line.VerticalOptions = LayoutOptions.Start;
-                line.HorizontalOptions = LayoutOptions.Fill;
-                line.Margin = new Thickness(0, -1, 0, 0);
-                _grid.Add(line, 0, i);
-            }
-            else
-            {
-                line.WidthRequest = 1;
-                line.HorizontalOptions = LayoutOptions.Start;
-                line.VerticalOptions = LayoutOptions.Fill;
-                line.Margin = new Thickness(-1, 0, 0, 0);
-                _grid.Add(line, i, 0);
-            }
+            _grid.Add(line, 0, i);
             _separators.Add((line, i));
         }
 
         _orderedForSeparators = buttons;
-        if (IsFluid && !stacked) ApplyFluidWidths();
         UpdateSeparators();
+    }
+
+    /// <summary>
+    /// A fluid set side by side: it fills the width it is offered and the row gives each button its Carbon width
+    /// (<see cref="ButtonSetModel.FluidWidths"/>), right-aligned, while it is measured and arranged.
+    /// </summary>
+    void BuildFluidRow(List<CdsButton> buttons)
+    {
+        Show(_fluidRow, maxWidth: null);
+        foreach (var button in buttons)
+        {
+            button.HorizontalOptions = LayoutOptions.Fill;
+            _fluidRow.Add(button);
+        }
+        AddRowSeparators(_fluidRow, buttons.Count);
+        _orderedForSeparators = buttons;
+        UpdateSeparators();
+    }
+
+    void AddRowSeparators(Layout row, int count)
+    {
+        for (var i = 1; i < count; i++)
+        {
+            var line = new BoxView { InputTransparent = true };
+            AutomationProperties.SetIsInAccessibleTree(line, false);
+            CdsEqualWidthRow.SetSeparatorFor(line, i);
+            row.Add(line);
+            _separators.Add((line, i));
+        }
     }
 
     List<CdsButton> _orderedForSeparators = [];
@@ -200,28 +215,20 @@ public class CdsButtonSet : CdsControl
     void BuildRow(List<CdsButton> buttons, bool expressive)
     {
         Show(_row, ButtonSetModel.MaxSetWidth(buttons.Count, stacked: false, expressive));
-        HorizontalOptions = LayoutOptions.Start;
         _row.MaxCellWidth = expressive ? ButtonSetModel.MaxExpressiveButtonWidth : ButtonSetModel.MaxButtonWidth;
         for (var i = 0; i < buttons.Count; i++)
         {
             buttons[i].HorizontalOptions = LayoutOptions.Fill;
             _row.Add(buttons[i]);
         }
-        for (var i = 1; i < buttons.Count; i++)
-        {
-            var line = new BoxView { InputTransparent = true };
-            AutomationProperties.SetIsInAccessibleTree(line, false);
-            CdsEqualWidthRow.SetSeparatorFor(line, i);
-            _row.Add(line);
-            _separators.Add((line, i));
-        }
+        AddRowSeparators(_row, buttons.Count);
         _orderedForSeparators = buttons;
         UpdateSeparators();
     }
 
     /// <summary>
     /// Makes <paramref name="content"/> the chrome: inside a box that fills the available width up to
-    /// <paramref name="maxWidth"/> (start aligned), or directly when there is no maximum (fluid sets).
+    /// <paramref name="maxWidth"/> (start aligned), or, with no maximum (fluid sets), filling all the width offered.
     /// </summary>
     void Show(View content, double? maxWidth)
     {
@@ -233,22 +240,12 @@ public class CdsButtonSet : CdsControl
             return;
         }
         if (_box.Content == content) _box.Content = null;
-        if (Content != content) SetChrome(content);
+        SetChrome(content, fillsWidth: true);
     }
 
-    /// <summary>The view the buttons are laid out in (the equal-width row or the grid) and the box around it, if any (tests).</summary>
+    /// <summary>The view the buttons are laid out in and the max-width box around it, if any (tests).</summary>
     internal (View Layout, CdsMaxWidthBox? Box) LayoutParts =>
-        Content == _box ? (_box.Content!, _box) : ((View)Content!, null);
-
-    void ApplyFluidWidths()
-    {
-        var buttons = _orderedForSeparators;
-        if (buttons.Count == 0 || _grid.Width <= 0) return;
-        var widths = ButtonSetModel.FluidWidths(_grid.Width, buttons.Select(b => b.Kind is CdsButtonKind.Ghost or CdsButtonKind.DangerGhost).ToArray(), out var offset);
-        for (var i = 0; i < buttons.Count && i < _grid.ColumnDefinitions.Count; i++)
-            _grid.ColumnDefinitions[i].Width = new GridLength(widths[i]);
-        _grid.Padding = new Thickness(offset, 0, 0, 0);
-    }
+        Content == _box ? (_box.Content!, _box) : (FillingChrome ?? (View)Content!, null);
 
     void UpdateSeparators()
     {

@@ -59,6 +59,9 @@ public class CdsActionableNotification : CdsDismissibleNotification
     {
         Kind = CdsNotificationKind.Error;
         Role = CdsNotificationRole.AlertDialog;
+        // A constructor default only (CONVENTIONS: never reassigned on a rebuild). The toast layout is 288 wide and must not
+        // be centered; the inline layout fills the offered width through its width box under any alignment.
+        HorizontalOptions = LayoutOptions.Start;
         _flow = CdsNotificationText.CreateFlow(out _flowTitle, out _flowSubtitle);
         RegisterText(_flow);
         RegisterText(_title);
@@ -272,8 +275,8 @@ public class CdsActionableNotification : CdsDismissibleNotification
         {
             WidthRequest = -1;
             MaximumWidthRequest = double.PositiveInfinity;
+            // The notification's width box fills the offered width up to the cap whatever the app's alignment is.
             SetMaxContentWidth(NotificationWidthModel.Inline(ViewportWidth));
-            HorizontalOptions = LayoutOptions.Fill;
             StatusIcon.Margin = new Thickness(0, 14, 0, 0);
             _texts.Padding = new Thickness(0, 15);
             // One row: details 13 in, the action 8 above and below, then the 48 close slot (8 when the close button is
@@ -289,7 +292,6 @@ public class CdsActionableNotification : CdsDismissibleNotification
             WidthRequest = CdsToastNotification.ToastWidth;
             MaximumWidthRequest = CdsToastNotification.ToastWidth;
             SetMaxContentWidth(double.PositiveInfinity);
-            HorizontalOptions = LayoutOptions.Start;
             StatusIcon.Margin = new Thickness(0, CdsSpacing.Spacing05, 0, 0);
             _texts.Padding = new Thickness(0, 15, 0, hasAction ? CdsSpacing.Spacing03 : CdsSpacing.Spacing05);
             var stacked = new Thickness(13, 0, CloseSpace + CdsSpacing.Spacing03, 0);

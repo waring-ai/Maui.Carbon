@@ -6,30 +6,30 @@
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.SelectableTagPage">
     <VerticalStackLayout Spacing="48">
         <g:GalleryExample Title="States" Description="Unselected: border-inverse outline on layer-01, hover layer-hover-01. Selected: layer-selected-inverse with text-inverse. Disabled looks the same selected or not.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center">
+            <g:WrapLayout AlignItems="Center">
                 <cds:CdsSelectableTag Text="us-south" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="eu-de" IsSelected="True" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="jp-tok" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="Disabled selected" IsSelected="True" IsEnabled="False" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes and icons" Description="sm 18, md 24, lg 32; icons are hidden at sm. Long labels truncate at 208.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center">
+            <g:WrapLayout AlignItems="Center">
                 <cds:CdsSelectableTag Text="GPU nodes" Size="Sm" IsSelected="True" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="GPU nodes" IsSelected="True" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="GPU nodes" Size="Lg" IsSelected="True" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="Edge nodes" Icon="Add" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="Edge nodes" Icon="Add" Size="Lg" IsSelected="True" Margin="0,0,8,8" />
                 <cds:CdsSelectableTag Text="A very long selectable label that will be truncated" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Interactive" Description="A labelled group of chips; SelectedChanged fires when one toggles (Tab between chips, Enter or Space to toggle).">
             <VerticalStackLayout Spacing="16">
                 <cds:CdsText Text="Filter by region" TypeStyle="Label01" Tone="Secondary" />
-                <FlexLayout x:Name="Chips" Wrap="Wrap" />
+                <g:WrapLayout x:Name="Chips" />
                 <cds:CdsText x:Name="Status" Text="Selected: eu-de" />
             </VerticalStackLayout>
         </g:GalleryExample>
@@ -38,11 +38,11 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <FlexLayout Wrap="Wrap">
+                        <g:WrapLayout>
                             <cds:CdsSelectableTag Text="us-south" Margin="0,0,8,8" />
                             <cds:CdsSelectableTag Text="eu-de" IsSelected="True" Margin="0,0,8,8" />
                             <cds:CdsSelectableTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
-                        </FlexLayout>
+                        </g:WrapLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

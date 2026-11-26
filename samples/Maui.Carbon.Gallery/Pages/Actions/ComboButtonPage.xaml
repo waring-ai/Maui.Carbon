@@ -18,11 +18,11 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes" Description="sm 32, md 40 and lg 48 (default); the chevron half is a square of that size.">
-            <FlexLayout Wrap="Wrap" AlignItems="End">
+            <g:WrapLayout AlignItems="End">
                 <cds:CdsComboButton Label="Deploy" Size="Sm" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
                 <cds:CdsComboButton Label="Deploy" Size="Md" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
                 <cds:CdsComboButton Label="Deploy" Size="Lg" Margin="0,0,16,16"><cds:CdsMenuItem Text="Deploy to staging" /></cds:CdsComboButton>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Long label" Description="The primary action is at most 239px wide; longer labels truncate with an ellipsis.">

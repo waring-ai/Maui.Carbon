@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.PieChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Share of a whole" Description="Slices run clockwise from 12 o'clock, largest first, with their percentage of the shown total outside the arc. The two smallest slices, under 5 degrees, move their labels out with callouts.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsPieChart Title="Support tickets by status (count)" Data="{x:Static data:PackageCSamples.Tickets}" />
+                <cds:CdsPieChart Grid.Column="1" Title="Browser share of sessions (%)" Data="{x:Static data:PackageCSamples.Browsers}" LegendAlignment="Center" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom order, centered without labels" Description="SortComparison orders the slices (colors still follow the values). Without labels the pie fills the graph; Alignment centers it and the legend sits on the right.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsPieChart x:Name="Sorted" Title="Generation by source (GWh), sorted A to Z" Data="{x:Static data:PackageCSamples.Energy}" />
+                <cds:CdsPieChart Grid.Column="1" Title="Revenue by region (USD M)" Data="{x:Static data:PackageCSamples.Regions}"
+                                 ShowLabels="False" Alignment="Center" LegendPosition="Right" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Hover a slice: it grows 3px and darkens, with its group and value in the tooltip. Click legend items to isolate slices; the percentages are recomputed for the shown ones. Tab to the graph and use the arrow keys to move through the slices.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsPieChart x:Name="Interactive" Title="Support tickets by status (count)" Data="{x:Static data:PackageCSamples.Tickets}"
+                                 SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows a shimmering circle; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsPieChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsPieChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageCSamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Slices take the pairing palette of each theme; labels and callouts are text-secondary.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsPieChart Title="Tickets" Data="{x:Static data:PackageCSamples.Tickets}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the slices and labels keep their colors; the tooltip steps up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsPieChart Title="Tickets" Data="{x:Static data:PackageCSamples.Tickets}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

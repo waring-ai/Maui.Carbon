@@ -259,7 +259,8 @@ public partial class CdsMultiSelect : CdsListBox
         SetColor(Entry, Microsoft.Maui.Controls.Entry.TextColorProperty, CdsListBoxTokens.FieldText(disabled));
         SetColor(Entry, Microsoft.Maui.Controls.Entry.PlaceholderColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPlaceholder);
         Entry.IsEnabled = IsEnabled;
-        _tag.Muted = disabled || readOnly;
+        _tag.Muted = disabled;
+        _tag.IsReadOnly = readOnly;
         _tag.IsEnabled = IsEnabled;
         _clearText.Dimmed = disabled || readOnly;
     }

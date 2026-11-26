@@ -36,13 +36,13 @@
                                     </cds:CdsSelect>
                                     <cds:CdsTextInput x:Name="ContactInput" Label="Technical contact" Text="platform-team@northwind.dev" Keyboard="Email" HelperText="Receives maintenance and security notices." TextChanged="OnDetailsChanged" />
                                     <cds:CdsTextInput Label="Account ID" Text="a7f3c9e2b41d4e8f9a06c5d2e1b7f480" IsReadOnly="True" HelperText="Read-only. Quote it when you contact support." />
-                                    <HorizontalStackLayout Spacing="16" Margin="0,8,0,0">
-                                        <Grid WidthRequest="160" HeightRequest="48">
+                                    <HorizontalStackLayout Spacing="0" Margin="0,8,0,0">
+                                        <Grid HeightRequest="48">
                                             <cds:CdsButton x:Name="SaveButton" Text="Save changes" Clicked="OnSaveClicked" />
                                             <cds:CdsInlineLoading x:Name="Saving" IsVisible="False" Status="Active" Description="Saving..." VerticalOptions="Center" Margin="16,0,0,0" />
                                         </Grid>
                                         <cds:CdsButton x:Name="CancelButton" Text="Cancel" Kind="Secondary" Clicked="OnCancelClicked" />
-                                        <cds:CdsInlineLoading x:Name="Saved" IsVisible="False" Status="Finished" Description="Changes saved" SuccessDelay="600000" VerticalOptions="Center" />
+                                        <cds:CdsInlineLoading x:Name="Saved" IsVisible="False" Status="Finished" Description="Changes saved" SuccessDelay="600000" VerticalOptions="Center" Margin="16,0,0,0" />
                                     </HorizontalStackLayout>
                                 </cds:CdsForm>
                             </VerticalStackLayout>

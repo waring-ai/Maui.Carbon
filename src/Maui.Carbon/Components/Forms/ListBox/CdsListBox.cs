@@ -193,6 +193,12 @@ public abstract partial class CdsListBox : CdsFormField
     /// <summary>The item the highlight lands on when the list opens (the selected item).</summary>
     internal virtual object? HighlightOnOpen => null;
 
+    /// <summary>
+    /// Whether the list opens with its first row highlighted (with the keyboard ring), as typing does: a combo box opened
+    /// on typed filter text with nothing chosen.
+    /// </summary>
+    internal virtual bool HighlightFirstOnOpen => false;
+
     /// <summary>Re-reads the rows (filter or selection changed) and updates the open list.</summary>
     protected void RefreshRows(bool keepHighlight)
     {
@@ -368,6 +374,9 @@ public abstract partial class CdsListBox : CdsFormField
         SyncOverlay();
     }
 
+    /// <summary>Narrowest the menu of an inline list box gets (18rem).</summary>
+    const double InlineMenuMinWidth = 288;
+
     void ShowOverlay()
     {
         _hidingForEmpty = false;
@@ -383,15 +392,24 @@ public abstract partial class CdsListBox : CdsFormField
         };
         _list = list;
 
-        if (_keyboardHighlight) _model.HighlightValueOrFirst(HighlightOnOpen);
+        if (HighlightFirstOnOpen)
+        {
+            _keyboardHighlight = true;
+            _model.MoveFirst();
+        }
+        else if (_keyboardHighlight) _model.HighlightValueOrFirst(HighlightOnOpen);
         else _model.HighlightValue(HighlightOnOpen);
         list.Refresh(_model.Highlighted, _keyboardHighlight, i => IsRowChosen(rows[i]));
 
+        // An inline field hugs its value, so its menu is not tied to the field's width: 18rem to 30rem
+        // (.cds--dropdown--inline .cds--list-box__menu).
+        var inline = UsesInlineType;
+        if (inline) list.Surface.WidthRequest = Math.Clamp(Chrome.Field.Width, InlineMenuMinWidth, CdsFieldChrome.InlineFieldMaxWidth);
         var overlay = CdsOverlayService.Open(list.Surface, new CdsOverlayOptions
         {
             Anchor = Chrome.Field,
             Placement = Direction == CdsListBoxDirection.Top ? CdsPlacement.TopStart : CdsPlacement.BottomStart,
-            MatchAnchorWidth = true,
+            MatchAnchorWidth = !inline,
             LightDismiss = true,
             ReturnFocusTo = _trigger,
             Keys = HasTextField ? CdsOverlayKeys.VerticalNavigation : CdsOverlayKeys.Navigation | CdsOverlayKeys.Activation,
@@ -610,6 +628,7 @@ public abstract partial class CdsListBox : CdsFormField
         base.UpdateChrome();
         var inline = UsesInlineType;
         Chrome.IsInline = inline;
+        Chrome.InlineFieldHugsContent = inline;
         Chrome.IsFlat = inline;
         Chrome.Size = CdsListBoxTokens.Coerce(Size);
         if (Chrome.Input is { } input) input.Margin = new Thickness(inline ? -CdsSpacing.Spacing03 : 0, 0, 0, 0);

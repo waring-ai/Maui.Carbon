@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.LineChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Time series" Description="Hover anywhere on the graph: the dashed ruler reads every series at that date, largest first, then the total. Time ticks are bold where a new month or year starts.">
+            <cds:CdsLineChart Title="Weekly revenue by dataset" Data="{x:Static data:ChartSamples.WeeklyRevenue}" Curve="MonotoneX">
+                <cds:CdsLineChart.BottomAxis>
+                    <cds:CdsChartAxis Title="2023" ScaleType="Time" />
+                </cds:CdsLineChart.BottomAxis>
+                <cds:CdsLineChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Revenue (USD)" />
+                </cds:CdsLineChart.LeftAxis>
+            </cds:CdsLineChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Labels axis" Description="Categories in data order on a labels axis.">
+            <cds:CdsLineChart Title="Units by stock status" Data="{x:Static data:ChartSamples.StockByDataset}">
+                <cds:CdsLineChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsLineChart.BottomAxis>
+                <cds:CdsLineChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Units" />
+                </cds:CdsLineChart.LeftAxis>
+            </cds:CdsLineChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Step line" Description="Curve StepAfter holds each value until the next point: counts that change in steps.">
+            <cds:CdsLineChart Title="Engineers on call (step line)" Data="{x:Static data:ChartSamples.OnCall}" Curve="StepAfter">
+                <cds:CdsLineChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Time" />
+                </cds:CdsLineChart.BottomAxis>
+                <cds:CdsLineChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Engineers" />
+                </cds:CdsLineChart.LeftAxis>
+            </cds:CdsLineChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Legend on the right, loading" Description="LegendPosition moves the legend; IsLoading shows the skeleton.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsLineChart Title="Weekly revenue" Data="{x:Static data:ChartSamples.WeeklyRevenue}" LegendPosition="Right" HeightRequest="320">
+                    <cds:CdsLineChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Time" />
+                    </cds:CdsLineChart.BottomAxis>
+                </cds:CdsLineChart>
+                <cds:CdsLineChart Grid.Column="1" Title="Loading state" IsLoading="True" HeightRequest="320" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The lines take the pairing palette of each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsLineChart Title="Revenue" Data="{x:Static data:ChartSamples.WeeklyRevenue}" HeightRequest="280" IsToolbarEnabled="False" Curve="MonotoneX">
+                            <cds:CdsLineChart.BottomAxis>
+                                <cds:CdsChartAxis ScaleType="Time" />
+                            </cds:CdsLineChart.BottomAxis>
+                        </cds:CdsLineChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

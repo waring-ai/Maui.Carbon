@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ConnectionMapPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Great circles" Description="Lines follow the shortest path on the globe, so long routes curve. Width grows with the value; lines are the group color at 80% opacity. Hover London for its connection count and total.">
+            <cds:CdsConnectionMap Title="Weekly nonstop departures from London Heathrow" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                  Data="{x:Static data:PackageESamples.HeathrowRoutes}" ValueLabel="Departures per week" HeightRequest="440" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Named nodes, arcs and labels" Description="Connections name their ends and Nodes lists each location once. LineType Arc bows each line left of its direction, which separates return routes; ArePointLabelsEnabled names the locations. IsLoading shows the shimmering skeleton.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsConnectionMap x:Name="Links" Title="Replication links between data centers (Gbps)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                  Data="{x:Static data:PackageESamples.ReplicationLinks}" Projection="ConicEqualArea" FitBounds="{x:Static data:PackageESamples.DataCenterRegion}"
+                                  LineType="Arc" MinimumLineWidth="1" MaximumLineWidth="5" ValueLabel="Gbps" ArePointLabelsEnabled="True" PointRadius="4" HeightRequest="440" />
+                <cds:CdsConnectionMap Grid.Column="1" Title="Loading state" IsLoading="True" HeightRequest="440" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Hover a line to raise it, or a location to raise all its lines. Click legend items to isolate groups; the button switches the line type.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsConnectionMap x:Name="Interactive" Title="Weekly nonstop departures from London Heathrow" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                      Data="{x:Static data:PackageESamples.HeathrowRoutes}" ValueLabel="Departures per week" HeightRequest="400"
+                                      SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Next line type" Kind="Tertiary" Size="Sm" Clicked="OnLineTypeClicked" />
+                    <cds:CdsText x:Name="Status" Text="Great circles, all groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Location rings and the base map follow each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsConnectionMap Title="Departures from Heathrow" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.HeathrowRoutes}"
+                                              HeightRequest="280" IsToolbarEnabled="False" IsLegendEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Location fills follow the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsConnectionMap Title="Departures from Heathrow" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.HeathrowRoutes}"
+                                              HeightRequest="280" IsToolbarEnabled="False" IsLegendEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

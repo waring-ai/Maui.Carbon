@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.NetworkDiagramPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Release pipeline" Description="Card nodes with elbow edges and arrow markers. Status colors on the left border come with a text label; Staging is clickable.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsNetworkDiagram x:Name="Pipeline" Data="{x:Static data:PackageDSamples.PipelineNodes}" Edges="{x:Static data:PackageDSamples.PipelineEdges}" NodeClicked="OnNodeClicked" HeightRequest="260" />
+                <cds:CdsText x:Name="Status" Text="No node clicked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Service topology" Description="Shape nodes with icons, straight and bezier edges, and tunnel and double edges with circle and diamond markers.">
+            <cds:CdsNetworkDiagram Data="{x:Static data:PackageDSamples.TopologyNodes}" Edges="{x:Static data:PackageDSamples.TopologyEdges}" HeightRequest="290" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Edge variants and markers" Description="The building blocks: every edge variant, and every marker at an edge end.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDefault}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="default" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDashSm}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="dash-sm" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDashMd}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="dash-md" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDashLg}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="dash-lg" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDashXl}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="dash-xl" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeTunnel}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="tunnel" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="232,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.EdgeDouble}" HeightRequest="24" WidthRequest="232" />
+                        <cds:CdsText Grid.Column="1" Text="double" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="16">
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerArrowRight}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="ArrowRight" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerArrowLeft}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="ArrowLeft" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerCircle}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="Circle" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerDiamond}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="Diamond" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerSquare}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="Square" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="136,*" HeightRequest="24">
+                        <cds:CdsNetworkDiagram Edges="{x:Static data:PackageDSamples.MarkerTee}" HeightRequest="24" WidthRequest="136" />
+                        <cds:CdsText Grid.Column="1" Text="Tee" Tone="Secondary" VerticalTextAlignment="Center" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette. The zones are at least 560 wide so the topology keeps its readable size.">
+            <g:ThemeStrip MinimumZoneWidth="560">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNetworkDiagram Data="{x:Static data:PackageDSamples.TopologyNodes}" Edges="{x:Static data:PackageDSamples.TopologyEdges}" HeightRequest="290" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True" MinimumZoneWidth="560">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNetworkDiagram Data="{x:Static data:PackageDSamples.TopologyNodes}" Edges="{x:Static data:PackageDSamples.TopologyEdges}" HeightRequest="290" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

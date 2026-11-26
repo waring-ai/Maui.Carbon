@@ -109,6 +109,8 @@ public partial class CdsFileUploaderItem : CdsControl
         _name.Text = Name;
         _root.MinimumHeightRequest = height;
         _root.Padding = new Thickness(0, padding);
+        // The outline frames the padded row (outline-offset -2px on the row's edge), so it reaches out over the padding.
+        _outline.Margin = new Thickness(0, -padding);
         _root.RowSpacing = invalid ? padding : 0;
 
         _spinner.IsVisible = Status == CdsFileStatus.Uploading;

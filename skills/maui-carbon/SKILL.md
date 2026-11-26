@@ -149,7 +149,7 @@ Use inline notifications for contextual messages and actionable notifications wh
 
 ## Verify and maintain
 
-Build the consuming app for the target platform. Check the UI in light/dark themes, nested layers, narrow/wide layouts, keyboard focus, and applicable invalid, disabled, read-only and loading states. For repository changes, use `tools/verify.sh` (options in README). Documentation-only edits need link/API checks rather than a full MAUI build.
+Build the consuming app for the target platform. Check the UI in light/dark themes, nested layers, narrow/wide layouts, keyboard focus, and applicable invalid, disabled, read-only and loading states. For repository changes, use `tools/verify.sh` (options in README). To find a slow or over-busy control, listen to the `Maui.Carbon` meter (instrument names on `CdsMetrics`; an optimized iOS, Mac Catalyst or Android build needs `<MetricsSupport>true</MetricsSupport>`) or run `tools/relay-exercise.sh` and read its "Carbon metrics" section. Documentation-only edits need link/API checks rather than a full MAUI build.
 
 The README records screenshot review on Mac Catalyst; other targets being compiled does not establish visual parity. On iOS/macOS 27, follow the gallery's UIScene lifecycle configuration. Check the current README and platform files when changing target versions.
 

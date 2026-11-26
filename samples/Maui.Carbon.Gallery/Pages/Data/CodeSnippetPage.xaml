@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Inline" Description="Copies on click; hide the copy button to render plain code. Inline snippets sit in the text flow and never wrap over lines.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center" MaximumWidthRequest="720" HorizontalOptions="Start">
+            <g:WrapLayout AlignItems="Center" MaximumWidthRequest="720" HorizontalOptions="Start">
                 <cds:CdsText Text="Set " TypeStyle="Body01" />
                 <cds:CdsCodeSnippet Type="Inline" Code="KUBECONFIG" Feedback="Copied to clipboard" />
                 <cds:CdsText Text=" to the downloaded file, then check access with " TypeStyle="Body01" />
@@ -15,7 +15,7 @@
                 <cds:CdsText Text=". The namespace " TypeStyle="Body01" />
                 <cds:CdsCodeSnippet Type="Inline" Code="kube-system" HideCopyButton="True" />
                 <cds:CdsText Text=" is managed for you." TypeStyle="Body01" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Single line" Description="One line with a 40px copy button; long commands scroll sideways under a fade.">

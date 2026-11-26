@@ -138,9 +138,18 @@ public CdsButtonKind Kind
 - `HorizontalOptions=Start` shrinks a Grid to its content even with Star columns.
 - Star columns in an auto-sized parent can under-measure children and truncate labels. For "equal widths sized to the
   widest child" (segmented controls, button sets) use `CdsEqualWidthRow` (Foundation).
+- A control sets its own `HorizontalOptions` only as a constructor default, never when it rebuilds: a rebuild runs
+  again after XAML applied the app's attributes and would overwrite them. To fill the width it is offered (fluid sets,
+  equally spaced steps, fluid fields), call `SetChrome(chrome, fillsWidth: true)`; the app's alignment and
+  `WidthRequest` still apply.
+- On Mac Catalyst a `Border` paints its background and stroke half a point inside its frame. Put a fill that must
+  cover the whole box (button faces) on the layout around the Border.
 - `HorizontalStackLayout` measures children unconstrained: cap a label's `MaximumWidthRequest` to get an ellipsis.
 - A Label with `LineBreakMode.NoWrap` and no `MaxLines` draws one line: set `MaxLines` for multi-line monospace text.
 - In a row of items with different heights, set `VerticalOptions=Start` so a short item isn't stretched to its neighbour.
+- `FlexLayout` applies a child's margins twice (in the flex slot and again in the child's arrange): a child with a
+  `WidthRequest` moves by half its margins (`Margin="0,0,24,24"` starts 12 left of the edge). In the gallery, wrap
+  rows with `g:WrapLayout`, which hands each child the slot its arrange expects.
 - `ContentView` measures its content even when the content is hidden. `CdsControl` measures to zero while its chrome
   is hidden, so hide a part by hiding the root you passed to `SetChrome`, not by sizing it.
 
@@ -160,6 +169,17 @@ public CdsButtonKind Kind
   without either. Every gesture recognizer costs platform setup each time its page enters or leaves the window.
 - Moving a large screen into and out of the window costs MAUI hundreds of milliseconds (window and resource
   propagation over every element, native subviews and gestures). Keep long-lived screens attached and hide them.
+
+### Metrics (`CdsMetrics`, `Foundation/CdsMetrics.cs`)
+- The library's `System.Diagnostics.Metrics` instruments live in `CdsMeter`; their public names are constants on
+  `CdsMetrics`. Durations are histograms in seconds tagged `carbon.component` with the control type.
+- The shared choke points already measure every control: `CdsWeakDrawable` (draws), `CdsControl` (`ApplyVisuals`,
+  measure, arrange, activation), `CdsCoalescedAction` (rebuilds), `CdsThemeManager.SetTheme` and the `CdsLoop` clock.
+  Use them and a new control is covered for free; don't add per-control instruments for the same work.
+- New measured work: `var start = CdsMeter.Start(CdsMeter.X); try { ... } finally { CdsMeter.Stop(CdsMeter.X, start, this); }`.
+  `Start` returns 0 when nothing listens, so keep anything costly (tag strings, `GetType().Name`) behind `Stop`.
+- `tools/relay-exercise.sh` listens (`samples/Maui.Carbon.Relay/Hosting/ExerciseMetrics.cs`). Relay sets
+  `MetricsSupport=true` because optimized Apple and Android builds trim metrics away.
 
 ## 8. Overlays and keyboard
 
@@ -221,7 +241,9 @@ public CdsButtonKind Kind
 - Content: a `VerticalStackLayout Spacing="48"` of `g:GalleryExample` sections that mirror `preview.html`:
   every kind and size, every state (normal, disabled, invalid, warning, read-only, selected, skeleton, as
   applicable), an **interactive** example wired to a `cds:CdsText` status label, a `g:ThemeStrip` showing the
-  control in all four themes, and (for anything that sits on surfaces) a `g:ThemeStrip Layered="True"`.
+  control in all four themes, and (for anything that sits on surfaces) a `g:ThemeStrip Layered="True"`. Let the
+  example fill its zone rather than fixing a width; the strip wraps to two columns when an example is wider than a
+  quarter of the page, and `MinimumZoneWidth` keeps content that scales down (diagrams) from shrinking.
 - Bindings in XAML need `x:DataType`; prefer code-behind event handlers for the demos.
 - Use realistic, sentence-case Carbon content ("Create cluster", "prod-eu-de-1"), never lorem ipsum.
 
@@ -252,6 +274,26 @@ Zero warnings (warnings are errors), zero test failures. If you started in a git
 You cannot launch the gallery app from an agent session (no window server access). Verify by building; the
 orchestrator reviews screenshots of your pages after merging. Make every page render meaningfully without
 interaction (open states shown via properties, not clicks) so screenshots show the component.
+
+## 12a. Charts
+
+The data visualization components (`Components/Charts/`) draw differently from the other controls. Read
+`Components/Charts/Core/` and the exemplars (`SimpleBarChart`, `LineChart`) before adding or changing one.
+
+- A chart derives from `CdsChart` (or `CdsCartesianChart` for axis charts) and builds an immutable `ChartScene` for
+  its plot size in `BuildScene` / `BuildMarks`: shapes, `ChartText` labels and `ChartMark`s. The hooks are
+  `private protected`: charts are not an extension point for apps.
+- One `GraphicsView` draws the shapes; colors are `ChartPaint` references (theme keys, `CdsChartToken`s, series,
+  sequential or diverging steps) resolved for the theme and layer at draw time, so a theme change only redraws.
+  Never hex colors. The chart palettes are generated by `tools/carbon-charts/build-maui.mjs`.
+- Text is never drawn on the canvas: every `ChartText` becomes a pooled `CdsText` label over it (IBM Plex Sans
+  Condensed for ticks and legends, font auto-scaling off). Layout measures text with `CdsChartTextMetrics` (generated
+  from the embedded fonts), so scenes are the same on every platform and in tests.
+- Hover and the data cursor only change which mark is active and redraw; they never rebuild the scene. Marks are also
+  the keyboard and screen-reader path: one adjustable hit target over the plot steps through them (arrow keys,
+  VoiceOver and TalkBack adjust gestures) and shows each mark's tooltip. Add marks in reading order with a spoken
+  `Description`, and keep "Show as table" complete: it is the accessible way to every value.
+- Test charts without a platform through `RenderScene(width, height)` and `RenderTable()`.
 
 ## 13. Definition of done and report
 

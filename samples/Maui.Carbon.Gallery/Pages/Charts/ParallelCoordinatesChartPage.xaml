@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ParallelCoordinatesChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Records across measures" Description="One axis per dimension, each with its own nice scale; one line per record in its group color at 70% opacity. A missing value (the Model 3's fuel economy) breaks the line. Hover a record for every value.">
+            <cds:CdsParallelCoordinatesChart Title="Car models by fuel economy, engine, power, weight and acceleration" Data="{x:Static data:PackageESamples.Cars}" HeightRequest="420">
+                <cds:CdsParallelCoordinatesChart.Dimensions>
+                    <cds:CdsParallelDimension Key="mpg" Title="Fuel (mpg)" />
+                    <cds:CdsParallelDimension Key="cylinders" Title="Cylinders" />
+                    <cds:CdsParallelDimension Key="horsepower" Title="Power (hp)" />
+                    <cds:CdsParallelDimension Key="weight" Title="Weight (kg)" />
+                    <cds:CdsParallelDimension Key="accel" Title="0-60 mph (s)" />
+                </cds:CdsParallelCoordinatesChart.Dimensions>
+            </cds:CdsParallelCoordinatesChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Filtered" Description="Filters keep a range per axis, drawn as Carbon's brush; records outside turn layer-accent-01 and lose their tooltip.">
+            <cds:CdsParallelCoordinatesChart x:Name="Filtered" Title="Service health by tier (filtered to latency under 180 ms)" Data="{x:Static data:PackageESamples.Services}" HeightRequest="440">
+                <cds:CdsParallelCoordinatesChart.Dimensions>
+                    <cds:CdsParallelDimension Key="latency" Title="Latency (ms)" />
+                    <cds:CdsParallelDimension Key="errors" Title="Errors (%)" />
+                    <cds:CdsParallelDimension Key="throughput" Title="Requests/s" />
+                    <cds:CdsParallelDimension Key="cpu" Title="CPU (%)" />
+                    <cds:CdsParallelDimension Key="cost" Title="Cost ($/mo)" />
+                </cds:CdsParallelCoordinatesChart.Dimensions>
+            </cds:CdsParallelCoordinatesChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Pointer brushing is not available: give users filters through form controls, as these buttons do. Hover a legend item to fade the other groups; click to isolate.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsParallelCoordinatesChart x:Name="Interactive" Title="Service health by tier" Data="{x:Static data:PackageESamples.Services}"
+                                                 HeightRequest="400" SelectedGroupsChanged="OnSelectedGroupsChanged">
+                    <cds:CdsParallelCoordinatesChart.Dimensions>
+                        <cds:CdsParallelDimension Key="latency" Title="Latency (ms)" />
+                        <cds:CdsParallelDimension Key="errors" Title="Errors (%)" />
+                        <cds:CdsParallelDimension Key="throughput" Title="Requests/s" />
+                        <cds:CdsParallelDimension Key="cpu" Title="CPU (%)" />
+                        <cds:CdsParallelDimension Key="cost" Title="Cost ($/mo)" />
+                    </cds:CdsParallelCoordinatesChart.Dimensions>
+                </cds:CdsParallelCoordinatesChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Latency under 180 ms" Kind="Tertiary" Size="Sm" Clicked="OnLatencyClicked" />
+                    <cds:CdsButton Text="CPU over 50%" Kind="Tertiary" Size="Sm" Clicked="OnCpuClicked" />
+                    <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Clicked="OnClearClicked" />
+                    <cds:CdsText x:Name="Status" Text="No filters, all groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsParallelCoordinatesChart Title="Loading state" IsLoading="True" HeightRequest="300" />
+                <cds:CdsParallelCoordinatesChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageESamples.NoRecords}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Axes, labels and the pairing palette follow each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsParallelCoordinatesChart Title="Service health" Data="{x:Static data:PackageESamples.Services}" HeightRequest="280" IsToolbarEnabled="False">
+                            <cds:CdsParallelCoordinatesChart.Dimensions>
+                                <cds:CdsParallelDimension Key="latency" Title="Latency (ms)" />
+                                <cds:CdsParallelDimension Key="errors" Title="Errors (%)" />
+                                <cds:CdsParallelDimension Key="throughput" Title="Requests/s" />
+                                <cds:CdsParallelDimension Key="cpu" Title="CPU (%)" />
+                                <cds:CdsParallelDimension Key="cost" Title="Cost ($/mo)" />
+                            </cds:CdsParallelCoordinatesChart.Dimensions>
+                        </cds:CdsParallelCoordinatesChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Tick label plates follow the surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsParallelCoordinatesChart Title="Service health" Data="{x:Static data:PackageESamples.Services}" HeightRequest="280" IsToolbarEnabled="False">
+                            <cds:CdsParallelCoordinatesChart.Dimensions>
+                                <cds:CdsParallelDimension Key="latency" Title="Latency (ms)" />
+                                <cds:CdsParallelDimension Key="errors" Title="Errors (%)" />
+                                <cds:CdsParallelDimension Key="throughput" Title="Requests/s" />
+                                <cds:CdsParallelDimension Key="cpu" Title="CPU (%)" />
+                                <cds:CdsParallelDimension Key="cost" Title="Cost ($/mo)" />
+                            </cds:CdsParallelCoordinatesChart.Dimensions>
+                        </cds:CdsParallelCoordinatesChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

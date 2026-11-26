@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ChoroplethChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="World map" Description="Each point's Key names a region (or gives its id); its Value picks one of 11 purple steps from 0. Regions without data merge into one hatched shape. The map comes from the app package; IsLoading shows the skeleton until it is read.">
+            <cds:CdsChoroplethChart Title="Internet users, % of population (2022)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                    Data="{x:Static data:PackageESamples.InternetUsers}" ColorLegendTitle="% of population" HeightRequest="420" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Regional views" Description="Values on both sides of zero use the diverging palette (left, clamped to -15 to 15). FitBounds fixes the view to a box in degrees, here on a conic equal-area projection; by default the view fits the regions with data (right, Mercator, ColorPairingOption 4 teal).">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsChoroplethChart Title="Population change in Europe, 2013-2023 (%)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                        Data="{x:Static data:PackageESamples.PopulationChange}" Projection="ConicEqualArea" FitBounds="{x:Static data:PackageESamples.Europe}"
+                                        ColorLegendType="Quantize" ColorLegendTitle="Change (%)" ColorDomainMinimum="-15" ColorDomainMaximum="15" HeightRequest="420" />
+                <cds:CdsChoroplethChart Grid.Column="1" Title="Forest area in South America, % of land (2021)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                        Data="{x:Static data:PackageESamples.ForestArea}" Projection="Mercator" ColorPairingOption="4"
+                                        ColorLegendType="Quantize" ColorLegendTitle="% of land" HeightRequest="420" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Equal Earth, loading" Description="ColorPairingOption 2 is the blue palette. IsLoading shows the shimmering skeleton while the geometry is read.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsChoroplethChart Title="Access to electricity in Africa, % of population (2021)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                        Data="{x:Static data:PackageESamples.ElectricityAccess}" Projection="EqualEarth" ColorPairingOption="2"
+                                        ColorLegendTitle="% of population" HeightRequest="420" />
+                <cds:CdsChoroplethChart Grid.Column="1" Title="Loading state" IsLoading="True" HeightRequest="420" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Hover a region for its value; Tab to the map and use the arrow keys to move through the regions, top to bottom. The button cycles the projection.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsChoroplethChart x:Name="Interactive" Title="Internet users, % of population (2022)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                        Data="{x:Static data:PackageESamples.InternetUsers}" ColorLegendTitle="% of population" FitTo="Map" HeightRequest="400" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Next projection" Kind="Tertiary" Size="Sm" Clicked="OnProjectionClicked" />
+                    <cds:CdsText x:Name="Status" Text="Natural Earth 1, whole map" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Steps reverse on g90 and g100; borders and the missing-data hatch follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsChoroplethChart Title="Internet users (%)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.ElectricityAccess}"
+                                                Projection="EqualEarth" ColorPairingOption="2" ColorLegendTitle="% of population" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="The missing-data background follows the surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsChoroplethChart Title="Internet users (%)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.ElectricityAccess}"
+                                                Projection="EqualEarth" ColorPairingOption="2" ColorLegendTitle="% of population" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

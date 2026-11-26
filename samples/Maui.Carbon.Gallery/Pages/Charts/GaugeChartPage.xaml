@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.GaugeChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Semi gauges" Description="The arc fills to Value (0-100) in the first pairing color. A delta shows under the value with an arrow; Status colors the arrow, always next to the signed delta text.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsGaugeChart Title="CPU utilization (%)" Value="42" HeightRequest="250" />
+                <cds:CdsGaugeChart Grid.Column="1" Title="SLA attainment (%), month over month" Value="76.5" Delta="-3.2" Status="Danger" HeightRequest="250" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Full gauges" Description="Type Full draws a ring with the numbers in its middle; Alignment centers it.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsGaugeChart Title="Quarterly target reached (%)" Value="88" Delta="4" Status="Success" Type="Full" Alignment="Center" HeightRequest="280" />
+                <cds:CdsGaugeChart Grid.Column="1" Title="Disk quota used (%)" Value="63" Type="Full" Alignment="Center" HeightRequest="280" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Change the value: the delta is the change from the previous value, and the status follows Carbon's usual ranges (success under 60, warning under 85, danger above). Tab to the graph to hear the value and change.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsGaugeChart x:Name="Interactive" Title="Memory used (%)" Value="52" HeightRequest="250" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Decrease" Kind="Tertiary" Size="Sm" Clicked="OnDecrease" />
+                    <cds:CdsButton Text="Increase" Kind="Tertiary" Size="Sm" Clicked="OnIncrease" />
+                    <cds:CdsText x:Name="Status" Text="52%, no change" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows a shimmering ring; without a value the ring is still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsGaugeChart Title="Loading" IsLoading="True" HeightRequest="250" />
+                <cds:CdsGaugeChart Grid.Column="1" Title="No data" HeightRequest="250" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The arc rest is layer-01 and the numbers text-secondary in each theme; status arrows use the support colors.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsGaugeChart Title="SLA attainment (%)" Value="76.5" Delta="-3.2" Status="Danger" HeightRequest="200" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the arc rest steps up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsGaugeChart Title="SLA attainment (%)" Value="76.5" Delta="-3.2" Status="Danger" HeightRequest="200" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

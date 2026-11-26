@@ -35,7 +35,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-south-2" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-south-2" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -45,7 +45,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-south-2" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidComboBox Label="Zone" Placeholder="Choose or type a zone" ItemsSource="{x:Static data:GListData.Zones}" SelectedItem="us-south-2" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

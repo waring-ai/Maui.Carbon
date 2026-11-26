@@ -40,7 +40,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextInput Label="Pool name" Text="default-pool" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTextInput Label="Pool name" Text="default-pool" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -50,7 +50,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTextInput Label="Pool name" Text="default-pool" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTextInput Label="Pool name" Text="default-pool" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.AreaChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Time series" Description="Each area fills from zero at 40% under a 1.5px line; the time axis runs edge to edge. Hover anywhere: the dashed ruler reads every region at that month and the points fill in under it.">
+<cds:CdsAreaChart Title="Monthly network traffic by region" Data="{x:Static data:PackageBSamples.Traffic}">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" Title="2024" />
+</cds:CdsAreaChart.BottomAxis>
+<cds:CdsAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Traffic (TB)" />
+</cds:CdsAreaChart.LeftAxis>
+</cds:CdsAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Gradient" Description="IsGradientEnabled fades a single series from 60% at the line to nothing at 80% of its height.">
+<cds:CdsAreaChart Title="Daily active users (gradient)" Data="{x:Static data:PackageBSamples.ActiveUsers}" Curve="MonotoneX" IsGradientEnabled="True" IsLegendEnabled="False">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+<cds:CdsAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Users" />
+</cds:CdsAreaChart.LeftAxis>
+</cds:CdsAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Bounded forecast band" Description="Points with Low and High shade the band between the bounds (one series only): a 40% fill with a dashed 0.7px outline. IncludeZero off zooms the value axis to the data; Show as table adds the bound columns.">
+<cds:CdsAreaChart Title="Weekly orders with 90% forecast band" Data="{x:Static data:PackageBSamples.OrderForecast}" Curve="MonotoneX">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+<cds:CdsAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Orders" IncludeZero="False" />
+</cds:CdsAreaChart.LeftAxis>
+</cds:CdsAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Gradient around zero" Description="When the value axis crosses zero the gradient fades to nothing at zero and grows again below it.">
+<cds:CdsAreaChart Title="Annual temperature anomaly" Data="{x:Static data:PackageBSamples.TemperatureAnomaly}" IsGradientEnabled="True" IsLegendEnabled="False">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+<cds:CdsAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Anomaly (°C)" />
+</cds:CdsAreaChart.LeftAxis>
+</cds:CdsAreaChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate a region (click more to add, the last to reset); hover a legend item to fade the other areas to 5%. Tab to the graph and use the arrow keys to step through the months.">
+<VerticalStackLayout Spacing="16">
+<cds:CdsAreaChart x:Name="Interactive" Title="Monthly network traffic by region" Data="{x:Static data:PackageBSamples.Traffic}" Curve="MonotoneX" SelectedGroupsChanged="OnSelectedGroupsChanged">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+<cds:CdsAreaChart.LeftAxis>
+<cds:CdsChartAxis Title="Traffic (TB)" />
+</cds:CdsAreaChart.LeftAxis>
+</cds:CdsAreaChart>
+<HorizontalStackLayout Spacing="16">
+<cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+<cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+</HorizontalStackLayout>
+</VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering grid skeleton; empty data shows it still.">
+<Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+<cds:CdsAreaChart Title="Loading" IsLoading="True" HeightRequest="300" />
+<cds:CdsAreaChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageBSamples.Empty}" HeightRequest="300" />
+</Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Areas take the pairing palette of each theme; g90 and g100 use the dark palette.">
+<g:ThemeStrip>
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsAreaChart Title="Traffic" Data="{x:Static data:PackageBSamples.Traffic}" Curve="MonotoneX" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+</cds:CdsAreaChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop and the hollow points step up with it.">
+<g:ThemeStrip Layered="True">
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsAreaChart Title="Traffic" Data="{x:Static data:PackageBSamples.Traffic}" Curve="MonotoneX" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsAreaChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsAreaChart.BottomAxis>
+</cds:CdsAreaChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

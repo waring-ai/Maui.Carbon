@@ -408,4 +408,23 @@ public class DatePickerTests
     [InlineData("03/18", "03/19 ", false)]
     public void Typed_space_detection(string? before, string? after, bool expected) =>
         Assert.Equal(expected, DatePickerFormat.IsTypedSpace(before, after));
+
+    [Fact]
+    public void A_status_icon_takes_the_calendar_icons_slot_instead_of_sitting_beside_an_empty_one()
+    {
+        var picker = Make(CdsDatePickerType.Range);
+        Assert.True(picker.CalendarIcons.Start.IsVisible);
+        Assert.True(picker.CalendarIcons.End.IsVisible);
+        picker.IsInvalid = true;
+        // The 16px slot goes with the icon, so the error icon sits 16px from the end, where the calendar icon was.
+        Assert.False(picker.CalendarIcons.Start.IsVisible);
+        Assert.False(picker.CalendarIcons.End.IsVisible);
+        picker.IsInvalid = false;
+        picker.IsWarning = true;
+        Assert.False(picker.CalendarIcons.Start.IsVisible);
+        picker.IsWarning = false;
+        Assert.True(picker.CalendarIcons.Start.IsVisible);
+        picker.Type = CdsDatePickerType.Simple;
+        Assert.False(picker.CalendarIcons.Start.IsVisible);
+    }
 }

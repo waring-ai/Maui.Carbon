@@ -36,7 +36,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTimePicker Label="Start time" Text="2:30" Period="Pm" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTimePicker Label="Start time" Text="2:30" Period="Pm" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -46,7 +46,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidTimePicker Label="Start time" Text="2:30" Period="Pm" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidTimePicker Label="Start time" Text="2:30" Period="Pm" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

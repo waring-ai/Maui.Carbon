@@ -385,4 +385,17 @@ public class SliderTests
         skeleton.IsRange = false;
         skeleton.HideLabel = false;
     }
+
+    [Fact]
+    public void The_invalid_and_warning_messages_are_text_only_the_icon_stays_in_the_box()
+    {
+        var slider = new CdsSlider { Label = "Size", IsInvalid = true, InvalidText = "Value is out of range" };
+        Assert.Equal("Value is out of range", slider.Message.CurrentText);
+        Assert.False(slider.Message.ShowsIcon);
+        slider.IsInvalid = false;
+        slider.IsWarning = true;
+        slider.WarnText = "One replica has no redundancy";
+        Assert.Equal("One replica has no redundancy", slider.Message.CurrentText);
+        Assert.False(slider.Message.ShowsIcon);
+    }
 }

@@ -238,7 +238,7 @@ public partial class CdsTimePicker : CdsControl
                 _root.RowDefinitions.Add(new RowDefinition(GridLength.Star));
                 _root.Add(_fluidGroup, 0, 0);
             }
-            HorizontalOptions = LayoutOptions.Fill;
+            SetChrome(_root, fillsWidth: true);
         }
         else if (_fluidBuilt)
         {
@@ -248,7 +248,7 @@ public partial class CdsTimePicker : CdsControl
             _row.Add(PeriodSelect);
             _row.Add(ZoneSelect);
             BuildDefaultRoot();
-            HorizontalOptions = LayoutOptions.Start;
+            SetChrome(_root, fillsWidth: false);
         }
     }
 

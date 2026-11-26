@@ -7,54 +7,54 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Kinds" Description="The same colors as Button with a pill radius. Keep one primary action (Send) per composer.">
-            <FlexLayout Wrap="Wrap" AlignItems="End">
+            <g:WrapLayout AlignItems="End">
                 <cds:CdsChatButton Text="Send" Icon="ArrowUp" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Regenerate" Kind="Secondary" Icon="Renew" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Attach file" Kind="Tertiary" Icon="Attachment" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Stop generating" Kind="Ghost" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Clear chat" Kind="Danger" Margin="0,0,16,16" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes" Description="sm 32 (radius 16), md 40 (radius 20), lg 48 (radius 24, default). Without an icon the end padding is 15 so the label looks centered.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center">
+            <g:WrapLayout AlignItems="Center">
                 <cds:CdsChatButton Text="Send" Size="Sm" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Size="Md" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Size="Sm" Icon="ArrowUp" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Size="Md" Icon="ArrowUp" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Send" Icon="ArrowUp" Margin="0,0,16,16" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Quick actions" Description="IsQuickAction forces a small ghost button drawn as an outlined pill: a 1px link-primary border and text; hover and pressed drop the border and fill with background-hover or background-active. The selected one has no border and a background-selected fill.">
             <VerticalStackLayout Spacing="16">
-                <FlexLayout Wrap="Wrap" x:Name="Prompts">
+                <g:WrapLayout x:Name="Prompts">
                     <cds:CdsChatButton Text="Show nodes not ready" IsQuickAction="True" Margin="0,0,8,8" Clicked="OnPromptClicked" />
                     <cds:CdsChatButton Text="Summarize cluster health" IsQuickAction="True" IsSelected="True" Margin="0,0,8,8" Clicked="OnPromptClicked" />
                     <cds:CdsChatButton Text="Compare with last week" IsQuickAction="True" Margin="0,0,8,8" Clicked="OnPromptClicked" />
                     <cds:CdsChatButton Text="Unavailable prompt" IsQuickAction="True" IsEnabled="False" Margin="0,0,8,8" />
-                </FlexLayout>
+                </g:WrapLayout>
                 <cds:CdsText x:Name="Status" Text="Selected prompt: Summarize cluster health" />
             </VerticalStackLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Disabled" Description="Disabled chat buttons use button-disabled (the quick action keeps a button-disabled border and text; a selected disabled quick action still shows text-secondary).">
-            <FlexLayout Wrap="Wrap" AlignItems="End">
+            <g:WrapLayout AlignItems="End">
                 <cds:CdsChatButton Text="Send" Icon="ArrowUp" IsEnabled="False" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Attach" Kind="Tertiary" IsEnabled="False" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Stop" Kind="Ghost" IsEnabled="False" Margin="0,0,16,16" />
                 <cds:CdsChatButton Text="Selected" IsQuickAction="True" IsSelected="True" IsEnabled="False" Margin="0,0,16,16" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="In a composer" Description="Quick actions follow an assistant message; one primary Send per composer, disabled until there is a message.">
             <VerticalStackLayout Spacing="16" MaximumWidthRequest="560" HorizontalOptions="Start">
                 <cds:CdsText Text="Two nodes in prod-eu-de-1 are not ready. What would you like to do?" TypeStyle="Body01" />
-                <FlexLayout Wrap="Wrap">
+                <g:WrapLayout>
                     <cds:CdsChatButton Text="Show nodes not ready" IsQuickAction="True" Margin="0,0,8,8" />
                     <cds:CdsChatButton Text="Restart workers" IsQuickAction="True" Margin="0,0,8,8" />
-                </FlexLayout>
+                </g:WrapLayout>
                 <HorizontalStackLayout Spacing="8">
                     <cds:CdsChatButton Text="Attach" Kind="Tertiary" Icon="Attachment" />
                     <cds:CdsChatButton Text="Send" Icon="ArrowUp" IsEnabled="False" />

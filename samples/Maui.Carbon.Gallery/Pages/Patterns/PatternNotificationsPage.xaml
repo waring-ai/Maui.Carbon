@@ -54,7 +54,7 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Inline notification and callout" Description="The inline notification sits at the top of the form it is about, 24 above the first field. The callout is guidance inside the content, before the person acts.">
-            <FlexLayout Wrap="Wrap" JustifyContent="Start" AlignItems="Start">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
                 <VerticalStackLayout WidthRequest="520" Margin="0,0,24,24" Spacing="24" BackgroundColor="{DynamicResource CdsLayer01}" Padding="16">
                     <cds:CdsText Text="Invite users" TypeStyle="Heading03" />
                     <cds:CdsInlineNotification Kind="Warning" IsLowContrast="True" HideCloseButton="True" Title="You can invite 2 more users."
@@ -81,7 +81,7 @@
                     <cds:CdsCallout Kind="Warning" Title="Keys don't expire." Subtitle="Rotate keys every 90 days and delete keys you no longer use."
                                     ActionButtonLabel="Set a rotation policy" />
                 </VerticalStackLayout>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="System and task messages on one page" Description="A banner under the header for the account, toasts stacked top-right (newest first), the newest with an Undo action.">
@@ -111,13 +111,13 @@
 
         <g:GalleryExample Title="Try each one" Description="Each button triggers the message that fits. The toast comes from CdsToast.Show; errors never time out, success toasts close after 5 seconds.">
             <VerticalStackLayout Spacing="16">
-                <FlexLayout Wrap="Wrap">
+                <g:WrapLayout>
                     <cds:CdsButton Text="Save with a form error" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnInlineClicked" />
                     <cds:CdsButton Text="Export report" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnToastClicked" />
                     <cds:CdsButton Text="Delete bucket" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnActionableClicked" />
                     <cds:CdsButton Text="Simulate failure" Kind="Tertiary" Size="Md" Margin="0,0,16,16" Clicked="OnErrorToastClicked" />
                     <cds:CdsButton Text="Expire session" Kind="DangerTertiary" Size="Md" Margin="0,0,16,16" Clicked="OnModalClicked" />
-                </FlexLayout>
+                </g:WrapLayout>
                 <cds:CdsInlineNotification x:Name="TrialInline" IsVisible="False" Kind="Error" IsLowContrast="True" Title="The cluster name is already taken."
                                            Subtitle="Choose another name for the cluster and save again." HorizontalOptions="Start" WidthRequest="560" />
                 <cds:CdsActionableNotification x:Name="TrialUndo" IsVisible="False" IsInline="True" IsLowContrast="True" Kind="Info" Role="Status" HasFocus="False"

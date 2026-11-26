@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ComboChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Bars with a line on a secondary axis" Description="Two measures with their own units: the right axis lists the datasets it measures, and the ruler tooltip leaves out the total.">
+            <cds:CdsComboChart Title="Park visitors and temperature" Data="{x:Static data:ComboSamples.Visitors}">
+                <cds:CdsComboChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Visitors (thousands)" />
+                </cds:CdsComboChart.LeftAxis>
+                <cds:CdsComboChart.RightAxis>
+                    <cds:CdsChartAxis Title="Temperature (°C)" CorrespondingDatasets="{x:Static data:ComboSamples.TemperatureDataset}" />
+                </cds:CdsComboChart.RightAxis>
+                <cds:CdsComboChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsComboChart.BottomAxis>
+                <cds:CdsComboChartType Graph="SimpleBar" CorrespondingDatasets="{x:Static data:ComboSamples.VisitorsDataset}" />
+                <cds:CdsComboChartType Graph="Line" PointRadius="4" CorrespondingDatasets="{x:Static data:ComboSamples.TemperatureDataset}" />
+            </cds:CdsComboChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Stacked bars with a target line" Description="Stacked parts with the goal drawn over them; the value axis covers the stacked sums.">
+            <cds:CdsComboChart Title="Revenue by line of business against target" Data="{x:Static data:ComboSamples.Revenue}">
+                <cds:CdsComboChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Revenue (USD millions)" IsStacked="True" />
+                </cds:CdsComboChart.LeftAxis>
+                <cds:CdsComboChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsComboChart.BottomAxis>
+                <cds:CdsComboChartType Graph="StackedBar" CorrespondingDatasets="{x:Static data:ComboSamples.LinesOfBusiness}" />
+                <cds:CdsComboChartType Graph="Line" CorrespondingDatasets="{x:Static data:ComboSamples.Target}" />
+            </cds:CdsComboChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Grouped bars with an area" Description="Opened and resolved tickets side by side, with the backlog as an area behind the line.">
+            <cds:CdsComboChart Title="Support tickets and backlog" Data="{x:Static data:ComboSamples.Tickets}">
+                <cds:CdsComboChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Tickets" />
+                </cds:CdsComboChart.LeftAxis>
+                <cds:CdsComboChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsComboChart.BottomAxis>
+                <cds:CdsComboChartType Graph="GroupedBar" CorrespondingDatasets="{x:Static data:ComboSamples.OpenedResolved}" />
+                <cds:CdsComboChartType Graph="Area" CorrespondingDatasets="{x:Static data:ComboSamples.Backlog}" />
+            </cds:CdsComboChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Each dataset keeps its pairing color in every theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsComboChart Title="Tickets" Data="{x:Static data:ComboSamples.Tickets}" HeightRequest="280" IsToolbarEnabled="False">
+                            <cds:CdsComboChart.BottomAxis>
+                                <cds:CdsChartAxis ScaleType="Labels" />
+                            </cds:CdsComboChart.BottomAxis>
+                            <cds:CdsComboChartType Graph="GroupedBar" CorrespondingDatasets="{x:Static data:ComboSamples.OpenedResolved}" />
+                            <cds:CdsComboChartType Graph="Line" CorrespondingDatasets="{x:Static data:ComboSamples.Backlog}" />
+                        </cds:CdsComboChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

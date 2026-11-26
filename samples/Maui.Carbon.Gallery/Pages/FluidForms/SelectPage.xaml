@@ -35,7 +35,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -45,7 +45,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidSelect Label="Region" SelectedItem="eu-de"><cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" /><cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" /><cds:CdsSelectItem Value="eu-gb" Text="London (eu-gb)" /></cds:CdsFluidSelect></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

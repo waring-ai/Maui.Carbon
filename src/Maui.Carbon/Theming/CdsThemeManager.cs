@@ -17,8 +17,16 @@ public static class CdsThemeManager
         var resources = CdsResources.Current ?? throw new InvalidOperationException(
             "No CdsResources found. Add <cds:CdsResources /> to Application.Resources (App.xaml) before switching themes.");
         if (resources.Theme == theme) return;
-        resources.Theme = theme;
-        ThemeChanged?.Invoke(null, EventArgs.Empty);
+        var start = CdsMeter.Start(CdsMeter.ThemeSwitch);
+        try
+        {
+            resources.Theme = theme;
+            ThemeChanged?.Invoke(null, EventArgs.Empty);
+        }
+        finally
+        {
+            CdsMeter.Stop(CdsMeter.ThemeSwitch, start, CdsMetrics.ThemeTag, theme.ToString());
+        }
     }
 
     /// <summary>

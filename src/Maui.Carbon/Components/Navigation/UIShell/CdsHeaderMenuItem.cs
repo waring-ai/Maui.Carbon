@@ -183,7 +183,9 @@ public class CdsHeaderMenuItem : CdsShellItem
                 _bar.VerticalOptions = LayoutOptions.Fill;
                 break;
         }
-        HorizontalOptions = _presentation == CdsShellPresentation.Bar ? LayoutOptions.Start : LayoutOptions.Fill;
+        // Dropdown and side-nav rows are full width; header links hug their text. Decided while measuring, so the app's
+        // HorizontalOptions are never overwritten.
+        SetChrome(_root, fillsWidth: _presentation != CdsShellPresentation.Bar);
         RefreshVisuals();
     }
 }

@@ -26,4 +26,8 @@
     <Using Include="Maui.Carbon" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\samples\Maui.Carbon.Gallery\Infrastructure\WrapLayout.cs" Link="Gallery\WrapLayout.cs" />
+  </ItemGroup>
+
 </Project>

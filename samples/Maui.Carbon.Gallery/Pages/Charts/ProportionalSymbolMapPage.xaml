@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ProportionalSymbolMapPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="World" Description="Each circle's area is proportional to its value, in its group's color at 20% with a 1px stroke, largest first. The size key under the map shows the largest value, about a quarter and a sixteenth.">
+            <cds:CdsProportionalSymbolMap Title="Largest urban areas by population (millions, 2023)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                          Data="{x:Static data:PackageESamples.UrbanAreas}" RadiusLabel="Population (M)" LocationLabel="Urban area" HeightRequest="440" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Region, one group, loading" Description="A conic projection fitted to a box over Europe; one group needs no legend; SymbolFillOpacity 0.3. IsLoading shows the shimmering skeleton.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsProportionalSymbolMap Title="Data center capacity in European cities (MW)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                              Data="{x:Static data:PackageESamples.DataCenterCapacity}" IsLegendEnabled="False" Projection="ConicEqualArea"
+                                              FitBounds="{x:Static data:PackageESamples.WesternEurope}" RadiusLabel="Capacity (MW)" LocationLabel="City"
+                                              SymbolFillOpacity="0.3" HeightRequest="440" />
+                <cds:CdsProportionalSymbolMap Grid.Column="1" Title="Loading state" IsLoading="True" HeightRequest="440" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Hover a legend item to fade the other groups; click to isolate. Hover a circle for its location, value and group; Tab to the map and use the arrow keys, largest first.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsProportionalSymbolMap Title="Largest urban areas by population (millions, 2023)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}"
+                                              Data="{x:Static data:PackageESamples.UrbanAreas}" RadiusLabel="Population (M)" LocationLabel="Urban area"
+                                              FitTo="Data" HeightRequest="400" SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <cds:CdsText x:Name="Status" Text="All groups shown" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The base map and the pairing palette follow each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsProportionalSymbolMap Title="Urban areas (millions)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.UrbanAreas}"
+                                                      RadiusLabel="Population (M)" LocationLabel="Urban area" HeightRequest="280" IsToolbarEnabled="False" IsLegendEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="The muted land steps up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsProportionalSymbolMap Title="Urban areas (millions)" x:DataType="data:MapAssets" GeoData="{Binding Countries, Source={x:Static data:MapAssets.Shared}}" IsLoading="{Binding IsLoading, Source={x:Static data:MapAssets.Shared}}" Data="{x:Static data:PackageESamples.UrbanAreas}"
+                                                      RadiusLabel="Population (M)" LocationLabel="Urban area" HeightRequest="280" IsToolbarEnabled="False" IsLegendEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

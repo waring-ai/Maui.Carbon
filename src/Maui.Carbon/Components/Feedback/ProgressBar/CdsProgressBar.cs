@@ -140,7 +140,10 @@ public class CdsProgressBar : CdsControl
     readonly Border _track = new() { StrokeThickness = 0, StrokeShape = new Microsoft.Maui.Controls.Shapes.Rectangle(), MinimumWidthRequest = 48, VerticalOptions = LayoutOptions.Center };
     readonly Grid _trackContent = new();
     readonly BoxView _fill = new() { AnchorX = 0, ScaleX = 0.0001 };
-    readonly BoxView _sweep = new() { HorizontalOptions = LayoutOptions.Start, IsVisible = false };
+    // The sweep fills the track and is drawn a quarter wide by ScaleX from its start edge, then moved by TranslationX:
+    // transforms only. Re-sizing it with WidthRequest each frame never re-arranged it on Mac Catalyst (its bounds stayed
+    // 0 wide, so the indeterminate bar showed an empty track).
+    readonly BoxView _sweep = new() { AnchorX = 0, ScaleX = 0.25, IsVisible = false };
     readonly CdsIcon _statusIcon = new() { IsVisible = false, VerticalOptions = LayoutOptions.Center };
     double _shownFraction;
     CdsProgressStatus _announcedStatus = CdsProgressStatus.Active;
@@ -152,8 +155,9 @@ public class CdsProgressBar : CdsControl
         _trackContent.Add(_sweep);
         _track.Content = _trackContent;
         _track.SizeChanged += (_, _) => RestartSweep();
-        HorizontalOptions = LayoutOptions.Fill;
-        SetChrome(_root);
+        // A block element: as wide as its container (Carbon's progress bar is inline-size 100%), whatever alignment the
+        // app gives it.
+        SetChrome(_root, fillsWidth: true);
         Loaded += (_, _) => RestartSweep();
         Unloaded += (_, _) => CdsLoop.Stop(_track, SweepAnimation);
         Update();
@@ -343,15 +347,20 @@ public class CdsProgressBar : CdsControl
         }
         if (!IsLoaded || _track.Width <= 0) return;
         var width = _track.Width;
-        _sweep.WidthRequest = width * 0.25;
-        CdsLoop.Start(_track, SweepAnimation, phase =>
-        {
-            var (x, w, visible) = ProgressBarModel.IndeterminateBlock(phase, width);
-            _sweep.WidthRequest = w;
-            _sweep.TranslationX = x;
-            _sweep.IsVisible = visible;
-        }, 0.4, 1400);
+        CdsLoop.Start(_track, SweepAnimation, phase => ApplySweep(phase, width), 0.4, 1400);
     }
+
+    /// <summary>Places the indeterminate block for a phase on a track <paramref name="width"/> wide (internal for tests).</summary>
+    internal void ApplySweep(double phase, double width)
+    {
+        var (x, w, visible) = ProgressBarModel.IndeterminateBlock(phase, width);
+        _sweep.ScaleX = width > 0 ? w / width : 0.25;
+        _sweep.TranslationX = x;
+        _sweep.IsVisible = visible;
+    }
+
+    /// <summary>The indeterminate block (for tests).</summary>
+    internal BoxView Sweep => _sweep;
 
     static void AnnounceStatus(CdsProgressStatus status)
     {

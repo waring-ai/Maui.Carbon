@@ -48,7 +48,7 @@ public class CdsLoading : CdsControl
 
     readonly CdsSpinnerView _spinner = new() { HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
     readonly BoxView _scrim = new() { IsVisible = false };
-    readonly Grid _root = new();
+    readonly RegionRoot _root = new();
     readonly List<BlockedView> _blocked = [];
     CdsOverlay? _overlay;
     CdsSpinnerView? _overlaySpinner;
@@ -216,10 +216,9 @@ public class CdsLoading : CdsControl
 
     void OnOverlayScopeChanged()
     {
-        // A region overlay fills the cell it covers; the spinner alone is centered.
-        var fill = OverlayScope == CdsLoadingOverlayScope.Region;
-        HorizontalOptions = fill ? LayoutOptions.Fill : LayoutOptions.Center;
-        VerticalOptions = fill ? LayoutOptions.Fill : LayoutOptions.Center;
+        // A region overlay fills the cell it covers; the spinner alone is centered. The root asks for the whole space it is
+        // offered while measuring, so the app's HorizontalOptions and VerticalOptions are never overwritten.
+        _root.FillsSpace = OverlayScope == CdsLoadingOverlayScope.Region;
         Update();
     }
 
@@ -259,4 +258,34 @@ public class CdsLoading : CdsControl
     readonly record struct BlockedView(WeakReference<VisualElement> View, bool InputTransparent, bool? ExcludedWithChildren);
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsLoading)b).Update();
+
+    /// <summary>Whether the control asks for all the space it is offered (region scope; for tests).</summary>
+    internal bool FillsSpace => _root.FillsSpace;
+
+    // The chrome root: in region scope it measures to the whole finite space it is offered, so the control covers its
+    // cell under any alignment (an unbounded direction falls back to the spinner's size).
+    sealed class RegionRoot : Grid
+    {
+        bool _fills;
+
+        public bool FillsSpace
+        {
+            get => _fills;
+            set
+            {
+                if (_fills == value) return;
+                _fills = value;
+                InvalidateMeasure();
+            }
+        }
+
+        protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
+        {
+            var size = base.MeasureOverride(widthConstraint, heightConstraint);
+            if (!_fills) return size;
+            return new Size(
+                double.IsFinite(widthConstraint) ? widthConstraint : size.Width,
+                double.IsFinite(heightConstraint) ? heightConstraint : size.Height);
+        }
+    }
 }

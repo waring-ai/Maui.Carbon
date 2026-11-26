@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.GroupedBarChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="One bar per group in each category, side by side on an inner band; bars in a group are up to 5px apart and at most 16px thick.">
+            <cds:CdsGroupedBarChart Title="Revenue by region and quarter (USD M)" Data="{x:Static data:PackageASamples.RevenueByRegion}">
+                <cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Revenue (USD M)" />
+                </cds:CdsGroupedBarChart.LeftAxis>
+                <cds:CdsGroupedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" Title="Quarter" />
+                </cds:CdsGroupedBarChart.BottomAxis>
+            </cds:CdsGroupedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal" Description="Put the labels axis on the left and the value axis at the bottom.">
+            <cds:CdsGroupedBarChart Title="Revenue by region and quarter (horizontal)" Data="{x:Static data:PackageASamples.RevenueByRegion}">
+                <cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsGroupedBarChart.LeftAxis>
+                <cds:CdsGroupedBarChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Revenue (USD M)" />
+                </cds:CdsGroupedBarChart.BottomAxis>
+            </cds:CdsGroupedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Time axis" Description="A monthly time axis: the step between two months sets the group width.">
+            <cds:CdsGroupedBarChart Title="Support tickets per month" Data="{x:Static data:PackageASamples.Tickets}" TimeInterval="Monthly">
+                <cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Tickets" />
+                </cds:CdsGroupedBarChart.LeftAxis>
+                <cds:CdsGroupedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Time" />
+                </cds:CdsGroupedBarChart.BottomAxis>
+            </cds:CdsGroupedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Negative values" Description="Negative bars grow down from the zero line.">
+            <cds:CdsGroupedBarChart Title="Operating margin change by segment (pp)" Data="{x:Static data:PackageASamples.MarginChange}">
+                <cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Change (percentage points)" />
+                </cds:CdsGroupedBarChart.LeftAxis>
+                <cds:CdsGroupedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsGroupedBarChart.BottomAxis>
+            </cds:CdsGroupedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Missing bars" Description="Europe has no Q2 value. By default its slot stays empty so every region keeps its position; with PreserveSpaceForMissingBars off the remaining bars are centered.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsGroupedBarChart Title="Slots preserved (default)" Data="{x:Static data:PackageASamples.RevenueWithGap}" HeightRequest="320">
+                    <cds:CdsGroupedBarChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Revenue (USD M)" />
+                    </cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsGroupedBarChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsGroupedBarChart.BottomAxis>
+                </cds:CdsGroupedBarChart>
+                <cds:CdsGroupedBarChart Grid.Column="1" Title="Slots not preserved" Data="{x:Static data:PackageASamples.RevenueWithGap}" PreserveSpaceForMissingBars="False" HeightRequest="320">
+                    <cds:CdsGroupedBarChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Revenue (USD M)" />
+                    </cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsGroupedBarChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsGroupedBarChart.BottomAxis>
+                </cds:CdsGroupedBarChart>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Hover a bar for its quarter, value and region; hover a legend item to fade the others, click it to isolate the region. Tab to the graph and use the arrow keys to move through the bars.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsGroupedBarChart x:Name="Interactive" Title="Revenue by region and quarter (USD M)" Data="{x:Static data:PackageASamples.RevenueByRegion}" SelectedGroupsChanged="OnSelectedGroupsChanged">
+                    <cds:CdsGroupedBarChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Revenue (USD M)" />
+                    </cds:CdsGroupedBarChart.LeftAxis>
+                    <cds:CdsGroupedBarChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" Title="Quarter" />
+                    </cds:CdsGroupedBarChart.BottomAxis>
+                </cds:CdsGroupedBarChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsGroupedBarChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsGroupedBarChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Grid, axes, labels and the pairing palette follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsGroupedBarChart Title="Revenue (USD M)" Data="{x:Static data:PackageASamples.RevenueByRegion}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop and surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsGroupedBarChart Title="Revenue (USD M)" Data="{x:Static data:PackageASamples.RevenueByRegion}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

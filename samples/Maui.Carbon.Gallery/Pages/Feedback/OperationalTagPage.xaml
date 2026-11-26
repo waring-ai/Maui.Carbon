@@ -6,7 +6,7 @@
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.OperationalTagPage">
     <VerticalStackLayout Spacing="48">
         <g:GalleryExample Title="Types" Description="A 1px tag-border-* outline on the tag-background-* fill; hover switches the fill to tag-hover-*. There is no high-contrast or outline type.">
-            <FlexLayout Wrap="Wrap">
+            <g:WrapLayout>
                 <cds:CdsOperationalTag Text="Red" Type="Red" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="Magenta" Type="Magenta" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="Purple" Type="Purple" Margin="0,0,8,8" />
@@ -17,18 +17,18 @@
                 <cds:CdsOperationalTag Text="Gray" Type="Gray" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="CoolGray" Type="CoolGray" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="WarmGray" Type="WarmGray" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes, icon and disabled" Description="sm 18, md 24, lg 32 (16px side padding). Disabled has a border-disabled outline and no hover.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center">
+            <g:WrapLayout AlignItems="Center">
                 <cds:CdsOperationalTag Text="+3" Type="Blue" Size="Sm" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="+3" Type="Blue" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="+3" Type="Blue" Size="Lg" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="Add label" Type="Teal" Icon="Add" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
                 <cds:CdsOperationalTag Text="A very long operational tag label that is truncated" Type="Purple" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Interactive" Description="Opens a popover with the rest of the labels. IsExpanded is announced; keyboard: Tab to focus, Enter or Space to activate.">
@@ -55,13 +55,13 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <FlexLayout Wrap="Wrap">
+                        <g:WrapLayout>
                             <cds:CdsOperationalTag Text="+3" Type="Blue" Margin="0,0,8,8" />
                             <cds:CdsOperationalTag Text="Red" Type="Red" Margin="0,0,8,8" />
                             <cds:CdsOperationalTag Text="Green" Type="Green" Margin="0,0,8,8" />
                             <cds:CdsOperationalTag Text="Gray" Margin="0,0,8,8" />
                             <cds:CdsOperationalTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
-                        </FlexLayout>
+                        </g:WrapLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

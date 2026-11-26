@@ -448,4 +448,10 @@ public class DatePickerCalendarModelTests
         Assert.True(cell.IsSelected);
         Assert.False(cell.InMonth);
     }
+
+    [Theory]
+    [InlineData("en-US", new[] { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" })]
+    [InlineData("en-GB", new[] { "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" })]
+    public void English_weekday_labels_are_a_uniform_two_letter_row(string culture, string[] expected) =>
+        Assert.Equal(expected, new CalendarModel(CultureInfo.GetCultureInfo(culture), Today, false).WeekdayLabels());
 }

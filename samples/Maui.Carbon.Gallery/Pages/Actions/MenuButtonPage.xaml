@@ -19,29 +19,29 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="Kinds" Description="Primary (default), tertiary and ghost; secondary also renders. Non-ghost triggers are at least 12rem wide; ghost keeps its natural width.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <cds:CdsMenuButton Label="Actions" Kind="Primary" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /><cds:CdsMenuItem Text="Scale" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Export" Kind="Secondary" Margin="0,0,16,16"><cds:CdsMenuItem Text="As CSV" /><cds:CdsMenuItem Text="As JSON" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Export" Kind="Tertiary" Margin="0,0,16,16"><cds:CdsMenuItem Text="As CSV" /><cds:CdsMenuItem Text="As JSON" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="More" Kind="Ghost" Margin="0,0,16,16"><cds:CdsMenuItem Text="Share" /><cds:CdsMenuItem Text="Duplicate" /></cds:CdsMenuButton>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes" Description="xs 24, sm 32, md 40 and lg 48 (default); the menu items use the same height.">
-            <FlexLayout Wrap="Wrap" AlignItems="End">
+            <g:WrapLayout AlignItems="End">
                 <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Xs" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Sm" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Md" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Actions" Kind="Tertiary" Size="Lg" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Disabled" Description="A disabled menu button leaves the tab order and cannot open.">
-            <FlexLayout Wrap="Wrap">
+            <g:WrapLayout>
                 <cds:CdsMenuButton Label="Actions" Kind="Primary" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="Export" Kind="Tertiary" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
                 <cds:CdsMenuButton Label="More" Kind="Ghost" IsEnabled="False" Margin="0,0,16,16"><cds:CdsMenuItem Text="Restart" /></cds:CdsMenuButton>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Menu alignment" Description="BottomEnd aligns the menu's end edge to the button's end edge and uses the menu's own width; TopStart opens above.">

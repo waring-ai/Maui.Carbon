@@ -384,9 +384,12 @@ internal sealed class CdsBatchBarButton : CdsControl
     readonly CdsIcon _icon = new() { IsVisible = false, VerticalOptions = LayoutOptions.Center, InputTransparent = true };
     readonly CdsFocusRing _ring = new(CdsFocusRingStyle.Inset);
     readonly CdsHitTarget _hit;
+    bool _iconOnly;
 
     public CdsBatchBarButton(string text, CdsIconName? icon, double height)
     {
+        Text = text;
+        HasIcon = icon is not null;
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _label.Text = text;
@@ -417,6 +420,28 @@ internal sealed class CdsBatchBarButton : CdsControl
 
     public event EventHandler? Clicked;
 
+    /// <summary>The label (also the accessible name, which stays when only the icon shows).</summary>
+    public string Text { get; }
+
+    /// <summary>Whether the button has an icon (only such a button can drop its label).</summary>
+    public bool HasIcon { get; }
+
+    /// <summary>Shows only the icon, in a square 48 wide button (Carbon's icon-only button), when the bar is too narrow for the labels.</summary>
+    public bool IconOnly
+    {
+        get => _iconOnly;
+        set
+        {
+            value &= HasIcon;
+            if (value == _iconOnly) return;
+            _iconOnly = value;
+            _label.IsVisible = !value;
+            _icon.Margin = value
+                ? new Thickness(CdsSpacing.Spacing05, 0)
+                : new Thickness(CdsSpacing.Spacing03, 0, CdsSpacing.Spacing05, 0);
+        }
+    }
+
     /// <summary>Makes the button follow <paramref name="gate"/>'s <c>CanExecute</c> (disabled while it cannot run).</summary>
     public void SetAvailability(ICommand? gate) => SetCommand(gate, null);
 
@@ -441,5 +466,38 @@ internal sealed class CdsBatchBarButton : CdsControl
         SetColor(_label, CdsText.TextColorProperty, disabled ? CdsColorKeys.TextOnColorDisabled : CdsTableTokens.BatchText);
         SetColor(_icon, CdsIcon.ColorProperty, disabled ? CdsColorKeys.IconOnColorDisabled : CdsColorKeys.IconOnColor);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
+    }
+}
+
+/// <summary>
+/// The batch bar's row: [count][actions][cancel] on <c>background-brand</c>. It decides while measuring whether the action
+/// labels fit beside the count; when they do not, the actions with an icon show only the icon (each keeps its label as its
+/// accessible name), so the count stays on one line (Carbon's summary does not wrap).
+/// </summary>
+internal sealed class CdsBatchBarRow : Grid
+{
+    readonly CdsText _summary;
+    readonly Layout _actions;
+
+    public CdsBatchBarRow(CdsText summary, Layout actions)
+    {
+        _summary = summary;
+        _actions = actions;
+    }
+
+    /// <summary>Whether the actions currently show only their icons.</summary>
+    public bool IconsOnly => _actions.Children.OfType<CdsBatchBarButton>().Any(b => b.IconOnly);
+
+    protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
+    {
+        // Decide before the columns are measured: switching from SizeChanged would arrange with the old measure.
+        var width = WidthRequest >= 0 ? Math.Min(WidthRequest, widthConstraint) : widthConstraint;
+        if (width > 0 && double.IsFinite(width))
+        {
+            var buttons = _actions.Children.OfType<CdsBatchBarButton>().ToList();
+            var iconsOnly = DataTableModel.BatchIconsOnly(width, _summary.Text, buttons.Select(b => ((string?)b.Text, b.HasIcon)));
+            foreach (var button in buttons) button.IconOnly = iconsOnly;
+        }
+        return base.MeasureOverride(widthConstraint, heightConstraint);
     }
 }

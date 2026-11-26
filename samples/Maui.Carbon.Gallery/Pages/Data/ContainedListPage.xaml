@@ -65,10 +65,10 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="With a search slot" Description="Any view passed as Search is pinned under the header with a rule below it.">
+        <g:GalleryExample Title="With a search slot" Description="A CdsSearch passed as Search is pinned under the header with a rule below it, for a persistent filter.">
             <cds:CdsContainedList Label="Clusters" WidthRequest="420" HorizontalOptions="Start">
                 <cds:CdsContainedList.Search>
-                    <Entry Placeholder="Filter clusters" HeightRequest="48" />
+                    <cds:CdsSearch Label="Filter clusters" Placeholder="Filter clusters" Size="Md" />
                 </cds:CdsContainedList.Search>
                 <cds:CdsContainedListItem Text="prod-us-east-1" Icon="Document" />
                 <cds:CdsContainedListItem Text="prod-eu-de-1" Icon="Document" />

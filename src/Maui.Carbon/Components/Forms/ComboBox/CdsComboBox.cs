@@ -83,6 +83,10 @@ public partial class CdsComboBox : CdsListBox
     /// <inheritdoc/>
     internal override object? HighlightOnOpen => SelectedItem;
 
+    /// <inheritdoc/>
+    /// <remarks>Carbon: "the first match is highlighted as you type", also when the list opens on text already typed.</remarks>
+    internal override bool HighlightFirstOnOpen => SelectedItem is null && InputText.Length > 0;
+
     void OnSelectedItemChanged(object? item)
     {
         if (!_customCommit) SetText(item is null ? string.Empty : TextOf(item));

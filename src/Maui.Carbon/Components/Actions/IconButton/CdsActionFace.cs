@@ -26,6 +26,7 @@ internal sealed class CdsActionFace : CdsControl
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap };
     readonly CdsIcon _icon = new() { IsVisible = false };
     readonly CdsHitTarget _hit;
+    readonly CdsButtonOutline _outline = new();
     readonly Border _badge = new() { StrokeThickness = 0, InputTransparent = true, StrokeShape = new RoundRectangle { CornerRadius = 100 } };
     readonly CdsText _badgeText = new(string.Empty, CdsTypeStyle.Label01, CdsTextTone.OnColor) { InputTransparent = true };
     CdsFocusRing _ring;
@@ -34,6 +35,7 @@ internal sealed class CdsActionFace : CdsControl
 
     string? _text;
     CdsIconName? _iconName;
+    CdsGlyph? _glyph;
     CdsActionFaceMode _mode = CdsActionFaceMode.IconOnly;
     double _height = CdsSizing.Large;
     double _minWidth;
@@ -69,6 +71,7 @@ internal sealed class CdsActionFace : CdsControl
         _hit = CreateHitTarget();
         _ring = new CdsFocusRing(_ringStyle);
         _root.Add(_box);
+        _root.Add(_outline);
         _root.Add(_badge);
         _root.Add(_ring);
         _root.Add(_hit);
@@ -87,6 +90,9 @@ internal sealed class CdsActionFace : CdsControl
 
     public string? Text { get => _text; set { _text = value; UpdateLayout(); } }
     public CdsIconName? Icon { get => _iconName; set { _iconName = value; UpdateLayout(); } }
+
+    /// <summary>A custom glyph drawn when <see cref="Icon"/> is not set (icons the bundled set lacks, such as the chart toolbar's table icon).</summary>
+    public CdsGlyph? Glyph { get => _glyph; set { _glyph = value; UpdateLayout(); } }
     public CdsActionFaceMode Mode { get => _mode; set { _mode = value; UpdateLayout(); } }
     public double ButtonHeight { get => _height; set { _height = value; UpdateLayout(); } }
     public double MinWidth { get => _minWidth; set { _minWidth = value; UpdateLayout(); } }
@@ -163,12 +169,17 @@ internal sealed class CdsActionFace : CdsControl
     protected override void ApplyVisuals()
     {
         var v = _resolver(State);
-        SetColor(_box, BackgroundColorProperty, v.Background);
-        SetBrush(_box, Border.StrokeProperty, v.Border);
+        // The fill goes on the root, which covers the whole box: on Mac Catalyst a Border paints its background and stroke
+        // half a point inside its frame, so a filled face drew 1pt smaller than its layout box (a 2pt gap in combo buttons).
+        SetColor(_root, BackgroundColorProperty, v.Background);
+        // The outline is drawn by hairlines on the box edge, for the same reason; the Border keeps its 1px (transparent)
+        // stroke so the label and icon keep their inset.
+        SetBrush(_box, Border.StrokeProperty, null);
+        SetColor(_outline, CdsButtonOutline.ColorProperty, v.Border);
         SetColor(_label, Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
-        if (_openShadow is not null) CdsTokens.SetShadow(_box, _isOpen ? CdsColorKeys.Shadow : null, offsetY: 2, radius: 6);
+        if (_openShadow is not null) CdsTokens.SetShadow(_root, _isOpen ? CdsColorKeys.Shadow : null, offsetY: 2, radius: 6);
     }
 
     void UpdateRotation(bool animate)
@@ -197,8 +208,9 @@ internal sealed class CdsActionFace : CdsControl
         _label.MaxLines = _truncate ? 1 : -1;
         _label.IsVisible = !iconOnly;
         _icon.Icon = _iconName;
+        _icon.Glyph = _iconName is null ? _glyph : null;
         _icon.Size = iconSize;
-        _icon.IsVisible = _iconName is not null;
+        _icon.IsVisible = _iconName is not null || _glyph is not null;
 
         var padTop = Math.Min((height - lineHeight) / 2 - 1, 14);
         var iconTop = Math.Min((height - iconSize) / 2 - 1, 14) + 1;

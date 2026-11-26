@@ -70,22 +70,19 @@ public static class SnapshotRunner
                     await Task.Delay(int.TryParse(Environment.GetEnvironmentVariable("CARBON_SNAPSHOT_SETTLE_MS"), out var settle) ? settle : 1500);
                     var page = Shell.Current.CurrentPage;
                     await WaitForOverlaysAsync(page);
-                    var shot = await page.CaptureAsync();
-                    if (shot is null)
+                    var name = $"{entry.Info.Route}-{theme.ToString().ToLowerInvariant()}";
+                    if (!await SaveAsync(page, Path.Combine(dir, name + ".png")))
                     {
                         log.Add($"{entry.Info.Route} {theme}: capture returned null");
                         continue;
                     }
-                    var path = Path.Combine(dir, $"{entry.Info.Route}-{theme.ToString().ToLowerInvariant()}.png");
-                    await using var src = await shot.OpenReadAsync(ScreenshotFormat.Png);
-                    await using var dst = File.Create(path);
-                    await src.CopyToAsync(dst);
+                    var segments = await CaptureBelowFoldAsync(page, dir, name);
                     var host = page is ContentPage hp ? CdsOverlayHost.Find(hp) : null;
                     var overlays = host is null ? "no host" : string.Join("; ", host.Overlays.Select(o =>
                         $"{o.Content.GetType().Name} open={o.IsOpen} placement={o.ActualPlacement} size={o.Content.Width:0}x{o.Content.Height:0} " +
                         $"opacity={(o.Content.Parent as VisualElement)?.Opacity:0.##} bounds={(o.Content.Parent as VisualElement)?.Bounds}"));
                     log.Add($"{entry.Info.Route} {theme}: overlays [{overlays}]");
-                    log.Add($"{entry.Info.Route} {theme}: ok bg={page.BackgroundColor?.ToArgbHex()} template={(page as ContentPage)?.ControlTemplate is not null} host={(page is ContentPage cp ? CdsOverlayHost.Find(cp) is not null : false)} style={page.Style is not null}");
+                    log.Add($"{entry.Info.Route} {theme}: ok segments={segments} bg={page.BackgroundColor?.ToArgbHex()} template={(page as ContentPage)?.ControlTemplate is not null} host={(page is ContentPage cp ? CdsOverlayHost.Find(cp) is not null : false)} style={page.Style is not null}");
                     Console.WriteLine($"snapshot: {entry.Info.Route} {theme}");
                 }
                 catch (Exception ex)
@@ -96,6 +93,43 @@ public static class SnapshotRunner
         }
         await File.AppendAllLinesAsync(Path.Combine(dir, "snapshot-log.txt"), log);
         Application.Current?.Quit();
+    }
+
+    static async Task<bool> SaveAsync(Page page, string path)
+    {
+        var shot = await page.CaptureAsync();
+        if (shot is null) return false;
+        await using var src = await shot.OpenReadAsync(ScreenshotFormat.Png);
+        await using var dst = File.Create(path);
+        await src.CopyToAsync(dst);
+        return true;
+    }
+
+    /// <summary>
+    /// A capture only holds what is on screen, so a long page is scrolled a viewport at a time (with a little overlap,
+    /// so a row cut at one edge is whole in the next shot) and saved as <c>&lt;name&gt;-2.png</c>,
+    /// <c>-3.png</c> and so on. Returns the number of shots taken, the first included; CARBON_SNAPSHOT_MAX_SEGMENTS caps it (default 12).
+    /// </summary>
+    static async Task<int> CaptureBelowFoldAsync(Page page, string dir, string name)
+    {
+        var scroll = (page as ContentPage)?.Content as ScrollView
+            ?? page.GetVisualTreeDescendants().OfType<ScrollView>()
+                .FirstOrDefault(s => s.Orientation != ScrollOrientation.Horizontal && s.Height >= page.Height / 2);
+        if (scroll is null || scroll.Height <= 0) return 1;
+        var maxSegments = int.TryParse(Environment.GetEnvironmentVariable("CARBON_SNAPSHOT_MAX_SEGMENTS"), out var m) ? m : 12;
+        var max = scroll.ContentSize.Height - scroll.Height;
+        var step = Math.Max(scroll.Height - 64, scroll.Height / 2);
+        var segments = 1;
+        for (double y = 0; y < max - 1 && segments < maxSegments;)
+        {
+            y = Math.Min(y + step, max);
+            await scroll.ScrollToAsync(0, y, animated: false);
+            await Task.Delay(400);
+            segments++;
+            if (!await SaveAsync(page, Path.Combine(dir, $"{name}-{segments}.png"))) break;
+        }
+        await scroll.ScrollToAsync(0, 0, animated: false);
+        return segments;
     }
 
     /// <summary>

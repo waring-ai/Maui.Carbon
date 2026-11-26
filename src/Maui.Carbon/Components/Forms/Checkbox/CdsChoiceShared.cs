@@ -95,6 +95,9 @@ internal sealed class CdsFormMessage : Grid
     /// <summary>The text currently shown, or <c>null</c>.</summary>
     public string? CurrentText => IsVisible ? _text.Text : null;
 
+    /// <summary>Whether the leading status icon is shown (for tests).</summary>
+    internal bool ShowsIcon => _icon.IsVisible;
+
     /// <summary>Applies a resolved message.</summary>
     public void Apply(CdsFormMessageVisuals v)
     {

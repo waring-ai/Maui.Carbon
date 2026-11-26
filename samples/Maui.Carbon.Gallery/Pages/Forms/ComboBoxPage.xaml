@@ -40,10 +40,10 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Rich items and a custom filter" Description="Rows from an ItemTemplate; ItemToString gives the text the filter and the field use. Eric and Elena both match 'e'.">
+        <g:GalleryExample Title="Rich items and a custom filter" Description="Rows from an ItemTemplate; ItemToString gives the text the filter and the field use, name and email. Typing 'en' keeps Ben, Chen and Elena.">
             <Grid HeightRequest="360" WidthRequest="480" HorizontalOptions="Start">
                 <cds:CdsComboBox Label="Owner" Placeholder="Search people" Size="Lg" ItemsSource="{x:Static data:GListData.People}"
-                                 ItemToString="{x:Static data:GListData.PersonToString}" VerticalOptions="Start">
+                                 ItemToString="{x:Static data:GListData.PersonToString}" VerticalOptions="Start" InputText="en" IsOpen="True">
                     <cds:CdsComboBox.ItemTemplate>
                         <DataTemplate x:DataType="data:GPerson">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">

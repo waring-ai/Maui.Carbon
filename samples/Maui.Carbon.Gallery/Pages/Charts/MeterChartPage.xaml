@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.MeterChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Single meters with status and peak" Description="The point's group is the title above the bar and its value the percentage. The first matching status range colors the bar and shows its icon; the peak is a 2px line. The chart is only as tall as it needs.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <VerticalStackLayout Spacing="48">
+                    <cds:CdsMeterChart Title="Cluster A" Data="{x:Static data:PackageCSamples.MemoryA}" Peak="71">
+                        <cds:CdsMeterChart.StatusRanges>
+                            <cds:CdsMeterStatusRange From="0" To="60" Status="Success" />
+                            <cds:CdsMeterStatusRange From="60" To="85" Status="Warning" />
+                            <cds:CdsMeterStatusRange From="85" To="100" Status="Danger" />
+                        </cds:CdsMeterChart.StatusRanges>
+                    </cds:CdsMeterChart>
+                    <cds:CdsMeterChart Title="Cluster B" Data="{x:Static data:PackageCSamples.MemoryB}" Peak="91"
+                                       StatusRanges="{x:Static data:PackageCSamples.ClusterStatus}" />
+                    <cds:CdsMeterChart Title="Cluster C" Data="{x:Static data:PackageCSamples.MemoryC}"
+                                       StatusRanges="{x:Static data:PackageCSamples.ClusterStatus}" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="48">
+                    <cds:CdsMeterChart Title="Mailbox storage" Data="{x:Static data:PackageCSamples.Mailbox}" IsProportional="True" Total="4000" Unit="MB" />
+                    <cds:CdsMeterChart x:Name="Spend" Title="Cloud spend this month" Data="{x:Static data:PackageCSamples.CloudSpend}" IsProportional="True" Total="25" Unit="k USD" />
+                </VerticalStackLayout>
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Change the value: the status, icon and table follow the ranges. Hover a proportional segment for its value; legend hover fades the others. Tab to a meter and use the arrow keys.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsMeterChart x:Name="Interactive" Title="Cluster D" Peak="88" StatusRanges="{x:Static data:PackageCSamples.ClusterStatus}" IsToolbarEnabled="True" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Decrease" Kind="Tertiary" Size="Sm" Clicked="OnDecrease" />
+                    <cds:CdsButton Text="Increase" Kind="Tertiary" Size="Sm" Clicked="OnIncrease" />
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="55%, success" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Without labels, loading and empty" Description="ShowLabels False leaves only the bar; IsLoading shimmers and empty data shows the bar in the skeleton color.">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="32">
+                <cds:CdsMeterChart Title="Bar only" Data="{x:Static data:PackageCSamples.MemoryA}" ShowLabels="False" />
+                <cds:CdsMeterChart Grid.Column="1" Title="Loading" IsLoading="True" />
+                <cds:CdsMeterChart Grid.Column="2" Title="No data" Data="{x:Static data:PackageCSamples.Empty}" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The track is layer-01, the peak border-inverse and the status colors the support tokens in each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsMeterChart Title="Cluster B" Data="{x:Static data:PackageCSamples.MemoryB}" Peak="91" StatusRanges="{x:Static data:PackageCSamples.ClusterStatus}" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the track steps up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsMeterChart Title="Cluster B" Data="{x:Static data:PackageCSamples.MemoryB}" Peak="91" StatusRanges="{x:Static data:PackageCSamples.ClusterStatus}" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

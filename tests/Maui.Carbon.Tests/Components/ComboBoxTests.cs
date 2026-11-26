@@ -234,4 +234,27 @@ public class ComboBoxTests
         combo.IsOpen = true;
         Assert.False(combo.WantsEscape);
     }
+
+    [Fact]
+    public void Opening_on_typed_text_highlights_the_first_match()
+    {
+        using var host = FormsTestHost.Load(() => new CdsComboBox { Label = "Zone", ItemsSource = Names, InputText = "a" }, out var combo);
+        FormsTestHost.SizeField(combo);
+        combo.IsOpen = true;
+        Assert.Equal("Alice Adams", combo.Model.HighlightedRow?.Text);
+    }
+
+    [Fact]
+    public void Opening_with_a_chosen_item_highlights_it_not_the_first_row()
+    {
+        using var host = FormsTestHost.Load(() => new CdsComboBox { Label = "Zone", ItemsSource = Names, SelectedItem = Names[2] }, out var combo);
+        FormsTestHost.SizeField(combo);
+        combo.IsOpen = true;
+        Assert.Equal("Carol Clark", combo.Model.HighlightedRow?.Text);
+        combo.IsOpen = false;
+        combo.SelectedItem = null;
+        combo.InputText = string.Empty;
+        combo.IsOpen = true;
+        Assert.Null(combo.Model.HighlightedRow); // no text, no selection: nothing to highlight
+    }
 }

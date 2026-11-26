@@ -59,7 +59,7 @@
         </g:GalleryExample>
 
         <g:GalleryExample Title="In context: a Viewer" Description="A Viewer sees the settings read-only, with the reason stated once at the top. An action blocked by a temporary condition is disabled, with a notification saying when it comes back. Delete is hidden, because Viewers can never use it.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <VerticalStackLayout Spacing="24" WidthRequest="560" Margin="0,0,48,24">
                     <cds:CdsText Text="Cluster details" TypeStyle="Heading03" />
                     <cds:CdsInlineNotification Kind="Info" IsLowContrast="True" HideCloseButton="True" Title="You have Viewer access to prod-eu-01."
@@ -82,7 +82,7 @@
                     <cds:CdsInlineNotification Kind="Warning" IsLowContrast="True" HideCloseButton="True" Title="Update is paused."
                                                Subtitle="A worker pool is still resizing. You can update when it finishes, in about 10 minutes." />
                 </VerticalStackLayout>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
     </VerticalStackLayout>

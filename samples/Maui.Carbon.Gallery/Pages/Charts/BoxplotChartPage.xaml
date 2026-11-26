@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.BoxplotChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="The box spans Q1 to Q3 with the median across it; whiskers reach the last values within 1.5 x IQR and outliers are circles. Hover a box for its statistics.">
+            <cds:CdsBoxplotChart Title="Salary by department (USD K)" Data="{x:Static data:PackageASamples.Salaries}">
+                <cds:CdsBoxplotChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Annual salary (USD K)" />
+                </cds:CdsBoxplotChart.LeftAxis>
+                <cds:CdsBoxplotChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsBoxplotChart.BottomAxis>
+            </cds:CdsBoxplotChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal" Description="A labels axis on the left makes horizontal boxes.">
+            <cds:CdsBoxplotChart Title="CI build duration by branch (minutes)" Data="{x:Static data:PackageASamples.BuildTimes}">
+                <cds:CdsBoxplotChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsBoxplotChart.LeftAxis>
+                <cds:CdsBoxplotChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Duration (min)" />
+                </cds:CdsBoxplotChart.BottomAxis>
+            </cds:CdsBoxplotChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Box plots are monochrome: ColorPairingOption picks among the four 1-color pairings. Show as table lists every statistic and the outliers.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsBoxplotChart x:Name="Interactive" Title="Salary by department (USD K)" Data="{x:Static data:PackageASamples.Salaries}">
+                    <cds:CdsBoxplotChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Annual salary (USD K)" />
+                    </cds:CdsBoxplotChart.LeftAxis>
+                    <cds:CdsBoxplotChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsBoxplotChart.BottomAxis>
+                </cds:CdsBoxplotChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Next color option" Kind="Tertiary" Size="Sm" Clicked="OnColorClicked" />
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="Color option 1" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsBoxplotChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsBoxplotChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Purple 70 on light themes, purple 30 on dark ones.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsBoxplotChart Title="Build duration" Data="{x:Static data:PackageASamples.BuildTimes}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Boxes on a layered grid backdrop.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsBoxplotChart Title="Build duration" Data="{x:Static data:PackageASamples.BuildTimes}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

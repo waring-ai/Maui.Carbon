@@ -18,10 +18,26 @@ public class FormsConformanceTests
     {
         Assert.Equal(key, CdsIcon.DefaultInnerColorKey(CdsIconName.WarningAltFilled, theme));
         var icon = new CdsIcon(CdsIconName.WarningAltFilled);
+        CdsTokens.SetColor(icon, CdsIcon.ColorProperty, CdsColorKeys.SupportWarning);
         _ = new CdsTheme { Theme = theme, Body = icon };
         Assert.Equal(Token(theme, token), icon.EffectiveInnerColor);
         // Dark in every theme: the mark is #161616 on the yellow triangle.
         Assert.True(icon.EffectiveInnerColor!.GetLuminosity() < 0.2f);
+    }
+
+    // A-03: drawn in any color other than support-warning, the "!" is a hole, as in Carbon; in icon-primary it would
+    // otherwise be filled with the triangle's own color and vanish.
+    [Theory]
+    [InlineData(CdsThemeName.White)]
+    [InlineData(CdsThemeName.G100)]
+    public void Untinted_warning_alt_glyph_keeps_its_mark_a_hole(CdsThemeName theme)
+    {
+        var icon = new CdsIcon(CdsIconName.WarningAltFilled);
+        _ = new CdsTheme { Theme = theme, Body = icon };
+        Assert.Equal(Token(theme, "icon-primary"), icon.Color);
+        Assert.Null(icon.EffectiveInnerColor);
+        CdsTokens.SetColor(icon, CdsIcon.ColorProperty, CdsColorKeys.SupportWarning);
+        Assert.NotNull(icon.EffectiveInnerColor);
     }
 
     [Fact]

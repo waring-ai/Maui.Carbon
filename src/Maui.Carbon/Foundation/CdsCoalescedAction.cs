@@ -3,7 +3,8 @@ namespace Maui.Carbon;
 /// <summary>
 /// Runs a control's rebuild once per batch of changes while it is on screen. Filling a shown list item by item would
 /// otherwise rebuild it once per item (N items cost N rebuilds of up to N items). Off screen (no handler, as while XAML
-/// builds the page) the rebuild runs at once, so the control is complete before it is shown.
+/// builds the page) the rebuild runs at once, so the control is complete before it is shown. Every run is measured as
+/// <see cref="CdsMetrics.RebuildDuration"/>, tagged with the owner's type.
 /// </summary>
 internal sealed class CdsCoalescedAction(VisualElement owner, Action action)
 {
@@ -22,7 +23,7 @@ internal sealed class CdsCoalescedAction(VisualElement owner, Action action)
             dispatcher.Dispatch(Flush);
             return;
         }
-        action();
+        Run();
     }
 
     /// <summary>Drops a queued run (call it when the action runs by other means).</summary>
@@ -33,6 +34,19 @@ internal sealed class CdsCoalescedAction(VisualElement owner, Action action)
     {
         if (!_pending) return;
         _pending = false;
-        action();
+        Run();
+    }
+
+    void Run()
+    {
+        var start = CdsMeter.Start(CdsMeter.Rebuild);
+        try
+        {
+            action();
+        }
+        finally
+        {
+            CdsMeter.Stop(CdsMeter.Rebuild, start, owner);
+        }
     }
 }

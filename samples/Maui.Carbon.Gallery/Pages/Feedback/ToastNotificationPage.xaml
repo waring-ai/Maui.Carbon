@@ -6,14 +6,14 @@
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.ToastNotificationPage">
     <VerticalStackLayout Spacing="48">
         <g:GalleryExample Title="Kinds" Description="288 wide, 3px colored edge, title, subtitle and a caption such as a timestamp. High contrast and low contrast.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <cds:CdsToastNotification Kind="Success" Title="Deployment complete" Subtitle="checkout-api v2.4.1 is live in prod-us-east." Caption="2 minutes ago" Margin="0,0,24,24" />
                 <cds:CdsToastNotification Kind="Error" Title="Backup failed" Subtitle="Check the storage credentials and retry." Caption="Just now" Margin="0,0,24,24" />
                 <cds:CdsToastNotification Kind="Warning" IsLowContrast="True" Title="Quota nearly reached" Subtitle="92 of 100 vCPUs in use." Caption="5 minutes ago" Margin="0,0,24,24" />
                 <cds:CdsToastNotification Kind="Info" IsLowContrast="True" Title="Maintenance tonight" Subtitle="Nodes restart at 02:00 UTC." Margin="0,0,24,24" />
                 <cds:CdsToastNotification Kind="InfoSquare" Title="New region available" Subtitle="Frankfurt supports GPU pools." HideCloseButton="True" Margin="0,0,24,24" />
                 <cds:CdsToastNotification Kind="WarningAlt" IsLowContrast="True" Title="Certificate expires soon" Subtitle="Renew before 30 Nov." Margin="0,0,24,24" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Show a toast" Description="CdsToast.Show opens the toast through the overlay service in the page's top-right region, newest at the bottom, 8 apart. Only success messages time out (5 s); errors stay.">
@@ -31,8 +31,8 @@
                 <g:ThemeStrip.Template>
                     <DataTemplate>
                         <VerticalStackLayout Spacing="16">
-                            <cds:CdsToastNotification Kind="Success" Title="Deployment complete" Subtitle="checkout-api is live." WidthRequest="240" />
-                            <cds:CdsToastNotification Kind="Error" IsLowContrast="True" Title="Backup failed" Subtitle="Retry the backup." WidthRequest="240" />
+                            <cds:CdsToastNotification Kind="Success" Title="Deployment complete" Subtitle="checkout-api is live." />
+                            <cds:CdsToastNotification Kind="Error" IsLowContrast="True" Title="Backup failed" Subtitle="Retry the backup." />
                         </VerticalStackLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>

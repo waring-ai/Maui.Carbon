@@ -44,12 +44,13 @@ public sealed class CdsFieldChrome : Grid
     readonly ContentView _inputSlot = new() { VerticalOptions = LayoutOptions.Fill };
     readonly BoxView _rule = new() { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true };
     readonly CdsFocusRing _outline = new(CdsFocusRingStyle.Inset);
-    readonly Grid _overlayGrid = new() { Margin = new Thickness(-CdsSpacing.Spacing05, 0), InputTransparent = true };
+    readonly Grid _overlayGrid = new() { InputTransparent = true };
     readonly CdsIcon _statusIcon = new() { IsVisible = false, Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0) };
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false };
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
     readonly CdsMessageAlert _alert = new();
     bool _inline;
+    bool _inlineHugs;
     CdsSize _size = CdsSize.Md;
 
     /// <summary>Creates the chrome.</summary>
@@ -72,6 +73,13 @@ public sealed class CdsFieldChrome : Grid
         _field.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _field.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _field.Padding = new Thickness(CdsSpacing.Spacing05, 0);
+        // The rule and outline cancel the field's horizontal padding, whatever a control sets it to (the inline select pads
+        // its start by 8): a fixed -16 drew the inline select's error outline 8 to the left of the field.
+        _field.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == PaddingProperty.PropertyName) SyncOverlayMargin();
+        };
+        SyncOverlayMargin();
         _field.Add(_inputSlot, 0);
         _field.Add(Trailing, 1);
         // Rule and outline span the full field width, including the padding.
@@ -101,6 +109,15 @@ public sealed class CdsFieldChrome : Grid
         get => _inputSlot.Content;
         set => _inputSlot.Content = value;
     }
+
+    void SyncOverlayMargin()
+    {
+        var padding = _field.Padding;
+        _overlayGrid.Margin = new Thickness(-padding.Left, -padding.Top, -padding.Right, -padding.Bottom);
+    }
+
+    /// <summary>The overlay of rule and outline (for tests).</summary>
+    internal Grid OverlayGrid => _overlayGrid;
 
     /// <summary>The field box itself (for controls that add overlays, such as a list box anchor).</summary>
     public Grid Field => _field;
@@ -198,6 +215,25 @@ public sealed class CdsFieldChrome : Grid
     }
 
     /// <summary>
+    /// Inline only: the field is as wide as its content, at most <see cref="InlineFieldMaxWidth"/>, instead of filling the
+    /// row (Carbon's inline Dropdown, MultiSelect and Select: <c>inline-size: auto</c>, the field at most 30rem). An error
+    /// or warning message under it may use the rest of the row.
+    /// </summary>
+    internal bool InlineFieldHugsContent
+    {
+        get => _inlineHugs;
+        set
+        {
+            if (_inlineHugs == value) return;
+            _inlineHugs = value;
+            Layout();
+        }
+    }
+
+    /// <summary>Widest a content-sized inline field gets (Carbon's <c>.cds--dropdown--inline</c> field: 30rem).</summary>
+    internal const double InlineFieldMaxWidth = 480;
+
+    /// <summary>
     /// Overrides the bottom rule's color key in every state (list boxes use <c>border-subtle-01</c> while open);
     /// <c>null</c> restores the Carbon defaults.
     /// </summary>
@@ -225,7 +261,6 @@ public sealed class CdsFieldChrome : Grid
         set
         {
             _field.Padding = new Thickness(value, 0);
-            _overlayGrid.Margin = new Thickness(-value, 0);
         }
     }
 
@@ -325,6 +360,7 @@ public sealed class CdsFieldChrome : Grid
         if (!_inline || _layoutFluid) return;
         var column = isHelper ? 0 : 1;
         if (GetColumn((BindableObject)_message) != column) SetColumn((BindableObject)_message, column);
+        SetColumnSpan((BindableObject)_message, !isHelper && _inlineHugs ? 2 : 1);
         _message.MaximumWidthRequest = isHelper ? InlineHelperMaxWidth : double.PositiveInfinity;
         _message.Margin = isHelper ? new Thickness(0, CdsSpacing.Spacing02, CdsSpacing.Spacing05, 0) : new Thickness(0, CdsSpacing.Spacing02, 0, 0);
     }
@@ -377,6 +413,9 @@ public sealed class CdsFieldChrome : Grid
 
         _layoutFluid = IsFluidLayout;
         _fluidFill.IsVisible = _layoutFluid;
+        var hugsField = _inline && _inlineHugs && !_layoutFluid;
+        _field.HorizontalOptions = hugsField ? LayoutOptions.Start : LayoutOptions.Fill;
+        _field.MaximumWidthRequest = hugsField ? InlineFieldMaxWidth : double.PositiveInfinity;
         if (_layoutFluid)
         {
             LayoutFluid();
@@ -397,11 +436,14 @@ public sealed class CdsFieldChrome : Grid
         _labelRow.InputTransparent = false;
         _message.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
         _message.MaximumWidthRequest = double.PositiveInfinity;
+        var hugs = _inline && _inlineHugs;
         if (_inline)
         {
-            // [label | field]; Apply puts helper text under the label and an error or warning under the field.
+            // [label | field]; Apply puts helper text under the label and an error or warning under the field. A field
+            // that hugs its content sits in an Auto column and leaves the rest of the row empty.
             ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-            ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            ColumnDefinitions.Add(new ColumnDefinition(hugs ? GridLength.Auto : GridLength.Star));
+            if (hugs) ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
             RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             _labelRow.Margin = new Thickness(0, 0, CdsSpacing.Spacing05, 0);
@@ -409,6 +451,7 @@ public sealed class CdsFieldChrome : Grid
             this.Add(_labelRow, 0, 0);
             this.Add(_field, 1, 0);
             this.Add(_message, 1, 1);
+            SetColumnSpan((BindableObject)_message, hugs ? 2 : 1);
         }
         else
         {
@@ -420,6 +463,7 @@ public sealed class CdsFieldChrome : Grid
             this.Add(_labelRow, 0, 0);
             this.Add(_field, 0, 1);
             this.Add(_message, 0, 2);
+            SetColumnSpan((BindableObject)_message, 1);
         }
     }
 

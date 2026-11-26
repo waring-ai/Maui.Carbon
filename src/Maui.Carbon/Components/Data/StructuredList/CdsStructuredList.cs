@@ -207,7 +207,22 @@ public class CdsStructuredList : CdsControl
         if (e.NewItems is not null)
             foreach (CdsStructuredListRow r in e.NewItems) r.Changed += OnPartChanged;
         Rebuild();
-        if (SelectedIndex >= _rows.Count) SelectedIndex = -1;
+        // XAML sets SelectedIndex before it adds the rows one by one: only a removal drops a selection out of range, and
+        // the selected row is synced once it exists.
+        if (e.Action is NotifyCollectionChangedAction.Add)
+        {
+            if (SelectedIndex >= 0 && SelectedIndex < _rows.Count && SelectedItem != _rows[SelectedIndex])
+            {
+                _syncing = true;
+                SelectedItem = _rows[SelectedIndex];
+                _syncing = false;
+                RefreshVisuals();
+            }
+        }
+        else if (SelectedIndex >= _rows.Count)
+        {
+            SelectedIndex = -1;
+        }
     }
 
     void OnPartChanged(object? sender, EventArgs e) => Rebuild();

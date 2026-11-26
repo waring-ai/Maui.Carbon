@@ -213,8 +213,9 @@ public partial class CdsCodeSnippet : CdsControl
         VerticalOptions = LayoutOptions.Start;
         _inlineBox.Content = null;
         _code.Margin = 0;
-        _code.LineBreakMode = IsWrapText ? LineBreakMode.WordWrap : LineBreakMode.NoWrap;
-        // Native labels draw a single line for non-wrapping modes unless the line count is explicit.
+        // UIKit draws a NoWrap label on one line whatever MaxLines says, so a non-wrapping snippet uses a wrapping mode too:
+        // the scroller measures it with unbounded width, so no line is ever broken, and MaxLines keeps the line count.
+        _code.LineBreakMode = IsWrapText ? LineBreakMode.WordWrap : LineBreakMode.CharacterWrap;
         _code.MaxLines = IsWrapText ? -1 : Math.Max(1, CdsCodeSnippetModel.LineCount(Code));
         _code.Padding = new Thickness(0, 0, HideCopyButton ? 0 : CdsSpacing.Spacing06, CdsCodeSnippetModel.CodeBottomPadding);
         _scroller.Orientation = IsWrapText ? ScrollOrientation.Vertical : ScrollOrientation.Both;

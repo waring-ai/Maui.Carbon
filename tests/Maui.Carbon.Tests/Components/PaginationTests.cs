@@ -243,4 +243,12 @@ public class PaginationTests
         lone.IsAttachedToTable = true;
         Assert.True(lone.IsAttached);
     }
+
+    [Fact]
+    public void A_compact_bar_caps_the_range_to_what_the_arrows_leave()
+    {
+        Assert.Equal(186 - 64 - 32, CdsPaginationTokens.CompactRangeWidth(true, 186, 32, 32));
+        Assert.Equal(0, CdsPaginationTokens.CompactRangeWidth(true, 50, 32, 32));
+        Assert.True(double.IsPositiveInfinity(CdsPaginationTokens.CompactRangeWidth(false, 800, 40, 32)));
+    }
 }

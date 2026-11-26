@@ -44,7 +44,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -54,7 +54,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidDatePicker Label="Snapshot date" Value="{x:Static data:GListData.SnapshotDate}" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

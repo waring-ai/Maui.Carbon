@@ -73,4 +73,11 @@ public class DataTableSkeletonTests
         Assert.Equal(0, skeleton.RowCount);
         Assert.Equal(1, skeleton.ColumnCount);
     }
+
+    [Theory]
+    [InlineData(96, 200, 96)] // room to spare: the bar and its padding
+    [InlineData(96, 62, 62)]  // a column narrower than the bar: the bar shrinks to its cell
+    [InlineData(96, double.PositiveInfinity, 96)]
+    public void A_bar_never_measures_wider_than_its_cell(double measured, double constraint, double expected) =>
+        Assert.Equal(expected, SkeletonBarModel.Fit(new Size(measured, 16), constraint).Width);
 }

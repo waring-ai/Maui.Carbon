@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.WordCloudChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Words by group and a single group" Description="Font size scales with the value and color names the group; words that do not fit are left out. A single group needs no legend.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsWordCloudChart Title="Support ticket keywords by topic (mentions this week)" Data="{x:Static data:PackageDSamples.Tickets}" HeightRequest="440" />
+                <cds:CdsWordCloudChart Grid.Column="1" Title="Skills in open job posts (postings)" Data="{x:Static data:PackageDSamples.Skills}" IsLegendEnabled="False" HeightRequest="440" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate topics (the cloud lays out again). Tab to the graph and use the arrow keys to move through the words.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsWordCloudChart x:Name="Interactive" Title="Support ticket keywords by topic" Data="{x:Static data:PackageDSamples.Tickets}" SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsWordCloudChart Title="Ticket keywords" Data="{x:Static data:PackageDSamples.Tickets}" IsLegendEnabled="False" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsWordCloudChart Title="Ticket keywords" Data="{x:Static data:PackageDSamples.Tickets}" IsLegendEnabled="False" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -24,7 +24,9 @@ public partial class MenuPage : GalleryPage
         }
         SubmenuHost.Content = child.CreatePreview(0);
         SubmenuHost.VerticalOptions = LayoutOptions.Start;
-        SubmenuHost.Margin = new Thickness(-14, 40, 0, 0);
+        // Placed as the overlay places it (.cds--menu-item > .cds--menu): 6 over the parent's end edge, and its top at the
+        // "Share" row's top minus the surface padding, so the first rows line up: 4 + 32 - 4 down the sm parent.
+        SubmenuHost.Margin = new Thickness(-15, CdsMenuTokens.RowHeight(CdsSize.Sm), 0, 0);
 
         foreach (var menu in new[] { _actions, _withSubmenu })
         {

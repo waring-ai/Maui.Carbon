@@ -110,4 +110,20 @@ public class ProgressBarTests
         bar.Max = 0;
         Assert.Equal("Uploading usage-march.csv", bar.Label);
     }
+
+    [Fact]
+    public void The_indeterminate_block_moves_by_transforms_only_so_it_never_waits_for_a_layout_pass()
+    {
+        var bar = new CdsProgressBar { Label = "Scanning registry" };
+        Assert.True(bar.Sweep.IsVisible);
+        bar.ApplySweep(0.4, 200);
+        // A quarter of the track, drawn from its start edge, moved along the track; its layout size is the track's.
+        Assert.Equal(-1, bar.Sweep.WidthRequest);
+        Assert.Equal(0, bar.Sweep.AnchorX);
+        Assert.Equal(0.25, bar.Sweep.ScaleX, 3);
+        Assert.Equal(ProgressBarModel.IndeterminateBlock(0.4, 200).X, bar.Sweep.TranslationX, 3);
+        Assert.True(bar.Sweep.IsVisible);
+        bar.ApplySweep(0.9, 200);
+        Assert.False(bar.Sweep.IsVisible);
+    }
 }

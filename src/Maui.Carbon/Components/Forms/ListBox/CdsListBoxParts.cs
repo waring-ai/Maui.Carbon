@@ -68,6 +68,7 @@ internal sealed class CdsListBoxSelectionTag : CdsControl
     readonly CdsHitTarget _closeHit;
     bool _closeHover;
     bool _disabled;
+    bool _readOnly;
 
     public CdsListBoxSelectionTag()
     {
@@ -119,16 +120,36 @@ internal sealed class CdsListBoxSelectionTag : CdsControl
         set => SemanticProperties.SetDescription(_closeHit, value);
     }
 
-    /// <summary>Disabled and read-only fields show a muted tag and ignore the x.</summary>
+    /// <summary>A disabled field shows a muted tag (<c>cds--tag--disabled</c>) and ignores the x.</summary>
     public bool Muted
     {
         get => _disabled;
         set
         {
             _disabled = value;
-            _closeHit.InputTransparent = value;
-            RefreshVisuals();
+            UpdateInert();
         }
+    }
+
+    /// <summary>
+    /// A read-only field keeps the high-contrast tag (Carbon mutes it only when disabled) but ignores the x, which shows no
+    /// hover.
+    /// </summary>
+    public bool IsReadOnly
+    {
+        get => _readOnly;
+        set
+        {
+            _readOnly = value;
+            UpdateInert();
+        }
+    }
+
+    void UpdateInert()
+    {
+        _closeHit.InputTransparent = _disabled || _readOnly;
+        if (_disabled || _readOnly) _closeHover = false;
+        RefreshVisuals();
     }
 
     /// <inheritdoc/>
@@ -136,7 +157,7 @@ internal sealed class CdsListBoxSelectionTag : CdsControl
 
     void SetCloseHover(bool on)
     {
-        _closeHover = on;
+        _closeHover = on && !_disabled && !_readOnly;
         RefreshVisuals();
     }
 

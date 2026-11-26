@@ -116,8 +116,7 @@ public class LoadingRegionTests
         using var heard = CdsAnnouncer.Capture();
         _ = TestWindow.Show(region, outside);
 
-        Assert.Equal(LayoutOptions.Fill, loading.HorizontalOptions);
-        Assert.Equal(LayoutOptions.Fill, loading.VerticalOptions);
+        Assert.True(loading.FillsSpace);
         Assert.True(loading.IsRegionOverlayShown);
         Assert.Null(loading.Overlay);
         Assert.False(loading.InputTransparent);
@@ -145,6 +144,7 @@ public class LoadingRegionTests
         Assert.False(table.InputTransparent);
         Assert.False(loading.InputTransparent);
         loading.OverlayScope = CdsLoadingOverlayScope.Page;
+        Assert.False(loading.FillsSpace);
         Assert.Equal(LayoutOptions.Center, loading.HorizontalOptions);
     }
 }

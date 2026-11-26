@@ -89,15 +89,22 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Hero image" Description="A 2 x 1 box (3 x 2 below lg) beside the header content, for landing pages.">
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="0">
-                <cds:CdsPageHeader>
-                    <cds:CdsPageHeaderContent Title="Welcome to Platform">
-                        <cds:CdsPageHeaderContentText Subtitle="Build, ship and run" Text="Start with a template or bring your own." />
-                    </cds:CdsPageHeaderContent>
-                </cds:CdsPageHeader>
-                <cds:CdsPageHeaderHeroImage Grid.Column="1" x:Name="Hero" VerticalOptions="Start" />
-            </Grid>
+        <g:GalleryExample Title="Hero image" Description="A 2 x 1 box (3 x 2 below lg) in a column beside the breadcrumb bar and content, inside the header, for landing pages. The image fills the box.">
+            <cds:CdsPageHeader>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="0">
+                    <VerticalStackLayout>
+                        <cds:CdsPageHeaderBreadcrumbBar HasBorder="False" Icon="Catalog">
+                            <cds:CdsBreadcrumb Size="Sm">
+                                <cds:CdsBreadcrumbItem Text="Catalog" />
+                            </cds:CdsBreadcrumb>
+                        </cds:CdsPageHeaderBreadcrumbBar>
+                        <cds:CdsPageHeaderContent Title="Get started with Kubernetes">
+                            <cds:CdsPageHeaderContentText Subtitle="Create your first cluster in about 10 minutes" Text="Pick a region and a worker profile, connect your container registry, then deploy a sample app with one command." />
+                        </cds:CdsPageHeaderContent>
+                    </VerticalStackLayout>
+                    <cds:CdsPageHeaderHeroImage Grid.Column="1" x:Name="Hero" />
+                </Grid>
+            </cds:CdsPageHeader>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="The page header sits on layer-01, so it follows the theme zone.">

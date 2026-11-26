@@ -192,6 +192,13 @@ public class CdsIconButton : CdsControl
         set => SetValue(CommandParameterProperty, value);
     }
 
+    /// <summary>A custom glyph for icons the bundled set lacks (the chart toolbar's table icon); used when <see cref="Icon"/> is not set.</summary>
+    internal CdsGlyph? Glyph
+    {
+        get => _face.Glyph;
+        set => _face.Glyph = value;
+    }
+
     /// <summary>True while the tooltip is shown.</summary>
     public bool IsTooltipOpen => _tooltip.IsOpen;
 

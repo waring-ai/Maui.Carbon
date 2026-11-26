@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.ScatterChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Two measures" Description="Dots are 4px with the group color at 30% and a 1.5px stroke, placed by X and Value on two linear axes. The ruler reads every dot at the nearest request size.">
+<cds:CdsScatterChart Title="Latency by request size" Data="{x:Static data:PackageBSamples.Requests}">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" Title="Request size (KB)" />
+</cds:CdsScatterChart.BottomAxis>
+<cds:CdsScatterChart.LeftAxis>
+<cds:CdsChartAxis Title="Latency (ms)" />
+</cds:CdsScatterChart.LeftAxis>
+</cds:CdsScatterChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Threshold anomalies" Description="Dots at or beyond the highest threshold get a 3px stroke next to the dashed threshold line; hover the line for its value.">
+<cds:CdsScatterChart Title="CPU load with alert threshold" Data="{x:Static data:PackageBSamples.CpuLoad}">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Time" />
+</cds:CdsScatterChart.BottomAxis>
+<cds:CdsScatterChart.LeftAxis>
+<cds:CdsChartAxis Title="CPU load (%)">
+<cds:CdsChartAxis.Thresholds>
+<cds:CdsChartThreshold Value="80" Label="Alert" ColorKey="{x:Static cds:CdsColorKeys.SupportError}" />
+</cds:CdsChartAxis.Thresholds>
+</cds:CdsChartAxis>
+</cds:CdsScatterChart.LeftAxis>
+</cds:CdsScatterChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Labels axis" Description="Several readings per category line up on a labels axis.">
+<cds:CdsScatterChart Title="Deal size by region" Data="{x:Static data:PackageBSamples.Deals}">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Labels" />
+</cds:CdsScatterChart.BottomAxis>
+<cds:CdsScatterChart.LeftAxis>
+<cds:CdsChartAxis Title="Deal size (k USD)" />
+</cds:CdsScatterChart.LeftAxis>
+</cds:CdsScatterChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Empty state" Description="Empty data shows the still grid skeleton.">
+<cds:CdsScatterChart Title="Empty state" Data="{x:Static data:PackageBSamples.Empty}" HeightRequest="300" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate services. With the ruler off each dot shows its own tooltip; unfilled dots fill with layer-01.">
+<VerticalStackLayout Spacing="16">
+<cds:CdsScatterChart x:Name="Interactive" Title="Latency by request size" Data="{x:Static data:PackageBSamples.Requests}" SelectedGroupsChanged="OnSelectedGroupsChanged">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" Title="Request size (KB)" />
+</cds:CdsScatterChart.BottomAxis>
+<cds:CdsScatterChart.LeftAxis>
+<cds:CdsChartAxis Title="Latency (ms)" />
+</cds:CdsScatterChart.LeftAxis>
+</cds:CdsScatterChart>
+<HorizontalStackLayout Spacing="16">
+<cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+<cds:CdsButton Text="Toggle fill" Kind="Tertiary" Size="Sm" Clicked="OnFillClicked" />
+<cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+</HorizontalStackLayout>
+</VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Dots take the three-color pairing of each theme.">
+<g:ThemeStrip>
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsScatterChart Title="Latency" Data="{x:Static data:PackageBSamples.Requests}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" />
+</cds:CdsScatterChart.BottomAxis>
+</cds:CdsScatterChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop steps up with it.">
+<g:ThemeStrip Layered="True">
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsScatterChart Title="Latency" Data="{x:Static data:PackageBSamples.Requests}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsScatterChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" />
+</cds:CdsScatterChart.BottomAxis>
+</cds:CdsScatterChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

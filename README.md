@@ -56,6 +56,7 @@ Every public control is prefixed `Cds` (`CdsButton`, `CdsDataTable`) and lives i
 | Forms | Form (FormGroup, FormItem, FormLabel), TextInput, PasswordInput, TextArea, NumberInput, Search, Select, Dropdown, ComboBox, MultiSelect, Checkbox, CheckboxGroup, RadioButtonGroup, Toggle, Slider, DatePicker, TimePicker, FileUploader |
 | Fluid forms | FluidForm and the Fluid variants of the text, number, search, select, time, dropdown, combo box, multi-select and date inputs |
 | Data | DataTable (+ Table primitives), DataTableSkeleton, Pagination, PaginationNav, TreeView, StructuredList, ContainedList, Accordion, CodeSnippet, OrderedList / UnorderedList |
+| Charts | SimpleBarChart, GroupedBarChart, StackedBarChart, LineChart, AreaChart, StackedAreaChart, SparklineChart, ScatterChart, BubbleChart, LollipopChart, ComboChart, HistogramChart, BoxplotChart, BulletChart, PieChart, DonutChart, GaugeChart, MeterChart, RadarChart, HeatmapChart, TreemapChart, CirclePackChart, TreeChart, AlluvialChart, WordCloudChart, NetworkDiagram, ParallelCoordinatesChart, ChoroplethChart, ProportionalSymbolMap, ConnectionMap (Carbon Charts 1.27, drawn natively: tooltips, legend isolation, keyboard and screen-reader data cursor, show as table, fullscreen, CSV/PNG/JPG export) |
 | Navigation | UIShell (Header, SideNav, Switcher...), HeaderPanel, PageHeader, Tabs, Breadcrumb, ContentSwitcher, Link |
 | Containers | Tile, ClickableTile, ExpandableTile, SelectableTile, RadioTile / TileGroup |
 | Overlays | Modal (+ ComposedModal), Dialog, Popover, Tooltip, Toggletip, DefinitionTooltip |
@@ -76,6 +77,11 @@ login).
 - **Overlays**: every `ContentPage` gets a `CdsOverlayHost` through an implicit page style; menus, list boxes,
   popovers, tooltips, modals and toasts open there, mirror the theme and layer of their trigger, and route Escape and
   arrow keys.
+- **Metrics**: the library publishes `System.Diagnostics.Metrics` instruments on the meter `Maui.Carbon`
+  (names in `CdsMetrics`): draws of self-drawing views, `ApplyVisuals` runs, measure and arrange passes, coalesced
+  rebuilds, activations, theme switches and loading-animation frames, each tagged with the control type. They cost one
+  flag check until a `MeterListener`, `dotnet-counters monitor --counters Maui.Carbon` or OpenTelemetry listens.
+  Optimized iOS, Mac Catalyst and Android builds trim metrics away unless the app sets `<MetricsSupport>true</MetricsSupport>`.
 - **Requirements**: .NET 11 with the MAUI workload (Microsoft.Maui.Controls 11.0.10 or later). On iOS/macOS 27 your
   app must adopt the UIScene lifecycle (see the gallery's `Platforms/*/Info.plist` and `SceneDelegate.cs`).
 
@@ -125,7 +131,8 @@ Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net11.0-maccatalyst
 Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build);
 every Relay screen: `APP=relay tools/snapshots.sh out/relay white,g100`.
 Exercise Relay to catch framework faults (every screen, state, theme and window size; layout overflow, contrast, leaks,
-UI hangs, crashes, and every logged warning attributed to the step that caused it):
+UI hangs, crashes, every logged warning attributed to the step that caused it, and a "Carbon metrics" section naming the
+components that draw, lay out, re-apply visuals or rebuild the most and what keeps drawing on a settled screen):
 `tools/relay-exercise.sh out/exercise` after a `-c Release` build (`QUICK=1` for 2 themes x 2 sizes, ~8 minutes).
 
 After updating `design/carbon/tokens.json` or the icons, regenerate with

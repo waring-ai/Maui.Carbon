@@ -8,7 +8,7 @@ public sealed class IconsPage : GalleryPage
 {
     public IconsPage()
     {
-        var flex = new FlexLayout { Wrap = Microsoft.Maui.Layouts.FlexWrap.Wrap };
+        var flex = new WrapLayout();
         foreach (var icon in Enum.GetValues<CdsIconName>())
         {
             var sizes = new HorizontalStackLayout { Spacing = CdsSpacing.Spacing04, HeightRequest = 32 };

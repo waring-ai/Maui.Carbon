@@ -12,6 +12,12 @@ public static class CdsFonts
     public const string Sans = "IBMPlexSans";
     /// <summary>IBM Plex Sans SemiBold (600).</summary>
     public const string SansSemiBold = "IBMPlexSansSemiBold";
+    /// <summary>IBM Plex Sans Condensed Regular (400): chart ticks, legends and labels (Carbon Charts' type).</summary>
+    public const string SansCondensed = "IBMPlexSansCondensed";
+    /// <summary>IBM Plex Sans Condensed Light (300): large chart words (word cloud words over 32px).</summary>
+    public const string SansCondensedLight = "IBMPlexSansCondensedLight";
+    /// <summary>IBM Plex Sans Condensed SemiBold (600): emphasized chart ticks (the first tick, a new day, month or year).</summary>
+    public const string SansCondensedSemiBold = "IBMPlexSansCondensedSemiBold";
     /// <summary>IBM Plex Mono Regular (400), for code.</summary>
     public const string Mono = "IBMPlexMono";
     /// <summary>IBM Plex Serif Light (300), for quotations.</summary>
@@ -25,6 +31,9 @@ public static class CdsFonts
         ("IBMPlexSans-Light.ttf", SansLight),
         ("IBMPlexSans-Regular.ttf", Sans),
         ("IBMPlexSans-SemiBold.ttf", SansSemiBold),
+        ("IBMPlexSansCondensed-Light.ttf", SansCondensedLight),
+        ("IBMPlexSansCondensed-Regular.ttf", SansCondensed),
+        ("IBMPlexSansCondensed-SemiBold.ttf", SansCondensedSemiBold),
         ("IBMPlexMono-Regular.ttf", Mono),
         ("IBMPlexSerif-Light.ttf", SerifLight),
         ("IBMPlexSerif-Regular.ttf", Serif),

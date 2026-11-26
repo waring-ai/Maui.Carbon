@@ -60,8 +60,12 @@ public class CdsDefinitionTooltip : CdsControl
     readonly CdsText _term = new() { TypeStyle = CdsTypeStyle.Body01, LineBreakMode = LineBreakMode.NoWrap, InputTransparent = true };
     readonly Microsoft.Maui.Controls.Shapes.Line _line = new()
     {
+        // Sized to the term (WidthRequest follows its width): left to fill, a Stretch.Fill line measures as wide as the
+        // parent and stretched the term with it.
         X1 = 0, Y1 = 0, X2 = 1, Y2 = 0,
         Aspect = Stretch.Fill,
+        WidthRequest = 0,
+        HorizontalOptions = LayoutOptions.Start,
         StrokeThickness = 1,
         StrokeDashArray = [1, 1],
         HeightRequest = 1,
@@ -84,6 +88,7 @@ public class CdsDefinitionTooltip : CdsControl
         AutomationProperties.SetIsInAccessibleTree(_line, false);
         _text.Add(_term);
         _text.Add(_line);
+        _term.SizeChanged += (_, _) => _line.WidthRequest = Math.Max(0, _term.Width);
         _root.Add(_text);
         _root.Add(_ring);
         _root.Add(_hit);

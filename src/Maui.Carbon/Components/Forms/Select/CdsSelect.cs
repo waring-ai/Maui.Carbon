@@ -84,6 +84,8 @@ public partial class CdsSelect : CdsFormField
         base.UpdateChrome();
         // Carbon's select comes in sm, md and lg only (32 / 40 / 48); xs and the larger sizes clamp to that range.
         Chrome.Size = CdsListBoxTokens.Coerce(Size);
+        // Inline, the control hugs its value (.cds--select--inline is a row of auto-sized items).
+        Chrome.InlineFieldHugsContent = IsInline && !IsFluidMode;
         Picker.Title = Placeholder;
         Chrome.Field.Padding = new Thickness(IsInline && !IsFluidMode ? CdsSpacing.Spacing03 : CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0);
         RefreshVisuals();

@@ -16,6 +16,9 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
     <WindowsPackageType>None</WindowsPackageType>
+    <!-- Optimized Apple and Android builds trim System.Diagnostics.Metrics away (MetricsSupport=false); the exercise run
+         (tools/relay-exercise.sh, a Release build) listens to Maui.Carbon's metrics, so keep them. -->
+    <MetricsSupport>true</MetricsSupport>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>

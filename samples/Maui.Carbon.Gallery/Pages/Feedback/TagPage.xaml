@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Types" Description="Ten categorical colors plus high contrast (most emphasis) and outline (least).">
-            <FlexLayout Wrap="Wrap">
+            <g:WrapLayout>
                 <cds:CdsTag Text="Red" Type="Red" Margin="0,0,8,8" />
                 <cds:CdsTag Text="Magenta" Type="Magenta" Margin="0,0,8,8" />
                 <cds:CdsTag Text="Purple" Type="Purple" Margin="0,0,8,8" />
@@ -20,11 +20,11 @@
                 <cds:CdsTag Text="Warm gray" Type="WarmGray" Margin="0,0,8,8" />
                 <cds:CdsTag Text="High contrast" Type="HighContrast" Margin="0,0,8,8" />
                 <cds:CdsTag Text="Outline" Type="Outline" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Sizes, icons and disabled" Description="sm 18 for dense rows, md 24 by default, lg 32 beside 32 controls. Icons are not drawn at sm. Long labels truncate at 208.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center">
+            <g:WrapLayout AlignItems="Center">
                 <cds:CdsTag Text="us-south" Type="Blue" Size="Sm" Margin="0,0,8,8" />
                 <cds:CdsTag Text="us-south" Type="Blue" Margin="0,0,8,8" />
                 <cds:CdsTag Text="us-south" Type="Blue" Size="Lg" Margin="0,0,8,8" />
@@ -32,21 +32,21 @@
                 <cds:CdsTag Text="AI assisted" Type="Teal" Icon="AiGenerate" Size="Lg" Margin="0,0,8,8" />
                 <cds:CdsTag Text="Disabled" IsEnabled="False" Margin="0,0,8,8" />
                 <cds:CdsTag Text="A very long tag label that will certainly be truncated" Type="Purple" Margin="0,0,8,8" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes">
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <FlexLayout Wrap="Wrap">
+                        <g:WrapLayout>
                             <cds:CdsTag Text="Red" Type="Red" Margin="0,0,8,8" />
                             <cds:CdsTag Text="Blue" Type="Blue" Margin="0,0,8,8" />
                             <cds:CdsTag Text="Green" Type="Green" Margin="0,0,8,8" />
                             <cds:CdsTag Text="Gray" Margin="0,0,8,8" />
                             <cds:CdsTag Text="High contrast" Type="HighContrast" Margin="0,0,8,8" />
                             <cds:CdsTag Text="Outline" Type="Outline" Margin="0,0,8,8" />
-                        </FlexLayout>
+                        </g:WrapLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

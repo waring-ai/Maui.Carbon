@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.CirclePackChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Two levels and a single parent" Description="Circles fill with their group color at 30% and stroke it; one top-level node draws its children in its color.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsCirclePackChart Title="Revenue by region and country (USD millions)" Data="{x:Static data:PackageDSamples.Revenue}" />
+                <cds:CdsCirclePackChart Grid.Column="1" Title="Storage capacity by tier, one parent (TB)" Data="{x:Static data:PackageDSamples.StorageTiers}" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Three levels" Description="With zoom on, click a department to zoom in on its teams (click again to zoom out); HierarchyLevel 3 draws every level at once.">
+            <VerticalStackLayout Spacing="16">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                    <cds:CdsCirclePackChart Title="Headcount by division, department and team (click a department to zoom)" Data="{x:Static data:PackageDSamples.Org}" IsZoomEnabled="True" CircleClicked="OnCircleClicked" />
+                    <cds:CdsCirclePackChart Grid.Column="1" Title="Headcount, all three levels (people)" Data="{x:Static data:PackageDSamples.Org}" HierarchyLevel="3" />
+                </Grid>
+                <cds:CdsText x:Name="CircleStatus" Text="No circle clicked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate groups. Tab to the graph and use the arrow keys to move through the circles; Show as table lists every value.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsCirclePackChart x:Name="Interactive" Title="Revenue by region and country (USD millions)" Data="{x:Static data:PackageDSamples.Revenue}" SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsCirclePackChart Title="Revenue" Data="{x:Static data:PackageDSamples.Revenue}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsCirclePackChart Title="Revenue" Data="{x:Static data:PackageDSamples.Revenue}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

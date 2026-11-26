@@ -36,7 +36,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -46,7 +46,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" SelectedItems="{x:Static data:GListData.SelectedEvents}" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

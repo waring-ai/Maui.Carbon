@@ -8,7 +8,7 @@ public sealed class ColorsPage : GalleryPage
 {
     public ColorsPage()
     {
-        var flex = new FlexLayout { Wrap = Microsoft.Maui.Layouts.FlexWrap.Wrap, JustifyContent = Microsoft.Maui.Layouts.FlexJustify.Start };
+        var flex = new WrapLayout { JustifyContent = Microsoft.Maui.Layouts.FlexJustify.Start };
         for (var i = 0; i < CdsColorKeys.All.Count; i++)
         {
             var key = CdsColorKeys.All[i];

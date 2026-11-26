@@ -35,6 +35,16 @@ public static class CdsDataTableSkeletonTokens
         inverted ? (CdsColorKeys.SkeletonElement, CdsColorKeys.SkeletonBackground) : (CdsColorKeys.SkeletonBackground, CdsColorKeys.SkeletonElement);
 }
 
+/// <summary>Pure sizing of <see cref="CdsSkeletonBar"/>.</summary>
+internal static class SkeletonBarModel
+{
+    /// <summary>The measured size of a bar, no wider than <paramref name="widthConstraint"/> (its cell, padding included).</summary>
+    public static Size Fit(Size measured, double widthConstraint) =>
+        double.IsFinite(widthConstraint) && measured.Width > widthConstraint
+            ? new Size(Math.Max(0, widthConstraint), measured.Height)
+            : measured;
+}
+
 /// <summary>
 /// A skeleton bar like <see cref="CdsSkeletonText"/>'s, optionally with the tokens swapped (header bars). Decorative. It
 /// does not animate itself: its <see cref="CdsDataTableSkeleton"/> runs one loop for all of its bars.
@@ -59,6 +69,15 @@ internal sealed class CdsSkeletonBar : Grid
         CascadeInputTransparent = true;
         IsClippedToBounds = true;
         AutomationProperties.SetIsInAccessibleTree(this, false);
+    }
+
+    /// <inheritdoc/>
+    protected override Size MeasureOverride(double widthConstraint, double heightConstraint)
+    {
+        // A bar never asks for more than its cell: in a column narrower than the bar and its padding it shrinks to fit,
+        // rather than running past the column (and, in the last column, past the table's edge).
+        var size = base.MeasureOverride(widthConstraint, heightConstraint);
+        return SkeletonBarModel.Fit(size, widthConstraint);
     }
 
     /// <summary>Shows the sweep at <paramref name="phase"/> (0 to 1).</summary>

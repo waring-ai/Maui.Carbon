@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.StackedBarChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="Each channel stacks onto the last, the first at the bottom. Hover a segment for its value, or the rest of a month for the ruler with every channel and the total.">
+            <cds:CdsStackedBarChart Title="Units sold by channel" Data="{x:Static data:PackageASamples.UnitsByChannel}">
+                <cds:CdsStackedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Units" />
+                </cds:CdsStackedBarChart.LeftAxis>
+                <cds:CdsStackedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsStackedBarChart.BottomAxis>
+            </cds:CdsStackedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal" Description="Put the labels axis on the left for horizontal stacks.">
+            <cds:CdsStackedBarChart Title="Engineering effort by team (story points)" Data="{x:Static data:PackageASamples.EffortByTeam}">
+                <cds:CdsStackedBarChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsStackedBarChart.LeftAxis>
+                <cds:CdsStackedBarChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Story points" />
+                </cds:CdsStackedBarChart.BottomAxis>
+            </cds:CdsStackedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="100% stacked" Description="IsPercentage on the value axis fixes it at 0 to 100% and scales every stack to its share; tooltips keep the values.">
+            <cds:CdsStackedBarChart Title="Share of effort by team (100%)" Data="{x:Static data:PackageASamples.EffortByTeam}">
+                <cds:CdsStackedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Share of points (%)" IsPercentage="True" />
+                </cds:CdsStackedBarChart.LeftAxis>
+                <cds:CdsStackedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsStackedBarChart.BottomAxis>
+            </cds:CdsStackedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Inflows and outflows" Description="Negative values stack down from zero, positive values up, on a monthly time axis.">
+            <cds:CdsStackedBarChart Title="Monthly cash flow (USD K)" Data="{x:Static data:PackageASamples.CashFlow}" TimeInterval="Monthly">
+                <cds:CdsStackedBarChart.LeftAxis>
+                    <cds:CdsChartAxis Title="USD K" />
+                </cds:CdsStackedBarChart.LeftAxis>
+                <cds:CdsStackedBarChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Time" />
+                </cds:CdsStackedBarChart.BottomAxis>
+            </cds:CdsStackedBarChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate channels; the stacks and the value axis follow. Turn the ruler off to show only segment tooltips.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsStackedBarChart x:Name="Interactive" Title="Units sold by channel" Data="{x:Static data:PackageASamples.UnitsByChannel}" SelectedGroupsChanged="OnSelectedGroupsChanged">
+                    <cds:CdsStackedBarChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Units" />
+                    </cds:CdsStackedBarChart.LeftAxis>
+                    <cds:CdsStackedBarChart.BottomAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsStackedBarChart.BottomAxis>
+                </cds:CdsStackedBarChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsStackedBarChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsStackedBarChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Segments take the pairing palette of each theme, separated by the plot background.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsStackedBarChart Title="Units" Data="{x:Static data:PackageASamples.UnitsByChannel}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="On a layer the divider gaps show the layered grid backdrop.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsStackedBarChart Title="Units" Data="{x:Static data:PackageASamples.UnitsByChannel}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

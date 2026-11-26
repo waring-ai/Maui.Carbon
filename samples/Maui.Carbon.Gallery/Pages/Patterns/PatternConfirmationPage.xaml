@@ -11,7 +11,7 @@
                 <VerticalStackLayout Spacing="16" WidthRequest="560" HorizontalOptions="Start">
                     <cds:CdsText Text="Labels on prod-eu-01" TypeStyle="HeadingCompact02" />
                     <cds:CdsText Text="Labels help you group clusters in billing reports." TypeStyle="BodyCompact01" Tone="Secondary" />
-                    <FlexLayout x:Name="LabelsRow" Wrap="Wrap" />
+                    <g:WrapLayout x:Name="LabelsRow" />
                     <cds:CdsActionableNotification x:Name="UndoNotice" Kind="Info" Role="Status" HasFocus="False" IsLowContrast="False"
                                                    Title="Label removed" ActionButtonLabel="Undo"
                                                    ActionClicked="OnUndoClicked" CloseRequested="OnUndoClosed" />
@@ -19,7 +19,7 @@
             </g:GalleryExample>
 
             <g:GalleryExample Title="Moderate impact or several items: danger modal" Description="The title and the primary button name the action and the object. The body lists what is deleted and what is lost. Cancel left, the danger action right; focus starts on Cancel.">
-                <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <g:WrapLayout AlignItems="Start">
                     <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="420" Margin="0,0,24,24">
                         <VerticalStackLayout BackgroundColor="{DynamicResource CdsLayer01}">
                             <cds:CdsModalHeader Title="Delete 2 snapshots?" />
@@ -37,11 +37,11 @@
                     <VerticalStackLayout Spacing="16" Margin="0,0,0,24">
                         <cds:CdsButton Text="Delete 2 snapshots" Kind="DangerTertiary" Size="Md" Clicked="OnSnapshotsClicked" />
                     </VerticalStackLayout>
-                </FlexLayout>
+                </g:WrapLayout>
             </g:GalleryExample>
 
             <g:GalleryExample Title="High impact and irreversible: type the name" Description="The person types the resource name before the danger button turns on. The label quotes the exact name and the helper text explains the disabled button. Type the rest of the name to try it.">
-                <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <g:WrapLayout AlignItems="Start">
                     <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="420" Margin="0,0,24,24">
                         <VerticalStackLayout BackgroundColor="{DynamicResource CdsLayer01}">
                             <cds:CdsModalHeader Label="prod-eu-01" Title="Delete cluster" />
@@ -58,11 +58,11 @@
                     <VerticalStackLayout Spacing="16" Margin="0,0,0,24">
                         <cds:CdsButton Text="Delete cluster" Kind="Danger" Size="Md" Clicked="OnClusterClicked" />
                     </VerticalStackLayout>
-                </FlexLayout>
+                </g:WrapLayout>
             </g:GalleryExample>
 
             <g:GalleryExample Title="Leaving with unsaved changes: transactional modal" Description="Not a danger modal. The safe choice, Keep editing, is the primary action; Discard is the secondary.">
-                <FlexLayout Wrap="Wrap" AlignItems="Start">
+                <g:WrapLayout AlignItems="Start">
                     <ContentView BackgroundColor="{DynamicResource CdsBorderSubtle01}" Padding="1" WidthRequest="320" Margin="0,0,24,24">
                         <VerticalStackLayout BackgroundColor="{DynamicResource CdsLayer01}">
                             <cds:CdsModalHeader Title="Discard unsaved changes?" />
@@ -75,7 +75,7 @@
                     <VerticalStackLayout Spacing="16" Margin="0,0,0,24">
                         <cds:CdsButton Text="Leave this page" Kind="Tertiary" Size="Md" Clicked="OnDiscardClicked" />
                     </VerticalStackLayout>
-                </FlexLayout>
+                </g:WrapLayout>
             </g:GalleryExample>
 
             <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />

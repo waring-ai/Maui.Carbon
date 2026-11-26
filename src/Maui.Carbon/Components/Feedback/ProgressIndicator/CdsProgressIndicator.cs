@@ -144,7 +144,8 @@ public class CdsProgressIndicator : CdsControl
             }
             _host.Content = grid;
         }
-        HorizontalOptions = !IsVertical && SpaceEqually ? LayoutOptions.Fill : LayoutOptions.Start;
+        // Equal steps share the width offered; the app's alignment (and any WidthRequest) is left alone.
+        SetChrome(_host, fillsWidth: !IsVertical && SpaceEqually);
         UpdateSteps();
     }
 

@@ -98,8 +98,9 @@ public class CdsIcon : GraphicsView, IDrawable
 
     /// <summary>
     /// Color of a filled status glyph's inner mark (the check in <c>checkmark--filled</c>). Default transparent, except for
-    /// <see cref="CdsIconName.WarningAltFilled"/>: its "!" stays dark on the yellow triangle in every theme, as in Carbon
-    /// (<c>icon-primary</c> in White and G10, <c>icon-inverse</c> in G90 and G100). Set a color to override that.
+    /// <see cref="CdsIconName.WarningAltFilled"/> drawn in <c>support-warning</c>: its "!" stays dark on the yellow triangle in
+    /// every theme, as in Carbon (<c>icon-primary</c> in White and G10, <c>icon-inverse</c> in G90 and G100). Set a color to
+    /// override that.
     /// </summary>
     public Color? InnerColor
     {
@@ -132,7 +133,7 @@ public class CdsIcon : GraphicsView, IDrawable
         canvas.FillColor = color;
         foreach (var p in glyph.Paths)
             canvas.FillPath(CdsIcons.GetPath(p.Data), p.EvenOdd ? WindingMode.EvenOdd : WindingMode.NonZero);
-        if ((InnerColor ?? (Color?)GetValue(DefaultInnerColorProperty)) is { Alpha: > 0 } inner)
+        if (EffectiveInnerColor is { Alpha: > 0 } inner)
         {
             canvas.FillColor = inner;
             foreach (var p in glyph.InnerPaths)
@@ -141,8 +142,19 @@ public class CdsIcon : GraphicsView, IDrawable
         canvas.RestoreState();
     }
 
-    /// <summary>The inner-mark color in effect: <see cref="InnerColor"/>, else the glyph's default (for tests).</summary>
-    internal Color? EffectiveInnerColor => InnerColor ?? (Color?)GetValue(DefaultInnerColorProperty);
+    /// <summary>
+    /// The inner-mark color in effect: <see cref="InnerColor"/>, else the glyph's default, which applies only while the glyph
+    /// is drawn in <c>support-warning</c> (the yellow triangle of a warning state or notification). Drawn in any other color
+    /// the mark stays a hole, as in Carbon: an untinted <c>warning--alt--filled</c> in a light theme would otherwise get an
+    /// <c>icon-primary</c> "!" on an <c>icon-primary</c> triangle and lose it.
+    /// </summary>
+    internal Color? EffectiveInnerColor =>
+        InnerColor ?? (IsWarningTone(Color) ? (Color?)GetValue(DefaultInnerColorProperty) : null);
+
+    bool IsWarningTone(Color? color) =>
+        color is not null && CdsPalettes.GetTokenColor((CdsThemeName)GetValue(ContextThemeProperty), "support-warning") is var warning
+        && Math.Abs(color.Red - warning.Red) < 0.01f && Math.Abs(color.Green - warning.Green) < 0.01f
+        && Math.Abs(color.Blue - warning.Blue) < 0.01f;
 
     /// <summary>
     /// The color key of the default inner mark for <paramref name="icon"/> in <paramref name="theme"/>, or <c>null</c> when

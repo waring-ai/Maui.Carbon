@@ -6,7 +6,7 @@
                x:Class="Maui.Carbon.Gallery.Pages.Patterns.PatternResourceListPage">
     <VerticalStackLayout Spacing="48">
 
-        <g:GalleryExample Title="Clusters page" Description="UI shell with the product links and system utilities, a side nav that marks Clusters as current, a page header with breadcrumb, description and an export action, then a searchable, sortable, selectable table. Two clusters are selected, so the batch bar replaces the toolbar. Pagination states the range. The frame is 640 high so the gallery page still scrolls.">
+        <g:GalleryExample Title="Clusters page" Description="UI shell with the product links and system utilities, a side nav that marks Clusters as current, a page header with breadcrumb, description and an export action, then a searchable, sortable, selectable table. Two clusters are selected, so the batch bar replaces the toolbar. Pagination states the range; pages of 5 keep the whole table in the 640 high frame, which scrolls when a larger page size is chosen.">
             <VerticalStackLayout Spacing="12">
                 <Border x:Name="ShellFrame" StrokeThickness="1" HeightRequest="640" StrokeShape="Rectangle" Padding="0">
                     <cds:CdsUIShell Breakpoint="Lg">
@@ -84,7 +84,7 @@
                                             <cds:CdsButton Text="Create cluster" Icon="Add" Size="Md" Clicked="OnCreateClicked" />
                                         </cds:CdsDataTable.ToolbarContent>
                                     </cds:CdsDataTable>
-                                    <cds:CdsPagination x:Name="Pager" Size="Md" PageSizes="10, 25, 50" PageSize="10" TotalItems="23" PageChanged="OnPageChanged" />
+                                    <cds:CdsPagination x:Name="Pager" Size="Md" PageSizes="5, 10, 25" PageSize="5" TotalItems="23" PageChanged="OnPageChanged" />
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
                         </ScrollView>

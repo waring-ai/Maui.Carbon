@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.LollipopChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Vertical" Description="One dot per category on a 1px stem from the axis start. Hover anywhere: the ruler snaps to the nearest category, fills its dot and thickens the stem.">
+            <cds:CdsLollipopChart Title="Net Promoter Score by product area" Data="{x:Static data:PackageASamples.Nps}" IsLegendEnabled="False">
+                <cds:CdsLollipopChart.LeftAxis>
+                    <cds:CdsChartAxis Title="NPS" />
+                </cds:CdsLollipopChart.LeftAxis>
+                <cds:CdsLollipopChart.BottomAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsLollipopChart.BottomAxis>
+            </cds:CdsLollipopChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Horizontal, by group" Description="A labels axis on the left makes horizontal lollipops; groups color the dots.">
+            <cds:CdsLollipopChart Title="Developers using each language (% of respondents)" Data="{x:Static data:PackageASamples.Languages}">
+                <cds:CdsLollipopChart.LeftAxis>
+                    <cds:CdsChartAxis ScaleType="Labels" />
+                </cds:CdsLollipopChart.LeftAxis>
+                <cds:CdsLollipopChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Respondents (%)" />
+                </cds:CdsLollipopChart.BottomAxis>
+            </cds:CdsLollipopChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate groups. Turn the ruler off to give each dot its own tooltip, or switch to hollow dots.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsLollipopChart x:Name="Interactive" Title="Developers using each language (% of respondents)" Data="{x:Static data:PackageASamples.Languages}" SelectedGroupsChanged="OnSelectedGroupsChanged">
+                    <cds:CdsLollipopChart.LeftAxis>
+                        <cds:CdsChartAxis ScaleType="Labels" />
+                    </cds:CdsLollipopChart.LeftAxis>
+                    <cds:CdsLollipopChart.BottomAxis>
+                        <cds:CdsChartAxis Title="Respondents (%)" />
+                    </cds:CdsLollipopChart.BottomAxis>
+                </cds:CdsLollipopChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+                    <cds:CdsButton Text="Toggle filled" Kind="Tertiary" Size="Sm" Clicked="OnFilledClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsLollipopChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsLollipopChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Stems and dots take the pairing palette of each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsLollipopChart Title="NPS" Data="{x:Static data:PackageASamples.Nps}" IsLegendEnabled="False" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Unfilled parts of the dots take the layer color.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsLollipopChart Title="NPS" Data="{x:Static data:PackageASamples.Nps}" IsLegendEnabled="False" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -6,7 +6,7 @@
                x:Class="Maui.Carbon.Gallery.Pages.Feedback.SkeletonTextPage">
     <VerticalStackLayout Spacing="48">
         <g:GalleryExample Title="Line, heading and paragraph" Description="16 high bars (24 for headings), 8 between lines. Paragraph widths cycle 100/85/95/75/90 percent.">
-            <VerticalStackLayout Spacing="24" MaximumWidthRequest="480" HorizontalOptions="Start">
+            <VerticalStackLayout Spacing="24" WidthRequest="480" HorizontalOptions="Start">
                 <cds:CdsSkeletonText />
                 <cds:CdsSkeletonText WidthPercent="55" />
                 <cds:CdsSkeletonText IsHeading="True" WidthPercent="55" />

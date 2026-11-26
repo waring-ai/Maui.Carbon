@@ -36,7 +36,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>
@@ -46,7 +46,7 @@
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsFluidForm WidthRequest="320" HorizontalOptions="Start"><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" /></cds:CdsFluidForm>
+                        <cds:CdsFluidForm><cds:CdsFluidNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" /></cds:CdsFluidForm>
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

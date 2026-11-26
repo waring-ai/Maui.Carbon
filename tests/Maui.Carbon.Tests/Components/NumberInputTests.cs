@@ -147,4 +147,40 @@ public class NumberInputTests
         input.Step = -2;
         Assert.Equal(1, input.Step);
     }
+
+    sealed class TestNumber : CdsNumberInput
+    {
+        public Thickness StepperMargin => Controls.Margin;
+    }
+
+    [Fact]
+    public void The_invalid_or_warning_icon_ends_16px_before_the_steppers()
+    {
+        var input = new TestNumber { Value = 4 };
+        Assert.False(input.ShowsStatusBesideSteppers);
+        Assert.Equal(0, input.StepperMargin.Left);
+        input.IsInvalid = true;
+        Assert.True(input.ShowsStatusBesideSteppers);
+        Assert.Equal(CdsSpacing.Spacing05, input.StepperMargin.Left);
+        input.IsInvalid = false;
+        input.IsWarning = true;
+        Assert.Equal(CdsSpacing.Spacing05, input.StepperMargin.Left);
+        // No icon in the field: read only, or without steppers (the icon then sits 16px from the end by itself).
+        input.IsReadOnly = true;
+        Assert.Equal(0, input.StepperMargin.Left);
+        input.IsReadOnly = false;
+        input.HideSteppers = true;
+        Assert.False(input.ShowsStatusBesideSteppers);
+    }
+
+    [Fact]
+    public void A_fluid_invalid_number_input_shows_no_leading_stepper_divider()
+    {
+        // Fluid: the icon moves to the message row, and Carbon hides the first divider (display: none).
+        var fluid = new CdsFluidNumberInput { Value = 14, IsInvalid = true };
+        Assert.False(fluid.ShowsStatusBesideSteppers);
+        var divider = (BoxView)typeof(CdsNumberInput).GetField("_dividerStart", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(fluid)!;
+        _ = new CdsTheme { Theme = CdsThemeName.White, Body = fluid };
+        Assert.True(divider.Color is null || divider.Color.Alpha == 0);
+    }
 }

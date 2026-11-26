@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.RadarChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Groups on shared spokes" Description="Each point's key is a spoke (clockwise from 12 o'clock in data order) and its group a translucent shape. Hover near a spoke for every group's value there.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsRadarChart Title="Skill coverage by team (score 0-100)" Data="{x:Static data:PackageCSamples.Skills}" />
+                <cds:CdsRadarChart Grid.Column="1" Title="Average high temperature (°C)" Data="{x:Static data:PackageCSamples.Weather}" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Fixed scale and center alignment" Description="MaxValue raises the outer ring (10 for scores out of 10). Alignment centers the radar; a single series needs no legend.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsRadarChart Title="Review scores, Phone X (0-10)" Data="{x:Static data:PackageCSamples.PhoneScores}" MaxValue="10" Alignment="Center" IsLegendEnabled="False" />
+                <cds:CdsRadarChart Grid.Column="1" Title="Units sold by region (thousands)" Data="{x:Static data:PackageCSamples.RegionalSales}" Alignment="Center" LegendAlignment="Center" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate groups (the scale stays). Hovering a legend item drops the other shapes to 10%. Tab to the graph and use the arrow keys to move from spoke to spoke.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsRadarChart x:Name="Interactive" Title="Units sold by region (thousands)" Data="{x:Static data:PackageCSamples.RegionalSales}"
+                                   SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="Carbon has no radar skeleton; this one shows the circular pie skeleton, shimmering while loading.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsRadarChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsRadarChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageCSamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Rings and spokes are layer-accent-01 and the shapes take the pairing palette of each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsRadarChart Title="Skills" Data="{x:Static data:PackageCSamples.Skills}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the rings step up with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsRadarChart Title="Skills" Data="{x:Static data:PackageCSamples.Skills}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+    </VerticalStackLayout>
+</g:GalleryPage>

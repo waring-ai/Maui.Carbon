@@ -203,8 +203,8 @@ public partial class CdsDatePicker : CdsFormField
     /// <summary>The 1px split between the halves of a fluid range (for tests).</summary>
     internal BoxView RangeDivider => _rangeDivider;
 
-    /// <summary>The calendar icons of the two fields (for tests).</summary>
-    internal (CdsIcon Start, CdsIcon End) CalendarIcons => (_startIcon, _endIcon);
+    /// <summary>The calendar icon slots of the two fields: the 16px host of each icon, hidden with it (for tests).</summary>
+    internal (View Start, View End) CalendarIcons => (_startIconHost, _endIconHost);
 
     /// <inheritdoc/>
     protected override string? HintText() => IsFluidMode ? FluidHint(Chrome) : _message.IsVisible ? _message.Text : null;
@@ -317,13 +317,10 @@ public partial class CdsDatePicker : CdsFormField
         _fields.ColumnSpacing = IsRange && !fluid ? 1 : 0;
         _fields.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
         _root.HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
-        HorizontalOptions = fluid ? LayoutOptions.Fill : LayoutOptions.Start;
+        SetChrome(_root, fillsWidth: fluid);
         CdsTokens.SetColor(_fields, BackgroundColorProperty, fluid ? CdsColorKeys.Field01 : null);
         _rangeDivider.IsVisible = fluid && IsRange;
         _fluidFill.IsVisible = fluid;
-        var hasCalendar = Type != CdsDatePickerType.Simple;
-        _startIconHost.IsVisible = hasCalendar;
-        _endIconHost.IsVisible = hasCalendar;
         UpdateMessage();
         RefreshVisuals();
     }
@@ -411,15 +408,17 @@ public partial class CdsDatePicker : CdsFormField
             SetColor(entry, Microsoft.Maui.Controls.Entry.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPrimary);
             SetColor(entry, Microsoft.Maui.Controls.Entry.PlaceholderColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextPlaceholder);
         }
-        // The calendar icon gives way to a field's error or warning icon. In fluid layout the status icon sits in the
-        // message row, so the calendar icon stays (the calendar can still be opened by pointer).
+        // The calendar icon gives way to a field's error or warning icon, which takes its slot 16px from the end: the
+        // icon's 16px host is hidden with it, or the status icon would sit 16px further in and squeeze the value. In fluid
+        // layout the status icon sits in the message row, so the calendar icon stays (the calendar can still be opened by
+        // pointer).
         var iconKey = disabled || readOnly ? CdsColorKeys.IconDisabled : CdsColorKeys.IconPrimary;
         SetColor(_startIcon, CdsIcon.ColorProperty, iconKey);
         SetColor(_endIcon, CdsIcon.ColorProperty, iconKey);
         var fluid = IsFluidMode;
         var calendar = Type != CdsDatePickerType.Simple;
-        _startIcon.IsVisible = calendar && (fluid || !_startStatus);
-        _endIcon.IsVisible = calendar && (fluid || !_endStatus);
+        _startIconHost.IsVisible = calendar && (fluid || !_startStatus);
+        _endIconHost.IsVisible = calendar && (fluid || !_endStatus);
     }
 
     // ---- dates and text ----

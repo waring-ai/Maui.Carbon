@@ -154,16 +154,12 @@ public partial class CdsSearch : CdsControl
         Magnifier.Icon = Icon;
         Entry.Placeholder = Placeholder;
 
-        if (IsExpandable && !fluid)
-        {
-            HorizontalOptions = expanded ? LayoutOptions.Fill : LayoutOptions.Start;
-            _root.WidthRequest = expanded ? -1 : height;
-        }
-        else
-        {
-            HorizontalOptions = LayoutOptions.Fill;
-            _root.WidthRequest = -1;
-        }
+        // A search is as wide as the space it is offered (Carbon: inline-size 100%); collapsed, it is the magnifier square
+        // at the start. The control decides this while measuring and never touches the app's HorizontalOptions.
+        var collapsed = IsExpandable && !fluid && !expanded;
+        _root.WidthRequest = collapsed ? height : -1;
+        _root.HorizontalOptions = collapsed ? LayoutOptions.Start : LayoutOptions.Fill;
+        SetChrome(_root, fillsWidth: !collapsed);
 
         SemanticProperties.SetDescription(Entry, Label);
         RefreshVisuals();

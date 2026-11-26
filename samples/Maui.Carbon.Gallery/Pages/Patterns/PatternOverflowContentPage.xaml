@@ -7,7 +7,7 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="Truncation types" Description="The ellipsis replaces at least 3 characters. The full text stays reachable through a tooltip, a copy button or a details view. Hover or focus the first two to read the full value.">
-            <FlexLayout Wrap="Wrap" AlignItems="Start">
+            <g:WrapLayout AlignItems="Start">
                 <VerticalStackLayout WidthRequest="320" Margin="0,0,24,24" Padding="16" Spacing="8" BackgroundColor="{DynamicResource CdsLayer01}">
                     <cds:CdsText Text="End: names and descriptions" TypeStyle="Label01" Tone="Secondary" />
                     <cds:CdsTooltip x:Name="EndTip" Placement="Bottom" HorizontalOptions="Start">
@@ -30,7 +30,7 @@
                     </HorizontalStackLayout>
                     <cds:CdsText Text="Copy always copies the full value." TypeStyle="Label01" Tone="Helper" />
                 </VerticalStackLayout>
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="In a table" Description="Fixed column widths and end truncation in cells; names are links with a tooltip so the full value shows on hover and keyboard focus. Numbers and status are never truncated. The row menu holds the extra actions, destructive last.">
@@ -42,7 +42,7 @@
                 <VerticalStackLayout Spacing="4" VerticalOptions="Start">
                     <cds:CdsText Text="prod-eu-01" TypeStyle="Heading03" />
                     <cds:CdsText Text="Kubernetes 1.31.2 in Frankfurt" TypeStyle="BodyCompact01" Tone="Secondary" />
-                    <FlexLayout Wrap="Wrap" AlignItems="Center" Margin="0,12,0,0">
+                    <g:WrapLayout AlignItems="Center" Margin="0,12,0,0">
                         <cds:CdsTag Text="env:production" Margin="0,0,8,8" />
                         <cds:CdsTag Text="team:payments" Margin="0,0,8,8" />
                         <cds:CdsTag Text="region:eu" Margin="0,0,8,8" />
@@ -51,16 +51,16 @@
                             <cds:CdsPopover.PopoverContent>
                                 <VerticalStackLayout Spacing="8" Padding="16" WidthRequest="256">
                                     <cds:CdsText Text="4 more labels" TypeStyle="HeadingCompact01" />
-                                    <FlexLayout Wrap="Wrap">
+                                    <g:WrapLayout>
                                         <cds:CdsTag Text="tier:gold" Margin="0,0,8,8" />
                                         <cds:CdsTag Text="backup:daily" Margin="0,0,8,8" />
                                         <cds:CdsTag Text="owner:platform" Margin="0,0,8,8" />
                                         <cds:CdsTag Text="compliance:pci" Margin="0,0,8,8" />
-                                    </FlexLayout>
+                                    </g:WrapLayout>
                                 </VerticalStackLayout>
                             </cds:CdsPopover.PopoverContent>
                         </cds:CdsPopover>
-                    </FlexLayout>
+                    </g:WrapLayout>
                 </VerticalStackLayout>
                 <HorizontalStackLayout Grid.Column="1" VerticalOptions="Start">
                     <cds:CdsButton Text="Restart" Kind="Ghost" Icon="Restart" Size="Md" />
@@ -76,7 +76,7 @@
             </Grid>
         </g:GalleryExample>
 
-        <FlexLayout Wrap="Wrap" AlignItems="Start">
+        <g:WrapLayout AlignItems="Start">
             <g:GalleryExample Title="Show more" Description="Long text clamps to 3 lines, then a ghost button; Show less collapses it again. No fades or inner scrolling." WidthRequest="520" Margin="0,0,48,48">
                 <VerticalStackLayout Spacing="8" Padding="16" BackgroundColor="{DynamicResource CdsLayer01}">
                     <cds:CdsText Text="About this cluster" TypeStyle="HeadingCompact01" />
@@ -94,7 +94,7 @@
                     </Grid>
                 </VerticalStackLayout>
             </g:GalleryExample>
-        </FlexLayout>
+        </g:WrapLayout>
 
     </VerticalStackLayout>
 </g:GalleryPage>

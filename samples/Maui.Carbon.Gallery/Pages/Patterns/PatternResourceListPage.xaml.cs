@@ -19,7 +19,7 @@ public partial class PatternResourceListPage : GalleryPage
         MainTable.RowActionsProvider = RowActions;
         Refresh();
         // Two clusters are selected when the page opens, so the batch bar shows.
-        MainTable.SelectedRows = new List<object> { K1Clusters.All[4], K1Clusters.All[5] };
+        MainTable.SelectedRows = new List<object> { K1Clusters.All[3], K1Clusters.All[4] };
         UpdateStatus();
 
         K1Clusters.AddColumns(SearchTable);

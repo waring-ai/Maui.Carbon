@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.HistogramChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Distribution" Description="20 nice bins over 400 ages. The count axis ends at the tallest bin and the binned axis runs exactly over the bins.">
+            <cds:CdsHistogramChart Title="Employee age distribution" Data="{x:Static data:PackageASamples.EmployeeAges}" Bins="20" RangeLabel="Ages" IsLegendEnabled="False">
+                <cds:CdsHistogramChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Age (years)" IncludeZero="False" />
+                </cds:CdsHistogramChart.BottomAxis>
+                <cds:CdsHistogramChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Employees" />
+                </cds:CdsHistogramChart.LeftAxis>
+            </cds:CdsHistogramChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Stacked groups" Description="Each region stacks inside its bins. Hover a bar for its count, or the rest of a bin for the ruler with every region and the total.">
+            <cds:CdsHistogramChart Title="API response time by region" Data="{x:Static data:PackageASamples.ResponseTimes}" Bins="15">
+                <cds:CdsHistogramChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Response time (ms)" IncludeZero="False" />
+                </cds:CdsHistogramChart.BottomAxis>
+                <cds:CdsHistogramChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Requests" />
+                </cds:CdsHistogramChart.LeftAxis>
+            </cds:CdsHistogramChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Fixed thresholds" Description="BinThresholds sets uneven price bands; values outside the first and last threshold are left out.">
+            <cds:CdsHistogramChart Title="Order value (USD), fixed price bands" Data="{x:Static data:PackageASamples.OrderValues}" BinThresholds="{x:Static data:PackageASamples.PriceBands}" RangeLabel="Price band">
+                <cds:CdsHistogramChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Order value (USD)" IncludeZero="False" />
+                </cds:CdsHistogramChart.BottomAxis>
+                <cds:CdsHistogramChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Orders" />
+                </cds:CdsHistogramChart.LeftAxis>
+            </cds:CdsHistogramChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Change the bin count; click legend items to isolate a region and re-bin the remaining rows.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsHistogramChart x:Name="Interactive" Title="API response time by region" Data="{x:Static data:PackageASamples.ResponseTimes}" Bins="15" SelectedGroupsChanged="OnSelectedGroupsChanged">
+                    <cds:CdsHistogramChart.BottomAxis>
+                        <cds:CdsChartAxis Title="Response time (ms)" IncludeZero="False" />
+                    </cds:CdsHistogramChart.BottomAxis>
+                    <cds:CdsHistogramChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Requests" />
+                    </cds:CdsHistogramChart.LeftAxis>
+                </cds:CdsHistogramChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="More bins" Kind="Tertiary" Size="Sm" Clicked="OnMoreBinsClicked" />
+                    <cds:CdsButton Text="Fewer bins" Kind="Tertiary" Size="Sm" Clicked="OnFewerBinsClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsHistogramChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsHistogramChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageASamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Bins take the pairing palette of each theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHistogramChart Title="Response time" Data="{x:Static data:PackageASamples.ResponseTimes}" Bins="15" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="On a layer the bin gaps show the layered grid backdrop.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHistogramChart Title="Response time" Data="{x:Static data:PackageASamples.ResponseTimes}" Bins="15" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

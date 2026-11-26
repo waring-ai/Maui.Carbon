@@ -133,9 +133,19 @@ public partial class CdsNumberInput : CdsFormField
         UpButton.Muted = IsReadOnly;
         var divider = disabled ? CdsColorKeys.IconDisabled : CdsColorKeys.BorderSubtle01;
         SetColor(_dividerMiddle, BoxView.ColorProperty, divider);
-        SetColor(_dividerStart, BoxView.ColorProperty,
-            EffectiveInvalid && !disabled ? CdsColorKeys.BorderSubtle01 : null);
+        var status = ShowsStatusBesideSteppers;
+        // Carbon: the leading divider shows only next to the invalid or warning icon (never in fluid, where the icon
+        // moves to the message row), and that icon ends 16px before the steppers (cds--number__invalid at 6rem, md).
+        SetColor(_dividerStart, BoxView.ColorProperty, status ? CdsColorKeys.BorderSubtle01 : null);
+        Controls.Margin = new Thickness(status ? CdsSpacing.Spacing05 : 0, 0, -CdsSpacing.Spacing05, 0);
     }
+
+    /// <summary>
+    /// Whether the chrome's invalid or warning icon sits in the field, just before the steppers: not fluid (the icon is in
+    /// the message row there), enabled, not read only, and the steppers shown.
+    /// </summary>
+    internal bool ShowsStatusBesideSteppers =>
+        (EffectiveInvalid || IsWarning) && IsEnabled && !IsReadOnly && !IsFluidMode && !HideSteppers;
 
     /// <inheritdoc/>
     protected override void UpdateChrome()

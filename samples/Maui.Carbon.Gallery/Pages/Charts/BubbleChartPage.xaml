@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.BubbleChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Three measures" Description="X and Value place each product, Size maps linearly onto the radius (3/400 to 25/400 of the graph). Bubbles fill at 20%, largest first; the legend ends with the radius item.">
+<cds:CdsBubbleChart Title="Product growth, margin and revenue" Data="{x:Static data:PackageBSamples.Products}" RadiusLabel="Revenue (M USD)" HeightRequest="480">
+<cds:CdsBubbleChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" Title="Annual growth (%)" />
+</cds:CdsBubbleChart.BottomAxis>
+<cds:CdsBubbleChart.LeftAxis>
+<cds:CdsChartAxis Title="Operating margin (%)" />
+</cds:CdsBubbleChart.LeftAxis>
+</cds:CdsBubbleChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Labels axis" Description="RadiusLabel names the size in the tooltip and table; RadiusLegendLabel names the legend item.">
+<cds:CdsBubbleChart Title="Delivery score by sprint (bubble = team size)" Data="{x:Static data:PackageBSamples.Sprints}" RadiusLabel="Engineers" RadiusLegendLabel="Engineers" HeightRequest="480">
+<cds:CdsBubbleChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Labels" />
+</cds:CdsBubbleChart.BottomAxis>
+<cds:CdsBubbleChart.LeftAxis>
+<cds:CdsChartAxis Title="Delivery score" />
+</cds:CdsBubbleChart.LeftAxis>
+</cds:CdsBubbleChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate product families. With the ruler off each bubble shows its own tooltip with its revenue.">
+<VerticalStackLayout Spacing="16">
+<cds:CdsBubbleChart x:Name="Interactive" Title="Product growth, margin and revenue" Data="{x:Static data:PackageBSamples.Products}" RadiusLabel="Revenue (M USD)" IsRulerEnabled="False" SelectedGroupsChanged="OnSelectedGroupsChanged">
+<cds:CdsBubbleChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" Title="Annual growth (%)" />
+</cds:CdsBubbleChart.BottomAxis>
+<cds:CdsBubbleChart.LeftAxis>
+<cds:CdsChartAxis Title="Operating margin (%)" />
+</cds:CdsBubbleChart.LeftAxis>
+</cds:CdsBubbleChart>
+<HorizontalStackLayout Spacing="16">
+<cds:CdsButton Text="Toggle ruler" Kind="Tertiary" Size="Sm" Clicked="OnRulerClicked" />
+<cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+</HorizontalStackLayout>
+</VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering grid skeleton; empty data shows it still.">
+<Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+<cds:CdsBubbleChart Title="Loading" IsLoading="True" HeightRequest="300" />
+<cds:CdsBubbleChart Grid.Column="1" Title="No data" Data="{x:Static data:PackageBSamples.Empty}" HeightRequest="300" />
+</Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Bubbles take the three-color pairing of each theme.">
+<g:ThemeStrip>
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsBubbleChart Title="Products" Data="{x:Static data:PackageBSamples.Products}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsBubbleChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" />
+</cds:CdsBubbleChart.BottomAxis>
+</cds:CdsBubbleChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the grid backdrop steps up with it.">
+<g:ThemeStrip Layered="True">
+<g:ThemeStrip.Template>
+<DataTemplate>
+<cds:CdsBubbleChart Title="Products" Data="{x:Static data:PackageBSamples.Products}" HeightRequest="280" IsToolbarEnabled="False">
+<cds:CdsBubbleChart.BottomAxis>
+<cds:CdsChartAxis ScaleType="Linear" />
+</cds:CdsBubbleChart.BottomAxis>
+</cds:CdsBubbleChart>
+</DataTemplate>
+</g:ThemeStrip.Template>
+</g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

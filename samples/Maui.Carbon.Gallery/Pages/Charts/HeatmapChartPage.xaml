@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.HeatmapChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Sequential scale" Description="Each point is a cell: its Key is the column, its Group the row. Values take 11 purple steps from 0; the gradient legend sits under the x axis with its title above it when it does not fit beside the row labels.">
+            <cds:CdsHeatmapChart Title="Website sessions by weekday and hour (thousands)" Data="{x:Static data:PackageESamples.Sessions}"
+                                 ColorLegendTitle="Sessions (k)" HeightRequest="440">
+                <cds:CdsHeatmapChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Hour of day" />
+                </cds:CdsHeatmapChart.BottomAxis>
+                <cds:CdsHeatmapChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Weekday" Categories="{x:Static data:PackageESamples.WeekdaysBottomUp}" />
+                </cds:CdsHeatmapChart.LeftAxis>
+            </cds:CdsHeatmapChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Diverging scale, quantized legend" Description="Values on both sides of zero switch to the 17-step red-cyan palette, symmetric around a neutral midpoint. ColorLegendType Quantize draws one block per step.">
+            <cds:CdsHeatmapChart Title="Temperature anomaly vs 1991-2020 average (°C)" Data="{x:Static data:PackageESamples.Anomalies}"
+                                 ColorLegendTitle="°C" ColorLegendType="Quantize" HeightRequest="440">
+                <cds:CdsHeatmapChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Month" />
+                </cds:CdsHeatmapChart.BottomAxis>
+                <cds:CdsHeatmapChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Year" />
+                </cds:CdsHeatmapChart.LeftAxis>
+            </cds:CdsHeatmapChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Null-state cells and dividers" Description="A missing pair is a striped null-state cell without a tooltip. Cells of at least 16 x 16px get 1px dividers. Hover an axis label for its row or column minimum, maximum and average.">
+            <cds:CdsHeatmapChart Title="Open incidents by service and severity" Data="{x:Static data:PackageESamples.Incidents}"
+                                 ColorLegendTitle="Open incidents" HeightRequest="440">
+                <cds:CdsHeatmapChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Severity" Categories="{x:Static data:PackageESamples.Severities}" />
+                </cds:CdsHeatmapChart.BottomAxis>
+                <cds:CdsHeatmapChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Service" />
+                </cds:CdsHeatmapChart.LeftAxis>
+            </cds:CdsHeatmapChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Fixed color domain" Description="ColorDomainMinimum and ColorDomainMaximum give a fixed range (a 50 to 100 score); ColorPairingOption 4 picks the teal palette.">
+            <cds:CdsHeatmapChart Title="Customer satisfaction score by region and quarter" Data="{x:Static data:PackageESamples.Satisfaction}"
+                                 ColorPairingOption="4" ColorLegendTitle="CSAT" ColorLegendType="Quantize"
+                                 ColorDomainMinimum="50" ColorDomainMaximum="100" HeightRequest="440">
+                <cds:CdsHeatmapChart.BottomAxis>
+                    <cds:CdsChartAxis Title="Quarter" />
+                </cds:CdsHeatmapChart.BottomAxis>
+                <cds:CdsHeatmapChart.LeftAxis>
+                    <cds:CdsChartAxis Title="Region" />
+                </cds:CdsHeatmapChart.LeftAxis>
+            </cds:CdsHeatmapChart>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Tab to the graph and use the arrow keys to move through the cells, then the axis labels; Show as table lists every value. The buttons switch the legend type and the dividers.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsHeatmapChart x:Name="Interactive" Title="Open incidents by service and severity" Data="{x:Static data:PackageESamples.Incidents}"
+                                     ColorLegendTitle="Open incidents" HeightRequest="360">
+                    <cds:CdsHeatmapChart.BottomAxis>
+                        <cds:CdsChartAxis Title="Severity" Categories="{x:Static data:PackageESamples.Severities}" />
+                    </cds:CdsHeatmapChart.BottomAxis>
+                    <cds:CdsHeatmapChart.LeftAxis>
+                        <cds:CdsChartAxis Title="Service" />
+                    </cds:CdsHeatmapChart.LeftAxis>
+                </cds:CdsHeatmapChart>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle legend type" Kind="Tertiary" Size="Sm" Clicked="OnLegendTypeClicked" />
+                    <cds:CdsButton Text="Toggle dividers" Kind="Tertiary" Size="Sm" Clicked="OnDividerClicked" />
+                    <cds:CdsText x:Name="Status" Text="Linear legend, automatic dividers" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Loading and empty" Description="IsLoading shows the shimmering grid skeleton; empty data shows it still.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsHeatmapChart Title="Loading" IsLoading="True" HeightRequest="300" />
+                <cds:CdsHeatmapChart Grid.Column="1" Title="No data" Data="{x:Static data:ChartSamples.Empty}" HeightRequest="300" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The sequential steps reverse on g90 and g100, so the largest value is the lightest.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHeatmapChart Title="Open incidents" Data="{x:Static data:PackageESamples.Incidents}" ColorLegendTitle="Incidents" HeightRequest="280" IsToolbarEnabled="False">
+                            <cds:CdsHeatmapChart.BottomAxis>
+                                <cds:CdsChartAxis Categories="{x:Static data:PackageESamples.Severities}" />
+                            </cds:CdsHeatmapChart.BottomAxis>
+                        </cds:CdsHeatmapChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Null-state hatching and dividers follow the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHeatmapChart Title="Open incidents" Data="{x:Static data:PackageESamples.Incidents}" ColorLegendTitle="Incidents" HeightRequest="280" IsToolbarEnabled="False">
+                            <cds:CdsHeatmapChart.BottomAxis>
+                                <cds:CdsChartAxis Categories="{x:Static data:PackageESamples.Severities}" />
+                            </cds:CdsHeatmapChart.BottomAxis>
+                        </cds:CdsHeatmapChart>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

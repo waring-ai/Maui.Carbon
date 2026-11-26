@@ -45,7 +45,7 @@
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>
-                        <cds:CdsSlider Label="Size (GB)" Min="0" Max="100" Value="40" HideTextInput="True" WidthRequest="240" />
+                        <cds:CdsSlider Label="Size (GB)" Min="0" Max="100" Value="40" HideTextInput="True" />
                     </DataTemplate>
                 </g:ThemeStrip.Template>
             </g:ThemeStrip>

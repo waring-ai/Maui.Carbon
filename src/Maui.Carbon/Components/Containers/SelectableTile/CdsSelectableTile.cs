@@ -69,7 +69,8 @@ public class CdsSelectableTile : CdsTileBase
     /// <inheritdoc/>
     protected override void ApplyTileVisuals(CdsTileVisuals visuals)
     {
-        _glyph.Icon = IsSelected ? CdsIconName.CheckboxChecked : CdsIconName.Checkbox;
+        // Selected: Carbon's filled checkbox with the check knocked out (checkbox--checked--filled), not the outline glyph.
+        _glyph.Icon = IsSelected ? CdsIconName.CheckboxCheckedFilled : CdsIconName.Checkbox;
         SetColor(_glyph, CdsIcon.ColorProperty, visuals.Icon);
         _hit.IsEnabled = !Is(CdsInteractionState.Disabled);
     }

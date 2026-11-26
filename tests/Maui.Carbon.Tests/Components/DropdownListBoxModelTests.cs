@@ -338,11 +338,13 @@ public class DropdownListBoxModelTests
     }
 
     [Fact]
-    public void A_highlighted_row_has_primary_text_but_no_fill()
+    public void A_highlighted_row_has_primary_text_and_the_hover_fill()
     {
         var v = CdsListBoxTokens.ResolveRow(false, true, false, false, false, false);
-        Assert.Null(v.Background);
+        Assert.Equal(CdsColorKeys.LayerHover01, v.Background);
         Assert.Equal(CdsColorKeys.TextPrimary, v.Text);
+        Assert.Equal(CdsColorKeys.LayerSelectedHover01, CdsListBoxTokens.ResolveRow(true, true, false, false, false, false).Background);
+        Assert.Equal(CdsColorKeys.LayerHover01, CdsListBoxTokens.ResolveRow(true, true, false, false, false, multi: true).Background);
     }
 
     [Fact]

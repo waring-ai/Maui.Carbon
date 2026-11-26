@@ -81,14 +81,25 @@ internal sealed class CalendarModel
     /// <summary>The heading of the visible month ("March 2026").</summary>
     public string MonthLabel => _visibleMonth.ToString("Y", Culture);
 
-    /// <summary>The weekday headings in column order, shortened ("Su", "Mo"...).</summary>
+    /// <summary>
+    /// The weekday headings in column order, shortened. English uses Carbon's uniform two-letter row ("Su", "Mo", "Tu"...),
+    /// not the culture's shortest names, which mix one and two letters ("M", "Tu", "W"); other languages keep their
+    /// culture's shortest names.
+    /// </summary>
     public IReadOnlyList<string> WeekdayLabels()
     {
+        var format = Culture.DateTimeFormat;
+        var english = Culture.TwoLetterISOLanguageName == "en";
         var labels = new string[7];
         for (var i = 0; i < 7; i++)
-            labels[i] = Culture.DateTimeFormat.GetShortestDayName((DayOfWeek)(((int)FirstDayOfWeek + i) % 7));
+        {
+            var day = (DayOfWeek)(((int)FirstDayOfWeek + i) % 7);
+            labels[i] = english ? TwoLetters(format.GetDayName(day)) : format.GetShortestDayName(day);
+        }
         return labels;
     }
+
+    static string TwoLetters(string name) => name.Length <= 2 ? name : name[..2];
 
     /// <summary>The first day of <paramref name="date"/>'s month.</summary>
     public static DateOnly FirstOfMonth(DateOnly date) => new(date.Year, date.Month, 1);

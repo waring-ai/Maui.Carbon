@@ -33,6 +33,13 @@ public static class CdsPaginationTokens
     /// <summary>Whether a bar of this width collapses to the item range and the arrows.</summary>
     public static bool IsCompact(double width) => width > 0 && width < CompactWidth;
 
+    /// <summary>
+    /// The widest the item range gets in a compact bar of <paramref name="width"/>: what the two square arrow buttons
+    /// (<paramref name="height"/> wide each) and the range's own padding leave. Unlimited in the full bar.
+    /// </summary>
+    internal static double CompactRangeWidth(bool compact, double width, double height, double padding) =>
+        compact ? Math.Max(0, width - 2 * height - padding) : double.PositiveInfinity;
+
     /// <summary>Whether the 1px top rule shows: not when the bar sits directly under a data table.</summary>
     public static bool ShowsTopRule(bool attachedToTable) => !attachedToTable;
 }

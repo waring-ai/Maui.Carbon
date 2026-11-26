@@ -7,21 +7,21 @@
     <VerticalStackLayout Spacing="48">
 
         <g:GalleryExample Title="In running text" Description="Tab to the term, tap or click it for the definition; with openOnHover it also opens on hover. Escape, blur and a tap outside close it.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center" Direction="Row" MaximumWidthRequest="640" HorizontalOptions="Start">
+            <g:WrapLayout AlignItems="Center" MaximumWidthRequest="640" HorizontalOptions="Start">
                 <cds:CdsText Text="Billing is based on " TypeStyle="Body01" />
                 <cds:CdsDefinitionTooltip Text="GB-hours" Definition="Memory allocated multiplied by hours running." OpenOnHover="True" />
                 <cds:CdsText Text=" and on " TypeStyle="Body01" />
                 <cds:CdsDefinitionTooltip Text="egress" Definition="Data that leaves the cloud network." />
                 <cds:CdsText Text=". Charges stop when a cluster is deleted." TypeStyle="Body01" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Open" Description="The definition is high contrast, 176 wide at most, with a caret.">
-            <FlexLayout Wrap="Wrap" AlignItems="Center" Padding="0,0,0,64">
+            <g:WrapLayout AlignItems="Center" Padding="0,0,0,64">
                 <cds:CdsText Text="Each node reports its " TypeStyle="Body01" />
                 <cds:CdsDefinitionTooltip Text="p95 latency" IsOpen="True" Definition="The time within which 95 percent of requests complete." />
                 <cds:CdsText Text=" every minute." TypeStyle="Body01" />
-            </FlexLayout>
+            </g:WrapLayout>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Placement" Description="bottom (default), top, left and right.">

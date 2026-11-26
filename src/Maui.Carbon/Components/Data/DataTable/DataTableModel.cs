@@ -310,6 +310,31 @@ internal sealed class DataTableModel
     /// <summary>The batch bar text: "1 item selected" or "3 items selected".</summary>
     public static string BatchText(int count) => count == 1 ? "1 item selected" : $"{count} items selected";
 
+    /// <summary>The label of the batch bar's cancel button.</summary>
+    public const string BatchCancelText = "Cancel";
+
+    /// <summary>The width of body-compact-01 text (14 Plex Sans, 0.16 tracking), from the embedded font's metrics.</summary>
+    internal static double BodyCompactWidth(string? text) =>
+        string.IsNullOrEmpty(text) ? 0 : CdsChartTextMetrics.Width(text, new ChartFont(ChartFontFamily.Sans, 14)) + 0.16 * text.Length;
+
+    /// <summary>
+    /// Whether the batch bar's actions drop their labels for icons: when the count, every action with its label and the
+    /// cancel button need more than <paramref name="width"/> (each has 16 padding at both ends; an icon adds 8 + 16).
+    /// Only actions with an icon can drop their label, so with none the answer is <c>false</c>.
+    /// </summary>
+    public static bool BatchIconsOnly(double width, string? summary, IEnumerable<(string? Label, bool HasIcon)> actions)
+    {
+        const double pad = CdsSpacing.Spacing05;
+        var needed = pad + BodyCompactWidth(summary) + pad + pad + BodyCompactWidth(BatchCancelText) + pad;
+        var anyIcon = false;
+        foreach (var (label, hasIcon) in actions)
+        {
+            needed += pad + BodyCompactWidth(label) + (hasIcon ? CdsSpacing.Spacing03 + 16 + pad : pad);
+            anyIcon |= hasIcon;
+        }
+        return anyIcon && needed > width;
+    }
+
     DataTableRowData? Find(string key)
     {
         foreach (var row in _rows)

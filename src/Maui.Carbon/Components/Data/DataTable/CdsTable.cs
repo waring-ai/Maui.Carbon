@@ -106,6 +106,8 @@ public class CdsTable : CdsControl
         VerticalOptions = LayoutOptions.Start;
         CdsTokens.SetColor(_bodyGrid, BackgroundColorProperty, CdsTableTokens.Background);
         CdsTokens.SetColor(_virtualBody, BackgroundColorProperty, CdsTableTokens.Background);
+        // The sticky header and its body are one table surface: nothing of the page shows between or beside them.
+        CdsTokens.SetColor(_stickyRoot, BackgroundColorProperty, CdsTableTokens.Background);
         _scroll.Scrolled += (_, _) => { if (IsVirtual) UpdateWindow(); };
         _scroll.SizeChanged += (_, _) => { if (IsVirtual) UpdateWindow(); };
         _stickyRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
@@ -592,14 +594,21 @@ public class CdsTable : CdsControl
         var rowColumns = virtualized || rows.Count == 0 ? 0 : rows.Max(r => r.CellList.Count);
         var columnCount = Math.Max(head?.Count ?? 0, rowColumns);
         _minimumWidth = 0;
+        var widths = new GridLength[columnCount];
+        var flush = new bool[columnCount];
         for (var c = 0; c < columnCount; c++)
         {
             var width = head is not null && c < head.Count ? head[c].Width : GridLength.Star;
             if (sticky && width.IsAuto) width = GridLength.Star;
+            widths[c] = width;
+            flush[c] = head is not null && c < head.Count && head[c].IsFlush;
+            _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
+        }
+        foreach (var width in FillColumns(widths, flush))
+        {
             _columns.Add(width);
             _bodyGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
             if (sticky) _headerGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
-            _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
         }
         _rowHeight = CdsTableTokens.RowHeight(Size);
         (_padTop, _padBottom) = CdsTableTokens.CellPaddingY(Size);
@@ -1043,6 +1052,27 @@ public class CdsTable : CdsControl
         else Run();
     }
 
+    /// <summary>
+    /// The columns as laid out. Carbon's table is always as wide as its container (`width: 100%`), so when no column is a
+    /// star column the spare width goes to the content columns: the last `Auto` column takes it, or else the fixed-width
+    /// columns share it in proportion to their widths, as a browser's table layout does. Flush tool columns (selection,
+    /// expand, row menu) keep their width. The fixed widths stay the minimum: below it the table scrolls.
+    /// </summary>
+    internal static GridLength[] FillColumns(IReadOnlyList<GridLength> widths, IReadOnlyList<bool> flush)
+    {
+        var result = widths.ToArray();
+        if (result.Any(w => w.IsStar)) return result;
+        for (var c = result.Length - 1; c >= 0; c--)
+        {
+            if (!result[c].IsAuto || flush[c]) continue;
+            result[c] = GridLength.Star;
+            return result;
+        }
+        for (var c = 0; c < result.Length; c++)
+            if (result[c].IsAbsolute && !flush[c] && result[c].Value > 0) result[c] = new GridLength(result[c].Value, GridUnitType.Star);
+        return result;
+    }
+
     /// <summary>The content width: the table's width, or the columns' minimum when that is wider (it then scrolls).</summary>
     internal static double ContentWidth(double viewport, double minimum) =>
         viewport > 0 ? Math.Max(viewport, minimum) : minimum > 0 ? minimum : -1;
@@ -1082,7 +1112,8 @@ public class CdsTable : CdsControl
         Hide(visual.Fill);
         grid.Add(visual.Fill, column, 0);
 
-        var host = new Grid { BackgroundColor = Colors.Transparent };
+        // The Auto header row ignores the fill's minimum, so the host carries the size's height (as body cells do).
+        var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
         grid.Add(host, column, 0);
 
         if (header?.Body is { } body)

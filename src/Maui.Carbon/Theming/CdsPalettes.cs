@@ -25,6 +25,27 @@ internal static class CdsPalettes
     /// <summary>The value of a token name (<c>layer-02</c>) in a theme.</summary>
     internal static Color GetTokenColor(CdsThemeName theme, string token) => CdsPaletteData.Get(theme)[IndexByToken[token]];
 
+    /// <summary>
+    /// The value of a color key where an element sits: <paramref name="theme"/> at layer <paramref name="level"/>, so a
+    /// <c>-01</c> layer key resolves as <see cref="CdsLayer"/> would remap it. Keys that are not Carbon color keys resolve to
+    /// transparent. For drawing code that reads colors instead of binding them (charts).
+    /// </summary>
+    internal static Color Resolve(CdsThemeName theme, int level, string key)
+    {
+        if (!IndexByKey.TryGetValue(key, out var index)) return Colors.Transparent;
+        if (level > 1)
+        {
+            var token = CdsColorKeys.TokenNames[index];
+            if (token.EndsWith("-01", StringComparison.Ordinal) && Array.IndexOf(LayerSetBases, token[..^3]) >= 0)
+                return GetTokenColor(theme, $"{token[..^3]}-0{Math.Clamp(level, 1, 3)}");
+        }
+        return CdsPaletteData.Get(theme)[index];
+    }
+
+    /// <summary>The value of a token name (<c>layer-01</c>) where an element sits, with layer remapping (see <see cref="Resolve"/>).</summary>
+    internal static Color ResolveToken(CdsThemeName theme, int level, string token) =>
+        IndexByToken.TryGetValue(token, out var index) ? Resolve(theme, level, CdsColorKeys.All[index]) : Colors.Transparent;
+
     /// <summary>True when <paramref name="key"/> is a Carbon color key.</summary>
     internal static bool IsColorKey(string key) => IndexByKey.ContainsKey(key);
 

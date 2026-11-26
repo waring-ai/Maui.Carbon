@@ -26,7 +26,8 @@ namespace Maui.Carbon.Relay.Hosting;
 /// interactions (filters, empty states, validation, dialogs, wizard steps, tabs, toasts); leak checks (repeat a cycle,
 /// collect garbage, look for element types whose live count grew with it); stress (rapid navigation, theme flips,
 /// resizes, panel toggles). Every state gets a <see cref="VisualAudit"/>; every warning or error logged meanwhile is
-/// attributed to the step that was running; a heartbeat on the UI thread records hangs.
+/// attributed to the step that was running; a heartbeat on the UI thread records hangs; Maui.Carbon's metrics are totalled
+/// per step and component (<see cref="ExerciseMetrics"/>), including what still draws once a screen has settled.
 /// </summary>
 public static class ExerciseRunner
 {
@@ -102,6 +103,7 @@ public static class ExerciseRunner
         readonly List<string> _notes = [];
         readonly List<(string Requested, string Actual)> _sizes = [];
         readonly Stopwatch _clock = Stopwatch.StartNew();
+        readonly ExerciseMetrics _metrics = new();
         int _states;
         int _captures;
         string _sizeName = "lg";
@@ -737,7 +739,9 @@ public static class ExerciseRunner
             _states++;
             var before = VisualAudit.Frames(page);
             var findings = VisualAudit.Audit(page);
+            _metrics.BeginIdle(state);
             await Task.Delay(600);
+            _metrics.EndIdle();
             findings.AddRange(VisualAudit.Unsettled(before, VisualAudit.Frames(page)));
             var capture = false;
             foreach (var f in findings)
@@ -905,6 +909,8 @@ public static class ExerciseRunner
             if (_slow.Count == 0) sb.AppendLine("None.");
             foreach (var s in _slow.OrderByDescending(s => s.Ms).Take(25)) sb.AppendLine(CultureInfo.InvariantCulture, $"- {s.Ms:0} ms: {s.Step}");
 
+            _metrics.WriteReport(sb);
+
             File.WriteAllText(Path.Combine(dir, "exercise-report.md"), sb.ToString());
             File.WriteAllText(Path.Combine(dir, "exercise-findings.json"), JsonSerializer.Serialize(new
             {
@@ -914,6 +920,7 @@ public static class ExerciseRunner
                 retainers = _retainers.Select(r => new { r.Scenario, r.Subscription, r.Before, r.After }),
                 hangs = _hangs.Select(h => new { h.Step, h.Ms }),
                 slow = _slow.Select(s => new { s.Step, s.Ms }),
+                metrics = _metrics.Data(),
                 sizes = _sizes.Distinct().Select(s => new { s.Requested, s.Actual }),
                 aborted = Aborted?.ToString(),
             }, new JsonSerializerOptions { WriteIndented = true }));

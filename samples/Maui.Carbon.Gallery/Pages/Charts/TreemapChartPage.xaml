@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Charts.Data"
+               x:Class="Maui.Carbon.Gallery.Pages.Charts.TreemapChartPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Two-level treemaps" Description="Each top-level group takes one palette color and each leaf is sized by its value; labelled leaves pick black or white text for contrast.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsTreemapChart Title="Monthly cloud spend by service (USD thousands)" Data="{x:Static data:PackageDSamples.Spend}" />
+                <cds:CdsTreemapChart Grid.Column="1" Title="Population by region and country (millions, 2023)" Data="{x:Static data:PackageDSamples.Population}" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Legend on the right and loading" Description="A right-hand legend lists one group per row. IsLoading shows the shimmering skeleton.">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="32">
+                <cds:CdsTreemapChart Title="Compute and storage spend, legend on the right (USD thousands)" Data="{x:Static data:PackageDSamples.SpendTopThree}" LegendPosition="Right" />
+                <cds:CdsTreemapChart Grid.Column="1" Title="Spend by service (loading)" IsLoading="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Click legend items to isolate groups; hover a leaf (or Tab to the graph and use the arrow keys) for its group and value.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTreemapChart x:Name="Interactive" Title="Monthly cloud spend by service (USD thousands)" Data="{x:Static data:PackageDSamples.Spend}" SelectedGroupsChanged="OnSelectedGroupsChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Toggle loading" Kind="Tertiary" Size="Sm" Clicked="OnLoadingClicked" />
+                    <cds:CdsText x:Name="Status" Text="All groups shown" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors, labels and surfaces follow each theme; g90 and g100 use the dark palette.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTreemapChart Title="Cloud spend" Data="{x:Static data:PackageDSamples.Spend}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On a layer" Description="Inside a layer the surfaces step up with it.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTreemapChart Title="Cloud spend" Data="{x:Static data:PackageDSamples.Spend}" HeightRequest="280" IsToolbarEnabled="False" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>
