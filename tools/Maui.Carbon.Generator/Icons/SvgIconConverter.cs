@@ -70,7 +70,7 @@ public static partial class SvgIconConverter
 
     // Carbon's 16px versions of these are the 32px artwork at half scale (close: an 8px cross; checkbox: a 12px box), so
     // they keep the full 32 box (design/carbon/components/Icon/README.md; the reference bundle.js crops neither).
-    static readonly HashSet<string> FullBox = ["close", "checkbox", "checkbox--checked", "checkbox--indeterminate"];
+    static readonly HashSet<string> FullBox = ["close", "checkbox", "checkbox--checked", "checkbox--checked--filled", "checkbox--indeterminate"];
 
     // Carbon's 16px add is a 10px cross: drawn from the centre 26x26 (the reference bundle.js CROP 'add-32'). subtract is
     // its pair in steppers and gets the same box, so the two bars match.

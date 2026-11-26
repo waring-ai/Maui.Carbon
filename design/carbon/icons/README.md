@@ -1,5 +1,0 @@
-A 78-glyph subset of Carbon's icon set, copied verbatim from `packages/icons/src/svg` at 16, 20 and 32px (file name = glyph name + `-` + size, e.g. `settings-16.svg`, `error--filled-20.svg`). Carbon's full set is much larger; this release's `src/svg/16` folder itself holds only about 70 glyphs, so `add`, `close`, `calendar`, `copy`, `edit` and most navigation glyphs are 32px files whose artwork sits in the centre 24px (the `Icon` component crops them).
-
-Every file is single-ink: the shapes carry no fill, so an `<img>` draws them in black `#000000`; use the `Icon` component to color them with `currentColor` (`icon-primary`, `icon-inverse`, `icon-on-color`, `support-*`). Draw 16px glyphs at 16px (or 24px for emphasis) and 20px glyphs at 20px; never recolor with a gradient.
-
-Use `error--filled`, `checkmark--filled`, `warning--filled` for status, always next to a text label; use `add`, `close`, `arrow--right`, `chevron--down`, `launch`, `search`, `settings`, `download`, `upload` for actions.

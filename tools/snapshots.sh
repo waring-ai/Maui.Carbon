@@ -3,6 +3,7 @@
 # screen and open state of the Relay sample (one launch; it signs itself in).
 # Must run outside any sandbox with window-server access. Usage: [APP=relay] tools/snapshots.sh [outdir] [themes] [Debug|Release]
 # Release captures are faster and less timing-sensitive; build it first with -c Release.
+# Long pages are captured a screen at a time: <route>-<theme>.png, then <route>-<theme>-2.png, -3.png… below the fold.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 OUT="${1:-$PWD/out/shots}"; THEMES="${2:-white,g100}"; CONFIG="${3:-Debug}"
@@ -18,7 +19,7 @@ if [[ "${APP:-gallery}" == "relay" ]]; then
   exit 0
 fi
 APP="samples/Maui.Carbon.Gallery/bin/$CONFIG/net11.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Gallery.app"
-for c in Foundations Actions Forms FluidForms Data Navigation Containers Overlays Feedback AI Layout Patterns; do
+for c in Foundations Actions Forms FluidForms Data Charts Navigation Containers Overlays Feedback AI Layout Patterns; do
   before=$(ls "$OUT"/*.png 2>/dev/null | wc -l)
   open -n -W --env CARBON_SNAPSHOT_DIR="$OUT" --env CARBON_SNAPSHOT_CATEGORY="$c" --env CARBON_SNAPSHOT_THEMES="$THEMES" "$APP"
   after=$(ls "$OUT"/*.png 2>/dev/null | wc -l)

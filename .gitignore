@@ -68,3 +68,4 @@ Directory.Build.local.props
 .claude/settings.local.json
 .claude/worktrees/
 .idea/.idea.Maui.Carbon/.idea/
+design/carbon/
