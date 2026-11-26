@@ -1,3 +1,5 @@
+using Microsoft.Maui.Animations;
+
 namespace Maui.Carbon.Tests.Components;
 
 public class LoadingTests
@@ -192,5 +194,159 @@ public class InlineLoadingLiveModeTests
         shown.Description = "Saved";
         shown.Description = "Saved";
         Assert.Equal(["Saving...", "Saved"], heard.Announcements.Select(a => a.Text));
+    }
+}
+
+// Runs alone: one test forces reduced motion, which every animating control reads.
+[Collection(FocusTrackerCollection.Name)]
+public class LoopClockTests
+{
+    sealed class FakeTicker : ITicker
+    {
+        public bool IsRunning { get; set; }
+        public bool SystemEnabled { get; set; } = true;
+        public int MaxFps { get; set; } = 60;
+        public Action? Fire { get; set; }
+        public void Start() => IsRunning = true;
+        public void Stop() => IsRunning = false;
+    }
+
+    sealed class FakeAnimationManager : IAnimationManager
+    {
+        public List<Microsoft.Maui.Animations.Animation> Animations { get; } = [];
+        public ITicker Ticker { get; } = new FakeTicker();
+        public double SpeedModifier { get; set; } = 1;
+        public bool AutoStartTicker { get; set; } = true;
+        public void Add(Microsoft.Maui.Animations.Animation animation)
+        {
+            if (!Animations.Contains(animation)) Animations.Add(animation);
+        }
+        public void Remove(Microsoft.Maui.Animations.Animation animation) => Animations.Remove(animation);
+        public void Frame(double milliseconds)
+        {
+            foreach (var animation in Animations.ToArray()) animation.Tick(milliseconds);
+        }
+    }
+
+    static bool Start(VisualElement owner, Action<double> callback, uint duration, IAnimationManager manager, string name = "test") =>
+        CdsLoop.Start(owner, name, callback, 0.2, duration, manager);
+
+    [Fact]
+    public void Loops_of_a_window_share_one_animation()
+    {
+        var manager = new FakeAnimationManager();
+        var phases = new double[3];
+        var owners = new[] { new BoxView(), new BoxView(), new BoxView() };
+        for (var i = 0; i < owners.Length; i++)
+        {
+            var index = i;
+            Assert.True(Start(owners[i], p => phases[index] = p, 400, manager));
+        }
+        Assert.Single(manager.Animations);
+
+        manager.Frame(100);
+        Assert.Equal([0.25, 0.25, 0.25], phases);
+
+        manager.Frame(400);
+        Assert.Equal(0.25, phases[0], 6);
+    }
+
+    [Fact]
+    public void Each_loop_keeps_its_own_duration()
+    {
+        var manager = new FakeAnimationManager();
+        double fast = -1, slow = -1;
+        Start(new BoxView(), p => fast = p, 200, manager);
+        Start(new BoxView(), p => slow = p, 1000, manager);
+        manager.Frame(150);
+        Assert.Equal(0.75, fast, 6);
+        Assert.Equal(0.15, slow, 6);
+    }
+
+    [Fact]
+    public void Hidden_loops_skip_their_frames()
+    {
+        var manager = new FakeAnimationManager();
+        var owner = new BoxView();
+        var screen = new Grid { IsVisible = false, Children = { owner } };
+        var calls = 0;
+        Start(owner, _ => calls++, 400, manager);
+        manager.Frame(16);
+        Assert.Equal(0, calls);
+
+        screen.IsVisible = true;
+        manager.Frame(16);
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
+    public void Stopping_the_last_loop_leaves_the_manager_idle()
+    {
+        var manager = new FakeAnimationManager();
+        var first = new BoxView();
+        var second = new BoxView();
+        Start(first, _ => { }, 400, manager);
+        Start(second, _ => { }, 400, manager);
+        Assert.True(CdsLoop.IsRunning(first, "test"));
+
+        CdsLoop.Stop(first, "test");
+        Assert.False(CdsLoop.IsRunning(first, "test"));
+        Assert.Single(manager.Animations);
+
+        CdsLoop.Stop(second, "test");
+        Assert.Empty(manager.Animations);
+
+        // A later loop puts the clock back.
+        Start(first, _ => { }, 400, manager);
+        Assert.Single(manager.Animations);
+        CdsLoop.Stop(first, "test");
+    }
+
+    [Fact]
+    public void Restarting_a_loop_replaces_it_and_a_stopped_loop_gets_no_more_frames()
+    {
+        var manager = new FakeAnimationManager();
+        var owner = new BoxView();
+        int first = 0, second = 0;
+        Start(owner, _ => first++, 400, manager);
+        Start(owner, _ => second++, 400, manager);
+        first = 0;
+        second = 0;
+        manager.Frame(16);
+        Assert.Equal((0, 1), (first, second));
+
+        // Stopping from inside another loop's frame takes effect in the same frame.
+        CdsLoop.Stop(owner, "test");
+        var other = new BoxView();
+        Start(other, _ => CdsLoop.Stop(owner, "test"), 400, manager);
+        Start(owner, _ => second++, 400, manager);
+        second = 0;
+        manager.Frame(16);
+        Assert.Equal(0, second);
+        Assert.False(CdsLoop.IsRunning(owner, "test"));
+        CdsLoop.Stop(other, "test");
+    }
+
+    [Fact]
+    public void Reduced_motion_or_disabled_system_animations_show_the_rest_phase()
+    {
+        var manager = new FakeAnimationManager();
+        var phase = -1.0;
+        CdsMotion.ReducedMotionOverride = true;
+        try
+        {
+            Assert.False(Start(new BoxView(), p => phase = p, 400, manager));
+            Assert.Equal(0.2, phase);
+        }
+        finally
+        {
+            CdsMotion.ReducedMotionOverride = null;
+        }
+
+        ((FakeTicker)manager.Ticker).SystemEnabled = false;
+        phase = -1;
+        Assert.False(Start(new BoxView(), p => phase = p, 400, manager));
+        Assert.Equal(0.2, phase);
+        Assert.Empty(manager.Animations);
     }
 }

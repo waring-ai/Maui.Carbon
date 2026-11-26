@@ -35,10 +35,12 @@ public static class CdsDataTableSkeletonTokens
         inverted ? (CdsColorKeys.SkeletonElement, CdsColorKeys.SkeletonBackground) : (CdsColorKeys.SkeletonBackground, CdsColorKeys.SkeletonElement);
 }
 
-/// <summary>A skeleton bar like <see cref="CdsSkeletonText"/>'s, optionally with the tokens swapped (header bars). Decorative.</summary>
+/// <summary>
+/// A skeleton bar like <see cref="CdsSkeletonText"/>'s, optionally with the tokens swapped (header bars). Decorative. It
+/// does not animate itself: its <see cref="CdsDataTableSkeleton"/> runs one loop for all of its bars.
+/// </summary>
 internal sealed class CdsSkeletonBar : Grid
 {
-    const string AnimationName = "cds-skeleton-bar";
     readonly BoxView _background = new();
     readonly BoxView _band = new() { AnchorX = 0 };
 
@@ -57,11 +59,10 @@ internal sealed class CdsSkeletonBar : Grid
         CascadeInputTransparent = true;
         IsClippedToBounds = true;
         AutomationProperties.SetIsInAccessibleTree(this, false);
-        Loaded += (_, _) => CdsLoop.Start(this, AnimationName, Apply, 0.2, ShimmerModel.LoopMilliseconds);
-        Unloaded += (_, _) => CdsLoop.Stop(this, AnimationName);
     }
 
-    void Apply(double phase)
+    /// <summary>Shows the sweep at <paramref name="phase"/> (0 to 1).</summary>
+    public void Apply(double phase)
     {
         var (scale, fromStart, opacity) = ShimmerModel.At(phase);
         _band.AnchorX = fromStart ? 0 : 1;
@@ -108,8 +109,12 @@ public class CdsDataTableSkeleton : CdsControl
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsDataTableSkeleton), "Table (loading)", propertyChanged: OnChanged);
 
+    const string AnimationName = "cds-skeleton-bars";
+    const double RestPhase = 0.2;
     readonly CdsItemCollection<string> _headers = [];
     readonly VerticalStackLayout _root = new() { Spacing = 0 };
+    readonly List<CdsSkeletonBar> _bars = [];
+    double _phase = RestPhase;
 
     /// <summary>Creates a 5 by 5 skeleton with a title block and toolbar.</summary>
     public CdsDataTableSkeleton()
@@ -119,7 +124,13 @@ public class CdsDataTableSkeleton : CdsControl
         _headers.CollectionChanged += (_, _) => Rebuild();
         SetChrome(_root);
         Rebuild();
+        // One loop sweeps every bar in step (a table of bars as one loop each kept the UI thread busy).
+        Loaded += (_, _) => CdsLoop.Start(this, AnimationName, ApplyPhase, RestPhase, ShimmerModel.LoopMilliseconds);
+        Unloaded += (_, _) => CdsLoop.Stop(this, AnimationName);
     }
+
+    /// <summary>The bars the shimmer sweeps (header, toolbar, column-header and cell bars).</summary>
+    internal IReadOnlyList<CdsSkeletonBar> Bars => _bars;
 
     /// <summary>Body rows. Default 5.</summary>
     public int RowCount
@@ -168,17 +179,32 @@ public class CdsDataTableSkeleton : CdsControl
 
     static void OnChanged(BindableObject b, object? o, object? n) => ((CdsDataTableSkeleton)b).Rebuild();
 
+    void ApplyPhase(double phase)
+    {
+        _phase = phase;
+        foreach (var bar in _bars) bar.Apply(phase);
+    }
+
+    CdsSkeletonBar Bar(double width, double height, bool inverted)
+    {
+        var bar = new CdsSkeletonBar(width, height, inverted);
+        bar.Apply(_phase);
+        _bars.Add(bar);
+        return bar;
+    }
+
     void Rebuild()
     {
         _root.Children.Clear();
+        _bars.Clear();
         var columns = Math.Max(ColumnCount, _headers.Count);
 
         if (ShowHeader)
         {
             var block = new VerticalStackLayout { Spacing = CdsSpacing.Spacing03, Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06) };
             CdsTokens.SetColor(block, BackgroundColorProperty, CdsColorKeys.Layer01);
-            block.Add(new CdsSkeletonBar(CdsDataTableSkeletonTokens.TitleBar.Width, CdsDataTableSkeletonTokens.TitleBar.Height, false));
-            block.Add(new CdsSkeletonBar(CdsDataTableSkeletonTokens.DescriptionBar.Width, CdsDataTableSkeletonTokens.DescriptionBar.Height, false));
+            block.Add(Bar(CdsDataTableSkeletonTokens.TitleBar.Width, CdsDataTableSkeletonTokens.TitleBar.Height, false));
+            block.Add(Bar(CdsDataTableSkeletonTokens.DescriptionBar.Width, CdsDataTableSkeletonTokens.DescriptionBar.Height, false));
             _root.Add(block);
         }
 
@@ -186,11 +212,9 @@ public class CdsDataTableSkeleton : CdsControl
         {
             var toolbar = new Grid { HeightRequest = CdsDataTableSkeletonTokens.RowHeight };
             CdsTokens.SetColor(toolbar, BackgroundColorProperty, CdsColorKeys.Layer01);
-            var button = new CdsSkeletonBar(CdsDataTableSkeletonTokens.ToolbarButtonWidth, CdsDataTableSkeletonTokens.RowHeight, false)
-            {
-                HorizontalOptions = LayoutOptions.End,
-                VerticalOptions = LayoutOptions.Fill,
-            };
+            var button = Bar(CdsDataTableSkeletonTokens.ToolbarButtonWidth, CdsDataTableSkeletonTokens.RowHeight, false);
+            button.HorizontalOptions = LayoutOptions.End;
+            button.VerticalOptions = LayoutOptions.Fill;
             toolbar.Add(button);
             SemanticProperties.SetDescription(toolbar, "data table toolbar");
             _root.Add(toolbar);
@@ -209,7 +233,7 @@ public class CdsDataTableSkeleton : CdsControl
         {
             View cell = c < _headers.Count
                 ? new CdsText(_headers[c], CdsTypeStyle.HeadingCompact01) { VerticalOptions = LayoutOptions.Center, LineBreakMode = LineBreakMode.TailTruncation }
-                : new CdsSkeletonBar(CdsDataTableSkeletonTokens.BarWidth, CdsDataTableSkeletonTokens.BarHeight, true);
+                : Bar(CdsDataTableSkeletonTokens.BarWidth, CdsDataTableSkeletonTokens.BarHeight, true);
             cell.Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0);
             table.Add(cell, c, 0);
         }
@@ -228,10 +252,8 @@ public class CdsDataTableSkeleton : CdsControl
             Grid.SetColumnSpan(rule, columns);
             for (var c = 0; c < columns; c++)
             {
-                var bar = new CdsSkeletonBar(CdsDataTableSkeletonTokens.BarWidth, CdsDataTableSkeletonTokens.BarHeight, false)
-                {
-                    Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0),
-                };
+                var bar = Bar(CdsDataTableSkeletonTokens.BarWidth, CdsDataTableSkeletonTokens.BarHeight, false);
+                bar.Margin = new Thickness(CdsSpacing.Spacing05, 0, CdsSpacing.Spacing05, 0);
                 table.Add(bar, c, r + 1);
             }
         }

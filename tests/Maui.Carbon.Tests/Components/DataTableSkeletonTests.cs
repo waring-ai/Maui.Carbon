@@ -51,6 +51,22 @@ public class DataTableSkeletonTests
     }
 
     [Fact]
+    public void Every_bar_is_swept_by_the_skeleton_not_by_a_loop_of_its_own()
+    {
+        var skeleton = new CdsDataTableSkeleton { RowCount = 3, ColumnCount = 4 };
+        // Title and description, the toolbar button, 4 header bars and 3 rows of 4 cell bars.
+        Assert.Equal(2 + 1 + 4 + 12, skeleton.Bars.Count);
+
+        skeleton.Headers.Add("Name");
+        Assert.Equal(2 + 1 + 3 + 12, skeleton.Bars.Count);
+
+        skeleton.ShowHeader = false;
+        skeleton.ShowToolbar = false;
+        Assert.Equal(3 + 12, skeleton.Bars.Count);
+        Assert.All(skeleton.Bars, bar => Assert.False(CdsLoop.IsRunning(bar, "cds-skeleton-bar")));
+    }
+
+    [Fact]
     public void Counts_are_coerced_to_sane_values()
     {
         var skeleton = new CdsDataTableSkeleton { RowCount = -3, ColumnCount = 0 };
