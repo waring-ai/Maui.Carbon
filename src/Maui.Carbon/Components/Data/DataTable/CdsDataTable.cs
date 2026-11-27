@@ -13,9 +13,10 @@ namespace Maui.Carbon;
 /// <item><see cref="IsExpandable"/> with <see cref="ExpandedRowTemplate"/> adds a chevron column and a child row; <see cref="RowActions"/> adds an overflow menu per row; <see cref="IsSearchable"/> adds the toolbar search; <see cref="StickyHeader"/> pins the header above a 300 high scrolling body.</item>
 /// <item><see cref="SelectedRows"/>, <see cref="ExpandedRows"/>, <see cref="SortKey"/> with <see cref="SortDirection"/> and <see cref="SearchText"/> are two-way, so you can control or persist them.</item>
 /// </list>
-/// With <see cref="StickyHeader"/> the table owns its scrolling and is virtualized: only the rows in view are built, and they
-/// are re-bound to other rows as the body scrolls, so bind everything a <see cref="CdsDataTableHeader.CellTemplate"/> or
-/// <see cref="ExpandedRowTemplate"/> shows to its item. Without it every row is a real view: keep to about 200 and put a
+/// The table is virtualized when it can be: with <see cref="StickyHeader"/> it owns its scrolling, and inside a vertical
+/// <see cref="ScrollView"/> it follows the page's (<see cref="VirtualizeInScrollView"/>). Only the rows in view are built,
+/// and they are re-bound to other rows as the body scrolls, so bind everything a <see cref="CdsDataTableHeader.CellTemplate"/>
+/// or <see cref="ExpandedRowTemplate"/> shows to its item. Otherwise every row is a real view: keep to about 200 and put a
 /// <see cref="CdsPagination"/> directly under the table for more. Use
 /// <see cref="CdsDataTableSkeleton"/> while the first rows load, and a <see cref="CdsStructuredList"/> for a handful of read-only values.
 /// </summary>
@@ -104,7 +105,12 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
             Attach(e);
             Render();
         };
-        Loaded += (_, _) => UpdateAttachedPagination();
+        Loaded += (_, _) =>
+        {
+            UpdateAttachedPagination();
+            // The ancestors are settled once the table is in a window: start (or stop) following a page scroll view.
+            if (_rendered && !ReferenceEquals(FindPageScroll(), _table.PageScroll)) Render();
+        };
 
         UpdateChrome();
         UpdateToolbar();
@@ -298,8 +304,10 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
             _table.Label = Title ?? Label;
             _table.Head = BuildHead(selection, rowActions);
             _table.Rows.Clear();
-            _table.RowSource = StickyHeader ? this : null;
-            if (!StickyHeader)
+            var page = FindPageScroll();
+            _table.PageScroll = page;
+            _table.RowSource = StickyHeader || page is not null ? this : null;
+            if (_table.RowSource is null)
             {
                 var visible = _model.VisibleRows;
                 for (var i = 0; i < visible.Count; i++)
@@ -322,7 +330,8 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     /// </summary>
     void RefreshRows()
     {
-        if (!_rendered)
+        // Not built yet, or moved into or out of a scroll view since: build the structure again.
+        if (!_rendered || !ReferenceEquals(FindPageScroll(), _table.PageScroll))
         {
             Render();
             return;
@@ -1006,6 +1015,21 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     {
         base.OnParentSet();
         UpdateAttachedPagination();
+        if (_rendered && !ReferenceEquals(FindPageScroll(), _table.PageScroll)) Render();
+    }
+
+    /// <summary>
+    /// The vertical scroll view to virtualize the rows against: the nearest one among the ancestors (within the page), when
+    /// <see cref="VirtualizeInScrollView"/> is on, there is no sticky header and no column is <c>Auto</c>.
+    /// </summary>
+    ScrollView? FindPageScroll()
+    {
+        if (!VirtualizeInScrollView || StickyHeader) return null;
+        foreach (var header in _headers)
+            if (header.Width.IsAuto) return null;
+        for (var e = Parent; e is not null and not Page; e = e.Parent)
+            if (e is ScrollView { Orientation: ScrollOrientation.Vertical or ScrollOrientation.Both } scroll) return scroll;
+        return null;
     }
 
     /// <summary>The selected row objects, as the batch actions receive them.</summary>

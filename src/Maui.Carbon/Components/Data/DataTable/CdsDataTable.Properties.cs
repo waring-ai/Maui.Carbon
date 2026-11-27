@@ -97,6 +97,10 @@ public partial class CdsDataTable
     public static readonly BindableProperty StickyHeaderProperty = BindableProperty.Create(
         nameof(StickyHeader), typeof(bool), typeof(CdsDataTable), false, propertyChanged: OnLayoutChanged);
 
+    /// <summary>Bindable property for <see cref="VirtualizeInScrollView"/>.</summary>
+    public static readonly BindableProperty VirtualizeInScrollViewProperty = BindableProperty.Create(
+        nameof(VirtualizeInScrollView), typeof(bool), typeof(CdsDataTable), true, propertyChanged: OnLayoutChanged);
+
     static readonly BindablePropertyKey VisibleRowCountPropertyKey = BindableProperty.CreateReadOnly(
         nameof(VisibleRowCount), typeof(int), typeof(CdsDataTable), 0);
 
@@ -327,6 +331,19 @@ public partial class CdsDataTable
     {
         get => (bool)GetValue(StickyHeaderProperty);
         set => SetValue(StickyHeaderProperty, value);
+    }
+
+    /// <summary>
+    /// In a vertical <see cref="ScrollView"/> (and without <see cref="StickyHeader"/>), builds only the rows in or near the
+    /// scroll view's viewport, and re-binds them as the page scrolls. Default <c>true</c>. Rows then keep the row height
+    /// (cell text truncates instead of wrapping) and rows out of view are not in the accessibility tree; set <c>false</c>
+    /// to build every row. A table with an <c>Auto</c> column always builds every row (the column is as wide as its widest
+    /// cell).
+    /// </summary>
+    public bool VirtualizeInScrollView
+    {
+        get => (bool)GetValue(VirtualizeInScrollViewProperty);
+        set => SetValue(VirtualizeInScrollViewProperty, value);
     }
 
     /// <summary>What shows under the header when no rows match: a title, one sentence and at most one action.</summary>

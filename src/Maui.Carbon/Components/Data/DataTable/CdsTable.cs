@@ -94,6 +94,11 @@ public class CdsTable : CdsControl
     int _suspend;
     bool _visualsDirty;
     bool _dirty;
+    ScrollView? _pageScroll;
+    readonly List<IDisposable> _pageSubscriptions = [];
+    bool _pageWindowQueued;
+    bool _warmQueued;
+    bool _warming;
     int _hoverRow = -1;
     int _hoverHeader = -1;
     int _hoverVersion;
@@ -108,8 +113,8 @@ public class CdsTable : CdsControl
         CdsTokens.SetColor(_virtualBody, BackgroundColorProperty, CdsTableTokens.Background);
         // The sticky header and its body are one table surface: nothing of the page shows between or beside them.
         CdsTokens.SetColor(_stickyRoot, BackgroundColorProperty, CdsTableTokens.Background);
-        _scroll.Scrolled += (_, _) => { if (IsVirtual) UpdateWindow(); };
-        _scroll.SizeChanged += (_, _) => { if (IsVirtual) UpdateWindow(); };
+        _scroll.Scrolled += (_, _) => { if (IsVirtual && StickyHeader) UpdateWindow(); };
+        _scroll.SizeChanged += (_, _) => { if (IsVirtual && StickyHeader) UpdateWindow(); };
         _stickyRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _stickyRoot.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         _stickyRoot.Add(_headerGrid, 0, 0);
@@ -221,8 +226,8 @@ public class CdsTable : CdsControl
         _rowVisuals.Where(v => v.Index >= 0).OrderBy(v => v.Index).Select(v => (v.Index, v.Source)).ToList();
 
     /// <summary>
-    /// Rows supplied on demand. With <see cref="StickyHeader"/> on, only the rows in (and near) view are realized, in a
-    /// pool of rows the source re-binds as the body scrolls; <see cref="Rows"/> is then ignored.
+    /// Rows supplied on demand. With <see cref="StickyHeader"/> on, or a <see cref="PageScroll"/>, only the rows in (and
+    /// near) view are realized, in a pool of rows the source re-binds as the body scrolls; <see cref="Rows"/> is then ignored.
     /// </summary>
     internal ICdsTableRowSource? RowSource
     {
@@ -236,8 +241,109 @@ public class CdsTable : CdsControl
         }
     }
 
-    /// <summary>Whether the body is virtualized: a row source and a sticky header (the table owns the scrolling).</summary>
-    internal bool IsVirtual => _source is not null && StickyHeader;
+    /// <summary>
+    /// The vertical scroll view the table scrolls in when it has no sticky header (the page's). With a row source, the
+    /// body is then virtualized against that scroll view's viewport: the header and a body as tall as all the rows, of
+    /// which only those in (and near) view have views. Set by the data table, which finds it among its ancestors.
+    /// </summary>
+    internal ScrollView? PageScroll
+    {
+        get => _pageScroll;
+        set
+        {
+            if (ReferenceEquals(_pageScroll, value)) return;
+            foreach (var subscription in _pageSubscriptions) subscription.Dispose();
+            _pageSubscriptions.Clear();
+            _pageScroll = value;
+            if (value is not null) WatchPageScroll(value);
+            _childHeights.Clear();
+            Rebuild();
+        }
+    }
+
+    /// <summary>
+    /// Whether the body is virtualized: a row source, and the table owns the scrolling (a sticky header) or knows the page's
+    /// scroll view.
+    /// </summary>
+    internal bool IsVirtual => _source is not null && (StickyHeader || _pageScroll is not null);
+
+    /// <summary>Virtualized against the page's scroll view (no sticky header).</summary>
+    bool IsPageVirtual => IsVirtual && !StickyHeader;
+
+    void WatchPageScroll(ScrollView page)
+    {
+        // Weakly: the scroll view can outlive the table (a table moved out of it), and must not keep it alive.
+        EventHandler<ScrolledEventArgs>? scrolled = null;
+        _pageSubscriptions.Add(new CdsWeakSubscription<CdsTable>(this, static t => t.OnPageScrolled(),
+            h => { scrolled = (s, e) => h(s, e); page.Scrolled += scrolled; }, _ => page.Scrolled -= scrolled));
+        _pageSubscriptions.Add(new CdsWeakSubscription<CdsTable>(this, static t => t.QueuePageWindow(),
+            h => page.SizeChanged += h, h => page.SizeChanged -= h));
+        // Content above the table growing or shrinking moves the body inside the scroll view.
+        if (page.Content is { } content)
+            _pageSubscriptions.Add(new CdsWeakSubscription<CdsTable>(this, static t => t.QueuePageWindow(),
+                h => content.SizeChanged += h, h => content.SizeChanged -= h));
+    }
+
+    void QueueWarm()
+    {
+        if (_warmQueued) return;
+        _warmQueued = true;
+        Dispatcher.Dispatch(() =>
+        {
+            _warmQueued = false;
+            _warming = true;
+            try
+            {
+                UpdateWindow();
+            }
+            finally
+            {
+                _warming = false;
+            }
+        });
+    }
+
+    void OnPageScrolled()
+    {
+        if (IsPageVirtual) UpdateWindow();
+    }
+
+    void QueuePageWindow()
+    {
+        if (!IsPageVirtual || _pageWindowQueued) return;
+        _pageWindowQueued = true;
+        void Run()
+        {
+            _pageWindowQueued = false;
+            UpdateWindow();
+        }
+        if (Handler is not null && Dispatcher is { } dispatcher) dispatcher.Dispatch(Run);
+        else Run();
+    }
+
+    /// <summary>
+    /// The part of the body in view, as (top, height) in body coordinates: the inner scroll view's with a sticky header,
+    /// else the page scroll view's viewport less the body's offset in its content (the top is negative while the body
+    /// starts below the fold).
+    /// </summary>
+    (double Top, double Height) Viewport()
+    {
+        if (!IsPageVirtual) return (_scroll.ScrollY, _scroll.Height > 0 ? _scroll.Height : MaximumBodyHeight);
+        var page = _pageScroll!;
+        var offset = 0d;
+        for (Element? e = _virtualBody; e is not null && !ReferenceEquals(e, page); e = e.Parent)
+            if (e is VisualElement v) offset += v.Y;
+        // Before the first layout nothing has a size: assume the window (or a laptop screen) is the viewport.
+        var height = page.Height > 0 ? page.Height : page.Window?.Height is > 0 and var window ? window : 900;
+        return (page.ScrollY - offset, height);
+    }
+
+    /// <summary>The visible span of a body from a viewport (top may be negative or past the end); at least 1 high, from 0.</summary>
+    internal static (double Top, double Height) VisibleSpan(double top, double viewport)
+    {
+        var from = Math.Max(0, top);
+        return (from, Math.Max(1, top + viewport - from));
+    }
 
     /// <summary>The source's rows changed (count, order or content): re-binds the realized rows.</summary>
     internal void InvalidateRows()
@@ -577,7 +683,9 @@ public class CdsTable : CdsControl
     {
         var sticky = StickyHeader;
         var virtualized = IsVirtual;
-        var header = sticky ? _headerGrid : _bodyGrid;
+        // The header is a grid of its own above the body when the table scrolls its body or virtualizes against the page.
+        var separate = sticky || virtualized;
+        var header = separate ? _headerGrid : _bodyGrid;
         ReleaseSlots();
         foreach (var grid in new[] { _bodyGrid, _headerGrid })
         {
@@ -607,7 +715,7 @@ public class CdsTable : CdsControl
         for (var c = 0; c < columnCount; c++)
         {
             var width = head is not null && c < head.Count ? head[c].Width : GridLength.Star;
-            if (sticky && width.IsAuto) width = GridLength.Star;
+            if (separate && width.IsAuto) width = GridLength.Star;
             widths[c] = width;
             flush[c] = head is not null && c < head.Count && head[c].IsFlush;
             _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
@@ -616,7 +724,7 @@ public class CdsTable : CdsControl
         {
             _columns.Add(width);
             _bodyGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
-            if (sticky) _headerGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
+            if (separate) _headerGrid.ColumnDefinitions.Add(new ColumnDefinition(width));
         }
         _rowHeight = CdsTableTokens.RowHeight(Size);
         (_padTop, _padBottom) = CdsTableTokens.CellPaddingY(Size);
@@ -630,7 +738,7 @@ public class CdsTable : CdsControl
             header.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             for (var c = 0; c < columnCount; c++)
                 BuildHeaderCell(header, c < head.Count ? head[c] : null, c, _rowHeight, _padTop, _padBottom, _topAligned);
-            if (!sticky) _nextGridRow = 1;
+            if (!separate) _nextGridRow = 1;
         }
 
         if (!virtualized)
@@ -646,8 +754,16 @@ public class CdsTable : CdsControl
         // otherwise its content is exactly as wide as the table, so star columns share the space.
         if (sticky)
         {
+            SetBody(_scroll);
             _scroll.Content = virtualized ? _virtualBody : _bodyGrid;
             _scroll.MaximumHeightRequest = MaximumBodyHeight;
+            _hscroll.Content = _stickyRoot;
+        }
+        else if (virtualized)
+        {
+            // The page scrolls: the body is as tall as all its rows, under the header.
+            _scroll.Content = null;
+            SetBody(_virtualBody);
             _hscroll.Content = _stickyRoot;
         }
         else
@@ -961,8 +1077,9 @@ public class CdsTable : CdsControl
         if (!IsVirtual || !_built || _building && !force) return;
         var source = _source!;
         var count = source.Count;
-        var viewport = _scroll.Height > 0 ? _scroll.Height : MaximumBodyHeight;
-        var (first, last) = RowWindow(_offsets, count, Math.Max(0, top ?? _scroll.ScrollY), viewport, Overscan);
+        var view = Viewport();
+        var (spanTop, spanHeight) = VisibleSpan(top ?? view.Top, view.Height);
+        var (first, last) = RowWindow(_offsets, count, spanTop, spanHeight, Overscan);
         var changed = false;
 
         var bound = new Dictionary<int, RowVisual>();
@@ -978,23 +1095,44 @@ public class CdsTable : CdsControl
             else free.Push(v);
         }
 
+        // The rows in view first; overscan rows (realized ahead of scrolling) take free slots, but new slots for them are
+        // made on the next turn of the run loop, so a first build only pays for what shows.
+        var (seenFirst, seenLast) = RowWindow(_offsets, count, spanTop, spanHeight, 0);
+        var deferred = false;
         _binding = true;
         try
         {
-            for (var i = first; i <= last; i++)
+            void Realize(int i, bool inView)
             {
-                if (bound.ContainsKey(i)) continue;
-                var slot = free.Count > 0 ? free.Pop() : CreateSlot();
-                Bind(slot, i);
+                if (bound.ContainsKey(i)) return;
+                if (free.Count == 0 && !inView && !_warming && Handler is not null)
+                {
+                    deferred = true;
+                    return;
+                }
+                RowVisual slot;
+                if (free.Count > 0)
+                {
+                    slot = free.Pop();
+                    Bind(slot, i);
+                }
+                else
+                {
+                    slot = CreateSlot(i);
+                }
                 Order(slot);
                 bound[i] = slot;
                 changed = true;
             }
+            for (var i = seenFirst; i <= seenLast; i++) Realize(i, inView: true);
+            for (var i = first; i <= last; i++)
+                if (i < seenFirst || i > seenLast) Realize(i, inView: false);
         }
         finally
         {
             _binding = false;
         }
+        if (deferred) QueueWarm();
 
         foreach (var (index, v) in bound) Place(v, _offsets[index]);
         if (_hoverRow >= 0 && !bound.ContainsKey(_hoverRow)) _hoverRow = -1;
@@ -1002,7 +1140,22 @@ public class CdsTable : CdsControl
         if (changed && applyVisuals) RequestVisuals();
     }
 
-    /// <summary>Realizes the rows for a body scrolled to <paramref name="top"/>, as scrolling there would (tests have no native scroll view).</summary>
+    /// <summary>Puts the body under the sticky root's header: the inner scroll view (sticky header) or the bare virtual body.</summary>
+    void SetBody(View body)
+    {
+        View? current = null;
+        foreach (var child in _stickyRoot.Children)
+            if (child is View v && Grid.GetRow(v) == 1) current = v;
+        if (ReferenceEquals(current, body)) return;
+        if (current is not null) _stickyRoot.Remove(current);
+        if (body.Parent is Layout old) old.Remove(body);
+        _stickyRoot.Add(body, 0, 1);
+    }
+
+    /// <summary>
+    /// Realizes the rows for a body whose top <paramref name="top"/> is at the top of the viewport (scrolled there, or for a
+    /// page-virtualized body, that far into the body), as scrolling would (tests have no native scroll view).
+    /// </summary>
     internal void RealizeAt(double top) => UpdateWindow(force: true, top: top);
 
     /// <summary>The top of data row <paramref name="index"/> in the virtualized body.</summary>
@@ -1016,7 +1169,11 @@ public class CdsTable : CdsControl
         return v.Root!.GetVisualTreeDescendants().OfType<VisualElement>().Any(e => e.IsFocused);
     }
 
-    RowVisual CreateSlot()
+    /// <summary>
+    /// A new pooled slot showing data row <paramref name="index"/>. It is bound before it joins the body, so its cell
+    /// templates never see the table's own binding context (the page's view model) in between.
+    /// </summary>
+    RowVisual CreateSlot(int index)
     {
         var source = _source!;
         _poolSource = source;
@@ -1031,10 +1188,11 @@ public class CdsTable : CdsControl
         WireRowHover(root, visual);
         AbsoluteLayout.SetLayoutFlags(root, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.WidthProportional);
         root.SizeChanged += (_, _) => OnSlotSized(visual);
-        _virtualBody.Add(root);
         _rowVisuals.Add(visual);
         _visualByRow[row] = visual;
         _slotByRoot[root] = visual;
+        Bind(visual, index);
+        _virtualBody.Add(root);
         return visual;
     }
 

@@ -192,6 +192,11 @@ public CdsButtonKind Kind
 - Per-row hover in `CdsTable` is one pointer recognizer on the body grid that finds the row by position (one per pooled
   slot when virtualized), not one per cell. Tool cells (flush, no column name: selection, expand, row menu) go into the
   row without a cell host, and an expandable row's child row is built on its first expansion.
+- `CdsDataTable` virtualizes against its nearest vertical `ScrollView` ancestor (`CdsTable.PageScroll`) when it has no
+  sticky header and no `Auto` column: header and body are separate grids, the body is as tall as all rows, and the
+  viewport is the scroll view's less the body's offset in its content. Rows in view are built at once; new slots for
+  overscan rows wait for the next turn of the run loop. The ancestor is looked up again on each refresh, on `Loaded` and
+  when the table's parent changes.
 
 ### Metrics (`CdsMetrics`, `Foundation/CdsMetrics.cs`)
 - The library's `System.Diagnostics.Metrics` instruments live in `CdsMeter`; their public names are constants on

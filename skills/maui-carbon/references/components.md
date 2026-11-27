@@ -44,7 +44,7 @@ Every chart takes `Data` (mostly `CdsChartPoint`s: Group, Key, Date, X, Value, L
 
 | Family | Components and companion types | Source | Gallery |
 |---|---|---|---|
-| Shared | `CdsChartPoint`, `CdsChartAxis`, `CdsChartThreshold`, `CdsChartExportingEventArgs`, `CdsChartSelectedGroupsChangedEventArgs` (bases: `CdsChart`, `CdsCartesianChart`) | [source](../../../src/Maui.Carbon/Components/Charts/Core/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
+| Shared | `CdsChartPoint`, `CdsChartAxis`, `CdsChartThreshold`, `CdsChartExportingEventArgs`, `CdsChartSelectedGroupsChangedEventArgs` (bases: `CdsChart`, `CdsCartesianChart`, `CdsThematicChart` for maps) | [source](../../../src/Maui.Carbon/Components/Charts/Core/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
 | AlluvialChart | `CdsAlluvialChart`, `CdsAlluvialLink`, `CdsAlluvialNode` | [source](../../../src/Maui.Carbon/Components/Charts/AlluvialChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
 | AreaChart | `CdsAreaChart` | [source](../../../src/Maui.Carbon/Components/Charts/AreaChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |
 | BoxplotChart | `CdsBoxplotChart` | [source](../../../src/Maui.Carbon/Components/Charts/BoxplotChart/) | [examples](../../../samples/Maui.Carbon.Gallery/Pages/Charts/) |

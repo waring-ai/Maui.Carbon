@@ -96,11 +96,13 @@ login).
 
 ## Differences from the web components
 
-- **Tables**: a `CdsDataTable` with `StickyHeader="True"` owns its scrolling, so it is virtualized: it builds only the
-  rows in view and re-binds them as the body scrolls, and sorts, searches and selects 10,000+ rows instantly. Cell and
+- **Tables**: a `CdsDataTable` is virtualized: it builds only the rows in view and re-binds them as the body scrolls,
+  and sorts, searches and selects 10,000+ rows instantly. With `StickyHeader="True"` it owns its scrolling; inside a
+  vertical `ScrollView` it follows the page's scrolling (`VirtualizeInScrollView`, on by default). Cell and
   expanded-row templates are re-used for other rows, so bind everything they show to the item (state a template keeps
-  on its own is lost when its row scrolls away). Without a sticky header (the page scrolls the table) every row is a
-  real view, so page large data sets with `CdsPagination`. Columns take fixed or star widths rather than sizing to their
+  on its own is lost when its row scrolls away). Virtualized rows are one line high and rows out of view are not in the
+  accessibility tree. A table outside any scroll view, with an `Auto` column, or with `VirtualizeInScrollView="False"`
+  builds every row, so page large data sets with `CdsPagination`. Columns take fixed or star widths rather than sizing to their
   content; a table whose columns need more than the available width scrolls sideways, as Carbon's does.
 - **Modals** cover the page they open on. The scrim cannot cover native Shell chrome (navigation bar, flyout); use
   `CdsUIShell` for a fully Carbon-styled frame.
@@ -138,13 +140,18 @@ components that draw, lay out, re-apply visuals or rebuild the most and what kee
 After updating `design/carbon/tokens.json` or the icons, regenerate with
 `dotnet run --project tools/Maui.Carbon.Generator`.
 
-## Agent skill
+## Agent skills
 
-The [Maui.Carbon skill](skills/maui-carbon/SKILL.md) explains setup, component selection,
-bindings, themes, layers, tables and overlays. Its [component catalog](skills/maui-carbon/references/components.md)
-lists supported controls and companion APIs with links to source and gallery examples.
+Two skills ship with the repository:
 
-To use it with Codex, copy `skills/maui-carbon` into `.agents/skills/maui-carbon` in your
-consuming project (or your user-level skills directory). Copy the whole folder, including
-`references`. Source and gallery links target this repository; keep a matching checkout
-available when using the skill in another project. You can also read the skill directly here.
+- [Maui.Carbon](skills/maui-carbon/SKILL.md) (`maui-carbon`) covers using the library: setup, the
+  [component catalog](skills/maui-carbon/references/components.md) with links to source and gallery examples,
+  bindings, themes, layers, tables, charts and overlays.
+- [Maui.Carbon design](skills/maui-carbon-design/SKILL.md) (`maui-carbon-design`) covers designing with Carbon:
+  a workflow for new screens, foundations (layers, color, type, spacing, grid, motion) in Maui.Carbon terms, choosing
+  components by need, patterns, content, accessibility, data visualization and a review checklist.
+
+To use them with Codex, copy `skills/maui-carbon` and `skills/maui-carbon-design` into `.agents/skills/` in your
+consuming project (or your user-level skills directory). Copy the whole folders, including `references`. Source and
+gallery links target this repository; keep a matching checkout available when using the skills in another project.
+You can also read the skills directly here.
