@@ -2,6 +2,26 @@ namespace Maui.Carbon.Tests.Components;
 
 public class ContainedListTests
 {
+    [Fact]
+    public void Changing_items_keeps_the_rows_already_in_place()
+    {
+        var list = new CdsContainedList();
+        CdsContainedListItem a = new() { Text = "a" }, b = new() { Text = "b" }, c = new() { Text = "c" };
+        foreach (var item in new[] { a, b, c }) list.Items.Add(item);
+        var reparented = 0;
+        foreach (var item in new[] { a, b, c }) item.ParentChanged += (_, _) => reparented++;
+
+        var d = new CdsContainedListItem { Text = "d" };
+        list.Items.Add(d);
+        list.Items.RemoveAt(0);
+        list.Items.Insert(1, new CdsContainedListItem { Text = "e" });
+
+        Assert.Equal(["b", "e", "c", "d"], list.ShownItems.Cast<CdsContainedListItem>().Select(i => i.Text));
+        Assert.Null(a.Parent);
+        // Only the removed item changed parent; b and c stayed where they were.
+        Assert.Equal(1, reparented);
+    }
+
     [Theory]
     [InlineData(CdsSize.Sm, 32, 32)]
     [InlineData(CdsSize.Md, 40, 40)]

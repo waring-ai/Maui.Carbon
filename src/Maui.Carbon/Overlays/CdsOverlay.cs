@@ -81,7 +81,7 @@ public sealed class CdsOverlay
         for (Element? e = element; e is not null; e = e.Parent)
         {
             if (ReferenceEquals(e, Container)) return false;
-            if (e is VisualElement { IsVisible: false } or VisualElement { IsEnabled: false }) return false;
+            if (CdsDeck.IsHidden(e) || e is VisualElement { IsEnabled: false }) return false;
             if (ReferenceEquals(e, _host)) return true;
         }
         return false;

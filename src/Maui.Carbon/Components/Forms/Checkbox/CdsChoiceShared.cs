@@ -73,11 +73,14 @@ public static class CdsFormMessageResolver
     }
 }
 
-/// <summary>The message row under a group or control: an optional 16px status icon and the text in <c>helper-text-01</c>.</summary>
+/// <summary>
+/// The message row under a group or control: an optional 16px status icon and the text in <c>helper-text-01</c>. The
+/// icon and text are created with the first message (most controls never show one).
+/// </summary>
 internal sealed class CdsFormMessage : Grid
 {
-    readonly CdsIcon _icon = new() { IsVisible = false, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(0, 1, 0, 0) };
-    readonly CdsText _text = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper };
+    CdsIcon? _icon;
+    CdsText? _text;
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
     readonly CdsMessageAlert _alert = new();
 
@@ -86,21 +89,27 @@ internal sealed class CdsFormMessage : Grid
         ColumnSpacing = 0;
         ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-        this.Add(_icon, 0);
-        this.Add(_text, 1);
         IsVisible = false;
         AutomationProperties.SetIsInAccessibleTree(this, false);
     }
 
     /// <summary>The text currently shown, or <c>null</c>.</summary>
-    public string? CurrentText => IsVisible ? _text.Text : null;
+    public string? CurrentText => IsVisible ? _text?.Text : null;
 
     /// <summary>Whether the leading status icon is shown (for tests).</summary>
-    internal bool ShowsIcon => _icon.IsVisible;
+    internal bool ShowsIcon => _icon?.IsVisible == true;
 
     /// <summary>Applies a resolved message.</summary>
     public void Apply(CdsFormMessageVisuals v)
     {
+        if (_text is null)
+        {
+            if (string.IsNullOrEmpty(v.Text)) return;
+            _icon = new CdsIcon { IsVisible = false, VerticalOptions = LayoutOptions.Start, Margin = new Thickness(0, 1, 0, 0) };
+            _text = new CdsText { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper };
+            this.Add(_icon, 0);
+            this.Add(_text, 1);
+        }
         _text.Text = v.Text;
         IsVisible = !string.IsNullOrEmpty(v.Text);
         // role="alert": the row itself is out of the accessibility tree, so a new error or warning is spoken once.
@@ -108,14 +117,14 @@ internal sealed class CdsFormMessage : Grid
         Set(_text, Label.TextColorProperty, v.TextColor);
         if (v.Icon is { } icon)
         {
-            _icon.Icon = icon;
+            _icon!.Icon = icon;
             _icon.IsVisible = true;
             _text.Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0);
             Set(_icon, CdsIcon.ColorProperty, v.IconColor);
         }
         else
         {
-            _icon.IsVisible = false;
+            _icon!.IsVisible = false;
             _text.Margin = 0;
         }
     }

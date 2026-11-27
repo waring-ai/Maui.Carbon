@@ -12,13 +12,18 @@ public class CdsResources : ResourceDictionary
     static WeakReference<CdsResources>? s_current;
 
     readonly ResourceDictionary _styles;
-    ResourceDictionary _palette;
+    // The palette of the theme the resources were created in, never removed, and on top of it the values of the current
+    // theme that differ from it (see Theme).
+    readonly ResourceDictionary _palette;
+    readonly CdsThemeName _baseTheme;
+    ResourceDictionary? _delta;
     CdsThemeName _theme;
 
     /// <summary>Creates the Carbon resources in the White theme.</summary>
     public CdsResources()
     {
         _styles = CreateStyles(CdsOptions.Current);
+        _baseTheme = _theme;
         _palette = CdsPalettes.CreateThemeDictionary(_theme);
         MergedDictionaries.Add(_styles);
         MergedDictionaries.Add(_palette);
@@ -35,12 +40,17 @@ public class CdsResources : ResourceDictionary
         set
         {
             if (_theme == value) return;
+            var previous = _theme;
             _theme = value;
-            var next = CdsPalettes.CreateThemeDictionary(value);
-            // Removing a merged dictionary raises nothing; adding one re-resolves every key it holds, once.
-            MergedDictionaries.Remove(_palette);
-            _palette = next;
-            MergedDictionaries.Add(next);
+            // Adding a merged dictionary makes MAUI re-resolve every key it holds on every element of the app (attached
+            // screens included), and its cost grows with the keys raised. Removing one raises nothing. So the full palette
+            // of the first theme stays, and a small dictionary on top holds only the keys whose value differs from it now
+            // or did before this switch (those revert to it silently otherwise): White and G10 share all but 17 colors, and
+            // the 25 colors every theme shares and the constant context keys are never raised again.
+            var delta = CdsPalettes.CreateThemeDelta(_baseTheme, previous, value);
+            if (_delta is not null) MergedDictionaries.Remove(_delta);
+            _delta = delta;
+            MergedDictionaries.Add(delta);
             ThemeChanged?.Invoke(this, EventArgs.Empty);
         }
     }

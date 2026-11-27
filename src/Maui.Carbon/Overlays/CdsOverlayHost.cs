@@ -164,6 +164,16 @@ public partial class CdsOverlayHost : Grid
         return overlay;
     }
 
+    // A closed overlay's container is never shown again (the next Open makes a new one), so its handlers are disconnected
+    // with it: a removed subtree keeps its native views and MAUI's Loaded and window hooks on them, which on iOS and Mac
+    // Catalyst hold the managed views (and through their event handlers the page that opened them) alive. The content
+    // can be opened again: MAUI gives it new handlers when it is next added.
+    static void Release(Layout layer, CdsOverlay overlay)
+    {
+        layer.Children.Remove(overlay.Container);
+        overlay.Container.DisconnectHandlers();
+    }
+
     internal void Remove(CdsOverlay overlay)
     {
         _overlays.Remove(overlay);
@@ -177,24 +187,24 @@ public partial class CdsOverlayHost : Grid
                 if (last) _modalLayer.InputTransparent = true;
                 _ = AnimateOutAsync(overlay.Container, last ? _scrim : null, () =>
                 {
-                    _modalLayer.Children.Remove(overlay.Container);
+                    Release(_modalLayer, overlay);
                     if (!HasModal) _modalLayer.IsVisible = false;
                 });
             }
             else
             {
-                _modalLayer.Children.Remove(overlay.Container);
+                Release(_modalLayer, overlay);
                 if (last) _modalLayer.IsVisible = false;
             }
         }
         else if (overlay.Layer == CdsOverlayLayer.Toast)
         {
-            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, () => _toastLayer.Children.Remove(overlay.Container));
-            else _toastLayer.Children.Remove(overlay.Container);
+            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, () => Release(_toastLayer, overlay));
+            else Release(_toastLayer, overlay);
         }
         else
         {
-            _popupLayer.Children.Remove(overlay.Container);
+            Release(_popupLayer, overlay);
         }
         UpdateDismissLayer();
         OnKeyStateChanged();

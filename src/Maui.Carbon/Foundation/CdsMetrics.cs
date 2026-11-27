@@ -59,7 +59,7 @@ public static class CdsMetrics
     /// <summary>One frame of the shared loading-animation clock: advancing every shown spinner, skeleton and shimmer.</summary>
     public const string LoopTickDuration = "carbon.loop.tick.duration";
 
-    /// <summary>The number of loading animations (spinners, skeletons, shimmers) running now, shown or not. Observable.</summary>
+    /// <summary>The number of loading animations (spinners, skeletons, shimmers) on a frame clock now. Hidden ones are parked and not counted. Observable.</summary>
     public const string ActiveLoops = "carbon.loop.active";
 }
 

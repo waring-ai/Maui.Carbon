@@ -99,7 +99,7 @@ public class CdsSkipToContent : CdsControl
     /// </summary>
     internal static VisualElement? FirstFocusable(Element root)
     {
-        if (root is VisualElement { IsVisible: false } or VisualElement { IsEnabled: false }) return null;
+        if (CdsDeck.IsHidden(root) || root is VisualElement { IsEnabled: false }) return null;
         if (root is VisualElement element && IsFocusable(element)) return element;
         if (root is not IVisualTreeElement tree) return null;
         foreach (var child in tree.GetVisualChildren())

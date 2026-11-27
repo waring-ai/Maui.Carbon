@@ -36,7 +36,7 @@ internal static class NotificationFocusSearch
 
     static VisualElement? Find(Element element, Func<VisualElement, bool> canFocus, bool forward)
     {
-        if (element is VisualElement { IsVisible: false }) return null;
+        if (CdsDeck.IsHidden(element)) return null;
         if (element is VisualElement visual && canFocus(visual)) return visual;
         var children = Children(element);
         if (forward)

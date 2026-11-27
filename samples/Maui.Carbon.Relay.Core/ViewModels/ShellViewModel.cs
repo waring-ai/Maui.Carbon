@@ -182,11 +182,33 @@ public sealed partial class ShellViewModel : ObservableObject
         SwitcherProjects = _projects.All.Where(p => !p.IsArchived).OrderByDescending(p => p.IsStarred).ThenBy(p => p.Name).ToList();
     }
 
+    // Brings Notifications in line with the feed one change at a time (marking one read replaces one row), not by clearing
+    // and refilling it: every row the panel shows is a set of views, and re-creating them all for one change is what made
+    // marking a notification read cost tens of milliseconds.
     void RefreshNotifications()
     {
         var now = _clock.Now;
-        Notifications.Clear();
-        foreach (var n in _feed.Items) Notifications.Add(new NotificationRow(n, Formatting.Relative(n.When, now)));
+        var rows = _feed.Items.Select(n => new NotificationRow(n, Formatting.Relative(n.When, now))).ToList();
+        for (var i = 0; i < rows.Count; i++)
+        {
+            if (i < Notifications.Count && Notifications[i] == rows[i]) continue;
+            if (i < Notifications.Count && ReferenceEquals(Notifications[i].Notification, rows[i].Notification))
+            {
+                Notifications[i] = rows[i];
+                continue;
+            }
+            var at = -1;
+            for (var j = i + 1; j < Notifications.Count && at < 0; j++)
+                if (ReferenceEquals(Notifications[j].Notification, rows[i].Notification)) at = j;
+            if (at < 0)
+            {
+                Notifications.Insert(i, rows[i]);
+                continue;
+            }
+            Notifications.Move(at, i);
+            if (Notifications[i] != rows[i]) Notifications[i] = rows[i];
+        }
+        while (Notifications.Count > rows.Count) Notifications.RemoveAt(Notifications.Count - 1);
         UnreadCount = _feed.UnreadCount;
     }
 }

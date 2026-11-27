@@ -30,11 +30,12 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <!-- CsWinRT1032 (new with the .NET 11 Windows SDK) flags collection expressions typed as IReadOnlyList<T>: CsWinRT
-       cannot marshal the compiler's backing type to WinRT. None of Carbon's lists (icon paths, color keys, options)
-       is ever handed to a WinRT API, so there is nothing to marshal. -->
+  <!-- CsWinRT1032 (new with the .NET 11 Windows SDK) flags collection expressions typed as IReadOnlyList<T>, and
+       CsWinRT1030 arrays handed out as IReadOnlyList<T> (CdsButtonOutline.Edges): CsWinRT cannot marshal them to WinRT.
+       None of Carbon's lists (icon paths, color keys, options, views) is ever handed to a WinRT API, so there is nothing
+       to marshal. -->
   <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
-    <NoWarn>$(NoWarn);CsWinRT1032</NoWarn>
+    <NoWarn>$(NoWarn);CsWinRT1032;CsWinRT1030</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,7 +26,7 @@ internal static class CdsContainedListModel
 
     static void Collect(Element element, List<string> parts)
     {
-        if (element is VisualElement { IsVisible: false }) return;
+        if (CdsDeck.IsHidden(element)) return;
         if (element is Label label)
         {
             var text = label.FormattedText is { } formatted ? string.Concat(formatted.Spans.Select(s => s.Text)) : label.Text;

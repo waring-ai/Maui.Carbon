@@ -23,12 +23,14 @@ internal sealed class CdsActionFace : CdsControl
     readonly Grid _root = new();
     readonly Border _box = new() { StrokeThickness = 1, StrokeShape = new Rectangle(), Padding = 0 };
     readonly Grid _layout = new() { ColumnSpacing = 0 };
-    readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap };
+    CdsText? _label; // made when the face first shows text (icon-only faces never do)
     readonly CdsIcon _icon = new() { IsVisible = false };
     readonly CdsHitTarget _hit;
-    readonly CdsButtonOutline _outline = new();
-    readonly Border _badge = new() { StrokeThickness = 0, InputTransparent = true, StrokeShape = new RoundRectangle { CornerRadius = 100 } };
-    readonly CdsText _badgeText = new(string.Empty, CdsTypeStyle.Label01, CdsTextTone.OnColor) { InputTransparent = true };
+    // The outline and the badge are created when first needed: most faces (ghost icon buttons, overflow menus) never have
+    // either, and a table has one in every row.
+    CdsButtonOutline? _outline;
+    Border? _badge;
+    CdsText? _badgeText;
     CdsFocusRing _ring;
     CdsFocusRingStyle _ringStyle = CdsFocusRingStyle.Inset;
     bool _suspend = true;
@@ -55,24 +57,14 @@ internal sealed class CdsActionFace : CdsControl
     {
         _layout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _layout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-        _layout.Add(_label, 0);
         _layout.Add(_icon, 1);
         _box.Content = _layout;
         _box.InputTransparent = true;
         AutomationProperties.SetExcludedWithChildren(_box, true);
 
-        _badge.Content = _badgeText;
-        _badge.IsVisible = false;
-        _badge.HorizontalOptions = LayoutOptions.End;
-        _badge.VerticalOptions = LayoutOptions.Start;
-        CdsTokens.SetColor(_badge, BackgroundColorProperty, CdsColorKeys.SupportError);
-        AutomationProperties.SetExcludedWithChildren(_badge, true);
-
         _hit = CreateHitTarget();
         _ring = new CdsFocusRing(_ringStyle);
         _root.Add(_box);
-        _root.Add(_outline);
-        _root.Add(_badge);
         _root.Add(_ring);
         _root.Add(_hit);
         HorizontalOptions = LayoutOptions.Start;
@@ -175,8 +167,8 @@ internal sealed class CdsActionFace : CdsControl
         // The outline is drawn by hairlines on the box edge, for the same reason; the Border keeps its 1px (transparent)
         // stroke so the label and icon keep their inset.
         SetBrush(_box, Border.StrokeProperty, null);
-        SetColor(_outline, CdsButtonOutline.ColorProperty, v.Border);
-        SetColor(_label, Label.TextColorProperty, v.Foreground);
+        if (v.Border is not null || _outline is not null) SetColor(EnsureOutline(), CdsButtonOutline.ColorProperty, v.Border);
+        if (_label is not null) SetColor(_label, Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Icon);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
         if (_openShadow is not null) CdsTokens.SetShadow(_root, _isOpen ? CdsColorKeys.Shadow : null, offsetY: 2, radius: 6);
@@ -203,10 +195,14 @@ internal sealed class CdsActionFace : CdsControl
         var lineHeight = 18d;
         var iconSize = _iconSize;
 
-        _label.Text = _text;
-        _label.LineBreakMode = _truncate ? LineBreakMode.TailTruncation : LineBreakMode.WordWrap;
-        _label.MaxLines = _truncate ? 1 : -1;
-        _label.IsVisible = !iconOnly;
+        var label = iconOnly ? _label : EnsureLabel();
+        if (label is not null)
+        {
+            label.Text = _text;
+            label.LineBreakMode = _truncate ? LineBreakMode.TailTruncation : LineBreakMode.WordWrap;
+            label.MaxLines = _truncate ? 1 : -1;
+            label.IsVisible = !iconOnly;
+        }
         _icon.Icon = _iconName;
         _icon.Glyph = _iconName is null ? _glyph : null;
         _icon.Size = iconSize;
@@ -231,10 +227,10 @@ internal sealed class CdsActionFace : CdsControl
         {
             _root.WidthRequest = -1;
             _root.HeightRequest = -1;
-            _label.VerticalOptions = LayoutOptions.Start;
+            label!.VerticalOptions = LayoutOptions.Start;
             if (_mode == CdsActionFaceMode.Inline)
             {
-                _label.Margin = new Thickness(15, padTop, _iconName is null ? 15 : 0, padTop);
+                label.Margin = new Thickness(15, padTop, _iconName is null ? 15 : 0, padTop);
                 Grid.SetColumn(_icon, 1);
                 Grid.SetColumnSpan(_icon, 1);
                 _icon.HorizontalOptions = LayoutOptions.Start;
@@ -242,7 +238,7 @@ internal sealed class CdsActionFace : CdsControl
             }
             else
             {
-                _label.Margin = new Thickness(15, padTop, 63, padTop);
+                label.Margin = new Thickness(15, padTop, 63, padTop);
                 Grid.SetColumn(_icon, 0);
                 Grid.SetColumnSpan(_icon, 2);
                 _icon.HorizontalOptions = LayoutOptions.End;
@@ -254,28 +250,29 @@ internal sealed class CdsActionFace : CdsControl
         // Badge: a dot (8x8) at count 0, otherwise a pill with the number.
         if (_badgeCount is { } count && IsEnabled)
         {
-            _badge.IsVisible = true;
+            var (badge, badgeText) = EnsureBadge();
+            badge.IsVisible = true;
             if (count <= 0)
             {
-                _badgeText.IsVisible = false;
-                _badge.Padding = 0;
-                _badge.WidthRequest = 8;
-                _badge.HeightRequest = 8;
-                _badge.Margin = new Thickness(0, 8, 8, 0);
+                badgeText.IsVisible = false;
+                badge.Padding = 0;
+                badge.WidthRequest = 8;
+                badge.HeightRequest = 8;
+                badge.Margin = new Thickness(0, 8, 8, 0);
             }
             else
             {
-                _badgeText.IsVisible = true;
-                _badgeText.Text = CdsIconButtonTokens.BadgeText(count);
-                _badge.Padding = new Thickness(4, 0, 4, 2);
-                _badge.WidthRequest = -1;
-                _badge.HeightRequest = -1;
-                _badge.MinimumWidthRequest = 8;
-                _badge.MaximumHeightRequest = 16;
-                _badge.Margin = new Thickness(0, 4, 4, 0);
+                badgeText.IsVisible = true;
+                badgeText.Text = CdsIconButtonTokens.BadgeText(count);
+                badge.Padding = new Thickness(4, 0, 4, 2);
+                badge.WidthRequest = -1;
+                badge.HeightRequest = -1;
+                badge.MinimumWidthRequest = 8;
+                badge.MaximumHeightRequest = 16;
+                badge.Margin = new Thickness(0, 4, 4, 0);
             }
         }
-        else
+        else if (_badge is not null)
         {
             _badge.IsVisible = false;
         }
@@ -289,6 +286,43 @@ internal sealed class CdsActionFace : CdsControl
         _hit.IsChecked = _role == CdsAccessibilityRole.ToggleButton ? _isSelected : false;
         _hit.IsExpanded = _expandable ? _isOpen : null;
         RefreshVisuals();
+    }
+
+    CdsText EnsureLabel()
+    {
+        if (_label is not null) return _label;
+        _label = new CdsText { LineBreakMode = LineBreakMode.WordWrap };
+        _layout.Children.Insert(0, _label);
+        Grid.SetColumn(_label, 0);
+        return _label;
+    }
+
+    (Border Badge, CdsText Text) EnsureBadge()
+    {
+        if (_badge is not null) return (_badge, _badgeText!);
+        _badgeText = new CdsText(string.Empty, CdsTypeStyle.Label01, CdsTextTone.OnColor) { InputTransparent = true };
+        _badge = new Border
+        {
+            StrokeThickness = 0,
+            InputTransparent = true,
+            StrokeShape = new RoundRectangle { CornerRadius = 100 },
+            Content = _badgeText,
+            HorizontalOptions = LayoutOptions.End,
+            VerticalOptions = LayoutOptions.Start,
+        };
+        CdsTokens.SetColor(_badge, BackgroundColorProperty, CdsColorKeys.SupportError);
+        AutomationProperties.SetExcludedWithChildren(_badge, true);
+        // Above the box and outline, under the focus ring and the hit target.
+        _root.Children.Insert(_root.Children.IndexOf(_ring), _badge);
+        return (_badge, _badgeText);
+    }
+
+    CdsButtonOutline EnsureOutline()
+    {
+        if (_outline is not null) return _outline;
+        _outline = new CdsButtonOutline();
+        _root.Children.Insert(_root.Children.IndexOf(_box) + 1, _outline);
+        return _outline;
     }
 
     /// <inheritdoc/>

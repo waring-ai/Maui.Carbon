@@ -57,6 +57,23 @@ internal static class CdsPalettes
         return rd;
     }
 
+    /// <summary>
+    /// The keys to lay over <paramref name="baseTheme"/>'s palette for <paramref name="next"/> after <paramref name="previous"/>:
+    /// every color that differs from the base in either theme (with <paramref name="next"/>'s value), and the theme id.
+    /// </summary>
+    internal static ResourceDictionary CreateThemeDelta(CdsThemeName baseTheme, CdsThemeName previous, CdsThemeName next)
+    {
+        var rd = new ResourceDictionary();
+        var baseColors = CdsPaletteData.Get(baseTheme);
+        var before = CdsPaletteData.Get(previous);
+        var after = CdsPaletteData.Get(next);
+        var keys = CdsColorKeys.All;
+        for (var i = 0; i < keys.Count; i++)
+            if (!after[i].Equals(baseColors[i]) || !before[i].Equals(baseColors[i])) rd.Add(keys[i], after[i]);
+        rd.Add(CdsContextKeys.ThemeId, next);
+        return rd;
+    }
+
     internal static void FillTheme(ResourceDictionary rd, CdsThemeName theme)
     {
         var colors = CdsPaletteData.Get(theme);

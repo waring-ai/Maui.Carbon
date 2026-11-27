@@ -116,6 +116,13 @@ public class CdsTable : CdsControl
         _stickyRoot.Add(_scroll, 0, 1);
         _rows.CollectionChanged += OnRowsChanged;
         _hscroll.SizeChanged += (_, _) => SyncContentWidth();
+        // Row hover in the shared body grid: one recognizer that finds the row under the pointer, not one on every cell of
+        // every row (each is a native gesture recognizer, and a table of 25 rows had 300 of them).
+        var hover = new PointerGestureRecognizer();
+        hover.PointerEntered += OnBodyPointer;
+        hover.PointerMoved += OnBodyPointer;
+        hover.PointerExited += (_, _) => SetHoverRow(-1);
+        _bodyGrid.GestureRecognizers.Add(hover);
         Rebuild();
     }
 
@@ -410,7 +417,7 @@ public class CdsTable : CdsControl
     {
         if (sender is CdsTableRow row && _visualByRow.TryGetValue(row, out var visual))
         {
-            if (row.IsExpandable && visual.ChildHost is null) { Rebuild(); return; }
+            if (row.IsExpandable && !visual.HasChildRow) { Rebuild(); return; }
             if (visual.ChildHost is not null && !ReferenceEquals(visual.ChildHost.Children.OfType<View>().FirstOrDefault(), row.ExpandedContent))
                 SetChildContent(visual, row);
             if (visual.Root is not null && visual.Index >= 0 && visual.Expanded != row.IsExpanded)
@@ -481,7 +488,8 @@ public class CdsTable : CdsControl
             var active = selected || hover;
             foreach (var label in v.Labels) SetColor(label, CdsText.TextColorProperty, CdsTableTokens.CellText(active));
 
-            var expanded = v.ChildHost is not null && v.Source.IsExpanded && v.Source.ExpandedContent is not null;
+            var expanded = v.HasChildRow && v.Source.IsExpanded && v.Source.ExpandedContent is not null;
+            if (expanded) EnsureChildRow(v);
             if (v.ChildHost is not null)
             {
                 v.ChildHost.IsVisible = expanded;
@@ -750,19 +758,33 @@ public class CdsTable : CdsControl
         visual.Fill = new BoxView { MinimumHeightRequest = height };
         Hide(visual.Fill);
         Add(visual.Fill, 0, gridRow, span);
-        WireRowHover(visual.Fill, visual);
 
         visual.Rule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true };
         Hide(visual.Rule);
         Add(visual.Rule, 0, gridRow, span);
 
+        string? ColumnName(int c) => head is not null && c < head.Count && !head[c].IsFlush ? head[c].Text : null;
+        // A flush control in a tool column (selection, expand, row menu) needs no cell host: it has no padding and no
+        // column name to group under, so it goes straight into the row. One host stays, to carry the row's height.
+        bool Bare(int c) => c < source.CellList.Count && source.CellList[c] is { Body: not null, IsFlush: true } && ColumnName(c) is null;
+        var anyHosted = false;
+        for (var c = 0; c < columnCount && !anyHosted; c++) anyHosted = !Bare(c);
+
         for (var c = 0; c < columnCount; c++)
         {
             var cell = c < source.CellList.Count ? source.CellList[c] : null;
             var headerAlign = head is not null && c < head.Count ? head[c].Align : CdsTableAlignment.Start;
-            var columnName = head is not null && c < head.Count && !head[c].IsFlush ? head[c].Text : null;
+            var columnName = ColumnName(c);
             var align = cell?.Align ?? headerAlign;
             var flush = cell?.IsFlush == true;
+            if (anyHosted && Bare(c))
+            {
+                var tool = cell!.Body!;
+                if (cell.RevealOnHover) visual.RevealViews.Add((cell, tool));
+                if (tool.Parent is Layout previous) previous.Remove(tool);
+                Add(tool, c, gridRow);
+                continue;
+            }
             var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
             View? content = null;
             if (cell?.Body is { } body)
@@ -802,28 +824,82 @@ public class CdsTable : CdsControl
                 if (content.Parent is Layout old) old.Remove(content);
                 host.Add(content);
             }
-            WireRowHover(host, visual);
             Add(host, c, gridRow);
         }
 
-        if (source.IsExpandable)
+        // The child row's views wait for the row's first expansion (EnsureChildRow): most rows are never expanded.
+        visual.HasChildRow = source.IsExpandable;
+        visual.ChildGrid = grid;
+        visual.ChildGridRow = gridRow + 1;
+    }
+
+    /// <summary>
+    /// Creates an expandable row's child row (fill, rule, content host) the first time it is shown, after the row's own views
+    /// so the order of the grid's children (Tab and screen reader order) stays row by row.
+    /// </summary>
+    void EnsureChildRow(RowVisual visual)
+    {
+        if (visual.ChildHost is not null || !visual.HasChildRow || visual.ChildGrid is not { } grid) return;
+        var span = Math.Max(1, _columns.Count);
+        var at = grid.Children.IndexOf(visual.Views[^1]) + 1;
+        void Insert(View view)
         {
-            var childRow = gridRow + 1;
-            visual.ChildFill = new BoxView { IsVisible = false };
-            Hide(visual.ChildFill);
-            Add(visual.ChildFill, 0, childRow, span);
-            visual.ChildRule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
-            Hide(visual.ChildRule);
-            Add(visual.ChildRule, 0, childRow, span);
-            visual.ChildHost = new Grid
-            {
-                IsVisible = false,
-                Padding = new Thickness(ChildInset, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
-            };
-            Add(visual.ChildHost, 0, childRow, span);
-            SetChildContent(visual, source);
-            WireRowHover(visual.ChildFill, visual);
+            Grid.SetRow(view, visual.ChildGridRow);
+            Grid.SetColumn(view, 0);
+            Grid.SetColumnSpan(view, span);
+            grid.Children.Insert(at++, view);
+            visual.Views.Add(view);
         }
+        visual.ChildFill = new BoxView { IsVisible = false };
+        Hide(visual.ChildFill);
+        Insert(visual.ChildFill);
+        visual.ChildRule = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.End, InputTransparent = true, IsVisible = false };
+        Hide(visual.ChildRule);
+        Insert(visual.ChildRule);
+        visual.ChildHost = new Grid
+        {
+            IsVisible = false,
+            Padding = new Thickness(ChildInset, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
+        };
+        Insert(visual.ChildHost);
+        SetChildContent(visual, visual.Source);
+    }
+
+    void OnBodyPointer(object? sender, PointerEventArgs e)
+    {
+        if (IsVirtual || e.GetPosition(_bodyGrid) is not { } point) return;
+        SetHoverRow(RowAt(point.Y));
+    }
+
+    void SetHoverRow(int row)
+    {
+        if (_hoverRow == row) return;
+        _hoverRow = row;
+        RequestVisuals();
+    }
+
+    /// <summary>The data row of the shared body grid at <paramref name="y"/> (its own row or its child row), or -1.</summary>
+    int RowAt(double y) => RowAt(RowSpans(), y);
+
+    IEnumerable<(int Index, double Top, double Bottom)> RowSpans()
+    {
+        foreach (var v in _rowVisuals)
+        {
+            if (v.Index < 0 || v.Fill.Height <= 0) continue;
+            var bottom = v.ChildFill is { IsVisible: true } child ? child.Y + child.Height : v.Fill.Y + v.Fill.Height;
+            yield return (v.Index, v.Fill.Y, bottom);
+        }
+    }
+
+    /// <summary>The row whose span holds <paramref name="y"/>; the spans run top to bottom. -1 above, between or below them.</summary>
+    internal static int RowAt(IEnumerable<(int Index, double Top, double Bottom)> spans, double y)
+    {
+        foreach (var (index, top, bottom) in spans)
+        {
+            if (y < top) return -1;
+            if (y < bottom) return index;
+        }
+        return -1;
     }
 
     // ----- virtualized body -----
@@ -952,6 +1028,7 @@ public class CdsTable : CdsControl
         root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
         var visual = new RowVisual { Source = row, Index = -1, Root = root, GridRows = 2 };
         BuildRowVisual(root, 0, visual, fixedHeight: true);
+        WireRowHover(root, visual);
         AbsoluteLayout.SetLayoutFlags(root, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.WidthProportional);
         root.SizeChanged += (_, _) => OnSlotSized(visual);
         _virtualBody.Add(root);
@@ -1304,6 +1381,10 @@ public class CdsTable : CdsControl
         public readonly List<CdsTableCell> TextCells = [];
         public BoxView Fill = null!;
         public BoxView Rule = null!;
+        /// <summary>The row is expandable: its child row's views are made on first expansion, in <see cref="ChildGrid"/>.</summary>
+        public bool HasChildRow;
+        public Grid? ChildGrid;
+        public int ChildGridRow;
         public BoxView? ChildFill;
         public BoxView? ChildRule;
         public Grid? ChildHost;

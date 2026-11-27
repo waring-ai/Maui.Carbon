@@ -55,14 +55,19 @@ public sealed record IssueRow(
     }
 }
 
-/// <summary>A notification prepared for the header panel.</summary>
-public sealed record NotificationRow(AppNotification Notification, string WhenText)
+/// <summary>
+/// A notification prepared for the header panel. A snapshot (the read state is captured), so two rows are equal only when
+/// they show the same thing and the panel can keep the views of rows that did not change.
+/// </summary>
+public sealed record NotificationRow(AppNotification Notification, string WhenText, bool IsUnread)
 {
+    public NotificationRow(AppNotification notification, string whenText) : this(notification, whenText, !notification.IsRead)
+    {
+    }
+
     public string Title => Notification.Title;
 
     public string Body => Notification.Body;
-
-    public bool IsUnread => !Notification.IsRead;
 
     public FeedbackKind Kind => Notification.Kind;
 }

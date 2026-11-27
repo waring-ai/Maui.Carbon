@@ -138,6 +138,8 @@ public CdsButtonKind Kind
 - `HorizontalOptions=Start` shrinks a Grid to its content even with Star columns.
 - Star columns in an auto-sized parent can under-measure children and truncate labels. For "equal widths sized to the
   widest child" (segmented controls, button sets) use `CdsEqualWidthRow` (Foundation).
+- Views switched often and costly to build (app screens, large panes) go in a `CdsDeck` (Foundation), not a Grid of
+  views toggled with `IsVisible`.
 - A control sets its own `HorizontalOptions` only as a constructor default, never when it rebuilds: a rebuild runs
   again after XAML applied the app's attributes and would overwrite them. To fill the width it is offered (fluid sets,
   equally spaced steps, fluid fields), call `SetChrome(chrome, fillsWidth: true)`; the app's alignment and
@@ -168,7 +170,28 @@ public CdsButtonKind Kind
 - Hover tracking comes with `CreateHitTarget`/`TrackFocus`; call `TrackHover()` only for a control that reacts to hover
   without either. Every gesture recognizer costs platform setup each time its page enters or leaves the window.
 - Moving a large screen into and out of the window costs MAUI hundreds of milliseconds (window and resource
-  propagation over every element, native subviews and gestures). Keep long-lived screens attached and hide them.
+  propagation over every element, native subviews and gestures), and so does hiding it with `IsVisible`: MAUI pushes the
+  effective visibility to every descendant, one native update each. Keep long-lived screens attached in a `CdsDeck`
+  (Foundation): only its `Active` child is laid out and shown, the others are hidden on their own native view. Code that
+  asks whether something is on screen uses `CdsDeck.IsShown`/`IsHidden`, not `IsVisible` alone.
+- A view removed for good (a screen leaving the back stack, a closed overlay's container) gets `DisconnectHandlers()`:
+  a removed subtree keeps its native views and the Loaded and window hooks MAUI put on them, which on iOS and Mac Catalyst
+  hold the managed views, and through their event handlers the page. `CdsOverlayHost` does it for overlays.
+- Endless animations go through `CdsLoop`. A loop whose owner is hidden (or in an inactive deck child) parks off the
+  shared clock until shown again, so a loading skeleton hidden when its data arrives, or a screen kept hidden, costs no
+  frames.
+- Rebuilds keep the child views already in place (`CdsContainedList` and `CdsList` sync their rows) instead of clearing
+  and re-adding them: each re-add costs the child its native view and a layout pass.
+- `CdsHitTarget` skips MAUI Button's native title and image layout on iOS and Mac Catalyst (`ICrossPlatformLayout`);
+  keep it chrome-less (no text, no image) or that shortcut is wrong.
+- Every element costs MAUI its handler, native subview, resource propagation and (on Apple) a safe-area walk up to the
+  window, about 0.5 ms on Mac Catalyst; a table builds dozens per row. Parts a control rarely shows are created on first
+  use, not in the constructor: `CdsFocusRing` draws its outline when first shown, `CdsFormMessage` its icon and text
+  with the first message, `CdsActionFace` its label (not icon-only), badge and outline, `CdsCheckbox` its label (set
+  `HideLabel` before `Label`) and message row. Follow that for new optional parts.
+- Per-row hover in `CdsTable` is one pointer recognizer on the body grid that finds the row by position (one per pooled
+  slot when virtualized), not one per cell. Tool cells (flush, no column name: selection, expand, row menu) go into the
+  row without a cell host, and an expandable row's child row is built on its first expansion.
 
 ### Metrics (`CdsMetrics`, `Foundation/CdsMetrics.cs`)
 - The library's `System.Diagnostics.Metrics` instruments live in `CdsMeter`; their public names are constants on

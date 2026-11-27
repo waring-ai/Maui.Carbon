@@ -80,6 +80,9 @@ public class CdsContainedList : CdsControl
     /// <summary>The items, in order.</summary>
     public IList<CdsContainedListItem> Items => _items;
 
+    /// <summary>The rows as laid out (for tests).</summary>
+    internal IList<IView> ShownItems => _list.Children;
+
     /// <summary>The header text: one to three words in sentence case. It also names the list.</summary>
     public string? Label
     {
@@ -134,6 +137,25 @@ public class CdsContainedList : CdsControl
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => _rebuild.Request();
 
+    // Brings the shown rows in line with Items without re-adding the ones already in place: removing or re-adding a row
+    // costs MAUI its native view and layout, and every item would rebuild its chrome. Configure is a no-op for an item
+    // whose size, inset and last-row state did not change.
+    void SyncItems()
+    {
+        var wanted = new HashSet<CdsContainedListItem>(_items);
+        for (var i = _list.Children.Count - 1; i >= 0; i--)
+            if (_list.Children[i] is not CdsContainedListItem shown || !wanted.Contains(shown)) _list.Children.RemoveAt(i);
+        for (var i = 0; i < _items.Count; i++)
+        {
+            var item = _items[i];
+            item.Configure(Size, IsInset, i == _items.Count - 1);
+            if (i < _list.Children.Count && ReferenceEquals(_list.Children[i], item)) continue;
+            var at = _list.Children.IndexOf(item);
+            if (at >= 0) _list.Children.RemoveAt(at);
+            _list.Children.Insert(i, item);
+        }
+    }
+
     void Rebuild()
     {
         _rebuild.Cancel();
@@ -161,12 +183,7 @@ public class CdsContainedList : CdsControl
         }
         _searchSlot.IsVisible = Search is not null;
 
-        _list.Children.Clear();
-        for (var i = 0; i < _items.Count; i++)
-        {
-            _items[i].Configure(Size, IsInset, i == _items.Count - 1);
-            _list.Add(_items[i]);
-        }
+        SyncItems();
 
         CdsSemantics.SetGroup(_list, Label, CdsSemanticGroupKind.List);
         RefreshVisuals();

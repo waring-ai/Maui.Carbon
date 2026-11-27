@@ -69,7 +69,6 @@ public abstract class CdsList : ContentView
     void Rebuild()
     {
         _rebuild.Cancel();
-        _stack.Children.Clear();
         var nested = IsNested;
         _stack.Margin = new Thickness(CdsListMarkers.LeftMargin(IsOrdered, nested), 0, 0, 0);
         var width = CdsListMarkers.MarkerWidth(IsOrdered, nested);
@@ -78,7 +77,24 @@ public abstract class CdsList : ContentView
         for (var i = 0; i < _items.Count; i++)
         {
             _items[i].Configure(MarkerFor(i), width, expressive, _depth, IsOrdered, markerAtEnd);
-            _stack.Add(_items[i]);
+        }
+        SyncItems();
+    }
+
+    // Keeps the items already in place instead of clearing and re-adding every one (each re-add costs MAUI the item's
+    // native view and a layout pass).
+    void SyncItems()
+    {
+        var wanted = new HashSet<CdsListItem>(_items);
+        for (var i = _stack.Children.Count - 1; i >= 0; i--)
+            if (_stack.Children[i] is not CdsListItem shown || !wanted.Contains(shown)) _stack.Children.RemoveAt(i);
+        for (var i = 0; i < _items.Count; i++)
+        {
+            var item = _items[i];
+            if (i < _stack.Children.Count && ReferenceEquals(_stack.Children[i], item)) continue;
+            var at = _stack.Children.IndexOf(item);
+            if (at >= 0) _stack.Children.RemoveAt(at);
+            _stack.Children.Insert(i, item);
         }
     }
 }

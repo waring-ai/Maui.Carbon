@@ -36,6 +36,11 @@ public static class CdsAiTokens
 /// Binds up to four color keys to a view and calls back with the resolved colors whenever any of them changes (theme switches,
 /// layers). It lets a <see cref="Brush"/> with gradient stops follow the theme: stops cannot take dynamic resources themselves,
 /// so the brush is rebuilt from the colors.
+/// <para>
+/// A theme switch changes the bound colors one key at a time. On screen, the callback runs once after the switch (with
+/// every color resolved), not once per key with a mix of old and new colors: each brush pushed to a native view costs
+/// MAUI a stroke or background update. Off screen it runs at once, so the view is complete before it is shown.
+/// </para>
 /// </summary>
 internal static class CdsColorProxies
 {
@@ -44,6 +49,7 @@ internal static class CdsColorProxies
         public readonly Color?[] Colors = new Color?[Slots];
         public required Action<Color?[]> Apply { get; init; }
         public int Count { get; init; }
+        public bool Pending;
     }
 
     const int Slots = 4;
@@ -62,7 +68,19 @@ internal static class CdsColorProxies
                 {
                     if (!s_bindings.TryGetValue(b, out var binding)) return;
                     binding.Colors[slot] = n as Color;
-                    binding.Apply(binding.Colors);
+                    if (b is not VisualElement { Handler: not null, Dispatcher: { } dispatcher })
+                    {
+                        binding.Apply(binding.Colors);
+                        return;
+                    }
+                    if (binding.Pending) return;
+                    binding.Pending = true;
+                    dispatcher.Dispatch(() =>
+                    {
+                        binding.Pending = false;
+                        // Unbound (or bound again) meanwhile: the new binding applies its own colors.
+                        if (s_bindings.TryGetValue(b, out var current) && ReferenceEquals(current, binding)) binding.Apply(binding.Colors);
+                    });
                 });
         }
         return properties;

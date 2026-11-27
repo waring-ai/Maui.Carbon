@@ -15,6 +15,7 @@ Links below are relative to this file in the repository. When copying the skill 
 | Tokens | `CdsColorKeys`, `CdsSpacing`, `CdsSizing`, `CdsDuration`, `CdsEasing`, `CdsSize` | [Generated](../../../src/Maui.Carbon/Generated/), [Foundation](../../../src/Maui.Carbon/Foundation/) |
 | Overlay infrastructure | `CdsOverlayHost`, `CdsOverlayService`, `CdsOverlayOptions`, `CdsOverlay`, `CdsPlacement` | [Overlays](../../../src/Maui.Carbon/Overlays/) |
 | Motion | `CdsMotion`, `CdsCubicBezier` | [Motion](../../../src/Maui.Carbon/Motion/) |
+| Layout helpers | `CdsDeck` (one active child of many kept attached: app screens, large panes; cheaper to switch than `IsVisible`), `CdsMaxWidthBox`, `CdsEqualWidthRow` | [Foundation](../../../src/Maui.Carbon/Foundation/) |
 
 ## AI
 

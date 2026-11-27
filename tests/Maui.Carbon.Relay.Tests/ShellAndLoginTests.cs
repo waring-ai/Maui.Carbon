@@ -44,6 +44,24 @@ public class ShellAndLoginTests
     }
 
     [Fact]
+    public async Task Opening_a_notification_replaces_only_its_row()
+    {
+        var shell = CreateShell();
+        var row = shell.Notifications.First(n => n.Notification.IssueKey is not null && n.IsUnread);
+        var index = shell.Notifications.IndexOf(row);
+        var before = shell.Notifications.ToList();
+        var changes = new List<System.Collections.Specialized.NotifyCollectionChangedAction>();
+        shell.Notifications.CollectionChanged += (_, e) => changes.Add(e.Action);
+
+        await shell.OpenNotificationCommand.ExecuteAsync(row);
+
+        Assert.Equal([System.Collections.Specialized.NotifyCollectionChangedAction.Replace], changes);
+        Assert.False(shell.Notifications[index].IsUnread);
+        for (var i = 0; i < before.Count; i++)
+            if (i != index) Assert.Same(before[i], shell.Notifications[i]);
+    }
+
+    [Fact]
     public void Switching_project_updates_the_current_project()
     {
         var shell = CreateShell();

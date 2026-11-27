@@ -441,7 +441,8 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
 
         if (selection == CdsDataTableSelection.Multi)
         {
-            var check = new CdsCheckbox { Label = "Select row", HideLabel = true, HorizontalOptions = LayoutOptions.Start };
+            // HideLabel first: the label's view is then never made.
+            var check = new CdsCheckbox { HideLabel = true, Label = "Select row", HorizontalOptions = LayoutOptions.Start };
             check.Margin = new Thickness(CdsTableTokens.CellPaddingX, topAligned ? CdsSpacing.Spacing04 : 0, 0, 0);
             check.VerticalOptions = topAligned ? LayoutOptions.Start : LayoutOptions.Center;
             check.Clicked += (_, _) =>
@@ -453,7 +454,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         }
         else if (selection == CdsDataTableSelection.Radio)
         {
-            var radio = new CdsRadioButton { Label = "Select row", HideLabel = true, HorizontalOptions = LayoutOptions.Start };
+            var radio = new CdsRadioButton { HideLabel = true, Label = "Select row", HorizontalOptions = LayoutOptions.Start };
             radio.Margin = new Thickness(CdsTableTokens.CellPaddingX, topAligned ? CdsSpacing.Spacing04 : 0, 0, 0);
             radio.VerticalOptions = topAligned ? LayoutOptions.Start : LayoutOptions.Center;
             radio.CheckedChanged += (_, e) =>

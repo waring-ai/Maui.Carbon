@@ -9,18 +9,20 @@ namespace Maui.Carbon.Relay.Hosting;
 /// from DI. Top-level routes reset the back stack; detail routes push onto it. The view model is told when its screen is
 /// shown (<see cref="IActivatable.ActivateAsync"/>, with the parameter) and left.
 /// <para>
-/// The body is a deck of screens with one visible. Screens mapped with <c>keepAttached</c> (the singleton top-level ones)
-/// stay in it, hidden while not shown: taking a large screen out of the window and putting it back costs MAUI hundreds of
-/// milliseconds each time (every element re-propagates the window and resources, and re-creates its native gestures and
-/// subviews), where hiding it costs nothing. Other screens leave the deck when they leave the back stack, so they can be
-/// collected.
+/// The body is a <see cref="CdsDeck"/> of screens with one active. Screens mapped with <c>keepAttached</c> (the singleton
+/// top-level ones) stay in it, hidden while not shown: taking a large screen out of the window and putting it back costs
+/// MAUI hundreds of milliseconds each time (every element re-propagates the window and resources, and re-creates its native
+/// gestures and subviews), and so does hiding it with <c>IsVisible</c> (MAUI pushes the visibility to every descendant);
+/// the deck hides only the screen's own native view. Other screens leave the deck when they leave the back stack, with their
+/// handlers disconnected so they can be collected: a removed subtree otherwise keeps its native views and the Loaded and
+/// window hooks MAUI put on them, which on iOS and Mac Catalyst keep the whole screen alive.
 /// </para>
 /// </summary>
 public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logger) : INavigator
 {
     readonly Dictionary<string, (Type View, Type ViewModel, bool Keep)> _routes = [];
     readonly Stack<Entry> _stack = new();
-    readonly Grid _deck = new();
+    readonly CdsDeck _deck = new();
     readonly HashSet<View> _kept = [];
     CdsUIShell? _shell;
     Entry? _pending;
@@ -59,7 +61,9 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
     public void Reset()
     {
         while (_stack.TryPop(out var e)) e.ViewModel.Deactivate();
+        var screens = _deck.Children.OfType<View>().ToList();
         _deck.Children.Clear();
+        foreach (var screen in screens) screen.DisconnectHandlers();
         _kept.Clear();
     }
 
@@ -121,12 +125,12 @@ public sealed class Navigator(IServiceProvider services, ILogger<Navigator> logg
     void Present(View view)
     {
         if (view.Parent != _deck) _deck.Add(view);
+        _deck.Active = view;
         foreach (var child in _deck.Children.OfType<View>().ToList())
         {
-            if (ReferenceEquals(child, view)) continue;
-            if (_kept.Contains(child) || _stack.Any(e => ReferenceEquals(e.View, child))) child.IsVisible = false;
-            else _deck.Remove(child);
+            if (ReferenceEquals(child, view) || _kept.Contains(child) || _stack.Any(e => ReferenceEquals(e.View, child))) continue;
+            _deck.Remove(child);
+            child.DisconnectHandlers();
         }
-        view.IsVisible = true;
     }
 }

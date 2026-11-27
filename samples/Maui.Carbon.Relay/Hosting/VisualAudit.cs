@@ -40,7 +40,7 @@ public static class VisualAudit
         Track(element);
         if (element is VisualElement v)
         {
-            if (!v.IsVisible || v.Opacity <= 0.01) return;
+            if (CdsDeck.IsHidden(v) || v.Opacity <= 0.01) return;
             // Offscreen by design (closed panels, collapsed side nav slide out).
             if (v.TranslationX != 0 || v.TranslationY != 0) return;
             opacity *= v.Opacity;
@@ -160,7 +160,7 @@ public static class VisualAudit
         var index = layout.Children.IndexOf(child);
         for (var i = index - 1; i >= 0; i--)
         {
-            if (layout.Children[i] is not VisualElement s || !s.IsVisible || s.Opacity < 0.5) continue;
+            if (layout.Children[i] is not VisualElement s || CdsDeck.IsHidden(s) || s.Opacity < 0.5) continue;
             var cf = child.Frame;
             // The layer itself, or a layer inside it (an indicator in an indicator layer), offset by its container.
             foreach (var (layer, dx, dy) in Layers(s, 0, 0, 3))
@@ -177,7 +177,7 @@ public static class VisualAudit
     {
         yield return (v, dx, dy);
         if (depth == 0 || v is not IVisualTreeElement t) yield break;
-        foreach (var c in t.GetVisualChildren().OfType<VisualElement>().Where(c => c.IsVisible && c.Opacity >= 0.5))
+        foreach (var c in t.GetVisualChildren().OfType<VisualElement>().Where(c => !CdsDeck.IsHidden(c) && c.Opacity >= 0.5))
             foreach (var l in Layers(c, dx + v.Frame.X, dy + v.Frame.Y, depth - 1)) yield return l;
     }
 
@@ -241,7 +241,7 @@ public static class VisualAudit
         {
             if (e is VisualElement v)
             {
-                if (!v.IsVisible) return;
+                if (CdsDeck.IsHidden(v)) return;
                 frames[v] = v.Frame;
             }
             if (e is IVisualTreeElement t)

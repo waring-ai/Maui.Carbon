@@ -141,6 +141,8 @@ public class CdsContainedListItem : CdsContainer
 
     internal void Configure(CdsSize size, bool inset, bool isLast)
     {
+        // The constructor built the defaults; a list re-syncing its rows passes the same values again.
+        if (_size == size && _inset == inset && _isLast == isLast) return;
         _size = size;
         _inset = inset;
         _isLast = isLast;

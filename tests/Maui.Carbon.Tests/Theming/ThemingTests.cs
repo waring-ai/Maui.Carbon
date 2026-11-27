@@ -14,6 +14,40 @@ public class ThemingTests
     }
 
     [Fact]
+    public void Switching_themes_in_any_order_resolves_every_color_of_the_current_theme()
+    {
+        var resources = new CdsResources();
+        var probes = CdsColorKeys.All.Select(k => Probe(k)).ToList();
+        var root = new VerticalStackLayout();
+        foreach (var p in probes) root.Add(p);
+        root.Resources = resources;
+        CdsThemeName[] order = [CdsThemeName.G10, CdsThemeName.G100, CdsThemeName.G90, CdsThemeName.White, CdsThemeName.G100, CdsThemeName.G10, CdsThemeName.G90, CdsThemeName.White];
+        foreach (var theme in order)
+        {
+            resources.Theme = theme;
+            var colors = CdsPaletteData.Get(theme);
+            for (var i = 0; i < probes.Count; i++) Assert.Equal(colors[i], probes[i].TextColor);
+            Assert.True(resources.TryGetValue(CdsContextKeys.ThemeId, out var id));
+            Assert.Equal(theme, id);
+        }
+    }
+
+    [Fact]
+    public void A_theme_switch_raises_only_the_colors_that_differ_from_the_first_theme()
+    {
+        // White and G10 share all but 17 colors; the theme id is always raised, constant context keys never.
+        var delta = CdsPalettes.CreateThemeDelta(CdsThemeName.White, CdsThemeName.White, CdsThemeName.G10);
+        Assert.Equal(18, delta.Count);
+        Assert.False(delta.ContainsKey(CdsContextKeys.LayerLevel));
+        Assert.False(delta.ContainsKey(CdsContextKeys.Transparent));
+        // Back to the first theme: the 17 that differed revert, with the first theme's values.
+        var back = CdsPalettes.CreateThemeDelta(CdsThemeName.White, CdsThemeName.G10, CdsThemeName.White);
+        Assert.Equal(18, back.Count);
+        Assert.Equal(Token(CdsThemeName.White, "background"), back[CdsColorKeys.Background]);
+        Assert.Equal(Token(CdsThemeName.G10, "background"), delta[CdsColorKeys.Background]);
+    }
+
+    [Fact]
     public void Every_theme_has_every_color()
     {
         foreach (var theme in Enum.GetValues<CdsThemeName>())

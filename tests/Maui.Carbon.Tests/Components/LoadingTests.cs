@@ -280,6 +280,82 @@ public class LoopClockTests
     }
 
     [Fact]
+    public void Hidden_loops_leave_the_clock_until_shown_again()
+    {
+        var manager = new FakeAnimationManager();
+        var owner = new BoxView();
+        var loading = new Grid { Children = { owner } };
+        var screen = new Grid { Children = { loading } };
+        var phase = -1.0;
+        Start(owner, p => phase = p, 400, manager);
+        manager.Frame(100);
+        Assert.Equal(0.25, phase, 6);
+
+        // The loading state ends: the loop parks at the next frame and the window's ticker can stop.
+        loading.IsVisible = false;
+        manager.Frame(16);
+        Assert.True(CdsLoop.IsParked(owner, "test"));
+        Assert.Empty(manager.Animations);
+
+        // Hiding the whole screen and showing it again leaves the hidden part parked.
+        screen.IsVisible = false;
+        screen.IsVisible = true;
+        Assert.True(CdsLoop.IsParked(owner, "test"));
+
+        // Shown again: back on the clock, where it left off.
+        loading.IsVisible = true;
+        Assert.False(CdsLoop.IsParked(owner, "test"));
+        Assert.Single(manager.Animations);
+        manager.Frame(100);
+        Assert.Equal(0.5, phase, 6);
+
+        CdsLoop.Stop(owner, "test");
+        loading.IsVisible = false;
+        loading.IsVisible = true;
+        Assert.Empty(manager.Animations);
+    }
+
+    [Fact]
+    public void A_loop_in_an_inactive_deck_screen_parks_and_resumes_when_it_is_active()
+    {
+        var manager = new FakeAnimationManager();
+        var owner = new BoxView();
+        var screen = new Grid { Children = { owner } };
+        var other = new Grid();
+        var deck = new CdsDeck { Children = { screen, other } };
+        deck.Active = screen;
+        Start(owner, _ => { }, 400, manager);
+        Assert.False(CdsLoop.IsParked(owner, "test"));
+
+        deck.Active = other;
+        manager.Frame(16);
+        Assert.True(CdsLoop.IsParked(owner, "test"));
+        Assert.Empty(manager.Animations);
+
+        deck.Active = screen;
+        Assert.False(CdsLoop.IsParked(owner, "test"));
+        CdsLoop.Stop(owner, "test");
+    }
+
+    [Fact]
+    public void A_loop_started_hidden_parks_until_moved_somewhere_shown()
+    {
+        var manager = new FakeAnimationManager();
+        var owner = new BoxView();
+        var hidden = new Grid { IsVisible = false, Children = { owner } };
+        Start(owner, _ => { }, 400, manager);
+        Assert.True(CdsLoop.IsParked(owner, "test"));
+        Assert.Empty(manager.Animations);
+
+        hidden.Children.Remove(owner);
+        var shown = new Grid();
+        shown.Children.Add(owner);
+        Assert.False(CdsLoop.IsParked(owner, "test"));
+        Assert.Single(manager.Animations);
+        CdsLoop.Stop(owner, "test");
+    }
+
+    [Fact]
     public void Stopping_the_last_loop_leaves_the_manager_idle()
     {
         var manager = new FakeAnimationManager();

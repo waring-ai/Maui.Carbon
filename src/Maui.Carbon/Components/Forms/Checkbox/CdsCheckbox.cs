@@ -11,8 +11,10 @@ public partial class CdsCheckbox : CdsControl
     readonly Grid _boxHost = new() { WidthRequest = 16, HeightRequest = 16, VerticalOptions = LayoutOptions.Start, HorizontalOptions = LayoutOptions.Start };
     readonly CdsCheckGlyph _box = new();
     readonly CdsFocusRing _ring = new(CdsFocusRingStyle.Offset, CdsRadius.Checkbox);
-    readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap, VerticalOptions = LayoutOptions.Start };
-    readonly CdsFormMessage _message = new();
+    // The label and the message row are created when first shown: a table's row checkboxes hide their label and never
+    // have a message.
+    CdsText? _label;
+    CdsFormMessage? _message;
     readonly CdsHitTarget _hit;
     CdsInteractionState _inherited;
     string? _groupMessage;
@@ -27,20 +29,13 @@ public partial class CdsCheckbox : CdsControl
 
         _boxHost.Add(_box);
         _boxHost.Add(_ring);
-        _label.Margin = new Thickness(CdsSpacing.Spacing03 + 2, 3, 0, 3);
-        _label.InputTransparent = true;
-        _message.Margin = new Thickness(26, 2, 0, 0);
         AutomationProperties.SetExcludedWithChildren(_boxHost, true);
-        AutomationProperties.SetExcludedWithChildren(_label, true);
 
         _hit = CreateHitTarget(CdsAccessibilityRole.Checkbox);
 
         _root.Add(_boxHost, 0, 0);
-        _root.Add(_label, 1, 0);
         _root.Add(_hit, 0, 0);
         Grid.SetColumnSpan(_hit, 2);
-        _root.Add(_message, 0, 1);
-        Grid.SetColumnSpan(_message, 2);
 
         SetChrome(_root);
         UpdateChrome();
@@ -114,11 +109,11 @@ public partial class CdsCheckbox : CdsControl
         SetColor(_box, CdsCheckGlyph.FillColorProperty, v.Fill);
         SetColor(_box, CdsCheckGlyph.MarkColorProperty, v.Mark);
         _box.Mark = shown is null ? CdsCheckMark.Dash : shown == true ? CdsCheckMark.Check : CdsCheckMark.None;
-        SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.Label);
+        if (_label is not null) SetColor(_label, Microsoft.Maui.Controls.Label.TextColorProperty, v.Label);
         _ring.IsActive = Is(CdsInteractionState.FocusVisible);
 
         var message = CdsFormMessageResolver.Resolve(state, HelperText, InvalidText, WarnText);
-        _message.Apply(message);
+        if (_message is not null || !string.IsNullOrEmpty(message.Text)) EnsureMessage().Apply(message);
         _hit.IsEnabled = !state.HasFlag(CdsInteractionState.Disabled);
         // aria-readonly (own or from the group): focusable, and screen readers say why it does not toggle.
         _hit.IsReadOnly = state.HasFlag(CdsInteractionState.ReadOnly) && !state.HasFlag(CdsInteractionState.Disabled);
@@ -136,11 +131,42 @@ public partial class CdsCheckbox : CdsControl
 
     void UpdateChrome()
     {
-        _label.Text = Label;
-        _label.IsVisible = !HideLabel && !string.IsNullOrEmpty(Label);
-        _boxHost.Margin = new Thickness(0, 2, 0, _label.IsVisible ? 0 : 6);
+        var shown = !HideLabel && !string.IsNullOrEmpty(Label);
+        if (shown || _label is not null)
+        {
+            var label = EnsureLabel();
+            label.Text = Label;
+            label.IsVisible = shown;
+        }
+        _boxHost.Margin = new Thickness(0, 2, 0, shown ? 0 : 6);
         SemanticProperties.SetDescription(_hit, Label);
         RefreshVisuals();
+    }
+
+    CdsText EnsureLabel()
+    {
+        if (_label is not null) return _label;
+        _label = new CdsText
+        {
+            LineBreakMode = LineBreakMode.WordWrap,
+            VerticalOptions = LayoutOptions.Start,
+            Margin = new Thickness(CdsSpacing.Spacing03 + 2, 3, 0, 3),
+            InputTransparent = true,
+        };
+        AutomationProperties.SetExcludedWithChildren(_label, true);
+        // Under the hit target, which spans both columns.
+        Grid.SetColumn(_label, 1);
+        _root.Children.Insert(_root.Children.IndexOf(_hit), _label);
+        return _label;
+    }
+
+    CdsFormMessage EnsureMessage()
+    {
+        if (_message is not null) return _message;
+        _message = new CdsFormMessage { Margin = new Thickness(26, 2, 0, 0) };
+        _root.Add(_message, 0, 1);
+        Grid.SetColumnSpan(_message, 2);
+        return _message;
     }
 
     void OnCheckedChanged(bool value)
