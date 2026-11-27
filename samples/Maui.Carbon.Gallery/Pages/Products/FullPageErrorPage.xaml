@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.FullPageErrorPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="403: access denied" Description="Kind Forbidden. The label in text-error after an arrow, the title as the level 1 heading (fluid-heading-05), the description in body-02 and links back to safety in Body.">
+            <cds:CdsFullPageError Kind="Forbidden" Label="Error 403" Title="Access denied"
+                                  Description="You are not authorized to access this resource. Contact your account administrator to request access to prod-eu-de-1.">
+                <VerticalStackLayout Spacing="8">
+                    <cds:CdsLink Text="Go to the dashboard" Size="Lg" Icon="ArrowRight" Clicked="OnLinkClicked" />
+                    <cds:CdsLink Text="Request access" Size="Lg" Icon="ArrowRight" Clicked="OnLinkClicked" />
+                </VerticalStackLayout>
+            </cds:CdsFullPageError>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="404: page not found" Description="Kind NotFound, for an address that does not exist.">
+            <cds:CdsFullPageError Kind="NotFound" Label="Error 404" Title="Page not found"
+                                  Description="The page you are looking for was moved, removed or never existed. Check the address or go back to the cluster list.">
+                <cds:CdsLink Text="Go to clusters" Size="Lg" Icon="ArrowRight" Clicked="OnLinkClicked" />
+            </cds:CdsFullPageError>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Custom" Description="Kind Custom (default) for any other error.">
+            <cds:CdsFullPageError Label="Error 503" Title="Service unavailable"
+                                  Description="The object storage service is down for maintenance until 02:00 UTC. Your data is safe.">
+                <cds:CdsLink Text="View the status page" Size="Lg" Icon="Launch" Href="https://www.ibm.com/cloud/status" />
+            </cds:CdsFullPageError>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Links in Body report their activation.">
+            <cds:CdsText x:Name="Status" Text="Choose a link in a full-page error." />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The drawing is painted with background and border-inverse, so it follows every theme.">
+            <g:ThemeStrip MinimumZoneWidth="480">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsFullPageError Kind="NotFound" Label="Error 404" Title="Page not found" Description="Check the address." />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

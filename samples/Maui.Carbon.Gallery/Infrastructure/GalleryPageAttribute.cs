@@ -15,6 +15,7 @@ public enum GalleryCategory
     Feedback,
     AI,
     Layout,
+    Products,
     Patterns,
 }
 

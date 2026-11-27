@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.OptionsTilePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Closed and open" Description="The header shows a chevron, the heading-compact-01 title and a helper-text-01 summary. Open, the content sits one layer up, 48 in from the start; the summary hides.">
+            <VerticalStackLayout MaximumWidthRequest="640" HorizontalOptions="Fill">
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Notifications" Summary="Email and in-app" IsOpen="True">
+                    <VerticalStackLayout Spacing="8">
+                        <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                        <cds:CdsCheckbox Label="In-app" IsChecked="True" />
+                        <cds:CdsCheckbox Label="SMS" />
+                    </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With a toggle" Description="Set IsToggled to add a small toggle at the end that enables the whole group. Clicking it does not open the tile.">
+            <VerticalStackLayout MaximumWidthRequest="640" HorizontalOptions="Fill">
+                <cds:CdsOptionsTile Title="Usage analytics" Summary="Share anonymous usage data" IsToggled="True">
+                    <cds:CdsText Text="We collect page views and feature usage to improve the product. No personal data is collected." />
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Beta features" Summary="Try features before they are released" IsToggled="False" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="lg is 48 high (default); xl is 64.">
+            <VerticalStackLayout MaximumWidthRequest="640" HorizontalOptions="Fill">
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" Size="Lg" IsToggled="True">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" Size="Xl" IsToggled="True">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Invalid, warning and locked replace the summary with an icon and their text. Locked disables the toggle and, open, shows its note above the content. A tile without content is static.">
+            <VerticalStackLayout MaximumWidthRequest="640" HorizontalOptions="Fill">
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" IsToggled="True" IsInvalid="True" InvalidText="Your system does not support this configuration">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" IsToggled="True" IsWarning="True" WarnText="A restart is required to apply these settings">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" IsToggled="True" IsLocked="True" LockedText="This option is managed by your administrator" IsOpen="True">
+                    <cds:CdsText Text="User interface: English. Locale: English-US." />
+                </cds:CdsOptionsTile>
+                <cds:CdsOptionsTile Title="Single sign-on" Summary="Not configured" IsToggled="False" IsLocked="True" LockedText="This option is managed by your administrator" />
+                <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" IsEnabled="False">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Open the tile and flip the toggle; the status follows OpenChanged and Toggled.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="640" HorizontalOptions="Fill">
+                <cds:CdsOptionsTile x:Name="Interactive" Title="Language" Summary="English | Locale: English" IsToggled="True" OpenChanged="OnOpenChanged" Toggled="OnToggled">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsText Text="User interface defines the language the application is displayed in. Locale sets the regional display formats for information like time, date, currency and decimal delimiters." />
+                    <cds:CdsSelect Label="User interface" SelectedItem="en">
+                        <cds:CdsSelectItem Value="en" Text="English" />
+                        <cds:CdsSelectItem Value="de" Text="Deutsch - German" />
+                        <cds:CdsSelectItem Value="fr" Text="Français - French" />
+                    </cds:CdsSelect>
+                    <cds:CdsSelect Label="Locale" SelectedItem="en-US">
+                        <cds:CdsSelectItem Value="en-US" Text="English-US" />
+                        <cds:CdsSelectItem Value="en-UK" Text="English-UK" />
+                        <cds:CdsSelectItem Value="de-DE" Text="German" />
+                    </cds:CdsSelect>
+                </VerticalStackLayout>
+                </cds:CdsOptionsTile>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Closed, enabled" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same tile in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsOptionsTile Title="Language" Summary="English | Locale: English" IsToggled="True" IsOpen="True">
+                            <cds:CdsText Text="User interface: English." />
+                        </cds:CdsOptionsTile>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

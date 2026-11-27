@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.EditInPlacePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Reads as text until you hover (edit button, field-01 fill) or click into it. Cancel and save turn on once the trimmed value changes. Enter saves and stays in edit mode, Escape restores the value, and moving focus away saves a valid change and cancels anything else.">
+            <cds:CdsEditInPlace Label="Cluster name" Value="prod-eu-de-1" Placeholder="Name the cluster"
+                                WidthRequest="320" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm (default) is 40 high with a 32 input, md 48 with 40, lg 64 with 48: the toolbar buttons are square at the component's height.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsEditInPlace Label="Topic name, small" Value="orders-created" Size="Sm" EditAlwaysVisible="True" WidthRequest="320" HorizontalOptions="Start" />
+                <cds:CdsEditInPlace Label="Topic name, medium" Value="orders-created" Size="Md" EditAlwaysVisible="True" WidthRequest="320" HorizontalOptions="Start" />
+                <cds:CdsEditInPlace Label="Topic name, large" Value="orders-created" Size="Lg" EditAlwaysVisible="True" WidthRequest="320" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="States" Description="Edit always visible for touch screens; invalid adds the 2px support-error border, the error icon and the message, and disables save; read only swaps the edit button for an edit-off toggletip that says why.">
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsEditInPlace Label="Bucket name" Value="logs-archive-prod" EditAlwaysVisible="True" WidthRequest="320" HorizontalOptions="Start" />
+                <cds:CdsEditInPlace Label="Bucket name" Value="" Placeholder="Name the bucket" IsInvalid="True" InvalidText="Enter a bucket name."
+                                    EditAlwaysVisible="True" WidthRequest="320" HorizontalOptions="Start" />
+                <cds:CdsEditInPlace Label="Region" Value="eu-de" IsReadOnly="True" ReadOnlyToggletipText="The region is set when the service is created and cannot be changed."
+                                    WidthRequest="320" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Title typography" Description="TypeStyle (Carbon's inheritTypography) matches the text being edited, here a heading-03 page title in a medium field.">
+            <cds:CdsEditInPlace Label="Dashboard name" Value="Payments overview" TypeStyle="Heading03" Size="Md" EditAlwaysVisible="True"
+                                WidthRequest="400" HorizontalOptions="Start" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Saved, Canceled and the custom Blurred handler (the second field keeps the value on blur without saving it; you decide).">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsEditInPlace x:Name="ProjectName" Label="Project name" Value="checkout-service" WidthRequest="320" HorizontalOptions="Start"
+                                    Saved="OnSaved" Canceled="OnCanceled" />
+                <cds:CdsEditInPlace x:Name="Owner" Label="Owner" Value="payments-team" WidthRequest="320" HorizontalOptions="Start"
+                                    Blurred="OnBlurred" Saved="OnSaved" Canceled="OnCanceled" />
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No change yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same field in every theme, one with the edit button showing and one invalid.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsEditInPlace Label="Cluster name" Value="prod-eu-de-1" EditAlwaysVisible="True" />
+                            <cds:CdsEditInPlace Label="Cluster name" Value="" Placeholder="Name the cluster" IsInvalid="True" InvalidText="Enter a name." />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers" Description="Hover and edit fill with the field token of the layer the field sits on.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsEditInPlace Label="Cluster name" Value="prod-eu-de-1" EditAlwaysVisible="True" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.CreateSidePanelPage">
+    <Grid>
+        <ContentView x:Name="PageArea">
+            <VerticalStackLayout Spacing="48">
+                <g:GalleryExample Title="Create side panel" Description="A one-step create form that slides in beside the page and pushes it aside, so the list it adds to stays in view. The secondary button closes it.">
+                    <cds:CdsButton x:Name="CreateButton" Text="Create rule" Kind="Tertiary" Clicked="OnCreateClicked" />
+                </g:GalleryExample>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+            </VerticalStackLayout>
+        </ContentView>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsCreateSidePanel x:Name="Panel" IsOpen="True" Title="Create rule" Subtitle="Alert when a metric crosses a threshold."
+                                FormTitle="Condition" FormDescription="The rule fires when the condition holds for the whole window."
+                                PrimaryButtonText="Create rule" IsSubmitEnabled="False"
+                                LauncherElement="{x:Reference CreateButton}" RequestSubmit="OnSubmit">
+            <cds:CdsStack Gap="5">
+                <cds:CdsTextInput x:Name="RuleName" Label="Rule name" Placeholder="e.g. high-cpu" TextChanged="OnNameChanged" />
+                <cds:CdsDropdown x:Name="Metric" Label="Metric" />
+                <cds:CdsNumberInput Label="Threshold (%)" Value="80" Min="1" Max="100" />
+            </cds:CdsStack>
+        </cds:CdsCreateSidePanel>
+    </Grid>
+</g:GalleryPage>

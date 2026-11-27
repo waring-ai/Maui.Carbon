@@ -19,7 +19,7 @@ if [[ "${APP:-gallery}" == "relay" ]]; then
   exit 0
 fi
 APP="samples/Maui.Carbon.Gallery/bin/$CONFIG/net11.0-maccatalyst/maccatalyst-arm64/Maui.Carbon.Gallery.app"
-for c in Foundations Actions Forms FluidForms Data Charts Navigation Containers Overlays Feedback AI Layout Patterns; do
+for c in Foundations Actions Forms FluidForms Data Charts Navigation Containers Overlays Feedback AI Layout Products Patterns; do
   before=$(ls "$OUT"/*.png 2>/dev/null | wc -l)
   open -n -W --env CARBON_SNAPSHOT_DIR="$OUT" --env CARBON_SNAPSHOT_CATEGORY="$c" --env CARBON_SNAPSHOT_THEMES="$THEMES" "$APP"
   after=$(ls "$OUT"/*.png 2>/dev/null | wc -l)

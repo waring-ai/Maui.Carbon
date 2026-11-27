@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.StatusIconPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Kinds" Description="Eleven statuses, each with its own shape and status color. Pair the icon with text; the description is the accessible name and tooltip.">
+            <VerticalStackLayout Spacing="12">
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Fatal" Size="Sm" IconDescription="Fatal" />
+                    <cds:CdsText Text="Fatal: node unreachable" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Critical" Size="Sm" IconDescription="Critical" />
+                    <cds:CdsText Text="Critical: 3 pods failed" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="MajorWarning" Size="Sm" IconDescription="Major warning" />
+                    <cds:CdsText Text="Major warning: disk 92% full" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="MinorWarning" Size="Sm" IconDescription="Minor warning" />
+                    <cds:CdsText Text="Minor warning: cert expires in 9 days" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Undefined" Size="Sm" IconDescription="Undefined" />
+                    <cds:CdsText Text="Undefined: no policy attached" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Unknown" Size="Sm" IconDescription="Unknown" />
+                    <cds:CdsText Text="Unknown: agent not reporting" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Normal" Size="Sm" IconDescription="Normal" />
+                    <cds:CdsText Text="Normal" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Info" Size="Sm" IconDescription="Info" />
+                    <cds:CdsText Text="Info: maintenance on Sunday" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="InProgress" Size="Sm" IconDescription="In progress" />
+                    <cds:CdsText Text="In progress: deploying" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Running" Size="Sm" IconDescription="Running" />
+                    <cds:CdsText Text="Running" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="8">
+                    <cds:CdsStatusIcon Kind="Pending" Size="Sm" IconDescription="Pending approval" />
+                    <cds:CdsText Text="Pending approval" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="sm 16 (default), md 20, lg 24, xl 32.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsStatusIcon Kind="Critical" Size="Sm" IconDescription="Critical" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Critical" Size="Md" IconDescription="Critical" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Critical" Size="Lg" IconDescription="Critical" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Critical" Size="Xl" IconDescription="Critical" VerticalOptions="End" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsStatusIcon Kind="MajorWarning" Size="Sm" IconDescription="MajorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MajorWarning" Size="Md" IconDescription="MajorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MajorWarning" Size="Lg" IconDescription="MajorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MajorWarning" Size="Xl" IconDescription="MajorWarning" VerticalOptions="End" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsStatusIcon Kind="MinorWarning" Size="Sm" IconDescription="MinorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MinorWarning" Size="Md" IconDescription="MinorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MinorWarning" Size="Lg" IconDescription="MinorWarning" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="MinorWarning" Size="Xl" IconDescription="MinorWarning" VerticalOptions="End" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsStatusIcon Kind="Normal" Size="Sm" IconDescription="Normal" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Normal" Size="Md" IconDescription="Normal" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Normal" Size="Lg" IconDescription="Normal" VerticalOptions="End" />
+                    <cds:CdsStatusIcon Kind="Normal" Size="Xl" IconDescription="Normal" VerticalOptions="End" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Step through the statuses of a cluster; the label says the current one.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsStatusIcon x:Name="Live" Kind="Normal" Size="Lg" IconDescription="Normal" VerticalOptions="Center" />
+                    <cds:CdsText x:Name="Status" Text="prod-eu-de-1: Normal" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Next status" Kind="Tertiary" Size="Md" Clicked="OnNextClicked" />
+                    <cds:CdsButton Text="Reset" Kind="Ghost" Size="Md" Clicked="OnResetClicked" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Colors follow the theme zone: the status tokens are lighter in g90 and g100, and the warning marks stay dark.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="12">
+                            <cds:CdsStatusIcon Kind="Fatal" Size="Md" IconDescription="Fatal" />
+                            <cds:CdsStatusIcon Kind="Critical" Size="Md" IconDescription="Critical" />
+                            <cds:CdsStatusIcon Kind="MajorWarning" Size="Md" IconDescription="MajorWarning" />
+                            <cds:CdsStatusIcon Kind="MinorWarning" Size="Md" IconDescription="MinorWarning" />
+                            <cds:CdsStatusIcon Kind="Undefined" Size="Md" IconDescription="Undefined" />
+                            <cds:CdsStatusIcon Kind="Unknown" Size="Md" IconDescription="Unknown" />
+                            <cds:CdsStatusIcon Kind="Normal" Size="Md" IconDescription="Normal" />
+                            <cds:CdsStatusIcon Kind="Info" Size="Md" IconDescription="Info" />
+                            <cds:CdsStatusIcon Kind="InProgress" Size="Md" IconDescription="InProgress" />
+                            <cds:CdsStatusIcon Kind="Running" Size="Md" IconDescription="Running" />
+                            <cds:CdsStatusIcon Kind="Pending" Size="Md" IconDescription="Pending" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers" Description="The icons sit on layer-01, layer-02 and layer-03 unchanged.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="12">
+                            <cds:CdsStatusIcon Kind="Fatal" Size="Md" IconDescription="Fatal" />
+                            <cds:CdsStatusIcon Kind="Critical" Size="Md" IconDescription="Critical" />
+                            <cds:CdsStatusIcon Kind="MajorWarning" Size="Md" IconDescription="MajorWarning" />
+                            <cds:CdsStatusIcon Kind="MinorWarning" Size="Md" IconDescription="MinorWarning" />
+                            <cds:CdsStatusIcon Kind="Normal" Size="Md" IconDescription="Normal" />
+                            <cds:CdsStatusIcon Kind="Info" Size="Md" IconDescription="Info" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

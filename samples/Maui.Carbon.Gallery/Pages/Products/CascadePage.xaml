@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.CascadePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Without grid" Description="Each item fades in and moves up from 48 below over moderate-02, 60 ms after the one before it. Use it for the main content of a page, never for secondary areas.">
+            <cds:CdsCascade x:Name="StackCascade" Spacing="16">
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Create a topic" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Topics hold the events your producers send." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Connect a producer" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Use the bootstrap server and an API key." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Add a consumer group" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Groups share the partitions of a topic." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Set retention" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Keep events for up to 30 days." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Monitor throughput" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Watch bytes in and out per partition." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Invite your team" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Give writers and readers their own roles." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+            </cds:CdsCascade>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="With grid" Description="IsGrid places the items in a CdsGrid by their spans (4 of 16 columns at lg, 4 of 8 at md, the full row at sm); they still enter in order.">
+            <cds:CdsCascade x:Name="GridCascade" IsGrid="True">
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Throughput" TypeStyle="Heading02" />
+                            <cds:CdsText Text="1.2 MB/s in, 3.4 MB/s out" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Partitions" TypeStyle="Heading02" />
+                            <cds:CdsText Text="48 across 12 topics" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Consumer lag" TypeStyle="Heading02" />
+                            <cds:CdsText Text="312 events behind" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Retention" TypeStyle="Heading02" />
+                            <cds:CdsText Text="7 days" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Producers" TypeStyle="Heading02" />
+                            <cds:CdsText Text="6 connected" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Consumers" TypeStyle="Heading02" />
+                            <cds:CdsText Text="14 in 5 groups" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Errors" TypeStyle="Heading02" />
+                            <cds:CdsText Text="0 in the last hour" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile cds:CdsGrid.Span="4" cds:CdsGrid.SpanMd="4" cds:CdsGrid.SpanLg="4" Margin="0,0,0,32">
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Storage" TypeStyle="Heading02" />
+                            <cds:CdsText Text="82 GB of 250 GB" TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+            </cds:CdsCascade>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Replay runs the entrance again (after new data arrived, say). Under reduced motion the items simply show.">
+            <VerticalStackLayout Spacing="16">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Replay" Kind="Tertiary" Icon="Restart" Clicked="OnReplayClicked" />
+                    <cds:CdsButton Text="Add item" Kind="Ghost" Icon="Add" Clicked="OnAddClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="6 items" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The cascade itself draws nothing: the tiles take the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsCascade Spacing="8">
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Create a topic" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Topics hold your events." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                    <cds:CdsTile>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Connect a producer" TypeStyle="Heading02" />
+                            <cds:CdsText Text="Use an API key." TypeStyle="Body01" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsTile>
+                        </cds:CdsCascade>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

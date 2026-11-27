@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.NotificationsPanelPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+            <g:GalleryExample Title="Notifications panel" Description="Opened from a header action with a badge. Grouped into Today, Yesterday and Previous; each notification can be opened, expanded and dismissed. A tap outside or Escape closes it.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsIconButton x:Name="Bell" Icon="Notification" Label="Notifications" Kind="Ghost" Clicked="OnBellClicked" />
+                    <cds:CdsButton Text="Add a notification" Kind="Tertiary" Size="Md" Clicked="OnAddClicked" />
+                    <cds:CdsButton Text="Empty panel" Kind="Ghost" Size="Md" Clicked="OnEmptyClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+        </VerticalStackLayout>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsNotificationsPanel x:Name="Panel" IsOpen="True" HasDoNotDisturb="True" HasFooterActions="True"
+                                   TriggerElement="{x:Reference Bell}"
+                                   NotificationClicked="OnNotificationClicked" NotificationDismissed="OnDismissed"
+                                   DismissAll="OnDismissAll" ViewAll="OnViewAll" SettingsClicked="OnSettings"
+                                   DoNotDisturbChanged="OnDoNotDisturb" />
+        <cds:CdsNotificationsPanel x:Name="EmptyPanel" TriggerElement="{x:Reference Bell}" />
+    </Grid>
+</g:GalleryPage>

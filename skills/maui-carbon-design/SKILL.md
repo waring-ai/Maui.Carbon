@@ -1,6 +1,6 @@
 ---
 name: maui-carbon-design
-description: Design .NET MAUI screens that follow the Carbon Design System's principles with Maui.Carbon (Waring.Maui.Carbon). Use when planning or laying out a page, dialog, form, dashboard or flow; deciding visual hierarchy, layering, color, type, spacing, grid or motion; choosing between similar components for a job; writing UI copy, labels, errors and notifications; designing empty, loading, error, read-only and disabled states; making a screen accessible; or reviewing an existing screen for Carbon conformance. For a control's API, properties and bindings, use the maui-carbon skill.
+description: Design .NET MAUI screens that follow the Carbon Design System's principles with Maui.Carbon (Waring.Maui.Carbon). Use when planning or laying out a page, dialog, form, dashboard or flow; deciding visual hierarchy, layering, color, type, spacing, grid or motion; choosing between similar components for a job; applying Carbon's patterns (forms, login, search, filtering, dialogs, disclosures, notifications, status indicators, common actions such as delete, global header and navigation); writing UI copy, labels, errors and notifications; designing empty, loading, error, read-only and disabled states; making a screen accessible; or reviewing an existing screen for Carbon conformance. For a control's API, properties and bindings, use the maui-carbon skill.
 ---
 
 # Designing with Carbon in Maui.Carbon
@@ -9,7 +9,7 @@ Carbon is a productive, enterprise design language: the interface is a tool, so 
 
 ## Workflow for a new screen
 
-1. **Name the job.** What does the person come here to do, and what is the one main action? Find the matching pattern in [patterns](references/patterns.md) and copy its structure; it names a gallery page in the library's repository to read.
+1. **Name the goal.** What does the person come here to do, and what is the one main action? Look the goal up in [patterns](references/patterns.md), read the matching section (forms, data, or feedback and overlays), including its "when not to use" lines, and copy the structure of the gallery page it names. Most screens combine several patterns: a list page uses resource lists, search, filtering, common actions, empty states, loading and a delete dialog.
 2. **Frame it.** `CdsUIShell` (header, side nav) for global navigation; each page starts with its title (`CdsPageHeader`, or a level-1 heading) and a breadcrumb when it is deep in a hierarchy. Lay out on the 2x grid (`CdsGrid`/`CdsColumn`) or a bounded single column; stack content with `CdsStack` and spacing-scale gaps.
 3. **Set the hierarchy.** Heading levels follow the outline, not the size you want (`CdsHeading` inside `CdsSection` keeps them right). Secondary detail goes behind disclosure (`CdsAccordion`, `CdsExpandableTile`, "Show more"), extra actions into a `CdsOverflowMenu`.
 4. **Pick components by need** with [choosing components](references/choosing-components.md). Never restyle a control to look like another one.
@@ -30,6 +30,7 @@ For charts and dashboards, also read [data visualization](references/data-visual
 - **Validate on blur or submit,** never on every keystroke; after a failed submit put a summary `CdsInlineNotification` above the form and keep the field errors.
 - **Read-only is not disabled.** Read-only values stay focusable, full contrast and copyable; disabled controls say why nearby. Hide what a person can never do.
 - **Friction matches impact.** Low impact: act and offer Undo in a toast. Moderate: a danger `CdsModal` (`IsDanger`) naming the object. High: make the person type the resource name.
+- **Interrupt only when the person asked or must act.** Dialogs and disclosures open only from the person's action, one at a time, never nested; system events are toasts or inline messages; only low-severity success toasts time out.
 - **Motion is productive and short.** 70 to 240 ms for most changes, entrance easing in, exit easing out, nothing that autoplays or loops; the library honors reduced motion, so custom animation goes through `CdsMotion.AnimateAsync`.
 
 ## Screen skeleton
@@ -83,13 +84,20 @@ Look at the screen in White and G100 at a narrow and a wide width, and with the 
 - [ ] Status always pairs color with an icon and a word; placeholder and disabled tones never carry essential information.
 - [ ] Every field has a label, every icon-only control a name, every group of controls a group name (`CdsSemantics.GroupName`, never `SemanticProperties.Description` on a container with controls inside), and changes are announced.
 - [ ] Focus order follows reading order; overlays return focus to their trigger; nothing traps the keyboard.
-- [ ] Long text truncates only where the full text stays reachable; labels on buttons wrap rather than truncate.
+- [ ] Long text truncates only where the full text stays reachable; titles, labels, buttons, errors and notifications wrap rather than truncate.
+- [ ] Each overlay is the right pattern: modals for required input or confirmation only (no nested modals, no tabs or accordions inside), non-modal dialogs and popovers for optional tools, toasts for system events; verbs on buttons, never "OK" except an acknowledgment.
+- [ ] Status indicators use at least two of color, shape and symbol plus a label, sit before their label and align in a column; badges cap at "99+".
+- [ ] Search and filters announce result counts, show applied filters and offer one way to clear them; hidden filters show their count on the trigger.
+- [ ] Disabled means "not yet, because…", read-only means "you can read but not change", and what a person may never do is hidden.
 
 ## References
 
 - [Foundations](references/foundations.md): themes, layers and color tokens, type, spacing and size, grid and breakpoints, shape, focus and states, motion, icons, AI presence, with their Maui.Carbon names.
 - [Choosing components](references/choosing-components.md): which Cds control answers which need.
-- [Patterns](references/patterns.md): composition rules for recurring screens, with gallery pages.
+- [Patterns](references/patterns.md): how to use Carbon's patterns, a goal-to-pattern index, page anatomy and the global header, and common actions (add, edit, copy, remove, delete, cancel, reset…).
+  - [Form patterns](references/patterns-forms.md): forms (container, layout, labels, help, validation, buttons), fluid styles, login, settings, text toolbar.
+  - [Data patterns](references/patterns-data.md): resource lists, details pages, search, filtering, overflow content, dashboards.
+  - [Feedback and overlay patterns](references/patterns-feedback.md): dialogs, disclosures, notifications, status indicators, loading, empty states, disabled/read-only/hidden.
 - [Content](references/content.md): voice, capitalization, labels, buttons, errors, notifications.
 - [Accessibility](references/accessibility.md): contrast, keyboard, names, announcements, and the MAUI-specific traps.
 - [Data visualization](references/data-visualization.md): choosing a chart, color, anatomy, axes, legends, dashboards.

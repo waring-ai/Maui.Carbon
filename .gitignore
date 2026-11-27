@@ -69,5 +69,6 @@ Directory.Build.local.props
 .claude/worktrees/
 .idea/.idea.Maui.Carbon/.idea/
 design/carbon/
+design/ibm-products/
 tools/carbon-charts/
 docs/design-conformance-review/

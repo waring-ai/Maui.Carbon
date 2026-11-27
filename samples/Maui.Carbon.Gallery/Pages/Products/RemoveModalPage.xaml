@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.RemoveModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Medium impact: remove" Description="The resource survives elsewhere, so the danger button alone confirms. Focus starts on Cancel so Enter cannot remove by accident. Drawn inline here; a real modal covers the window.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsRemoveModal IsInline="True" Label="Remove bx1001" Title="Confirm removal"
+                                        BodyText="Removing bx1001 will permanently remove the configuration. This action cannot be undone."
+                                        ResourceName="bx1001" PrimaryButtonText="Remove" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="High impact: delete" Description="RequiresTextConfirmation adds an input; the danger button stays disabled until it holds the resource name exactly.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsRemoveModal IsInline="True" Label="Delete bx1001" Title="Confirm delete"
+                                        BodyText="Deleting bx1001 will permanently delete the configuration. This action cannot be undone."
+                                        ResourceName="bx1001" RequiresTextConfirmation="True"
+                                        InputLabel="Type bx1001 to confirm" InputPlaceholder="Name of resource"
+                                        InputInvalidText="A valid value is required"
+                                        PrimaryButtonText="Delete" SecondaryButtonText="Cancel" PrimaryDangerDescription="danger" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Name typed, ready to delete" Description="Once the input matches, the danger button enables.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsRemoveModal IsInline="True" Label="Delete bx1001" Title="Confirm delete"
+                                        BodyText="Deleting bx1001 will permanently delete the configuration. This action cannot be undone."
+                                        ResourceName="bx1001" RequiresTextConfirmation="True" ConfirmationText="bx1001"
+                                        InputLabel="Type bx1001 to confirm" PrimaryButtonText="Delete" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Body with a link" Description="Body replaces BodyText with your own content, such as a paragraph with an inline link.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsRemoveModal IsInline="True" Label="Delete bx1001" Title="Confirm delete" ResourceName="bx1001"
+                                        PrimaryButtonText="Delete" SecondaryButtonText="Cancel">
+                        <cds:CdsParagraph>
+                            <FormattedString>
+                                <Span Text="Before removing bx1001, you can find out more information on the " />
+                                <cds:CdsLinkSpan Text="Carbon Design System" Href="https://carbondesignsystem.com" />
+                                <Span Text=" website." />
+                            </FormattedString>
+                        </cds:CdsParagraph>
+                    </cds:CdsRemoveModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Opens the real modals over the page. Remove closes on submit; Delete needs the name first.">
+                <VerticalStackLayout Spacing="16">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton x:Name="RemoveButton" Text="Remove configuration" Kind="Tertiary" Clicked="OnRemoveClicked" />
+                        <cds:CdsButton x:Name="DeleteButton" Text="Delete configuration" Kind="Danger" Clicked="OnDeleteClicked" />
+                    </HorizontalStackLayout>
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The delete confirmation in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsRemoveModal IsInline="True" Label="Delete bx1001" Title="Confirm delete"
+                                                BodyText="This action cannot be undone." ResourceName="bx1001" RequiresTextConfirmation="True"
+                                                InputLabel="Type bx1001 to confirm" PrimaryButtonText="Delete" SecondaryButtonText="Cancel" />
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <!-- Declared modals: they draw nothing here and show over the page while IsOpen is true. -->
+        <cds:CdsRemoveModal x:Name="RemoveModal" Label="Remove bx1001" Title="Confirm removal"
+                            BodyText="Removing bx1001 will permanently remove the configuration. This action cannot be undone."
+                            ResourceName="bx1001" PrimaryButtonText="Remove" SecondaryButtonText="Cancel"
+                            LauncherElement="{x:Reference RemoveButton}" RequestSubmit="OnRemoveSubmit" RequestClose="OnRequestClose" />
+        <cds:CdsRemoveModal x:Name="DeleteModal" Label="Delete bx1001" Title="Confirm delete"
+                            BodyText="Deleting bx1001 will permanently delete the configuration. This action cannot be undone."
+                            ResourceName="bx1001" RequiresTextConfirmation="True" InputLabel="Type bx1001 to confirm"
+                            InputPlaceholder="Name of resource" InputInvalidText="Type bx1001 exactly"
+                            PrimaryButtonText="Delete" SecondaryButtonText="Cancel" PrimaryDangerDescription="danger"
+                            LauncherElement="{x:Reference DeleteButton}" RequestSubmit="OnDeleteSubmit" RequestClose="OnRequestClose" />
+    </Grid>
+</g:GalleryPage>

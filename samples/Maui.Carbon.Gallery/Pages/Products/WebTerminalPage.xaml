@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.WebTerminalPage">
+    <Grid>
+        <ContentView x:Name="PageArea">
+            <VerticalStackLayout Spacing="48">
+                <g:GalleryExample Title="Web terminal" Description="A dark terminal panel at the end edge with documentation links, actions and a close button. It narrows the page while open.">
+                    <cds:CdsButton Text="Toggle terminal" Kind="Tertiary" Clicked="OnToggle" />
+                </g:GalleryExample>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+            </VerticalStackLayout>
+        </ContentView>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsWebTerminal x:Name="Terminal" IsOpen="True">
+            <cds:CdsWebTerminal.Actions>
+                <cds:CdsIconButton Icon="Copy" Label="Copy output" Clicked="OnCopy" />
+                <cds:CdsIconButton Icon="Download" Label="Download log" Clicked="OnDownload" />
+            </cds:CdsWebTerminal.Actions>
+            <cds:CdsWebTerminal.DocumentationLinks>
+                <cds:CdsMenuItem Text="Command reference" />
+                <cds:CdsMenuItem Text="Getting started" />
+            </cds:CdsWebTerminal.DocumentationLinks>
+            <ScrollView>
+                <cds:CdsText x:Name="Output" FontFamily="IBMPlexMono" TypeStyle="Code02" Margin="16" />
+            </ScrollView>
+        </cds:CdsWebTerminal>
+    </Grid>
+</g:GalleryPage>

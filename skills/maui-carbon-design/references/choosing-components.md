@@ -25,6 +25,7 @@ Button emphasis, from most to least: Primary, Secondary, Tertiary, Ghost. A view
 |---|---|
 | One of 2 to 5 options, all visible | `CdsRadioButtonGroup`; `CdsRadioTile`s in a `CdsTileGroup` when options need a description |
 | One of many options | `CdsDropdown`; `CdsSelect` when a native picker is better (phones, very long lists); `CdsComboBox` when people type to find a value |
+| Add one or many resources from a long or nested list (users to a group, a cluster to a project) | `CdsSingleAddSelect` / `CdsMultiAddSelect` (search, filters, a selection sidebar) |
 | Several of many options | `CdsMultiSelect`; `CdsCheckboxGroup` (`CdsCheckbox`es) when there are few and all should show; `CdsSelectableTile`s for rich choices |
 | A setting that applies immediately | `CdsToggle`. Never inside a form with a Save button: use a `CdsCheckbox` there |
 | Agree to, or turn on, one independent option | `CdsCheckbox` |
@@ -51,7 +52,15 @@ Button emphasis, from most to least: Primary, Secondary, Tertiary, Ghost. A view
 | A confirmation or system event that needs no response | `CdsToastNotification` / `CdsToast.Show` (top right; time out only low-severity success) |
 | A message with one follow-up action | `CdsActionableNotification` |
 | Information to read before acting, that stays | `CdsCallout` |
-| A decision that blocks progress, or a destructive confirmation | `CdsModal` (`IsDanger` for destructive) or `CdsDialog`; `CdsComposedModal` for custom structure |
+| A decision that blocks progress, or a destructive confirmation | `CdsModal` (`IsDanger` for destructive) or `CdsDialog IsModal="True"`; `CdsComposedModal` for custom structure |
+| Delete or remove a resource, with the friction its impact needs | `CdsRemoveModal` (it can make the person type the resource name) |
+| A common product task in a dialog | `CdsCreateModal` (create a simple resource), `CdsExportModal`, `CdsImportModal`, `CdsAPIKeyModal`, `CdsAboutModal` |
+| An optional tool or help used beside the page (find and replace) | `CdsDialog` (non-modal, the default) |
+| Create, edit or view details of something while the page stays in view | `CdsSidePanel`: slides over the page by default, `IncludeOverlay` to block it, `SlideIn` to push it aside |
+| A substantial task that is too big for a modal (a long form, a multi-step flow, reviewing many records) | `CdsTearsheet` (wide, with optional tabs and an influencer column); `CdsTearsheetNarrow` for a focused task |
+| Create something in steps | `CdsCreateTearsheet` over the page, `CdsCreateFullPage` for a large setup on its own page; one step: `CdsCreateTearsheetNarrow`, `CdsCreateSidePanel` or a modal |
+| A product- or account-wide message (maintenance, billing) | A high-contrast `CdsInlineNotification` directly under the header (Carbon has no banner component) |
+| A history of system notifications | `CdsNotificationsPanel` opened from a `CdsHeaderGlobalAction` with a `CdsBadgeIndicator` (in package versions without it, a `CdsHeaderPanel`) |
 | Status of a resource in a table or list | `CdsIconIndicator` or `CdsShapeIndicator` with a label; `CdsBadgeIndicator` (`CdsIconButton BadgeCount`) for counts |
 | Categorize or label items | `CdsTag` (read-only); `CdsDismissibleTag` for applied filters; `CdsOperationalTag` for a tag that opens detail |
 

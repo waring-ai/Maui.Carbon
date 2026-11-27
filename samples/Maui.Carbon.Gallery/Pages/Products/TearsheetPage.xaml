@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.TearsheetPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Wide" Description="Nearly the width of the page, for a substantial task: header with label, title, description and tabs; an influencer column; actions 80 high.">
+                <cds:CdsButton x:Name="WideButton" Text="Create pipeline" Kind="Tertiary" Clicked="OnWideClicked" />
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Narrow" Description="As wide as a small modal, for a focused task with more content than a modal holds. The content sits on the next layer.">
+                <cds:CdsButton Text="Request quota" Kind="Tertiary" Clicked="OnNarrowClicked" />
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Passive" Description="Without actions a tearsheet shows its close button and closes on a tap outside.">
+                <cds:CdsButton Text="Release notes" Kind="Ghost" Clicked="OnPassiveClicked" />
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Stacking" Description="A tearsheet opened from another stacks on it; the one underneath shrinks so its top shows. At most three.">
+                <cds:CdsButton Text="Open a stack" Kind="Ghost" Clicked="OnStackClicked" />
+            </g:GalleryExample>
+
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+        </VerticalStackLayout>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsTearsheet x:Name="WideSheet" IsOpen="True" Label="Delivery" Title="Create pipeline"
+                          Description="A pipeline builds, tests and deploys your app on every commit to the branch you choose."
+                          LauncherElement="{x:Reference WideButton}" RequestClose="OnWideClosing">
+            <cds:CdsTearsheet.HeaderNavigation>
+                <cds:CdsTabs>
+                    <cds:CdsTab Text="Source" />
+                    <cds:CdsTab Text="Stages" />
+                    <cds:CdsTab Text="Triggers" />
+                </cds:CdsTabs>
+            </cds:CdsTearsheet.HeaderNavigation>
+            <cds:CdsTearsheet.Influencer>
+                <cds:CdsProgressIndicator IsVertical="True" CurrentIndex="0" Margin="16,24">
+                    <cds:CdsProgressStep Label="Source" />
+                    <cds:CdsProgressStep Label="Stages" />
+                    <cds:CdsProgressStep Label="Triggers" />
+                    <cds:CdsProgressStep Label="Review" />
+                </cds:CdsProgressIndicator>
+            </cds:CdsTearsheet.Influencer>
+            <cds:CdsTearsheet.Actions>
+                <cds:CdsButton Text="Cancel" Kind="Ghost" Clicked="OnWideCancel" />
+                <cds:CdsButton Text="Back" Kind="Secondary" IsEnabled="False" />
+                <cds:CdsButton Text="Next" Kind="Primary" Clicked="OnWideNext" />
+            </cds:CdsTearsheet.Actions>
+            <VerticalStackLayout Spacing="24" Padding="32,24" MaximumWidthRequest="640" HorizontalOptions="Start">
+                <cds:CdsText TypeStyle="Heading03" Text="Source" />
+                <cds:CdsTextInput Label="Pipeline name" Text="checkout-api" />
+                <cds:CdsDropdown x:Name="RepoDropdown" Label="Repository" />
+                <cds:CdsTextInput Label="Branch" Text="main" HelperText="Commits to this branch start the pipeline." />
+            </VerticalStackLayout>
+        </cds:CdsTearsheet>
+
+        <cds:CdsTearsheetNarrow x:Name="NarrowSheet" Label="Kubernetes" Title="Request quota"
+                                Description="Ask for more clusters in this account. Requests are usually approved within a day.">
+            <cds:CdsTearsheetNarrow.Actions>
+                <cds:CdsButton Text="Cancel" Kind="Secondary" Clicked="OnNarrowCancel" />
+                <cds:CdsButton Text="Send request" Kind="Primary" Clicked="OnNarrowSubmit" />
+            </cds:CdsTearsheetNarrow.Actions>
+            <VerticalStackLayout Spacing="24" Padding="16,24">
+                <cds:CdsNumberInput Label="Clusters" Value="12" Min="1" Max="50" />
+                <cds:CdsTextArea Label="Reason" Placeholder="What the extra clusters are for" />
+            </VerticalStackLayout>
+        </cds:CdsTearsheetNarrow>
+
+        <cds:CdsTearsheetNarrow x:Name="PassiveSheet" Title="Release notes" Label="Version 2.4">
+            <VerticalStackLayout Spacing="16" Padding="16,24">
+                <cds:CdsText TypeStyle="Body01" Text="Clusters can now be resized without draining their nodes." />
+                <cds:CdsText TypeStyle="Body01" Text="Pipelines show the duration of each stage." />
+            </VerticalStackLayout>
+        </cds:CdsTearsheetNarrow>
+
+        <cds:CdsTearsheet x:Name="StackSheet1" Title="Edit policy" Label="Stack, level 1">
+            <cds:CdsTearsheet.Actions>
+                <cds:CdsButton Text="Open level 2" Kind="Primary" Clicked="OnStack2" />
+                <cds:CdsButton Text="Close" Kind="Secondary" Clicked="OnStackClose" />
+            </cds:CdsTearsheet.Actions>
+            <cds:CdsText TypeStyle="Body01" Text="The first tearsheet of the stack." Margin="32,24" />
+        </cds:CdsTearsheet>
+        <cds:CdsTearsheet x:Name="StackSheet2" Title="Add rule" Label="Stack, level 2">
+            <cds:CdsTearsheet.Actions>
+                <cds:CdsButton Text="Open level 3" Kind="Primary" Clicked="OnStack3" />
+                <cds:CdsButton Text="Close" Kind="Secondary" Clicked="OnStackClose" />
+            </cds:CdsTearsheet.Actions>
+            <cds:CdsText TypeStyle="Body01" Text="The second tearsheet: the first one shrinks behind it." Margin="32,24" />
+        </cds:CdsTearsheet>
+        <cds:CdsTearsheet x:Name="StackSheet3" Title="Choose resource" Label="Stack, level 3">
+            <cds:CdsTearsheet.Actions>
+                <cds:CdsButton Text="Close" Kind="Primary" Clicked="OnStackClose" />
+            </cds:CdsTearsheet.Actions>
+            <cds:CdsText TypeStyle="Body01" Text="The third and last level." Margin="32,24" />
+        </cds:CdsTearsheet>
+    </Grid>
+</g:GalleryPage>

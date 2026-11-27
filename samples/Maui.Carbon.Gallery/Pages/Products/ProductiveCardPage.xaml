@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.ProductiveCardPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A heading-compact-02 title, the body and the icon actions in the header as 32px ghost icon buttons.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsProductiveCard Title="Cluster health" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="3 of 3 worker nodes ready" />
+                        <cds:CdsText Text="Last check 2 minutes ago" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+                <cds:CdsProductiveCard Title="Cluster health" Description="prod-eu-de-1" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="3 of 3 worker nodes ready" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+                <cds:CdsProductiveCard Title="Cluster health" Label="Kubernetes" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="3 of 3 worker nodes ready" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Overflow menu" Description="More than two actions go in an overflow menu, which replaces the icons in the header.">
+            <cds:CdsProductiveCard Title="Storage bucket" Description="logs-archive-eu" WidthRequest="320" HorizontalOptions="Start" OverflowDescription="Bucket actions">
+                <cds:CdsProductiveCard.OverflowActions>
+                    <cds:CdsMenuItem Text="Edit" />
+                    <cds:CdsMenuItem Text="Duplicate" />
+                    <cds:CdsMenuItem Text="Delete" Kind="Danger" />
+                </cds:CdsProductiveCard.OverflowActions>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="1.2 TB used of 2 TB" />
+                        <cds:CdsText Text="Lifecycle: archive after 30 days" />
+                    </VerticalStackLayout>
+            </cds:CdsProductiveCard>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Bottom bar" Description="Ghost buttons sit at the start of the bottom bar under a border-subtle-01 rule; with ActionsPlacement=&quot;Bottom&quot; the icons move to its end (40px).">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsProductiveCard Title="Monthly spend" PrimaryButtonText="Read more" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="$4,280 of $5,000 budget" />
+                        <cds:CdsText Text="Forecast: $4,950" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+                <cds:CdsProductiveCard Label="Billing" PrimaryButtonText="Read more" ActionsPlacement="Bottom" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="$4,280 of $5,000 budget" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+                <cds:CdsProductiveCard Title="Monthly spend" PrimaryButtonText="View invoices" PrimaryButtonIcon="ArrowRight" PrimaryButtonHref="https://www.ibm.com/cloud" WidthRequest="320" Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="$4,280 of $5,000 budget" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Header ghost buttons" Description="With PrimaryButtonPlacement=&quot;Top&quot; the primary button is a small ghost button in the header, after the icons and a separator. Here it is disabled.">
+            <cds:CdsProductiveCard Title="Access keys" WidthRequest="360" HorizontalOptions="Start"
+                                   PrimaryButtonText="Rotate" PrimaryButtonIcon="Renew" PrimaryButtonPlacement="Top" IsPrimaryButtonEnabled="False">
+                <cds:CdsProductiveCard.ActionIcons>
+                    <cds:CdsCardAction Icon="Copy" IconDescription="Copy key" />
+                </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="2 active keys" />
+                        <cds:CdsText Text="Oldest: 87 days" />
+                    </VerticalStackLayout>
+            </cds:CdsProductiveCard>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Title sizes and AI label" Description="TitleSize=&quot;Large&quot; uses heading-03. An AI label decorator sits 16 from the top end corner and gives the card the AI gradient, border and shadow.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsProductiveCard Title="Anomaly summary" TitleSize="Large" WidthRequest="320" Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Two unusual spikes in API latency this week" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+                <cds:CdsProductiveCard Title="Anomaly summary" Label="Insights" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.Decorator>
+                        <cds:CdsAILabel Size="Xs" />
+                    </cds:CdsProductiveCard.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Two unusual spikes in API latency this week" />
+                    </VerticalStackLayout>
+                </cds:CdsProductiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Clickable zones" Description="Handling Clicked makes the card clickable. ClickZone picks the target: the whole card (One, border-tile-01 border), the header and body (Two) or the body (Three); buttons stay separate targets.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                    <cds:CdsProductiveCard Title="prod-eu-de-1" Label="Zone one" Clicked="OnCardClicked" WidthRequest="280" Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Open the cluster overview" />
+                    </VerticalStackLayout>
+                    </cds:CdsProductiveCard>
+                    <cds:CdsProductiveCard Title="prod-us-south-1" Label="Zone two" ClickZone="Two" PrimaryButtonText="Read more" Clicked="OnCardClicked" PrimaryButtonClicked="OnReadMore" WidthRequest="280" Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Open the cluster overview" />
+                    </VerticalStackLayout>
+                    </cds:CdsProductiveCard>
+                    <cds:CdsProductiveCard Title="prod-jp-tok-1" Label="Zone three" ClickZone="Three" Clicked="OnCardClicked" WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Open the cluster overview" />
+                    </VerticalStackLayout>
+                    </cds:CdsProductiveCard>
+                </g:WrapLayout>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Click a card" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Disabled" Description="IsEnabled=&quot;False&quot; disables the card's buttons and click target.">
+            <cds:CdsProductiveCard Title="Cluster health" PrimaryButtonText="Read more" IsEnabled="False" WidthRequest="320" HorizontalOptions="Start">
+                    <cds:CdsProductiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                        <cds:CdsCardAction Icon="TrashCan" IconDescription="Delete" />
+                    </cds:CdsProductiveCard.ActionIcons>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="3 of 3 worker nodes ready" />
+                    </VerticalStackLayout>
+            </cds:CdsProductiveCard>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same card in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsProductiveCard Title="Cluster health" Label="Kubernetes" PrimaryButtonText="Read more">
+                            <cds:CdsProductiveCard.ActionIcons>
+                                <cds:CdsCardAction Icon="Edit" IconDescription="Edit" />
+                            </cds:CdsProductiveCard.ActionIcons>
+                            <cds:CdsText Text="3 of 3 worker nodes ready" />
+                        </cds:CdsProductiveCard>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

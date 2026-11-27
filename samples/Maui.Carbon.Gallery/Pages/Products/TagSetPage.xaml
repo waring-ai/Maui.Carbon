@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.TagSetPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Overflow" Description="As many tags as fit the width are shown; the rest collapse into a +N tag. Its popover lists them on a high-contrast surface (shown open here).">
+            <cds:CdsTagSet WidthRequest="360" HorizontalOptions="Start" IsOverflowOpen="True">
+                <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                <cds:CdsTagSetItem Text="Production" Type="Green" />
+                <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                <cds:CdsTagSetItem Text="Cost center 4021" Type="WarmGray" />
+                <cds:CdsTagSetItem Text="Beta" Type="Magenta" />
+            </cds:CdsTagSet>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Widths" Description="The same eight tags in 520, 280 and 120 wide rows. With no room for any tag only the +N tag shows.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTagSet WidthRequest="520" HorizontalOptions="Start">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                    <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                    <cds:CdsTagSetItem Text="Cost center 4021" Type="WarmGray" />
+                    <cds:CdsTagSetItem Text="Beta" Type="Magenta" />
+                </cds:CdsTagSet>
+                <cds:CdsTagSet WidthRequest="280" HorizontalOptions="Start">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                    <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                    <cds:CdsTagSetItem Text="Cost center 4021" Type="WarmGray" />
+                    <cds:CdsTagSetItem Text="Beta" Type="Magenta" />
+                </cds:CdsTagSet>
+                <cds:CdsTagSet WidthRequest="120" HorizontalOptions="Start">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                    <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                    <cds:CdsTagSetItem Text="Cost center 4021" Type="WarmGray" />
+                    <cds:CdsTagSetItem Text="Beta" Type="Magenta" />
+                </cds:CdsTagSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Many tags" Description="With more than 10 hidden tags the popover lists 10 and offers View all tags, a searchable modal of every tag (try searching for pci).">
+            <cds:CdsTagSet WidthRequest="360" HorizontalOptions="Start" MaxVisible="3" OverflowType="Tag">
+                <cds:CdsTagSetItem Text="api-gateway" Type="Blue" />
+                <cds:CdsTagSetItem Text="auth" Type="Cyan" />
+                <cds:CdsTagSetItem Text="billing" Type="Teal" />
+                <cds:CdsTagSetItem Text="catalog" Type="Purple" />
+                <cds:CdsTagSetItem Text="checkout" Type="Gray" />
+                <cds:CdsTagSetItem Text="dns" Type="Blue" />
+                <cds:CdsTagSetItem Text="edge" Type="Cyan" />
+                <cds:CdsTagSetItem Text="events" Type="Teal" />
+                <cds:CdsTagSetItem Text="gateway" Type="Purple" />
+                <cds:CdsTagSetItem Text="inventory" Type="Gray" />
+                <cds:CdsTagSetItem Text="logging" Type="Blue" />
+                <cds:CdsTagSetItem Text="metrics" Type="Cyan" />
+                <cds:CdsTagSetItem Text="notifications" Type="Teal" />
+                <cds:CdsTagSetItem Text="orders" Type="Purple" />
+                <cds:CdsTagSetItem Text="payments" Type="Gray" SearchText="pci" />
+                <cds:CdsTagSetItem Text="search" Type="Blue" />
+                <cds:CdsTagSetItem Text="shipping" Type="Cyan" />
+                <cds:CdsTagSetItem Text="storage" Type="Teal" />
+                <cds:CdsTagSetItem Text="tracing" Type="Purple" />
+                <cds:CdsTagSetItem Text="users" Type="Gray" />
+                <cds:CdsTagSetItem Text="web" Type="Blue" />
+            </cds:CdsTagSet>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Max visible, sizes and alignment" Description="MaxVisible caps the shown tags; Size applies to every tag and the overflow; Align places the row.">
+            <VerticalStackLayout Spacing="16" WidthRequest="520" HorizontalOptions="Start">
+                <cds:CdsTagSet MaxVisible="2" Size="Sm">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                </cds:CdsTagSet>
+                <cds:CdsTagSet MaxVisible="2" Align="Center">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                </cds:CdsTagSet>
+                <cds:CdsTagSet MaxVisible="2" Size="Lg" Align="End">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                </cds:CdsTagSet>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Multiline" Description="IsMultiline wraps the tags instead of collapsing them, 8 apart.">
+            <cds:CdsTagSet WidthRequest="360" HorizontalOptions="Start" IsMultiline="True">
+                <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                <cds:CdsTagSetItem Text="Production" Type="Green" />
+                <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                <cds:CdsTagSetItem Text="Cost center 4021" Type="WarmGray" />
+                <cds:CdsTagSetItem Text="Beta" Type="Magenta" />
+            </cds:CdsTagSet>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Dismissible filters: close one to remove it, or add more; the label follows the overflow. A second set handles the +N tag itself (OverflowClicked with Handled).">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTagSet x:Name="Filters" WidthRequest="400" HorizontalOptions="Start" OverflowItemsChanged="OnOverflowChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Add filter" Icon="Add" Kind="Tertiary" Size="Md" Clicked="OnAddClicked" />
+                    <cds:CdsButton Text="Reset" Kind="Ghost" Size="Md" Clicked="OnResetClicked" />
+                </HorizontalStackLayout>
+                <cds:CdsText x:Name="Status" Text="0 filters hidden" />
+                <cds:CdsTagSet x:Name="Custom" WidthRequest="240" HorizontalOptions="Start" OverflowClicked="OnCustomOverflowClicked">
+                    <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                    <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                    <cds:CdsTagSetItem Text="Production" Type="Green" />
+                    <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                    <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                    <cds:CdsTagSetItem Text="Owner: platform team" Type="Gray" />
+                </cds:CdsTagSet>
+                <cds:CdsText x:Name="CustomStatus" Text="Activate the +N tag to handle it yourself" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTagSet>
+                            <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                            <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                            <cds:CdsTagSetItem Text="Production" Type="Green" />
+                            <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                            <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                        </cds:CdsTagSet>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTagSet>
+                            <cds:CdsTagSetItem Text="Kubernetes" Type="Blue" />
+                            <cds:CdsTagSetItem Text="us-south" Type="Cyan" />
+                            <cds:CdsTagSetItem Text="Production" Type="Green" />
+                            <cds:CdsTagSetItem Text="PCI DSS" Type="Purple" />
+                            <cds:CdsTagSetItem Text="High availability" Type="Teal" />
+                        </cds:CdsTagSet>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

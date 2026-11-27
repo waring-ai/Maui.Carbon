@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.ExportModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="File name" Description="The person names the file; the suggested name comes from Filename each time the modal opens.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsExportModal IsInline="True" Title="Export" Filename="Sample02.pdf" InputLabel="File name"
+                                        PrimaryButtonText="Export" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Extension validation" Description="With ValidExtensions the field turns invalid once it is left without a valid extension, and Export is disabled.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsExportModal IsInline="True" Title="Export" BodyText="File must be exported in a PDF format." InputLabel="File name"
+                                        InvalidInputText="File must have valid extension .pdf" PrimaryButtonText="Export" SecondaryButtonText="Cancel">
+                        <cds:CdsExportModal.ValidExtensions>
+                            <x:String>pdf</x:String>
+                        </cds:CdsExportModal.ValidExtensions>
+                    </cds:CdsExportModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Preformatted extensions" Description="A few formats as radio buttons instead of the field; the file is named Filename plus the chosen extension in lowercase.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsExportModal IsInline="True" Title="Export" Filename="test" PreformattedExtensionsLabel="Choose an export format"
+                                        PrimaryButtonText="Export" SecondaryButtonText="Cancel">
+                        <cds:CdsExportModal.PreformattedExtensions>
+                            <cds:CdsExportExtension Extension="YAML" Description="best for IBM managed cloud" />
+                            <cds:CdsExportExtension Extension="BAR" Description="best for integration server" />
+                        </cds:CdsExportModal.PreformattedExtensions>
+                    </cds:CdsExportModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Loading, success and error" Description="After submit the fields and footer give way to a status message; the close button ends the flow.">
+                <g:WrapLayout AlignItems="Start">
+                    <cds:CdsExportModal IsInline="True" WidthRequest="360" Margin="0,0,16,16" Title="Export" Filename="Sample02.pdf" IsLoading="True" LoadingMessage="Exporting file..." />
+                    <cds:CdsExportModal IsInline="True" WidthRequest="360" Margin="0,0,16,16" Title="Export" Filename="Sample02.pdf" IsSuccessful="True" SuccessMessage="The file has been exported." />
+                    <cds:CdsExportModal IsInline="True" WidthRequest="360" Margin="0,0,16,16" Title="Export" Filename="Sample02.pdf" IsError="True" ErrorMessage="Server error 500" />
+                </g:WrapLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Opens the real modal: Export shows the loading state for a second, then success.">
+                <VerticalStackLayout Spacing="16">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton x:Name="ExportButton" Text="Export report" Icon="Download" Clicked="OnExportClicked" />
+                        <cds:CdsButton x:Name="FailButton" Text="Export (fails)" Kind="Tertiary" Clicked="OnFailClicked" />
+                    </HorizontalStackLayout>
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The export modal in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsExportModal IsInline="True" Title="Export" Filename="Sample02.pdf" InputLabel="File name"
+                                                PrimaryButtonText="Export" SecondaryButtonText="Cancel" />
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <cds:CdsExportModal x:Name="ExportModal" Title="Export" Filename="cluster-report.pdf" InputLabel="File name"
+                            InvalidInputText="File must have valid extension .pdf"
+                            PrimaryButtonText="Export" SecondaryButtonText="Cancel" LoadingMessage="Exporting file..."
+                            SuccessMessage="The file has been exported." ErrorMessage="Server error 500"
+                            RequestSubmit="OnExportSubmit" RequestClose="OnRequestClose">
+            <cds:CdsExportModal.ValidExtensions>
+                <x:String>pdf</x:String>
+            </cds:CdsExportModal.ValidExtensions>
+        </cds:CdsExportModal>
+    </Grid>
+</g:GalleryPage>

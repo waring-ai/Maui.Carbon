@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.SidePanelPage">
+    <Grid>
+        <ContentView x:Name="PageArea">
+            <VerticalStackLayout Spacing="48">
+
+                <g:GalleryExample Title="Slide over" Description="The default: the panel covers part of the page, which stays usable. Escape and the close button ask to close.">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton x:Name="EditButton" Text="Edit cluster" Kind="Tertiary" Clicked="OnEditClicked" />
+                        <cds:CdsButton Text="Start edge" Kind="Ghost" Clicked="OnStartClicked" />
+                    </HorizontalStackLayout>
+                </g:GalleryExample>
+
+                <g:GalleryExample Title="With overlay" Description="IncludeOverlay dims and blocks the page; a tap on the overlay closes the panel unless PreventCloseOnClickOutside is set.">
+                    <cds:CdsButton Text="Add filters" Kind="Tertiary" Clicked="OnOverlayClicked" />
+                </g:GalleryExample>
+
+                <g:GalleryExample Title="Slide in" Description="SlideIn pushes PageContent aside so both stay visible. It takes no focus when it opens and does not close on Escape.">
+                    <cds:CdsButton Text="Show details" Kind="Tertiary" Clicked="OnSlideInClicked" />
+                </g:GalleryExample>
+
+                <g:GalleryExample Title="Steps and toolbar" Description="A later step shows a back button; a toolbar under the title holds small actions on the panel content.">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton Text="Create rule" Kind="Tertiary" Clicked="OnStepsClicked" />
+                        <cds:CdsButton Text="View logs" Kind="Ghost" Clicked="OnToolbarClicked" />
+                    </HorizontalStackLayout>
+                </g:GalleryExample>
+
+                <g:GalleryExample Title="Sizes" Description="xs 256, sm 320, md 480 (default), lg 640, xl 1040 and 2xl 1280; never more than 75% of a wide viewport. Small panels stack their buttons.">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton Text="xs" Kind="Tertiary" Size="Md" Clicked="OnSizeClicked" CommandParameter="Xs" />
+                        <cds:CdsButton Text="sm" Kind="Tertiary" Size="Md" Clicked="OnSizeClicked" CommandParameter="Sm" />
+                        <cds:CdsButton Text="md" Kind="Tertiary" Size="Md" Clicked="OnSizeClicked" CommandParameter="Md" />
+                        <cds:CdsButton Text="lg" Kind="Tertiary" Size="Md" Clicked="OnSizeClicked" CommandParameter="Lg" />
+                        <cds:CdsButton Text="xl" Kind="Tertiary" Size="Md" Clicked="OnSizeClicked" CommandParameter="Xl" />
+                    </HorizontalStackLayout>
+                </g:GalleryExample>
+
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+            </VerticalStackLayout>
+        </ContentView>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsSidePanel x:Name="EditPanel" IsOpen="True" Label="prod-eu-de-1" Title="Edit cluster"
+                          Subtitle="Changes apply to new worker nodes. Running workloads are not restarted."
+                          LauncherElement="{x:Reference EditButton}" RequestClose="OnEditClosing">
+            <cds:CdsSidePanel.Actions>
+                <cds:CdsButton Text="Cancel" Kind="Secondary" Clicked="OnEditCancel" />
+                <cds:CdsButton Text="Save changes" Kind="Primary" Clicked="OnEditSave" />
+            </cds:CdsSidePanel.Actions>
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsTextInput Label="Cluster name" Text="prod-eu-de-1" HelperText="Use lowercase letters, numbers and hyphens." />
+                <cds:CdsDropdown x:Name="FlavorDropdown" Label="Worker flavor" />
+                <cds:CdsNumberInput Label="Workers per zone" Value="3" Min="1" Max="50" />
+                <cds:CdsTextArea Label="Description (optional)" Placeholder="What runs on this cluster" />
+                <cds:CdsCheckbox Label="Enable automatic updates" IsChecked="True" />
+            </VerticalStackLayout>
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="StartPanel" Placement="Start" Size="Sm" Title="Projects" HideCloseButton="False">
+            <cds:CdsText TypeStyle="Body01" Text="A start-edge panel suits navigation and browsing: lists of projects, folders or saved views." />
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="OverlayPanel" IncludeOverlay="True" Size="Sm" Title="Filters" Subtitle="Narrow the list of clusters.">
+            <cds:CdsSidePanel.Actions>
+                <cds:CdsButton Text="Apply filters" Kind="Primary" Clicked="OnFiltersApply" />
+                <cds:CdsButton Text="Reset" Kind="Secondary" Clicked="OnFiltersReset" />
+            </cds:CdsSidePanel.Actions>
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsCheckboxGroup Legend="Status">
+                    <cds:CdsCheckbox Label="Normal" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Warning" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Critical" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsDropdown x:Name="RegionDropdown" Label="Region" />
+            </VerticalStackLayout>
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="SlidePanel" SlideIn="True" Size="Sm" Label="Cluster" Title="prod-eu-de-1" AnimateTitle="False">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsText TypeStyle="Label01" Tone="Secondary" Text="Status" />
+                <cds:CdsText TypeStyle="Body01" Text="Normal" />
+                <cds:CdsText TypeStyle="Label01" Tone="Secondary" Text="Version" />
+                <cds:CdsText TypeStyle="Body01" Text="1.31.2" />
+                <cds:CdsText TypeStyle="Label01" Tone="Secondary" Text="Workers" />
+                <cds:CdsText TypeStyle="Body01" Text="9 in 3 zones" />
+            </VerticalStackLayout>
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="StepsPanel" Title="Create rule" Label="Step 1 of 2" NavigationBack="OnStepsBack">
+            <cds:CdsSidePanel.Actions>
+                <cds:CdsButton x:Name="StepsCancel" Text="Cancel" Kind="Secondary" Clicked="OnStepsCancel" />
+                <cds:CdsButton x:Name="StepsNext" Text="Next" Kind="Primary" Clicked="OnStepsNext" />
+            </cds:CdsSidePanel.Actions>
+            <VerticalStackLayout Spacing="24">
+                <cds:CdsTextInput x:Name="RuleName" Label="Rule name" Placeholder="e.g. block-public-ingress" />
+                <cds:CdsTextArea x:Name="RuleDetail" Label="Condition" IsVisible="False" Placeholder="source.ip not in 10.0.0.0/8" />
+            </VerticalStackLayout>
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="ToolbarPanel" Size="Lg" Title="Logs" Subtitle="worker-pool-default, last 24 hours">
+            <cds:CdsSidePanel.ToolbarActions>
+                <cds:CdsButton Text="Download" Kind="Ghost" Icon="Download" Clicked="OnToolbarAction" />
+                <cds:CdsButton IsIconOnly="True" IconDescription="Refresh" Kind="Ghost" Icon="Renew" Clicked="OnToolbarAction" />
+                <cds:CdsButton IsIconOnly="True" IconDescription="Settings" Kind="Ghost" Icon="Settings" Clicked="OnToolbarAction" />
+            </cds:CdsSidePanel.ToolbarActions>
+            <cds:CdsCodeSnippet x:Name="LogSnippet" Type="Multi" />
+        </cds:CdsSidePanel>
+
+        <cds:CdsSidePanel x:Name="SizePanel" Title="Panel size">
+            <cds:CdsSidePanel.Actions>
+                <cds:CdsButton Text="Cancel" Kind="Secondary" Clicked="OnSizeClose" />
+                <cds:CdsButton Text="Done" Kind="Primary" Clicked="OnSizeClose" />
+            </cds:CdsSidePanel.Actions>
+            <cds:CdsText x:Name="SizeText" TypeStyle="Body01" />
+        </cds:CdsSidePanel>
+    </Grid>
+</g:GalleryPage>

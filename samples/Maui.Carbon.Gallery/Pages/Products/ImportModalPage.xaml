@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.ImportModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Empty" Description="Drop a file on the area or activate it to pick one, or fetch a file by URL. Import stays disabled until a valid file is chosen; there is no close button.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsImportModal IsInline="True" Title="Import"
+                                        Description="You can specify a file to import by either dragging it into the drag and drop area or by specifying a URL. (Maximum file size of 500KB)"
+                                        Accept="image/png, image/jpeg, image/gif" MaxFileSize="500000"
+                                        FileDropHeader="Add files using drag and drop" FileDropLabel="Drag and drop files here or click to upload"
+                                        InputLabel="Add a file by specifying a URL" InputPlaceholder="URL" InputButtonText="Add file"
+                                        FileUploadLabel="files uploaded" PrimaryButtonText="Import" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="File chosen" Description="A valid file shows as a row with a remove button; the drop area and URL field are disabled until it is removed.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsImportModal x:Name="ChosenExample" IsInline="True" Title="Import"
+                                        FileDropHeader="Add files using drag and drop" FileDropLabel="Drag and drop files here or click to upload"
+                                        InputLabel="Add a file by specifying a URL" InputPlaceholder="URL" InputButtonText="Add file" InputButtonIcon="True"
+                                        FileUploadLabel="files uploaded" PrimaryButtonText="Import" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Invalid file" Description="A file of the wrong type, over the size limit or that could not be fetched shows its error; Import stays disabled.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsImportModal x:Name="InvalidExample" IsInline="True" Title="Import" Accept="image/png"
+                                        DefaultErrorHeader="Import failed" DefaultErrorBody="Select a new file and try again."
+                                        InvalidFileTypeErrorBody="Invalid file type. Choose a PNG image."
+                                        FileDropLabel="Drag and drop files here or click to upload" HideInputLabel="True"
+                                        InputLabel="Add a file by specifying a URL" InputPlaceholder="URL" InputButtonText="Add file"
+                                        FileUploadLabel="files uploaded" InvalidIconDescription="Delete" PrimaryButtonText="Import" SecondaryButtonText="Cancel" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Opens the real modal. Pick or drop a file, or fetch one by URL; Import reports the file name.">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="ImportButton" Text="Import image" Clicked="OnImportClicked" HorizontalOptions="Start" />
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The import modal in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsImportModal IsInline="True" Title="Import" FileDropHeader="Add files using drag and drop"
+                                                FileDropLabel="Drag and drop files here or click to upload" InputLabel="Add a file by specifying a URL"
+                                                InputPlaceholder="URL" InputButtonText="Add file" PrimaryButtonText="Import" SecondaryButtonText="Cancel" />
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <cds:CdsImportModal x:Name="ImportModal" Title="Import"
+                            Description="Add an image by dragging it into the drop area or by specifying a URL. (Maximum file size of 500KB)"
+                            Accept="image/png, image/jpeg, image/gif" MaxFileSize="500000"
+                            DefaultErrorHeader="Import failed" DefaultErrorBody="Select a new file and try again."
+                            FetchErrorBody="Unable to fetch URL." InvalidFileTypeErrorBody="Invalid file type."
+                            MaxFileSizeErrorBody="500kb max file size. Select a new file and try again."
+                            FileDropHeader="Add files using drag and drop" FileDropLabel="Drag and drop files here or click to upload"
+                            InputLabel="Add a file by specifying a URL" InputPlaceholder="URL" InputButtonText="Add file"
+                            FileUploadLabel="files uploaded" PrimaryButtonText="Import" SecondaryButtonText="Cancel"
+                            LauncherElement="{x:Reference ImportButton}" RequestSubmit="OnImportSubmit" RequestClose="OnRequestClose" />
+    </Grid>
+</g:GalleryPage>

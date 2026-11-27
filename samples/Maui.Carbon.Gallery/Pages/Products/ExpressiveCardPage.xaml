@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.ExpressiveCardPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="A label, a heading-03 title and the body, with the primary button flush at the bottom end.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsExpressiveCard Label="Tutorial" Title="Deploy a sample app" PrimaryButtonText="Read more" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Run a starter app on Code Engine in about 10 minutes and connect it to a database." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Label="Tutorial" PrimaryButtonText="Read more" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Run a starter app on Code Engine in about 10 minutes." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Title="Deploy a sample app" Description="About 10 minutes" PrimaryButtonText="Read more" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Run a starter app on Code Engine." />
+                </cds:CdsExpressiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Media and pictogram" Description="Media sits above the content or, with MediaPosition=&quot;Left&quot;, beside it. A 32px pictogram sits 16 from the top and start edges.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsExpressiveCard Label="Catalog" Title="Event Streams" PrimaryButtonText="Create" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsExpressiveCard.Media>
+                        <cds:CdsAspectRatio Ratio="Ratio16x9">
+                            <BoxView Color="{DynamicResource CdsLayerAccent01}" />
+                            <cds:CdsText Text="16:9" HorizontalOptions="Center" VerticalOptions="Center" Tone="Secondary" />
+                        </cds:CdsAspectRatio>
+                    </cds:CdsExpressiveCard.Media>
+                    <cds:CdsText Text="Fully managed Kafka for event-driven apps." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Label="Catalog" Title="Event Streams" PrimaryButtonText="Create" MediaPosition="Left" WidthRequest="440" Margin="0,0,16,16">
+                    <cds:CdsExpressiveCard.Media>
+                        <cds:CdsAspectRatio Ratio="Ratio1x1" WidthRequest="160">
+                            <BoxView Color="{DynamicResource CdsLayerAccent01}" />
+                            <cds:CdsText Text="1:1" HorizontalOptions="Center" VerticalOptions="Center" Tone="Secondary" />
+                        </cds:CdsAspectRatio>
+                    </cds:CdsExpressiveCard.Media>
+                    <cds:CdsText Text="Fully managed Kafka for event-driven apps." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Label="Get started" Title="Monitor your apps" Pictogram="Dashboard" PrimaryButtonText="Read more" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Collect metrics and logs from every cluster in one place." />
+                </cds:CdsExpressiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Buttons and icons" Description="The secondary button comes before the primary; each can be a ghost. Icon actions are small ghost icon buttons at the end of the bar.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsExpressiveCard Label="Tutorial" Title="Deploy a sample app" PrimaryButtonText="Read more" SecondaryButtonText="Remove" SecondaryButtonKind="Ghost" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Run a starter app on Code Engine." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Label="Tutorial" Title="Deploy a sample app" PrimaryButtonText="Add to plan" PrimaryButtonIcon="Add" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsText Text="Run a starter app on Code Engine." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsExpressiveCard Label="Docs" Title="API reference" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsExpressiveCard.ActionIcons>
+                        <cds:CdsCardAction Icon="ArrowRight" IconDescription="Open the API reference" Href="https://cloud.ibm.com/docs" />
+                    </cds:CdsExpressiveCard.ActionIcons>
+                    <cds:CdsText Text="Every endpoint, with request and response examples." />
+                </cds:CdsExpressiveCard>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Clickable" Description="Handling Clicked makes the whole card one target: a border-tile-01 border, layer-hover-01 on hover and an inset focus ring. Keep a clickable card to one action.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
+                <cds:CdsExpressiveCard Label="Tutorial" Title="Deploy a sample app" Clicked="OnCardClicked" WidthRequest="320">
+                    <cds:CdsText Text="Run a starter app on Code Engine." />
+                </cds:CdsExpressiveCard>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Click the card" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label" Description="An AI label decorator gives the card the AI gradient, border and shadow.">
+            <cds:CdsExpressiveCard Label="Insights" Title="Suggested next step" PrimaryButtonText="Apply" WidthRequest="320" HorizontalOptions="Start">
+                <cds:CdsExpressiveCard.Decorator>
+                    <cds:CdsAILabel Size="Xs" />
+                </cds:CdsExpressiveCard.Decorator>
+                    <cds:CdsText Text="Scale the worker pool to 5 nodes before the end-of-month peak." />
+            </cds:CdsExpressiveCard>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same card in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsExpressiveCard Label="Tutorial" Title="Deploy a sample app" PrimaryButtonText="Read more">
+                            <cds:CdsText Text="Run a starter app on Code Engine." />
+                        </cds:CdsExpressiveCard>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

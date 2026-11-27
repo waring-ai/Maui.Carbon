@@ -42,9 +42,11 @@ Carbon's product voice is plain, specific and brief. The interface is a tool; th
 
 ## Empty states
 
-- A short heading that says what is (not) here ("No clusters yet", "No results for \"prod\""), one sentence on why or what to do, one action.
+- A short heading, positive where it can be ("Start by creating a cluster" rather than "You don't have any clusters"); for no results, name the query ("No results for \"prod\""). Then one sentence on why or what to do, and one action. Errors in empty states use plain words, no codes, no jokes.
 
 ## Truncation and length
 
 - Write for the narrowest layout; expect translated text to be about 30% longer.
-- Truncate with an ellipsis only where the full text stays reachable (tooltip, details page); never truncate a button label, let it wrap.
+- Truncate with an ellipsis only where the full text stays reachable (tooltip, details page); never truncate page titles, labels, button labels, errors or notifications, let them wrap.
+- Error text: two lines at most in a field, three in a modal or full-page error.
+- Login screens say "Log in" (not "Sign in"); the first step's button is "Continue".

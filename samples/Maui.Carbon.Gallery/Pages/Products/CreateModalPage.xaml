@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.CreateModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="One field" Description="Title, subtitle over a rule, description and a short form. There is no close button: Cancel and Escape ask to close, and a tap outside never does.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsCreateModal IsInline="True" Title="Create partition" Subtitle="Your new partition will be added to topic-1"
+                                        Description="Partitions are ordered, immutable sequences of messages. Name the partition after the data it holds."
+                                        PrimaryButtonText="Create" SecondaryButtonText="Cancel">
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsTextInput Label="Partition name" Placeholder="orders-eu" HelperText="Lowercase letters, numbers and dashes" />
+                        </VerticalStackLayout>
+                    </cds:CdsCreateModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Several fields, submit disabled" Description="PrimaryButtonDisabled keeps Create disabled until the required fields are valid.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsCreateModal IsInline="True" Title="Create cluster" Description="A cluster runs your containers on worker nodes in one region."
+                                        PrimaryButtonText="Create cluster" SecondaryButtonText="Cancel" PrimaryButtonDisabled="True">
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsTextInput Label="Cluster name" Placeholder="prod-eu-de-1" />
+                            <cds:CdsTextArea Label="Description" Placeholder="What runs on this cluster" />
+                            <cds:CdsRadioButtonGroup Legend="Plan" SelectedValue="standard">
+                                <cds:CdsRadioButton Label="Lite (free)" Value="lite" />
+                                <cds:CdsRadioButton Label="Standard" Value="standard" />
+                            </cds:CdsRadioButtonGroup>
+                        </VerticalStackLayout>
+                    </cds:CdsCreateModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Opens the real modal. Create enables once the name is filled; submitting closes it.">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="CreateButton" Text="Create partition" Icon="Add" Clicked="OnCreateClicked" HorizontalOptions="Start" />
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The create modal in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsCreateModal IsInline="True" Title="Create partition" Subtitle="Added to topic-1"
+                                                Description="Name the partition after the data it holds." PrimaryButtonText="Create" SecondaryButtonText="Cancel">
+                                <cds:CdsTextInput Label="Partition name" Placeholder="orders-eu" />
+                            </cds:CdsCreateModal>
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <cds:CdsCreateModal x:Name="CreateModal" Title="Create partition" Subtitle="Your new partition will be added to topic-1"
+                            Description="Partitions are ordered, immutable sequences of messages."
+                            PrimaryButtonText="Create" SecondaryButtonText="Cancel" PrimaryButtonDisabled="True"
+                            LauncherElement="{x:Reference CreateButton}" RequestSubmit="OnCreateSubmit" RequestClose="OnRequestClose">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsTextInput x:Name="NameInput" Label="Partition name" Placeholder="orders-eu" TextChanged="OnNameChanged" />
+                <cds:CdsNumberInput Label="Retention (days)" Value="7" Min="1" Max="30" />
+            </VerticalStackLayout>
+        </cds:CdsCreateModal>
+    </Grid>
+</g:GalleryPage>

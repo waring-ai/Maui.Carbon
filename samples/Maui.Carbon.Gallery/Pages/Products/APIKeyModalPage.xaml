@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.APIKeyModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Name the key" Description="With IsNameRequired, Generate stays disabled until the key has a name. There is no close button.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsAPIKeyModal IsInline="True" ModalLabel="Access" GenerateTitle="Generate an API key" IsNameRequired="True"
+                                        NameLabel="Name of the API key" NamePlaceholder="ci-deploy" NameHelperText="Say where the key is used"
+                                        GenerateButtonText="Generate API key" CloseButtonText="Close" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Generating" Description="IsLoading shows an inline loading and disables the name field and the primary button.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsAPIKeyModal IsInline="True" ModalLabel="Access" GenerateTitle="Generate an API key" IsNameRequired="True"
+                                        ApiKeyName="ci-deploy" NameLabel="Name of the API key" IsLoading="True" LoadingText="Generating..."
+                                        GenerateButtonText="Generate API key" CloseButtonText="Close" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Key generated, hidden and downloadable" Description="The key shows read-only behind a visibility toggle; Copy puts it on the clipboard and the link saves it as a file.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsAPIKeyModal IsInline="True" ModalLabel="Access" GenerateTitle="Generate an API key" ApiKey="111-111-111-111"
+                                        ApiKeyLabel="API key" HasAPIKeyVisibilityToggle="True" ShowAPIKeyLabel="Show key" HideAPIKeyLabel="Hide key"
+                                        HelperText="This is your unique API key and is non-recoverable. If you lose this API key, you will have to reset it."
+                                        HasDownloadLink="True" DownloadBodyText="This key cannot be shown again." DownloadLinkText="Download as JSON"
+                                        DownloadLinkLabel="Download the API key as a JSON file" GenerateSuccessMessage="API key successfully created"
+                                        CopyButtonText="Copy" CopyIconDescription="Copy to clipboard" CloseButtonText="Close" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Key generated, shown" Description="Without the toggle the key shows as plain read-only text, with the success body underneath.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsAPIKeyModal IsInline="True" GenerateTitle="Generate an API key" ApiKey="111-111-111-111" ApiKeyLabel="API key"
+                                        GenerateSuccessBody="This is your unique API key and is non-recoverable. If you lose this API key, you will have to reset it."
+                                        GenerateSuccessMessage="API key successfully created" CopyButtonText="Copy" CloseButtonText="Close" />
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Error and edit" Description="IsError shows the error as an alert. IsEditing renames an existing key; IsEditSuccess confirms the save.">
+                <g:WrapLayout AlignItems="Start">
+                    <cds:CdsAPIKeyModal IsInline="True" WidthRequest="400" Margin="0,0,16,16" GenerateTitle="Generate an API key" IsNameRequired="True" ApiKeyName="ci-deploy"
+                                        NameLabel="Name of the API key" IsError="True" ErrorText="An error occurred. Please try again."
+                                        GenerateButtonText="Generate API key" CloseButtonText="Close" />
+                    <cds:CdsAPIKeyModal IsInline="True" WidthRequest="400" Margin="0,0,16,16" GenerateTitle="Edit API key" IsEditing="True" ApiKeyName="ci-deploy"
+                                        NameLabel="Name of the API key" EditButtonText="Save" IsEditSuccess="True"
+                                        EditSuccessMessage="API key successfully saved" CloseButtonText="Close" />
+                </g:WrapLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Custom steps" Description="CustomSteps gather more than a name: Next until the last step, Back after the first; a step's IsValid gates the primary button.">
+                <cds:CdsMaxWidthBox MaxContentWidth="480">
+                    <cds:CdsAPIKeyModal IsInline="True" GenerateTitle="Generate an API key" NextStepButtonText="Next" PreviousStepButtonText="Back"
+                                        GenerateButtonText="Generate" CloseButtonText="Close" CurrentStep="1">
+                        <cds:CdsAPIKeyModalStep Title="Name the key">
+                            <cds:CdsTextInput Label="Name of the API key" Text="ci-deploy" />
+                        </cds:CdsAPIKeyModalStep>
+                        <cds:CdsAPIKeyModalStep Title="Set permissions">
+                            <cds:CdsRadioButtonGroup Legend="Access" SelectedValue="read">
+                                <cds:CdsRadioButton Label="Read only" Value="read" />
+                                <cds:CdsRadioButton Label="Read and write" Value="write" />
+                            </cds:CdsRadioButtonGroup>
+                        </cds:CdsAPIKeyModalStep>
+                    </cds:CdsAPIKeyModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Standard flow: name the key, Generate waits a second, then the key shows with Copy and the download link. Instant flow: the key exists before the modal opens.">
+                <VerticalStackLayout Spacing="16">
+                    <HorizontalStackLayout Spacing="16">
+                        <cds:CdsButton x:Name="GenerateButton" Text="Generate API key" Icon="Add" Clicked="OnGenerateClicked" />
+                        <cds:CdsButton x:Name="InstantButton" Text="Instant key" Kind="Tertiary" Clicked="OnInstantClicked" />
+                    </HorizontalStackLayout>
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The generated key in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsAPIKeyModal IsInline="True" GenerateTitle="Generate an API key" ApiKey="111-111-111-111" ApiKeyLabel="API key"
+                                                HasAPIKeyVisibilityToggle="True" GenerateSuccessMessage="API key successfully created"
+                                                CopyButtonText="Copy" CloseButtonText="Close" />
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <cds:CdsAPIKeyModal x:Name="GenerateModal" ModalLabel="Access" GenerateTitle="Generate an API key" IsNameRequired="True"
+                            NameLabel="Name of the API key" NamePlaceholder="ci-deploy" NameHelperText="Say where the key is used"
+                            GenerateButtonText="Generate API key" LoadingText="Generating..." ApiKeyLabel="API key"
+                            HasAPIKeyVisibilityToggle="True" ShowAPIKeyLabel="Show key" HideAPIKeyLabel="Hide key"
+                            HelperText="This is your unique API key and is non-recoverable. If you lose this API key, you will have to reset it."
+                            HasDownloadLink="True" DownloadBodyText="This key cannot be shown again." DownloadLinkText="Download as JSON"
+                            GenerateSuccessMessage="API key successfully created" CopyButtonText="Copy" CopyErrorText="The key could not be copied."
+                            CloseButtonText="Close" LauncherElement="{x:Reference GenerateButton}"
+                            RequestGenerate="OnRequestGenerate" RequestClose="OnRequestClose" />
+        <cds:CdsAPIKeyModal x:Name="InstantModal" ModalLabel="Access" GenerateTitle="API key created" ApiKey="9f2c-41aa-80d1-77e3"
+                            ApiKeyLabel="API key" GenerateSuccessBody="Copy the key now: it cannot be shown again."
+                            GenerateSuccessMessage="API key successfully created" CopyButtonText="Copy" CloseButtonText="Close"
+                            LauncherElement="{x:Reference InstantButton}" RequestClose="OnRequestClose" />
+    </Grid>
+</g:GalleryPage>

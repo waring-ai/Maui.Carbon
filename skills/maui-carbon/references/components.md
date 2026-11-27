@@ -20,7 +20,7 @@ Folders are under `src/Maui.Carbon/` in the repository:
 | Text and typography | `CdsText`, `CdsTypography`, `CdsTypeSpec`, `CdsTypeStyle`, `CdsFonts` | `Typography`, `Generated` |
 | Icons | `CdsIcon`, `CdsIcons`, `CdsGlyph`, `CdsIconName` | `Icons`, `Generated/CdsIcons.g.cs` |
 | Tokens | `CdsColorKeys`, `CdsSpacing`, `CdsFluidSpacing`, `CdsSizing`, `CdsDuration`, `CdsEasing`, `CdsSize` | `Generated`, `Foundation` |
-| Overlay infrastructure | `CdsOverlayHost`, `CdsOverlayService`, `CdsOverlayOptions`, `CdsOverlay`, `CdsPlacement` | `Overlays` |
+| Overlay infrastructure | `CdsOverlayHost`, `CdsOverlayService`, `CdsOverlayOptions`, `CdsOverlay`, `CdsPlacement`, `CdsOverlayDock` | `Overlays` |
 | Motion | `CdsMotion`, `CdsCubicBezier` | `Motion` |
 | Layout helpers | `CdsDeck` (one active child of many kept attached: app screens, large panes; cheaper to switch than `IsVisible`), `CdsMaxWidthBox`, `CdsEqualWidthRow` | `Foundation` |
 
@@ -201,6 +201,39 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | Popover | `CdsPopover` |
 | Toggletip | `CdsToggletip`, `CdsToggletipActions` |
 | Tooltip | `CdsTooltip` |
+
+## Products
+
+Components from Carbon for IBM Products (`@carbon/ibm-products`), the extension library for product UI. Versions before they were added do not have them: check the XML documentation of the installed package.
+
+| Family | Types |
+|---|---|
+| ActionSet | `CdsActionSet`, `CdsActionSetSize` |
+| AboutModal | `CdsAboutModal` |
+| AddSelect | `CdsSingleAddSelect`, `CdsMultiAddSelect`, `CdsAddSelectItem`, `CdsAddSelectMeta`, `CdsAddSelectFilter`, `CdsAddSelectModifier`, `CdsAddSelectSubmittedEventArgs` |
+| APIKeyModal | `CdsAPIKeyModal`, `CdsAPIKeyModalStep`, `CdsAPIKeyModalEventArgs`, `CdsAPIKeyDownloader`, `CdsAPIKeyFileType`, `CdsAPIKeySaveEventArgs` |
+| Card | `CdsProductiveCard`, `CdsExpressiveCard`, `CdsCardAction` (and the enums `CdsCardPlacement`, `CdsCardClickZone`, `CdsCardTitleSize`, `CdsCardMediaPosition`, `CdsCardPrimaryButtonKind`, `CdsCardSecondaryButtonKind`) |
+| Cascade | `CdsCascade` |
+| Checklist | `CdsChecklist`, `CdsChecklistTask`, `CdsChecklistTaskList`, `CdsChecklistTaskKind` |
+| CreateFlow | `CdsCreateTearsheet`, `CdsCreateTearsheetNarrow`, `CdsCreateSidePanel`, `CdsCreateFullPage`, `CdsCreateStep`, `CdsCreateTearsheetDivider` |
+| CreateModal | `CdsCreateModal` |
+| EditInPlace | `CdsEditInPlace`, `CdsEditInPlaceEventArgs` |
+| EmptyState | `CdsEmptyState`, `CdsErrorEmptyState`, `CdsNoDataEmptyState`, `CdsNoTagsEmptyState`, `CdsNotFoundEmptyState`, `CdsNotificationsEmptyState`, `CdsUnauthorizedEmptyState`, `CdsEmptyStateSize`, `CdsEmptyStateIllustrationPosition`, `CdsIllustrationTheme` |
+| ExportModal | `CdsExportModal`, `CdsExportModalInputType`, `CdsExportExtension`, `CdsExportModalSubmitEventArgs` |
+| FullPageError | `CdsFullPageError`, `CdsFullPageErrorKind` |
+| HTTPErrors | `CdsHttpError403`, `CdsHttpError404`, `CdsHttpErrorOther` (deprecated upstream in favour of `CdsFullPageError`) |
+| ImportModal | `CdsImportModal`, `CdsImportModalSubmitEventArgs` |
+| InterstitialScreen | `CdsInterstitialScreen`, `CdsInterstitialScreenView`, `CdsInterstitialScreenAction`, `CdsInterstitialScreenButtons`, `CdsInterstitialScreenActionEventArgs`, `CdsInterstitialScreenCloseEventArgs` |
+| NotificationsPanel | `CdsNotificationsPanel`, `CdsNotificationsPanelItem` |
+| OptionsTile | `CdsOptionsTile`, `CdsOptionsTileStatus` |
+| RemoveModal | `CdsRemoveModal` |
+| Saving | `CdsSaving`, `CdsSavingType`, `CdsSavingStatus` |
+| SidePanel | `CdsSidePanel`, `CdsSidePanelSize`, `CdsSidePanelPlacement` |
+| StatusIcon | `CdsStatusIcon`, `CdsStatusIconKind` |
+| TagSet | `CdsTagSet`, `CdsTagSetItem`, `CdsTagSetOverflowEventArgs`, `CdsTagSetAlign`, `CdsTagSetOverflowType` |
+| Tearsheet | `CdsTearsheet`, `CdsTearsheetNarrow`, `CdsTearsheetInfluencerPosition`, `CdsTearsheetInfluencerWidth` |
+| UserAvatar | `CdsUserAvatar`, `CdsUserAvatarColor`, `CdsUserAvatarContent` |
+| WebTerminal | `CdsWebTerminal` |
 
 ## Composed product patterns
 

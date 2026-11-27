@@ -12,6 +12,13 @@ Carbon Design System, https://github.com/carbon-design-system/carbon, and `@carb
 Copyright IBM Corp. Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
 See `design/carbon/icons/LICENSE-carbon-icons`.
 
+## Carbon for IBM Products (component specifications)
+
+The controls in `src/Maui.Carbon/Components/Products/` are a C# implementation of components from Carbon for IBM
+Products, https://github.com/carbon-design-system/ibm-products (`@carbon/ibm-products`), following its component
+behavior, measurements and usage guidance. Copyright IBM Corp. Licensed under the Apache License, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0).
+
 ## IBM Plex (fonts)
 
 The IBM Plex Sans, IBM Plex Sans Condensed, IBM Plex Mono and IBM Plex Serif font files embedded in the package

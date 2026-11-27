@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.AddSelectPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+            <g:GalleryExample Title="Multi add-select" Description="Add several items: search, filter by attribute, sort the results, choose a role for each, see details, and review the selection in the sidebar.">
+                <cds:CdsButton x:Name="MultiButton" Text="Add members" Kind="Tertiary" Clicked="OnMultiClicked" />
+            </g:GalleryExample>
+            <g:GalleryExample Title="Single add-select" Description="Choose one item, navigating into nested items with the breadcrumb.">
+                <cds:CdsButton Text="Choose a data center" Kind="Tertiary" Clicked="OnSingleClicked" />
+            </g:GalleryExample>
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+        </VerticalStackLayout>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsMultiAddSelect x:Name="Multi" IsOpen="True" Title="Add members" Description="Members get access to every cluster in the project."
+                               ItemsLabel="People" GlobalSearchLabel="Find people" GlobalSearchPlaceholder="Search by name"
+                               SubmitButtonText="Add members" InfluencerTitle="Members to add"
+                               NoSelectionTitle="No members selected" NoSelectionDescription="Choose people from the list."
+                               LauncherElement="{x:Reference MultiButton}" Submitted="OnMultiSubmitted" />
+        <cds:CdsSingleAddSelect x:Name="Single" Title="Choose a data center" Description="Clusters run in the data center you choose."
+                                ItemsLabel="Regions" GlobalSearchLabel="Find a data center" SubmitButtonText="Choose"
+                                Submitted="OnSingleSubmitted" />
+    </Grid>
+</g:GalleryPage>

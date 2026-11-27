@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.SavingPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Auto" Description="A status line for auto-save: in progress, success, and failure with an error-filled icon in button-danger-primary. Leave DefaultText unset in auto mode.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsSaving Status="InProgress" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" />
+                <cds:CdsSaving Status="Success" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" />
+                <cds:CdsSaving Status="Fail" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" FailIconDescription="Error" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Manual" Description="Cancel is enabled only while a save is in progress; the save button carries the status and is disabled while saving.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsSaving Type="Manual" Status="Default" DefaultText="Save" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" SecondaryButtonText="Cancel" />
+                <cds:CdsSaving Type="Manual" Status="InProgress" DefaultText="Save" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" SecondaryButtonText="Cancel" />
+                <cds:CdsSaving Type="Manual" Status="Success" DefaultText="Save" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" SecondaryButtonText="Cancel" />
+                <cds:CdsSaving Type="Manual" Status="Fail" DefaultText="Save" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save. Try again?" SecondaryButtonText="Cancel" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive auto-save" Description="Type in the field: one second after the last change the note saves, then reports the outcome. Turn off success to see the failure.">
+            <VerticalStackLayout Spacing="16" WidthRequest="480" HorizontalOptions="Start">
+                <cds:CdsTextArea x:Name="Notes" Label="Release notes" Text="" TextChanged="OnNotesChanged" />
+                <cds:CdsSaving x:Name="AutoSaving" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save" FailIconDescription="Error" />
+                <cds:CdsToggle x:Name="Succeeds" LabelText="Saves succeed" IsToggled="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive manual save" Description="Save starts a two-second save; Cancel stops it.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsSaving x:Name="ManualSaving" Type="Manual" DefaultText="Save" InProgressText="Saving..." SuccessText="Saved" FailText="Failed to save. Try again?" SecondaryButtonText="Cancel"
+                               RequestSave="OnRequestSave" RequestCancel="OnRequestCancel" />
+                <cds:CdsText x:Name="Status" Text="Not saved yet" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsSaving Status="Fail" FailText="Failed to save" />
+                            <cds:CdsSaving Type="Manual" Status="Default" DefaultText="Save" SecondaryButtonText="Cancel" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="16">
+                            <cds:CdsSaving Status="Success" SuccessText="Saved" />
+                            <cds:CdsSaving Type="Manual" Status="InProgress" InProgressText="Saving..." SecondaryButtonText="Cancel" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

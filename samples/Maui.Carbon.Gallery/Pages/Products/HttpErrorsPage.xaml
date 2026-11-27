@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.HttpErrorsPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="403" Description="Deprecated in Carbon for IBM Products in favor of Full page error. The text is centered over an illustration anchored at the bottom start.">
+            <cds:CdsHttpError403 HeightRequest="560" ErrorCodeLabel="Error 403" Title="Forbidden"
+                                 Description="You are not authorized to access this resource.">
+                <cds:CdsLink Text="Carbon Design System" Href="https://www.carbondesignsystem.com" />
+                <cds:CdsLink Text="Carbon for IBM Products component library" Href="https://github.com/carbon-design-system/ibm-products" />
+            </cds:CdsHttpError403>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="404" Description="For an address that does not exist.">
+            <cds:CdsHttpError404 HeightRequest="560" ErrorCodeLabel="Error 404" Title="Page not found"
+                                 Description="The page you are looking for was not found.">
+                <cds:CdsLink Text="Go to the dashboard" Clicked="OnLinkClicked" />
+                <cds:CdsLink Text="Search the documentation" Clicked="OnLinkClicked" />
+            </cds:CdsHttpError404>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Other" Description="Any other code: put it in ErrorCodeLabel.">
+            <cds:CdsHttpErrorOther HeightRequest="560" ErrorCodeLabel="Error 502" Title="Bad gateway"
+                                   Description="Received an invalid response.">
+                <cds:CdsLink Text="View the status page" Icon="Launch" Href="https://www.ibm.com/cloud/status" />
+            </cds:CdsHttpErrorOther>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Links report their activation.">
+            <cds:CdsText x:Name="Status" Text="Choose a link on the 404 page." />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The text follows the theme; the illustration keeps its fixed artwork colors.">
+            <g:ThemeStrip MinimumZoneWidth="480">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsHttpError404 HeightRequest="320" ErrorCodeLabel="Error 404" Title="Page not found" Description="The page was not found." />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

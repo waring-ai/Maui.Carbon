@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.EmptyStatePage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Default" Description="Title in heading-03, subtitle in body-01 text-secondary, a small tertiary button and a link. Without an illustration the text stands alone.">
+            <cds:CdsEmptyState Title="Start by adding data assets"
+                               Subtitle="Click Upload assets to upload your data, or create a connection to a data source."
+                               ActionText="Create new" ActionIcon="Add"
+                               LinkText="View documentation" LinkHref="https://www.carbondesignsystem.com" />
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Presets" Description="Each preset draws its own illustration in a light and a dark variant. Pick the one that names why the area is empty.">
+            <g:WrapLayout>
+                <cds:CdsNoDataEmptyState WidthRequest="320" Margin="0,0,32,32" Title="No buckets yet" Subtitle="Create a bucket to start storing objects in this region." ActionText="Create bucket" ActionIcon="Add" />
+                <cds:CdsNotFoundEmptyState WidthRequest="320" Margin="0,0,32,32" Title="No results for &quot;staging-ap&quot;" Subtitle="Check the spelling or try a broader search." ActionText="Clear search" />
+                <cds:CdsErrorEmptyState WidthRequest="320" Margin="0,0,32,32" Title="Usage could not load" Subtitle="The metrics service did not respond. Try again in a few minutes." ActionText="Retry" ActionIcon="Renew" />
+                <cds:CdsNotificationsEmptyState WidthRequest="320" Margin="0,0,32,32" Title="You are all caught up" Subtitle="New alerts and updates about your clusters will show here." />
+                <cds:CdsNoTagsEmptyState WidthRequest="320" Margin="0,0,32,32" Title="No tags" Subtitle="Add tags to group resources by team, environment or cost center." ActionText="Add tag" ActionIcon="Add" />
+                <cds:CdsUnauthorizedEmptyState WidthRequest="320" Margin="0,0,32,32" Title="You do not have access" Subtitle="Ask an account administrator for the Viewer role on prod-eu-de-1." LinkText="Learn about access roles" LinkHref="https://www.carbondesignsystem.com" />
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Sizes" Description="lg (default): 80 illustration, heading-03 title. sm for cards and side panels: 64 illustration, body-compact-02 title and label-01 subtitle.">
+            <g:WrapLayout>
+                <cds:CdsNoDataEmptyState WidthRequest="320" Margin="0,0,32,32" Title="No volumes attached" Subtitle="Attach a block storage volume to keep data across restarts." ActionText="Attach volume" />
+                <cds:CdsNoDataEmptyState WidthRequest="320" Margin="0,0,32,32" Size="Sm" Title="No volumes attached" Subtitle="Attach a block storage volume to keep data across restarts." ActionText="Attach volume" />
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Illustration position" Description="Top (default), bottom, left and right of the text. The illustration keeps its 16 bottom margin in every position.">
+            <VerticalStackLayout Spacing="32">
+                <cds:CdsNotFoundEmptyState IllustrationPosition="Top" Size="Sm" Title="Top" Subtitle="No matching clusters in us-south." />
+                <cds:CdsNotFoundEmptyState IllustrationPosition="Bottom" Size="Sm" Title="Bottom" Subtitle="No matching clusters in us-south." />
+                <cds:CdsNotFoundEmptyState IllustrationPosition="Left" Size="Sm" Title="Left" Subtitle="No matching clusters in us-south." />
+                <cds:CdsNotFoundEmptyState IllustrationPosition="Right" Size="Sm" Title="Right" Subtitle="No matching clusters in us-south." />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Light and dark artwork" Description="IllustrationTheme picks the variant; Auto (default) follows the theme zone, so the dark artwork shows in g90 and g100.">
+            <g:WrapLayout>
+                <cds:CdsErrorEmptyState WidthRequest="240" Margin="0,0,32,32" Size="Sm" IllustrationTheme="Light" Title="Light artwork" />
+                <cds:CdsErrorEmptyState WidthRequest="240" Margin="0,0,32,32" Size="Sm" IllustrationTheme="Dark" Title="Dark artwork" />
+                <cds:CdsUnauthorizedEmptyState WidthRequest="240" Margin="0,0,32,32" Size="Sm" IllustrationTheme="Light" Title="Light artwork" />
+                <cds:CdsUnauthorizedEmptyState WidthRequest="240" Margin="0,0,32,32" Size="Sm" IllustrationTheme="Dark" Title="Dark artwork" />
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="ActionClicked and LinkClicked (or ActionCommand and LinkCommand) report the choice.">
+            <VerticalStackLayout Spacing="16">
+                <cds:CdsNoDataEmptyState x:Name="Interactive" Title="No API keys"
+                                         Subtitle="Create a key to call the service from your applications."
+                                         ActionText="Create API key" ActionKind="Primary" ActionIcon="Add"
+                                         LinkText="How API keys work" LinkIcon="ArrowRight"
+                                         ActionClicked="OnActionClicked" LinkClicked="OnLinkClicked" />
+                <cds:CdsText x:Name="Status" Text="0 keys created" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Text follows the theme tokens; Auto picks the dark artwork in g90 and g100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNoDataEmptyState Size="Sm" Title="No data yet" Subtitle="Add a data source to see results." ActionText="Add source" />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers" Description="Empty states sit inside tiles and tables on layer-01 and layer-02; the artwork does not change with the layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsNotificationsEmptyState Size="Sm" Title="No notifications" Subtitle="You are up to date." />
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

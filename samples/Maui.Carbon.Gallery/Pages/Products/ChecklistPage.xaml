@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.ChecklistPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Checklist" Description="A 40px progress ring with its label, a heading-compact-02 title and a ghost chevron toggle; tasks with an action are links; View all sits at the bottom.">
+            <VerticalStackLayout Spacing="16" WidthRequest="320" HorizontalOptions="Start">
+                <cds:CdsChecklist x:Name="Interactive" Title="Get started with Cloud Pak" ChartValue="0.15" ChartLabel="15% complete" ViewAllLabel="View all (10)"
+                                  ViewAllClicked="OnViewAll" OpenChanged="OnOpenChanged">
+                    <cds:CdsChecklistTaskList Title="Set up your workspace">
+                        <cds:CdsChecklistTask Kind="Checked" Label="Create a project" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Indeterminate" Label="Connect a data source" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Unchecked" Label="Invite your team" Clicked="OnTaskClicked" />
+                    </cds:CdsChecklistTaskList>
+                </cds:CdsChecklist>
+                <cds:CdsText x:Name="Status" Tone="Secondary" Text="Open" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Task states" Description="Unchecked, in progress, checked, disabled and error, each as plain text and as a link. Each status has its own glyph.">
+            <cds:CdsChecklist WidthRequest="320" HorizontalOptions="Start">
+                <cds:CdsChecklistTaskList Title="Unchecked state">
+                        <cds:CdsChecklistTask Kind="Unchecked" Label="Review the security checklist" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Unchecked" Label="Review the security checklist" />
+                </cds:CdsChecklistTaskList>
+                <cds:CdsChecklistTaskList Title="Indeterminate state">
+                        <cds:CdsChecklistTask Kind="Indeterminate" Label="Configure single sign-on" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Indeterminate" Label="Configure single sign-on" />
+                </cds:CdsChecklistTaskList>
+                <cds:CdsChecklistTaskList Title="Checked state">
+                        <cds:CdsChecklistTask Kind="Checked" Label="Create a project" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Checked" Label="Create a project" />
+                </cds:CdsChecklistTaskList>
+                <cds:CdsChecklistTaskList Title="Disabled state">
+                        <cds:CdsChecklistTask Kind="Disabled" Label="Enable audit logging" />
+                        <cds:CdsChecklistTask Kind="Disabled" Label="Enable audit logging" Clicked="OnTaskClicked" />
+                </cds:CdsChecklistTaskList>
+                <cds:CdsChecklistTaskList Title="Error state">
+                        <cds:CdsChecklistTask Kind="Error" Label="Verify the domain" />
+                        <cds:CdsChecklistTask Kind="Error" Label="Verify the domain" Clicked="OnTaskClicked" />
+                </cds:CdsChecklistTaskList>
+            </cds:CdsChecklist>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Collapsed and long text" Description="IsOpen=&quot;False&quot; collapses the list under the header. Titles and labels wrap to two lines, then end with an ellipsis.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsChecklist Title="Get started with Cloud Pak" ChartValue="0.6" ChartLabel="60% complete" IsOpen="False" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsChecklistTaskList>
+                        <cds:CdsChecklistTask Kind="Checked" Label="Create a project" />
+                    </cds:CdsChecklistTaskList>
+                </cds:CdsChecklist>
+                <cds:CdsChecklist Title="A long title running over the lines to show how the checklist header wraps its text" ChartValue="1" ChartLabel="100% complete, every task is done" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsChecklistTaskList Title="A long section label that runs over two lines and then ends with an ellipsis so it never pushes the tasks down">
+                        <cds:CdsChecklistTask Kind="Checked" Label="A long task name that runs over two lines and then ends with an ellipsis, with the full name in its tooltip" Clicked="OnTaskClicked" />
+                        <cds:CdsChecklistTask Kind="Checked" Label="Connect a data source" />
+                    </cds:CdsChecklistTaskList>
+                </cds:CdsChecklist>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Without toggle or chart" Description="ShowToggle=&quot;False&quot; removes the toggle; without ChartValue and ChartLabel there is no ring; without a title or chart there is no header.">
+            <g:WrapLayout JustifyContent="Start" AlignItems="Start">
+                <cds:CdsChecklist Title="Onboarding" ShowToggle="False" WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsChecklistTaskList>
+                        <cds:CdsChecklistTask Kind="Checked" Label="Create a project" />
+                        <cds:CdsChecklistTask Kind="Unchecked" Label="Invite your team" />
+                    </cds:CdsChecklistTaskList>
+                </cds:CdsChecklist>
+                <cds:CdsChecklist WidthRequest="320" Margin="0,0,16,16">
+                    <cds:CdsChecklistTaskList Title="Next steps">
+                        <cds:CdsChecklistTask Kind="Unchecked" Label="Deploy your first app" Clicked="OnTaskClicked" />
+                    </cds:CdsChecklistTaskList>
+                </cds:CdsChecklist>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="The same checklist in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsChecklist Title="Get started" ChartValue="0.4" ChartLabel="40% complete" ViewAllLabel="View all (5)">
+                            <cds:CdsChecklistTaskList>
+                                <cds:CdsChecklistTask Kind="Checked" Label="Create a project" />
+                                <cds:CdsChecklistTask Kind="Indeterminate" Label="Connect a data source" />
+                                <cds:CdsChecklistTask Kind="Error" Label="Verify the domain" />
+                            </cds:CdsChecklistTaskList>
+                        </cds:CdsChecklist>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

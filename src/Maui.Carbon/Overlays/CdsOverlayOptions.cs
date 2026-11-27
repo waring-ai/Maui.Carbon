@@ -17,6 +17,24 @@ public enum CdsOverlayKeys
     VerticalNavigation = 4,
 }
 
+/// <summary>The page edge an anchorless overlay is docked to (side panels, tearsheets).</summary>
+public enum CdsOverlayDock
+{
+    /// <summary>Not docked: a modal is centered, a non-modal anchorless overlay stacks with the toasts.</summary>
+    None,
+    /// <summary>Full height against the start edge; slides in from that edge.</summary>
+    Start,
+    /// <summary>Full height against the end edge; slides in from that edge.</summary>
+    End,
+    /// <summary>Full width against the bottom edge; slides up from it (tearsheets).</summary>
+    Bottom,
+    /// <summary>
+    /// In the top end corner, sliding down from above (the notifications panel under the UI shell header). It floats
+    /// with the popups, so <see cref="CdsOverlayOptions.LightDismiss"/> closes it on a tap outside.
+    /// </summary>
+    TopEnd,
+}
+
 /// <summary>How an overlay is shown by <see cref="CdsOverlayService"/>.</summary>
 public sealed class CdsOverlayOptions
 {
@@ -46,6 +64,20 @@ public sealed class CdsOverlayOptions
     /// screen readers until the overlay closes. The content is centered unless it sets its own alignment.
     /// </summary>
     public bool IsModal { get; set; }
+
+    /// <summary>
+    /// Docks an anchorless overlay to an edge of the page: it fills that edge and slides in from it (Carbon's side panel
+    /// and tearsheet motion) instead of dropping in from above. With <see cref="IsModal"/> it sits over the scrim; without,
+    /// it floats over the page, which stays usable, under menus and other popups. The content's own size and margins
+    /// still apply along the edge. Default <see cref="CdsOverlayDock.None"/>.
+    /// </summary>
+    public CdsOverlayDock Dock { get; set; }
+
+    /// <summary>
+    /// Called when the scrim beside a docked modal overlay is tapped (a side panel's overlay). A centered modal covers the
+    /// scrim with its own surface and handles those taps itself.
+    /// </summary>
+    public Action? ScrimTapped { get; set; }
 
     /// <summary>The popup ignores input (hover tooltips).</summary>
     public bool InputTransparent { get; set; }

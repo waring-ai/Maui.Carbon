@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.CreateTearsheetPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+            <g:GalleryExample Title="Create tearsheet" Description="A multi-step create flow over the page: one step at a time, a progress indicator in the influencer column, Cancel, Back and Next. Next validates the step; the last step submits.">
+                <cds:CdsButton x:Name="WideButton" Text="Create topic" Kind="Tertiary" Clicked="OnWideClicked" />
+            </g:GalleryExample>
+            <g:GalleryExample Title="Create tearsheet narrow" Description="A one-step create form in a narrow tearsheet.">
+                <cds:CdsButton Text="Create partition" Kind="Tertiary" Clicked="OnNarrowClicked" />
+            </g:GalleryExample>
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+        </VerticalStackLayout>
+
+        <!-- Open when the page loads so it appears in screenshots. -->
+        <cds:CdsCreateTearsheet x:Name="Wide" IsOpen="True" Label="Event streams" Title="Create topic"
+                                Description="Topics hold the messages producers send. You can change most settings later."
+                                SubmitButtonText="Create topic" LauncherElement="{x:Reference WideButton}" Submitted="OnSubmitted">
+            <cds:CdsCreateStep x:Name="NameStep" Title="Topic name" Subtitle="Name the topic" FieldsetLegend="Topic name"
+                               Description="The name identifies the topic to producers and consumers. It cannot be changed.">
+                <cds:CdsStack Gap="5">
+                    <cds:CdsTextInput x:Name="TopicName" Label="Topic name" Placeholder="e.g. orders-eu" HelperText="Lowercase letters, numbers, dots and hyphens." />
+                </cds:CdsStack>
+            </cds:CdsCreateStep>
+            <cds:CdsCreateStep Title="Partitions" FieldsetLegend="Partitions"
+                               Description="More partitions let more consumers read in parallel.">
+                <cds:CdsStack Gap="5">
+                    <cds:CdsNumberInput Label="Partitions" Value="3" Min="1" Max="100" />
+                </cds:CdsStack>
+            </cds:CdsCreateStep>
+            <cds:CdsCreateStep Title="Message retention" SecondaryLabel="Optional" FieldsetLegend="Retention">
+                <cds:CdsStack Gap="5">
+                    <cds:CdsRadioButtonGroup x:Name="Retention" Legend="Keep messages for" />
+                    <cds:CdsCreateTearsheetDivider />
+                    <cds:CdsCheckbox Label="Compact the topic (keep the latest message per key)" />
+                </cds:CdsStack>
+            </cds:CdsCreateStep>
+        </cds:CdsCreateTearsheet>
+
+        <cds:CdsCreateTearsheetNarrow x:Name="Narrow" Title="Create partition" Label="orders-eu"
+                                      FormTitle="Partition details" FormDescription="New partitions start empty."
+                                      PrimaryButtonText="Create partition" RequestSubmit="OnNarrowSubmit">
+            <cds:CdsStack Gap="5">
+                <cds:CdsNumberInput Label="Number of partitions to add" Value="1" Min="1" Max="20" />
+            </cds:CdsStack>
+        </cds:CdsCreateTearsheetNarrow>
+    </Grid>
+</g:GalleryPage>

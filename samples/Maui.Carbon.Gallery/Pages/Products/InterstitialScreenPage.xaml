@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.InterstitialScreenPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Modal" Description="A large modal over a scrim: header with title and subtitle, the steps one at a time and the footer. One step shows only Get started; several add the progress indicator, Skip, Back and Next (Get started with an arrow on the last step). Escape and the close button close it; a tap on the scrim does not.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="SingleButton" Text="Show welcome" Clicked="OnSingleClicked" />
+                    <cds:CdsButton x:Name="MultiButton" Text="Show tour" Kind="Tertiary" Clicked="OnMultiClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Full screen" Description="IsFullScreen covers the whole page; it has no close button, so the footer (or Escape) leaves it.">
+                <cds:CdsButton x:Name="FullButton" Text="Show full-screen tour" Kind="Tertiary" Clicked="OnFullClicked" />
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Asynchronous actions and custom footer" Description="ActionHandler runs before each move or close: the button shows an inline loading until it ends, and it can cancel the move. FooterContent replaces the buttons with your own.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="AsyncButton" Text="Show tour with checks" Kind="Tertiary" Clicked="OnAsyncClicked" />
+                    <cds:CdsButton x:Name="CustomButton" Text="Show tour with own buttons" Kind="Tertiary" Clicked="OnCustomClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Inline, modal look" Description="IsInline draws the screen where it is declared, here on step 2 of 4 with Next disabled until a choice is made (DisabledButtons).">
+                <cds:CdsInterstitialScreen x:Name="InlineModal" IsInline="True" IsOpen="True" CurrentStep="1" DisabledButtons="Next"
+                                           HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Get set up in four steps"
+                                           RequestClose="OnInlineRequestClose" CurrentStepChanged="OnStepChanged">
+                    <cds:CdsInterstitialScreenView StepTitle="Create a topic">
+                        <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                            <cds:CdsText Text="Create your first topic" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                            <cds:CdsText Text="Topics hold the events your applications send. Name it after the events it carries, for example orders-created, and pick how many partitions it needs." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </cds:CdsInterstitialScreenView>
+                    <cds:CdsInterstitialScreenView StepTitle="Connect">
+                        <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                            <cds:CdsText Text="Connect a producer" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                            <cds:CdsText Text="Copy the bootstrap server address and create an API key with writer access. Your producer sends events to the topic over TLS." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </cds:CdsInterstitialScreenView>
+                    <cds:CdsInterstitialScreenView StepTitle="Consume">
+                        <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                            <cds:CdsText Text="Read events with a consumer group" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                            <cds:CdsText Text="Consumers in the same group share the partitions of a topic, so adding consumers spreads the load." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </cds:CdsInterstitialScreenView>
+                    <cds:CdsInterstitialScreenView StepTitle="Monitor">
+                        <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                            <cds:CdsText Text="Monitor throughput and lag" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                            <cds:CdsText Text="The dashboard shows bytes in and out per topic and how far each consumer group is behind." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </cds:CdsInterstitialScreenView>
+                </cds:CdsInterstitialScreen>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Inline, full-screen look" Description="The full-screen variant drawn in a 480-high slot: no border or close button, the body takes the height between header and footer.">
+                <cds:CdsInterstitialScreen IsInline="True" IsOpen="True" IsFullScreen="True" HeightRequest="480"
+                                           HeaderTitle="What's new in Event Streams" HeaderSubtitle="Schema registry is now included"
+                                           RequestClose="OnInlineRequestClose">
+                    <cds:CdsInterstitialScreenView StepTitle="Welcome">
+                        <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                            <cds:CdsText Text="Your instance is ready" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                            <cds:CdsText Text="Event Streams is a fully managed Kafka service. Start by creating a topic, then connect a producer and a consumer." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                        </VerticalStackLayout>
+                    </cds:CdsInterstitialScreenView>
+                </cds:CdsInterstitialScreen>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="A single-step screen in every theme: layer-01 header with its rule, background body and footer.">
+                <g:ThemeStrip>
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsInterstitialScreen IsInline="True" IsOpen="True" HeaderTitle="Welcome" HeaderSubtitle="Your instance is ready">
+                                <cds:CdsInterstitialScreenView StepTitle="Welcome">
+                                    <cds:CdsText Text="Create a topic, then connect a producer." TypeStyle="Body01" LineBreakMode="WordWrap" Margin="32,24,32,32" />
+                                </cds:CdsInterstitialScreenView>
+                            </cds:CdsInterstitialScreen>
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+            <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+
+        </VerticalStackLayout>
+
+        <!-- Declared screens: they draw nothing here and show in the page host while IsOpen is true. -->
+        <cds:CdsInterstitialScreen x:Name="SingleScreen" HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Your instance is ready"
+                                   LauncherElement="{x:Reference SingleButton}" RequestClose="OnRequestClose">
+            <cds:CdsInterstitialScreenView StepTitle="Welcome">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Your instance is ready" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Event Streams is a fully managed Kafka service. Start by creating a topic, then connect a producer and a consumer." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+        </cds:CdsInterstitialScreen>
+
+        <cds:CdsInterstitialScreen x:Name="MultiScreen" HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Get set up in four steps"
+                                   LauncherElement="{x:Reference MultiButton}" RequestClose="OnRequestClose" CurrentStepChanged="OnStepChanged">
+            <cds:CdsInterstitialScreenView StepTitle="Create a topic">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Create your first topic" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Topics hold the events your applications send. Name it after the events it carries, for example orders-created, and pick how many partitions it needs." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Connect">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Connect a producer" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Copy the bootstrap server address and create an API key with writer access. Your producer sends events to the topic over TLS." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Consume">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Read events with a consumer group" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Consumers in the same group share the partitions of a topic, so adding consumers spreads the load." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Monitor">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Monitor throughput and lag" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="The dashboard shows bytes in and out per topic and how far each consumer group is behind." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+        </cds:CdsInterstitialScreen>
+
+        <cds:CdsInterstitialScreen x:Name="FullScreen" IsFullScreen="True" HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Get set up in four steps"
+                                   LauncherElement="{x:Reference FullButton}" RequestClose="OnRequestClose" CurrentStepChanged="OnStepChanged">
+            <cds:CdsInterstitialScreenView StepTitle="Create a topic">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Create your first topic" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Topics hold the events your applications send. Name it after the events it carries, for example orders-created, and pick how many partitions it needs." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Connect">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Connect a producer" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Copy the bootstrap server address and create an API key with writer access. Your producer sends events to the topic over TLS." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Consume">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Read events with a consumer group" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Consumers in the same group share the partitions of a topic, so adding consumers spreads the load." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Monitor">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Monitor throughput and lag" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="The dashboard shows bytes in and out per topic and how far each consumer group is behind." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+        </cds:CdsInterstitialScreen>
+
+        <cds:CdsInterstitialScreen x:Name="AsyncScreen" HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Each step checks your setup"
+                                   LauncherElement="{x:Reference AsyncButton}" RequestClose="OnRequestClose" CurrentStepChanged="OnStepChanged">
+            <cds:CdsInterstitialScreenView StepTitle="Create a topic">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Create your first topic" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Topics hold the events your applications send. Name it after the events it carries, for example orders-created, and pick how many partitions it needs." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Connect">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Connect a producer" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Copy the bootstrap server address and create an API key with writer access. Your producer sends events to the topic over TLS." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Consume">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Read events with a consumer group" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Consumers in the same group share the partitions of a topic, so adding consumers spreads the load." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+        </cds:CdsInterstitialScreen>
+
+        <cds:CdsInterstitialScreen x:Name="CustomScreen" HeaderTitle="Welcome to Event Streams" HeaderSubtitle="Explore at your own pace"
+                                   LauncherElement="{x:Reference CustomButton}" RequestClose="OnRequestClose" CurrentStepChanged="OnCustomStepChanged">
+            <cds:CdsInterstitialScreen.FooterContent>
+                <Grid ColumnDefinitions="*,Auto,Auto" HeightRequest="64">
+                    <cds:CdsButton Text="Explore on my own" Kind="Ghost" Size="Xl" HorizontalOptions="Fill" Clicked="OnExploreClicked" />
+                    <cds:CdsButton x:Name="CustomPrevious" Grid.Column="1" Text="Previous" Kind="Secondary" Size="Xl" WidthRequest="240" Clicked="OnCustomPrevious" />
+                    <cds:CdsButton x:Name="CustomNext" Grid.Column="2" Text="Next" Icon="ArrowRight" Size="Xl" WidthRequest="240" Clicked="OnCustomNext" />
+                </Grid>
+            </cds:CdsInterstitialScreen.FooterContent>
+            <cds:CdsInterstitialScreenView StepTitle="Create a topic">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Create your first topic" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Topics hold the events your applications send. Name it after the events it carries, for example orders-created, and pick how many partitions it needs." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Connect">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Connect a producer" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Copy the bootstrap server address and create an API key with writer access. Your producer sends events to the topic over TLS." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+            <cds:CdsInterstitialScreenView StepTitle="Consume">
+                <VerticalStackLayout Spacing="16" Padding="32,32,32,48">
+                    <cds:CdsText Text="Read events with a consumer group" TypeStyle="Heading04" LineBreakMode="WordWrap" />
+                    <cds:CdsText Text="Consumers in the same group share the partitions of a topic, so adding consumers spreads the load." TypeStyle="Body01" LineBreakMode="WordWrap" MaximumWidthRequest="640" HorizontalOptions="Start" />
+                </VerticalStackLayout>
+            </cds:CdsInterstitialScreenView>
+        </cds:CdsInterstitialScreen>
+    </Grid>
+</g:GalleryPage>

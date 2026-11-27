@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.CreateFullPagePage">
+    <VerticalStackLayout Spacing="24">
+        <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+        <Border StrokeThickness="1" HeightRequest="720" x:Name="FlowFrame">
+            <cds:CdsCreateFullPage x:Name="Flow" Title="Create cluster" SecondaryTitle="Cluster setup"
+                                   SubmitButtonText="Create cluster" RequestClose="OnClose" Submitted="OnSubmitted"
+                                   InfluencerStepClicked="OnStepClicked">
+                <cds:CdsCreateFullPage.Breadcrumb>
+                    <cds:CdsBreadcrumb Size="Sm">
+                        <cds:CdsBreadcrumbItem Text="Kubernetes" />
+                        <cds:CdsBreadcrumbItem Text="Clusters" />
+                    </cds:CdsBreadcrumb>
+                </cds:CdsCreateFullPage.Breadcrumb>
+                <cds:CdsCreateStep Title="Location" FieldsetLegend="Location" Description="Where the cluster runs. Pick the region closest to your users.">
+                    <cds:CdsStack Gap="5" MaximumWidthRequest="480" HorizontalOptions="Start">
+                        <cds:CdsDropdown x:Name="RegionDropdown" Label="Region" />
+                        <cds:CdsCheckbox Label="Spread workers across three zones" IsChecked="True" />
+                    </cds:CdsStack>
+                </cds:CdsCreateStep>
+                <cds:CdsCreateStep Title="Worker pool" FieldsetLegend="Worker pool">
+                    <cds:CdsStack Gap="5" MaximumWidthRequest="480" HorizontalOptions="Start">
+                        <cds:CdsNumberInput Label="Workers per zone" Value="3" Min="1" Max="50" />
+                    </cds:CdsStack>
+                </cds:CdsCreateStep>
+                <cds:CdsCreateStep Title="Review" HasFieldset="False" Description="Check the settings, then create the cluster. It takes about 20 minutes." />
+            </cds:CdsCreateFullPage>
+        </Border>
+    </VerticalStackLayout>
+</g:GalleryPage>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.AboutModalPage">
+    <Grid>
+        <VerticalStackLayout Spacing="48">
+
+            <g:GalleryExample Title="Product information" Description="Logo, product name, version, links, legal text and copyright. Only the close button; without additional info a tap outside closes it too.">
+                <cds:CdsMaxWidthBox MaxContentWidth="640">
+                    <cds:CdsAboutModal IsInline="True" Title="IBM Product name" Version="Version 1.3.41"
+                                       LegalText="This Web site contains proprietary notices and copyright information, the terms of which must be observed and followed."
+                                       CopyrightText="Copyright © 2020, 2026 IBM Corp.">
+                        <cds:CdsAboutModal.Logo>
+                            <cds:CdsIcon Icon="Analytics" Size="64" />
+                        </cds:CdsAboutModal.Logo>
+                        <cds:CdsAboutModal.Links>
+                            <cds:CdsLink Text="Release notes" Href="https://www.ibm.com" />
+                            <cds:CdsLink Text="Support" Href="https://www.ibm.com" />
+                            <cds:CdsLink Text="Privacy" Href="https://www.ibm.com" />
+                        </cds:CdsAboutModal.Links>
+                    </cds:CdsAboutModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Additional info" Description="AdditionalInfo sits in a layer-02 footer, for example the technologies the product is built on.">
+                <cds:CdsMaxWidthBox MaxContentWidth="640">
+                    <cds:CdsAboutModal IsInline="True" Title="IBM Product name example that is longer than one line" Version="Version 2.0.0"
+                                       CopyrightText="Copyright © 2018, 2026 IBM Corp.">
+                        <cds:CdsAboutModal.Logo>
+                            <cds:CdsIcon Icon="AiGenerate" Size="64" />
+                        </cds:CdsAboutModal.Logo>
+                        <cds:CdsAboutModal.AdditionalInfo>
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsText Text="Powered by" TypeStyle="Label01" Tone="Secondary" />
+                                <HorizontalStackLayout Spacing="16">
+                                    <cds:CdsIcon Icon="Analytics" Size="32" />
+                                    <cds:CdsIcon Icon="Activity" Size="32" />
+                                    <cds:CdsIcon Icon="Bee" Size="32" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </cds:CdsAboutModal.AdditionalInfo>
+                    </cds:CdsAboutModal>
+                </cds:CdsMaxWidthBox>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Interactive" Description="Opens the real modal from a help menu style button.">
+                <VerticalStackLayout Spacing="16">
+                    <cds:CdsButton x:Name="AboutButton" Text="About this product" Kind="Tertiary" Clicked="OnAboutClicked" HorizontalOptions="Start" />
+                    <cds:CdsText x:Name="Status" Tone="Secondary" Text="No action yet" />
+                </VerticalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="Themes" Description="The about modal in every theme.">
+                <g:ThemeStrip MinimumZoneWidth="320">
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <cds:CdsAboutModal IsInline="True" Title="IBM Product name" Version="Version 1.3.41" CopyrightText="Copyright © 2020, 2026 IBM Corp.">
+                                <cds:CdsAboutModal.Logo>
+                                    <cds:CdsIcon Icon="Analytics" Size="48" />
+                                </cds:CdsAboutModal.Logo>
+                                <cds:CdsAboutModal.Links>
+                                    <cds:CdsLink Text="Release notes" />
+                                    <cds:CdsLink Text="Support" />
+                                </cds:CdsAboutModal.Links>
+                            </cds:CdsAboutModal>
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
+        </VerticalStackLayout>
+
+        <cds:CdsAboutModal x:Name="AboutModal" Title="IBM Product name" Version="Version 1.3.41"
+                           LegalText="IBM grants you a non-exclusive, non-transferable, limited permission to access and display the Web pages within this site as a customer or potential customer of IBM."
+                           CopyrightText="Copyright © 2020, 2026 IBM Corp." LauncherElement="{x:Reference AboutButton}" RequestClose="OnRequestClose">
+            <cds:CdsAboutModal.Logo>
+                <cds:CdsIcon Icon="Analytics" Size="64" />
+            </cds:CdsAboutModal.Logo>
+            <cds:CdsAboutModal.Links>
+                <cds:CdsLink Text="Release notes" Href="https://www.ibm.com" />
+                <cds:CdsLink Text="Support" Href="https://www.ibm.com" />
+            </cds:CdsAboutModal.Links>
+        </cds:CdsAboutModal>
+    </Grid>
+</g:GalleryPage>

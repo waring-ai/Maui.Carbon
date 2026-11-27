@@ -15,6 +15,7 @@ public partial class CdsOverlayHost : Grid
     readonly View _content;
     readonly ContentView _dismissLayer;
     readonly AbsoluteLayout _popupLayer;
+    readonly Grid _panelLayer;
     readonly Grid _modalLayer;
     readonly BoxView _scrim;
     readonly VerticalStackLayout _toastLayer;
@@ -37,9 +38,14 @@ public partial class CdsOverlayHost : Grid
         _dismissLayer.GestureRecognizers.Add(tap);
 
         _popupLayer = new AbsoluteLayout { InputTransparent = true, CascadeInputTransparent = false };
+        _panelLayer = new Grid { InputTransparent = true, CascadeInputTransparent = false };
 
         _scrim = new BoxView();
         _scrim.SetDynamicResource(BoxView.ColorProperty, CdsColorKeys.Overlay);
+        var scrimTap = new TapGestureRecognizer();
+        scrimTap.Tapped += (_, _) => OnScrimTapped();
+        _scrim.GestureRecognizers.Add(scrimTap);
+        AutomationProperties.SetIsInAccessibleTree(_scrim, false);
         _modalLayer = new Grid { IsVisible = false };
         _modalLayer.Children.Add(_scrim);
 
@@ -53,10 +59,14 @@ public partial class CdsOverlayHost : Grid
             CascadeInputTransparent = false,
         };
 
+        // Bottom to top: the page, docked non-modal panels, modals over their scrim, then the light-dismiss catcher and
+        // the popups, so a menu, list box or tooltip opened from inside a modal or panel draws above it and a tap beside
+        // it closes the popup, not the modal.
         Children.Add(_breakpointScope);
+        Children.Add(_panelLayer);
+        Children.Add(_modalLayer);
         Children.Add(_dismissLayer);
         Children.Add(_popupLayer);
-        Children.Add(_modalLayer);
         Children.Add(_toastLayer);
 
         SizeChanged += OnHostSizeChanged;
@@ -101,6 +111,9 @@ public partial class CdsOverlayHost : Grid
     /// <summary>How far the modal and dialog container slides: it enters from 24px above its place and leaves the same way.</summary>
     internal const double SlideDistance = -24;
 
+    /// <summary>How far a docked panel slides (Carbon's side panel <c>--panel-transform</c>, 320px).</summary>
+    internal const double PanelSlideDistance = 320;
+
     /// <summary>Finds the host of the page that contains <paramref name="element"/>.</summary>
     public static CdsOverlayHost? Find(Element? element)
     {
@@ -124,11 +137,21 @@ public partial class CdsOverlayHost : Grid
         var overlay = new CdsOverlay(this, content, options, context);
         _overlays.Add(overlay);
 
-        overlay.Layer = options.IsModal ? CdsOverlayLayer.Modal : options.Anchor is null ? CdsOverlayLayer.Toast : CdsOverlayLayer.Popup;
+        var docked = options.Anchor is null && options.Dock != CdsOverlayDock.None;
+        var corner = docked && options.Dock == CdsOverlayDock.TopEnd && !options.IsModal;
+        overlay.Layer = options.IsModal ? CdsOverlayLayer.Modal
+            : corner ? CdsOverlayLayer.Popup
+            : docked ? CdsOverlayLayer.Panel
+            : options.Anchor is null ? CdsOverlayLayer.Toast
+            : CdsOverlayLayer.Popup;
+        if (docked) Dock(overlay.Container, options.Dock);
         if (options.IsModal)
         {
-            overlay.Container.HorizontalOptions = content.HorizontalOptions;
-            overlay.Container.VerticalOptions = content.VerticalOptions;
+            if (!docked)
+            {
+                overlay.Container.HorizontalOptions = content.HorizontalOptions;
+                overlay.Container.VerticalOptions = content.VerticalOptions;
+            }
             _modalLayer.Children.Add(overlay.Container);
             _modalLayer.IsVisible = true;
             _modalLayer.InputTransparent = false;
@@ -138,13 +161,27 @@ public partial class CdsOverlayHost : Grid
             if (ShouldAnimate(overlay))
             {
                 _scrim.Opacity = 0;
-                _ = _scrim.FadeToAsync(1, CdsDuration.Moderate02, EntranceEasing);
-                AnimateIn(overlay.Container);
+                var motion = SlideMotion(options.Dock, Height);
+                _ = _scrim.FadeToAsync(1, motion.Duration, motion.Entrance);
+                AnimateIn(overlay.Container, options.Dock);
             }
             else
             {
                 _scrim.Opacity = 1;
             }
+        }
+        else if (corner)
+        {
+            // Pinned to the top end corner of the popup layer, so the light-dismiss catcher under it closes it.
+            AbsoluteLayout.SetLayoutFlags(overlay.Container, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.XProportional);
+            AbsoluteLayout.SetLayoutBounds(overlay.Container, new Rect(1, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+            _popupLayer.Children.Add(overlay.Container);
+            if (ShouldAnimate(overlay)) AnimateIn(overlay.Container, options.Dock);
+        }
+        else if (docked)
+        {
+            _panelLayer.Children.Add(overlay.Container);
+            if (ShouldAnimate(overlay)) AnimateIn(overlay.Container, options.Dock);
         }
         else if (options.Anchor is null)
         {
@@ -185,7 +222,7 @@ public partial class CdsOverlayHost : Grid
             if (ShouldAnimate(overlay))
             {
                 if (last) _modalLayer.InputTransparent = true;
-                _ = AnimateOutAsync(overlay.Container, last ? _scrim : null, () =>
+                _ = AnimateOutAsync(overlay.Container, last ? _scrim : null, overlay.Options.Dock, () =>
                 {
                     Release(_modalLayer, overlay);
                     if (!HasModal) _modalLayer.IsVisible = false;
@@ -197,10 +234,19 @@ public partial class CdsOverlayHost : Grid
                 if (last) _modalLayer.IsVisible = false;
             }
         }
+        else if (overlay.Layer == CdsOverlayLayer.Panel)
+        {
+            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, overlay.Options.Dock, () => Release(_panelLayer, overlay));
+            else Release(_panelLayer, overlay);
+        }
         else if (overlay.Layer == CdsOverlayLayer.Toast)
         {
-            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, () => Release(_toastLayer, overlay));
+            if (ShouldAnimate(overlay)) _ = AnimateOutAsync(overlay.Container, null, CdsOverlayDock.None, () => Release(_toastLayer, overlay));
             else Release(_toastLayer, overlay);
+        }
+        else if (overlay.Options.Dock == CdsOverlayDock.TopEnd && overlay.Options.Anchor is null && ShouldAnimate(overlay))
+        {
+            _ = AnimateOutAsync(overlay.Container, null, CdsOverlayDock.TopEnd, () => Release(_popupLayer, overlay));
         }
         else
         {
@@ -277,25 +323,58 @@ public partial class CdsOverlayHost : Grid
     static bool ShouldAnimate(CdsOverlay overlay) =>
         overlay.Options.Animate && !CdsMotion.IsReducedMotion && overlay.Container.Handler is not null;
 
-    static void AnimateIn(View container)
+    static void Dock(View container, CdsOverlayDock dock)
     {
-        container.Opacity = 0;
-        container.TranslationY = SlideDistance;
-        _ = container.FadeToAsync(1, CdsDuration.Moderate02, EntranceEasing);
-        _ = container.TranslateToAsync(0, 0, CdsDuration.Moderate02, EntranceEasing);
+        container.HorizontalOptions = dock switch
+        {
+            CdsOverlayDock.Start => LayoutOptions.Start,
+            CdsOverlayDock.End or CdsOverlayDock.TopEnd => LayoutOptions.End,
+            _ => LayoutOptions.Fill,
+        };
+        container.VerticalOptions = dock switch
+        {
+            CdsOverlayDock.Bottom => LayoutOptions.End,
+            CdsOverlayDock.TopEnd => LayoutOptions.Start,
+            _ => LayoutOptions.Fill,
+        };
     }
 
-    static async Task AnimateOutAsync(View container, View? scrim, Action remove)
+    /// <summary>
+    /// How a container moves in and out: modals and dialogs drop 24px with expressive motion over moderate-02; side
+    /// panels slide 320px from their edge with productive motion over moderate-01; tearsheets rise from the bottom by
+    /// <c>min(95vh, 500px)</c> with expressive motion over moderate-02.
+    /// </summary>
+    internal static (Point Offset, uint Duration, Easing Entrance, Easing Exit) SlideMotion(CdsOverlayDock dock, double hostHeight) => dock switch
+    {
+        CdsOverlayDock.Start => (new Point(-PanelSlideDistance, 0), CdsDuration.Moderate01, CdsEasing.EntranceProductive, CdsEasing.ExitProductive),
+        CdsOverlayDock.End => (new Point(PanelSlideDistance, 0), CdsDuration.Moderate01, CdsEasing.EntranceProductive, CdsEasing.ExitProductive),
+        CdsOverlayDock.Bottom => (new Point(0, Math.Min(hostHeight > 0 ? hostHeight * 0.95 : 500, 500)), CdsDuration.Moderate02, EntranceEasing, ExitEasing),
+        CdsOverlayDock.TopEnd => (new Point(0, -Math.Min(hostHeight > 0 ? hostHeight : 616, 616)), CdsDuration.Moderate02, CdsEasing.StandardProductive, CdsEasing.StandardProductive),
+        _ => (new Point(0, SlideDistance), CdsDuration.Moderate02, EntranceEasing, ExitEasing),
+    };
+
+    void AnimateIn(View container, CdsOverlayDock dock = CdsOverlayDock.None)
+    {
+        var (from, duration, easing, _) = SlideMotion(dock, Height);
+        container.Opacity = 0;
+        container.TranslationX = from.X;
+        container.TranslationY = from.Y;
+        _ = container.FadeToAsync(1, duration, easing);
+        _ = container.TranslateToAsync(0, 0, duration, easing);
+    }
+
+    async Task AnimateOutAsync(View container, View? scrim, CdsOverlayDock dock, Action remove)
     {
         // Already out of the overlay list: it must not take taps or be read while it fades.
         container.InputTransparent = true;
         AutomationProperties.SetExcludedWithChildren(container, true);
+        var (to, duration, _, easing) = SlideMotion(dock, Height);
         var fades = new List<Task>
         {
-            container.FadeToAsync(0, CdsDuration.Moderate02, ExitEasing),
-            container.TranslateToAsync(0, SlideDistance, CdsDuration.Moderate02, ExitEasing),
+            container.FadeToAsync(0, duration, easing),
+            container.TranslateToAsync(to.X, to.Y, duration, easing),
         };
-        if (scrim is not null) fades.Add(scrim.FadeToAsync(0, CdsDuration.Moderate02, ExitEasing));
+        if (scrim is not null) fades.Add(scrim.FadeToAsync(0, duration, easing));
         try
         {
             await Task.WhenAll(fades);
@@ -303,6 +382,16 @@ public partial class CdsOverlayHost : Grid
         finally
         {
             remove();
+        }
+    }
+
+    void OnScrimTapped()
+    {
+        for (var i = _overlays.Count - 1; i >= 0; i--)
+        {
+            if (_overlays[i].Layer != CdsOverlayLayer.Modal) continue;
+            _overlays[i].Options.ScrimTapped?.Invoke();
+            return;
         }
     }
 
@@ -349,6 +438,8 @@ internal enum CdsOverlayLayer
     Popup,
     Modal,
     Toast,
+    /// <summary>A docked, non-modal panel (side panel without overlay): over the page, under modals and popups.</summary>
+    Panel,
 }
 
 /// <summary>Keys the platform layer should capture right now.</summary>

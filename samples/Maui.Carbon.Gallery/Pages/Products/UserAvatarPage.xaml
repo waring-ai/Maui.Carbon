@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<g:GalleryPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
+               xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               x:Class="Maui.Carbon.Gallery.Pages.Products.UserAvatarPage">
+    <VerticalStackLayout Spacing="48">
+
+        <g:GalleryExample Title="Sizes" Description="sm 24 (label-01), md 32 (default, body-compact-01), lg 48 (heading-03), xl 64 (heading-04). One word gives its first two letters; more give the first and last initials.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsUserAvatar Name="Thomas J. Watson" Size="Sm" VerticalOptions="End" />
+                <cds:CdsUserAvatar Name="Thomas J. Watson" VerticalOptions="End" />
+                <cds:CdsUserAvatar Name="Thomas J. Watson" Size="Lg" VerticalOptions="End" />
+                <cds:CdsUserAvatar Name="Thomas J. Watson" Size="Xl" VerticalOptions="End" />
+                <cds:CdsUserAvatar Name="Thomas" Size="Xl" AvatarColor="Order5Purple" VerticalOptions="End" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Colors" Description="Twelve background colors in assignment order: six mid tones, then six deep ones. Give the people in one view different colors.">
+            <g:WrapLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Thomas J. Watson" AvatarColor="Order1Cyan" Size="Lg" />
+                    <cds:CdsText Text="Thomas J. Watson" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Ada Lovelace" AvatarColor="Order2Gray" Size="Lg" />
+                    <cds:CdsText Text="Ada Lovelace" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Grace Hopper" AvatarColor="Order3Green" Size="Lg" />
+                    <cds:CdsText Text="Grace Hopper" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Alan Turing" AvatarColor="Order4Magenta" Size="Lg" />
+                    <cds:CdsText Text="Alan Turing" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Katherine Johnson" AvatarColor="Order5Purple" Size="Lg" />
+                    <cds:CdsText Text="Katherine Johnson" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Linus Torvalds" AvatarColor="Order6Teal" Size="Lg" />
+                    <cds:CdsText Text="Linus Torvalds" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Margaret Hamilton" AvatarColor="Order7Cyan" Size="Lg" />
+                    <cds:CdsText Text="Margaret Hamilton" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Dennis Ritchie" AvatarColor="Order8Gray" Size="Lg" />
+                    <cds:CdsText Text="Dennis Ritchie" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Barbara Liskov" AvatarColor="Order9Green" Size="Lg" />
+                    <cds:CdsText Text="Barbara Liskov" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Tim Berners-Lee" AvatarColor="Order10Magenta" Size="Lg" />
+                    <cds:CdsText Text="Tim Berners-Lee" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Frances Allen" AvatarColor="Order11Purple" Size="Lg" />
+                    <cds:CdsText Text="Frances Allen" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="8" Margin="0,0,24,24" WidthRequest="104">
+                    <cds:CdsUserAvatar Name="Ken Thompson" AvatarColor="Order12Teal" Size="Lg" />
+                    <cds:CdsText Text="Ken Thompson" TypeStyle="Label01" Tone="Secondary" />
+                </VerticalStackLayout>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Icons" Description="With no name the avatar shows the user icon; Icon replaces the initials (a team, a service account). A photo (Image with ImageDescription) takes precedence over both and is clipped to the circle.">
+            <HorizontalStackLayout Spacing="16">
+                <cds:CdsUserAvatar Size="Lg" />
+                <cds:CdsUserAvatar Size="Lg" Icon="Events" AvatarColor="Order6Teal" />
+                <cds:CdsUserAvatar Size="Lg" Icon="UserAvatar" AvatarColor="Order11Purple" />
+                <cds:CdsUserAvatar Size="Xl" Icon="Events" AvatarColor="Order3Green" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Tooltip" Description="With TooltipText the avatar is a focusable trigger: hover or Tab to it to show the name. TooltipPlacement sets the side (bottom by default).">
+            <HorizontalStackLayout Spacing="24">
+                <cds:CdsUserAvatar Name="Thomas J. Watson" TooltipText="TW, Thomas J. Watson user profile" />
+                <cds:CdsUserAvatar Name="Ada Lovelace" AvatarColor="Order2Gray" TooltipText="Ada Lovelace" TooltipPlacement="Right" />
+                <cds:CdsUserAvatar Icon="Events" AvatarColor="Order6Teal" TooltipText="Platform team" TooltipPlacement="Top" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Interactive" Description="Type a name; the initials and the label update.">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput x:Name="NameInput" Label="Assignee" Text="Grace Hopper" TextChanged="OnNameChanged" />
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsUserAvatar x:Name="Live" Name="Grace Hopper" AvatarColor="Order3Green" Size="Lg" />
+                    <cds:CdsText x:Name="Status" Text="Initials: GH" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <cds:CdsButton Text="Next color" Kind="Tertiary" Size="Md" Clicked="OnNextColorClicked" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Themes" Description="Light themes use the darker step of each hue with white initials; dark themes use the lighter step with dark initials.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <g:WrapLayout>
+                            <cds:CdsUserAvatar Name="Thomas J. Watson" AvatarColor="Order1Cyan" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Ada Lovelace" AvatarColor="Order2Gray" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Grace Hopper" AvatarColor="Order3Green" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Alan Turing" AvatarColor="Order4Magenta" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Katherine Johnson" AvatarColor="Order5Purple" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Linus Torvalds" AvatarColor="Order6Teal" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Margaret Hamilton" AvatarColor="Order7Cyan" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Dennis Ritchie" AvatarColor="Order8Gray" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Barbara Liskov" AvatarColor="Order9Green" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Tim Berners-Lee" AvatarColor="Order10Magenta" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Frances Allen" AvatarColor="Order11Purple" Margin="0,0,8,8" />
+                            <cds:CdsUserAvatar Name="Ken Thompson" AvatarColor="Order12Teal" Margin="0,0,8,8" />
+                        </g:WrapLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="On layers" Description="Avatars keep their color on every layer.">
+            <g:ThemeStrip Layered="True">
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <HorizontalStackLayout Spacing="8">
+                            <cds:CdsUserAvatar Name="Thomas J. Watson" />
+                            <cds:CdsUserAvatar Name="Ada Lovelace" AvatarColor="Order4Magenta" />
+                            <cds:CdsUserAvatar Icon="Events" AvatarColor="Order8Gray" />
+                        </HorizontalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
+    </VerticalStackLayout>
+</g:GalleryPage>

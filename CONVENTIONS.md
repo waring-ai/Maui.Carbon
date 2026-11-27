@@ -15,6 +15,11 @@ Copy their structure.
   Search it with `grep -n 'cds--<name>' design/carbon/components/bundle.css`.
 - `design/carbon/README.md`: the design language (layers, focus, states, content rules).
 - Never invent token values or measurements. When the CSS says `padding-inline: 1rem`, that is `CdsSpacing.Spacing05`.
+- Components from Carbon for IBM Products (`Components/Products/`) have their specs in
+  `design/ibm-products/components/<Name>/README.md`, hand-written from the `@carbon/ibm-products` sources
+  (`packages/ibm-products/src/components/<Name>` for props and behavior, `packages/ibm-products-styles/src/components/<Name>`
+  for measurements) of https://github.com/carbon-design-system/ibm-products. Only components the package marks as
+  released (`src/global/js/package-settings.js`) are implemented. A spec names the commit it was written from.
 
 ## 2. Ownership: what you may touch
 
@@ -32,7 +37,7 @@ If you genuinely need a foundation change (a new platform hook, a new token help
 report; the orchestrator implements it between waves. Do not add NuGet packages.
 
 Categories (folder names): `Actions`, `Forms`, `FluidForms`, `Data`, `Navigation`, `Containers`, `Overlays`,
-`Feedback`, `AI`, `Layout`, `Patterns`.
+`Feedback`, `AI`, `Layout`, `Products` (Carbon for IBM Products components), `Patterns`.
 
 ## 3. Files per component
 
