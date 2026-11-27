@@ -27,6 +27,11 @@ public class CdsComposedModal : CdsControl
     public static readonly BindableProperty PreventCloseOnClickOutsideProperty = BindableProperty.Create(
         nameof(PreventCloseOnClickOutside), typeof(bool), typeof(CdsComposedModal), false);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsComposedModal), null,
+        propertyChanged: static (b, _, _) => ((CdsComposedModal)b).SyncDecorator());
+
     /// <summary>Bindable property for <see cref="LauncherElement"/>.</summary>
     public static readonly BindableProperty LauncherElementProperty = BindableProperty.Create(
         nameof(LauncherElement), typeof(VisualElement), typeof(CdsComposedModal), null);
@@ -39,6 +44,8 @@ public class CdsComposedModal : CdsControl
     readonly List<View> _parts = [];
     CdsModalSurface? _surface;
     CdsModalFooter? _footer;
+    CdsModalHeader? _header;
+    View? _forwarded;
     Action? _unwire;
     bool _openedOnLoad;
 
@@ -106,6 +113,24 @@ public class CdsComposedModal : CdsControl
         get => (bool)GetValue(PreventCloseOnClickOutsideProperty);
         set => SetValue(PreventCloseOnClickOutsideProperty, value);
     }
+
+    /// <summary>
+    /// A view in the header before the close button (Carbon's <c>decorator</c> slot). A <see cref="CdsAILabel"/> is shown at size
+    /// <see cref="CdsAILabelSize.Sm"/> (32) and gives the modal Carbon's AI presence: the AI aura rising from the bottom edge, a gradient
+    /// border, the AI drop shadow and the <c>ai-overlay</c> scrim. Like Carbon, the AI presence stays while the label shows its revert
+    /// button (<see cref="CdsAILabel.IsRevertActive"/>); only removing the label takes it away. Use it when AI generated the whole
+    /// content of the modal; when only part of it is AI, put the label on that field or tile. Any other view is placed in the slot without
+    /// AI styling. The view's bindings resolve while the modal is open.
+    /// </summary>
+    /// <remarks>It is placed in the <see cref="CdsModalHeader"/> part (see <see cref="CdsModalHeader.Decorator"/>); a modal without a header part has no slot and ignores it.</remarks>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>Whether the modal shows Carbon's AI presence: its <see cref="Decorator"/> is a <see cref="CdsAILabel"/>.</summary>
+    public bool IsAiPresence => Decorator is CdsAILabel;
 
     /// <summary>The element that opened the modal; focus returns to it on close.</summary>
     public VisualElement? LauncherElement
@@ -184,6 +209,8 @@ public class CdsComposedModal : CdsControl
         }
         SyncClose();
         _footer = footer;
+        _header = header;
+        SyncDecorator();
         var wiredHeader = header;
         var wiredFooter = footer;
         _unwire = () =>
@@ -192,6 +219,8 @@ public class CdsComposedModal : CdsControl
             {
                 wiredHeader.CloseButtonClicked -= OnHeaderClose;
                 wiredHeader.IsCloseEnabled = true;
+                // Hand the decorator back: it is shown by the header of the next opening.
+                if (_forwarded is not null && ReferenceEquals(wiredHeader.Decorator, _forwarded)) wiredHeader.Decorator = null;
             }
             if (wiredFooter is not null)
             {
@@ -237,6 +266,23 @@ public class CdsComposedModal : CdsControl
         _unwire = null;
         _surface = null;
         _footer = null;
+        _header = null;
+        _forwarded = null;
+    }
+
+    // Forwards the decorator to the shown header part. A decorator the app put on the header itself stays unless this modal has one.
+    void SyncDecorator()
+    {
+        if (_header is not { } header) return;
+        var decorator = Decorator;
+        if (decorator is null)
+        {
+            if (_forwarded is not null && ReferenceEquals(header.Decorator, _forwarded)) header.Decorator = null;
+            _forwarded = null;
+            return;
+        }
+        header.Decorator = decorator;
+        _forwarded = decorator;
     }
 
     /// <summary>True while the shown footer's submit runs: the modal cannot be closed from its chrome.</summary>

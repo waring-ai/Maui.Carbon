@@ -197,14 +197,14 @@ public partial class CdsSlider
         set => SetValue(MaxLabelProperty, value);
     }
 
-    /// <summary>Formats the min and max labels and the spoken value (Carbon's <c>formatLabel</c>); overrides <see cref="MinLabel"/> and <see cref="MaxLabel"/>.</summary>
+    /// <summary>Formats the min and max labels, the spoken value and the thumb tooltip (Carbon's <c>formatLabel</c>); overrides <see cref="MinLabel"/> and <see cref="MaxLabel"/>.</summary>
     public Func<double, string>? ValueFormatter
     {
         get => (Func<double, string>?)GetValue(ValueFormatterProperty);
         set => SetValue(ValueFormatterProperty, value);
     }
 
-    /// <summary>Removes the number box(es).</summary>
+    /// <summary>Removes the number box(es). Each thumb then shows its value, formatted by <see cref="ValueFormatter"/>, in a tooltip on hover, keyboard focus and while it is dragged.</summary>
     public bool HideTextInput
     {
         get => (bool)GetValue(HideTextInputProperty);

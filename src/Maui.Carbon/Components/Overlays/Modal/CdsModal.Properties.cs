@@ -78,6 +78,11 @@ public partial class CdsModal
         nameof(CloseButtonLabel), typeof(string), typeof(CdsModal), "Close",
         propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsModal), null,
+        propertyChanged: static (b, _, _) => ((CdsModal)b).SyncParts());
+
     /// <summary>Bindable property for <see cref="LauncherElement"/>.</summary>
     public static readonly BindableProperty LauncherElementProperty = BindableProperty.Create(
         nameof(LauncherElement), typeof(VisualElement), typeof(CdsModal), null);
@@ -218,6 +223,23 @@ public partial class CdsModal
         get => (string)GetValue(CloseButtonLabelProperty);
         set => SetValue(CloseButtonLabelProperty, value);
     }
+
+    /// <summary>
+    /// A view in the header before the close button (Carbon's <c>decorator</c> slot). A <see cref="CdsAILabel"/> is shown at size
+    /// <see cref="CdsAILabelSize.Sm"/> (32) and gives the modal Carbon's AI presence: the AI aura rising from the bottom edge, a gradient
+    /// border, the AI drop shadow and the <c>ai-overlay</c> scrim. Like Carbon, the AI presence stays while the label shows its revert
+    /// button (<see cref="CdsAILabel.IsRevertActive"/>); only removing the label takes it away. Use it when AI generated the whole
+    /// content of the modal; when only part of it is AI, put the label on that field or tile. Any other view is placed in the slot without
+    /// AI styling. The view's bindings resolve while the modal is open.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>Whether the modal shows Carbon's AI presence: its <see cref="Decorator"/> is a <see cref="CdsAILabel"/>.</summary>
+    public bool IsAiPresence => Decorator is CdsAILabel;
 
     /// <summary>
     /// The element that opened the modal; focus returns to it on close (<c>launcherButtonRef</c>). When it is not set,

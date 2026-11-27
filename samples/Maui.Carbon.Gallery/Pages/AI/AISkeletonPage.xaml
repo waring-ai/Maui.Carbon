@@ -6,7 +6,7 @@
                x:Class="Maui.Carbon.Gallery.Pages.AI.AISkeletonPage">
     <VerticalStackLayout Spacing="48">
 
-        <g:GalleryExample Title="Text" Description="16 high lines (24 for a heading), fully rounded, tag-background-blue with a fast sliding interactive shimmer (1250ms), 8 between lines. A paragraph varies the line widths.">
+        <g:GalleryExample Title="Text" Description="16 high lines (24 for a heading), fully rounded, ai-skeleton-background with a fast sliding ai-skeleton-element-background shimmer (1250ms), 8 between lines. A paragraph varies the line widths.">
             <VerticalStackLayout Spacing="24" WidthRequest="560" HorizontalOptions="Start">
                 <cds:CdsAISkeletonText />
                 <cds:CdsAISkeletonText IsHeading="True" WidthPercent="60" />
@@ -36,7 +36,7 @@
             </Border>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Themes" Description="The fill is tag-background-blue (exact in white and g10, a brighter blue than Carbon in g90 and g100); the shimmer is interactive at 50% opacity.">
+        <g:GalleryExample Title="Themes" Description="The fill is ai-skeleton-background and the shimmer ai-skeleton-element-background at 50% opacity, Carbon's AI tokens in every theme.">
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>

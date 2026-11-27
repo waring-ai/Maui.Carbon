@@ -86,7 +86,8 @@ internal sealed class CdsIconTooltip
             Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing01),
             LineBreakMode = LineBreakMode.WordWrap,
         };
-        var surface = new CdsPopoverSurface(text, hasCaret: true, highContrast: IsHighContrast, dropShadow: HasDropShadow, maxWidth: 288);
+        var surface = new CdsPopoverSurface(text, hasCaret: true, highContrast: IsHighContrast, dropShadow: HasDropShadow, maxWidth: 288,
+            caretWidth: CdsPopoverSurface.TooltipCaretWidth, caretHeight: CdsPopoverSurface.TooltipCaretHeight);
         _overlay = CdsOverlayService.Open(surface, new CdsOverlayOptions
         {
             Anchor = _anchor,

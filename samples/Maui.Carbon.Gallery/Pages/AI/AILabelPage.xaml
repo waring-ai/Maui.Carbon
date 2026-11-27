@@ -28,7 +28,7 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Explainability callout" Description="8px radius, 1px gradient border from tag-background-blue to border-interactive, background fill fading to a blue tint at the bottom, 280 minimum width, 24 padding with 80 at the bottom for the actions toolbar (docked right, no gaps). Shown here as a static preview; click a label above or below to open it for real.">
+        <g:GalleryExample Title="Explainability callout" Description="8px radius, 1px gradient border from ai-border-start to ai-border-end, background fill fading to a blue tint at the bottom, 280 minimum width, 24 padding with 80 at the bottom for the actions toolbar (docked right, no gaps). Shown here as a static preview; click a label above or below to open it for real.">
             <ContentView x:Name="CalloutHost" HorizontalOptions="Start" />
         </g:GalleryExample>
 
@@ -78,7 +78,7 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
-        <g:GalleryExample Title="Themes" Description="The AI treatment is built from highlight, tag-background-blue, border-interactive and background, so it follows each theme.">
+        <g:GalleryExample Title="Themes" Description="The AI treatment uses Carbon's ai-* tokens (aura, border, shadow, callout background), so it follows each theme.">
             <g:ThemeStrip>
                 <g:ThemeStrip.Template>
                     <DataTemplate>

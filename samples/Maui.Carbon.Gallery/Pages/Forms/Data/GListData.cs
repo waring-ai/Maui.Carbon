@@ -68,6 +68,15 @@ public static class GListData
 
     public static readonly string[] Statuses = ["Succeeded", "In progress", "Failed"];
 
+    /// <summary>Roles for the "select all" examples; the owner role cannot be chosen or cleared by the parent row.</summary>
+    public static readonly string[] AccessRoles = ["Viewer", "Operator", "Editor", "Administrator", "Owner"];
+
+    public static readonly string[] SelectedAccessRoles = ["Viewer", "Editor"];
+
+    public static readonly string[] SelectedEnabledRoles = ["Viewer", "Operator", "Editor", "Administrator"];
+
+    public static readonly Func<object?, bool> IsOwnerRole = static o => o as string == "Owner";
+
     /// <summary>Preselected items for the multi-select (arrays are fixed-size, so each control copies them on change).</summary>
     public static readonly string[] SelectedEvents = ["Deployment failed", "Certificate expiring"];
 

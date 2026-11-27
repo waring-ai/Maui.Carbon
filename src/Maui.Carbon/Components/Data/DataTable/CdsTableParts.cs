@@ -39,6 +39,16 @@ public class CdsTableHeader : BindableObject
     public static readonly BindableProperty DescriptionProperty = BindableProperty.Create(
         nameof(Description), typeof(string), typeof(CdsTableHeader), null, propertyChanged: OnStructureChanged);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsTableHeader), null,
+        propertyChanged: static (b, _, n) =>
+        {
+            // Carbon: an AILabel in a table is always size mini.
+            if (n is CdsAILabel label) label.Size = CdsAILabelSize.Mini;
+            OnStructureChanged(b, null, n);
+        });
+
     internal event EventHandler? Changed;
 
     internal event EventHandler? VisualChanged;
@@ -100,6 +110,23 @@ public class CdsTableHeader : BindableObject
         get => (string?)GetValue(DescriptionProperty);
         set => SetValue(DescriptionProperty, value);
     }
+
+    /// <summary>
+    /// A view at the end of the header cell, after the label and the sort arrow (Carbon's <c>decorator</c> of <c>TableHeader</c>). A
+    /// <see cref="CdsAILabel"/> is shown at its mini size and gives the whole column Carbon's AI presence: an <c>ai-aura-start-sm</c>
+    /// gradient in the header cell and in every body cell of the column, and a 1px <c>ai-border-strong</c> line along the top of the header.
+    /// Carbon decides this by the label's type only, so the styling stays while the label shows its revert button
+    /// (<see cref="CdsAILabel.IsRevertActive"/>). Any other view is placed in the slot without AI styling. The label is its own button and
+    /// does not sort the column.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>The column has Carbon's AI presence: its <see cref="Decorator"/> is a <see cref="CdsAILabel"/>.</summary>
+    internal bool IsAi => Decorator is CdsAILabel;
 
     /// <summary>When true the cell has no padding (columns of controls that bring their own).</summary>
     internal bool IsFlush { get; set; }
@@ -230,7 +257,13 @@ public class CdsTableRow : BindableObject
     public static readonly BindableProperty ExpandedContentProperty = BindableProperty.Create(
         nameof(ExpandedContent), typeof(View), typeof(CdsTableRow), null, propertyChanged: OnVisualChanged);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsTableRow), null,
+        propertyChanged: static (b, _, n) => ((CdsTableRow)b).OnDecoratorChanged(n as View));
+
     readonly CdsItemCollection<CdsTableCell> _cells = [];
+    IDisposable? _decoratorWatch;
     bool _isExpandable;
 
     /// <summary>Creates an empty row.</summary>
@@ -268,6 +301,46 @@ public class CdsTableRow : BindableObject
     {
         get => (View?)GetValue(ExpandedContentProperty);
         set => SetValue(ExpandedContentProperty, value);
+    }
+
+    /// <summary>
+    /// The row's AI label (Carbon's <c>TableDecoratorRow</c>), drawn in a 16 wide column before the first column of the table; the table adds
+    /// that column when a row has a decorator. A <see cref="CdsAILabel"/> is shown at its mini size and makes the row an AI row: an
+    /// <c>ai-aura-start-sm</c> gradient across the row, a 1px <c>ai-border-strong</c> line on its start edge and the AI hover and selected
+    /// fills. Carbon decides this by the label's type only, so the row stays an AI row while the label shows its revert button
+    /// (<see cref="CdsAILabel.IsRevertActive"/>); hide the label (<c>IsVisible</c>) on a row that is not AI. A view that is not a
+    /// <see cref="CdsAILabel"/> draws nothing in a row, as in Carbon.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>The row is an AI row: its <see cref="Decorator"/> is a shown <see cref="CdsAILabel"/>.</summary>
+    internal bool IsAi => Decorator is CdsAILabel { IsVisible: true };
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        _decoratorWatch?.Dispose();
+        _decoratorWatch = null;
+        if (decorator is CdsAILabel label) label.Size = CdsAILabelSize.Mini;
+        if (decorator is not null)
+        {
+            // Weakly: the label can be held by its native view, and must not lead back to the table.
+            System.ComponentModel.PropertyChangedEventHandler? handler = null;
+            _decoratorWatch = new CdsWeakSubscription<CdsTableRow>(this, static r => r.VisualChanged?.Invoke(r, EventArgs.Empty),
+                h =>
+                {
+                    handler = (_, e) =>
+                    {
+                        if (e.PropertyName == VisualElement.IsVisibleProperty.PropertyName) h(decorator, EventArgs.Empty);
+                    };
+                    decorator.PropertyChanged += handler;
+                },
+                _ => decorator.PropertyChanged -= handler);
+        }
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>The row reserves a child row even before <see cref="ExpandedContent"/> exists (it is created on first expansion).</summary>

@@ -73,6 +73,12 @@ public partial class CdsExpandableTile : CdsTileBase
     public bool IsInteractiveVariant => _interactive;
 
     /// <inheritdoc/>
+    protected override CdsAILabelSize? DecoratorSize => CdsAILabelSize.Xs;
+
+    /// <inheritdoc/>
+    protected override void OnDecoratorReplaced() => UpdateVariant();
+
+    /// <inheritdoc/>
     protected override CdsTileKind TileKind => _interactive ? CdsTileKind.ExpandableInteractive : CdsTileKind.Expandable;
 
     /// <inheritdoc/>
@@ -106,7 +112,7 @@ public partial class CdsExpandableTile : CdsTileBase
 
     void UpdateVariant()
     {
-        _interactive = ExpandableTileModel.UseInteractiveVariant(IsInteractive, Body, ExpandedContent);
+        _interactive = ExpandableTileModel.UseInteractiveVariant(IsInteractive, Body, ExpandedContent, Decorator is not null);
         _tileHit.IsVisible = !_interactive;
         _chevronHit.IsVisible = _interactive;
         // Non-interactive: the tile is one button and its content is just text. Interactive: content stays reachable.

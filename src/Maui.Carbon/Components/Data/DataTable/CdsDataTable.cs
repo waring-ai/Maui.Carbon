@@ -26,7 +26,9 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     readonly DataTableModel _model = new();
     readonly CdsTable _table = new() { VerticalOptions = LayoutOptions.Start };
     readonly VerticalStackLayout _root = new() { Spacing = 0 };
-    readonly VerticalStackLayout _titleBlock = new() { Spacing = 0, Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06) };
+    // Title and description in the star column, the decorator (Carbon: space-between) in an auto column at the end.
+    readonly Grid _titleBlock = new() { ColumnSpacing = 0, Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06) };
+    readonly VerticalStackLayout _titleStack = new() { Spacing = 0 };
     readonly CdsText _title = new() { TypeStyle = CdsTypeStyle.Heading03 };
     readonly CdsText _description = new() { TypeStyle = CdsTypeStyle.BodyCompact01, Tone = CdsTextTone.Secondary, MaximumWidthRequest = 640, HorizontalOptions = LayoutOptions.Start };
     readonly Grid _toolbar = new();
@@ -43,6 +45,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
     readonly Stack<CdsTableRow> _spareRows = new();
     readonly List<(CdsTableHeader Header, string Key)> _dataHeaders = [];
     bool _rendered;
+    bool _aiFrame;
     readonly Dictionary<object, string> _itemKeys = [];
     INotifyCollectionChanged? _observed;
     bool _syncing;
@@ -57,8 +60,11 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
 
         // Title block.
         CdsTokens.SetColor(_titleBlock, BackgroundColorProperty, CdsTableTokens.Background);
-        _titleBlock.Add(_title);
-        _titleBlock.Add(_description);
+        _titleBlock.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+        _titleBlock.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+        _titleStack.Add(_title);
+        _titleStack.Add(_description);
+        _titleBlock.Add(_titleStack, 0, 0);
         _description.Margin = new Thickness(0, CdsSpacing.Spacing02, 0, 0);
 
         // Toolbar: [spacer][search][content], with the batch bar over it.
@@ -297,6 +303,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         _table.BatchUpdate(() =>
         {
             _table.Size = size;
+            _table.ShowDecoratorColumn = RowDecoratorTemplate is not null;
             _table.UseZebraStyles = UseZebraStyles;
             _table.StickyHeader = StickyHeader;
             _table.IsSortable = false;
@@ -408,6 +415,7 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
                 Width = source.Width,
                 IsSortable = source.IsSortable ?? IsSortable,
                 SortDirection = _model.SortKey == key ? _model.SortDirection : CdsSortDirection.None,
+                Decorator = source.Decorator,
             };
             header.Clicked += (_, _) => OnHeaderActivated(key);
             head.HeaderList.Add(header);
@@ -444,6 +452,12 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         var row = new CdsTableRow { IsExpandable = CanExpand };
         var reference = new RowRef { Row = row };
         _rowRefs[row] = reference;
+        // The row's AI label: one view per row, like a cell template's, so it is re-bound with the row. Nothing is made without a template.
+        if (RowDecoratorTemplate is { } decoratorTemplate && decoratorTemplate.CreateContent() is View decorator)
+        {
+            row.Decorator = decorator;
+            reference.Decorator = decorator;
+        }
         var topAligned = size >= CdsSize.Xl;
 
         if (CanExpand) row.CellList.Add(new CdsTableCell { Body = BuildExpandButton(reference), IsFlush = true });
@@ -521,6 +535,11 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
                     r.DataCells[c].Text = c < data.Texts.Count ? data.Texts[c] : null;
                 }
             }
+            if (r.Decorator is { } decorator)
+            {
+                if (!ReferenceEquals(decorator.BindingContext, data.Item)) decorator.BindingContext = data.Item;
+                if (decorator is CdsAILabel label) NameDecorator(label, r, data);
+            }
             var selected = _model.IsSelected(data.Key);
             row.IsSelected = selected;
             // Every row control is named by its row: a screen reader has no table context to tell the rows apart.
@@ -548,6 +567,19 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         {
             _syncing = wasSyncing;
         }
+    }
+
+    /// <summary>
+    /// Names a row's AI label by its row ("AI Show information, cluster-01"): a screen reader has no table context. The label's own
+    /// name (a Description set on it, else its AI text and label) is kept as the start.
+    /// </summary>
+    void NameDecorator(CdsAILabel label, RowRef reference, DataTableRowData data)
+    {
+        reference.DecoratorName ??= SemanticProperties.GetDescription(label) is { Length: > 0 } own
+            ? own
+            : CdsAILabelTokens.AccessibleName(label.AiText, label.Label, label.TextLabel, label.Kind);
+        var name = $"{reference.DecoratorName}, {RowName(data)}";
+        if (SemanticProperties.GetDescription(label) != name) SemanticProperties.SetDescription(label, name);
     }
 
     void ReleaseRow(CdsTableRow row)
@@ -852,11 +884,51 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         _description.Text = Description;
         _title.IsVisible = !string.IsNullOrEmpty(Title);
         _description.IsVisible = !string.IsNullOrEmpty(Description);
-        _titleBlock.IsVisible = _title.IsVisible || _description.IsVisible;
+        _titleStack.IsVisible = _title.IsVisible || _description.IsVisible;
+        _titleBlock.IsVisible = _titleStack.IsVisible || Decorator is not null;
+        UpdateAiEnabled();
         _table.Label = Title ?? Label;
         // Shown as text above the table; also the table body's group hint. Never a Hint on the table itself: that makes
         // the whole table one VoiceOver element.
         _table.AccessibleHint = Description;
+    }
+
+    /// <summary>Carbon's <c>cds--data-table-container--ai-enabled</c>: a 1px gradient border around the table, and the glow over its body.</summary>
+    void UpdateAiEnabled()
+    {
+        var enabled = IsAiEnabled;
+        _table.IsAiEnabled = enabled;
+        if (enabled == _aiFrame) return;
+        _aiFrame = enabled;
+        if (enabled)
+        {
+            // The border is the root's own background showing around the 1px padding (Carbon: padding: 1px on the container, the
+            // gradient on its ::after behind the content).
+            _root.Padding = new Thickness(1);
+            CdsColorProxies.Bind(_root, colors =>
+            {
+                if (colors[0] is { } start && colors[1] is { } end) _root.Background = CdsAiTreatment.CreateBorder(start, end);
+            }, CdsAiTokens.BorderStart, CdsAiTokens.BorderEnd);
+        }
+        else
+        {
+            CdsColorProxies.Unbind(_root);
+            _root.ClearValue(VisualElement.BackgroundProperty);
+            _root.Padding = new Thickness(0);
+        }
+    }
+
+    void OnDecoratorChanged(View? oldDecorator, View? newDecorator)
+    {
+        if (oldDecorator is not null) _titleBlock.Remove(oldDecorator);
+        if (newDecorator is not null)
+        {
+            if (newDecorator.Parent is Layout previous) previous.Remove(newDecorator);
+            newDecorator.HorizontalOptions = LayoutOptions.End;
+            newDecorator.VerticalOptions = LayoutOptions.Start;
+            _titleBlock.Add(newDecorator, 1, 0);
+        }
+        UpdateChrome();
     }
 
     bool BatchAvailable => Selection == CdsDataTableSelection.Multi && _batchActions.Count > 0;
@@ -1091,5 +1163,8 @@ public partial class CdsDataTable : CdsControl, ICdsTableRowSource
         public CdsHitTarget? ExpandHit;
         public CdsIcon? ExpandIcon;
         public CdsOverflowMenu? Menu;
+        /// <summary>The row's AI label (made from <see cref="RowDecoratorTemplate"/>), and the name it had before it was named by the row.</summary>
+        public View? Decorator;
+        public string? DecoratorName;
     }
 }

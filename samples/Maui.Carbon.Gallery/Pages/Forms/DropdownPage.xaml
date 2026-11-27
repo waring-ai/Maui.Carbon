@@ -64,6 +64,14 @@
             </Grid>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="The AI label sits before the chevron; the field takes the AI aura and a border-interactive rule.">
+            <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}" SelectedItem="Frankfurt (eu-de)" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsDropdown.Decorator>
+                    <cds:CdsAILabel Label="Why this is suggested" />
+                </cds:CdsDropdown.Decorator>
+            </cds:CdsDropdown>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Choose a region; the status follows the selection.">
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsDropdown Label="Region" Placeholder="Choose a region" ItemsSource="{x:Static data:GListData.Regions}"

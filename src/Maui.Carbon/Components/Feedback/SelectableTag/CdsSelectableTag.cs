@@ -43,6 +43,9 @@ public class CdsSelectableTag : CdsTag
     }
 
     /// <inheritdoc/>
+    protected override bool SupportsDecorator => false;
+
+    /// <inheritdoc/>
     protected override View BuildChrome(Border pill)
     {
         CdsTagParts.Rebuild(pill, Row, out _iconView, out _labelView);

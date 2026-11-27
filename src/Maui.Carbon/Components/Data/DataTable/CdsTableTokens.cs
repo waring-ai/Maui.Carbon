@@ -43,6 +43,24 @@ public static class CdsTableTokens
         return CdsColorKeys.BorderSubtle01;
     }
 
+    /// <summary>
+    /// The fill under the AI tint of a row with an AI label in its decorator: <c>ai-aura-hover-background</c> while hovered (Carbon's
+    /// hover rules win over the selected ones), <c>layer-selected-01</c> when selected, else <c>layer-01</c> (an AI row ignores the zebra stripe).
+    /// </summary>
+    public static string AiRowFill(bool selected, bool hover) =>
+        hover ? CdsAiTokens.AuraHoverBackground : selected ? CdsColorKeys.LayerSelected01 : CdsColorKeys.Layer01;
+
+    /// <summary>
+    /// The rule under a row, for a row that may be an AI row (<paramref name="ai"/>). An AI row that is hovered or selected keeps
+    /// <c>border-subtle-01</c> (Carbon: <c>border-block-end-color: $border-subtle</c>); every other row follows
+    /// <see cref="RowRule(bool, bool, bool, bool)"/>, with no stripe for an AI row.
+    /// </summary>
+    public static string RowRule(bool selected, bool hover, bool zebra, bool zebraStripe, bool ai)
+    {
+        if (!ai) return RowRule(selected, hover, zebra, zebraStripe);
+        return selected || hover ? CdsColorKeys.BorderSubtle01 : RowRule(false, false, zebra, false);
+    }
+
     /// <summary>Cell text: <c>text-secondary</c>, <c>text-primary</c> when the row is hovered or selected.</summary>
     public static string CellText(bool active) => active ? CdsColorKeys.TextPrimary : CdsColorKeys.TextSecondary;
 
@@ -110,6 +128,15 @@ public static class CdsTableTokens
 
     /// <summary>The overflow menu column width: 52.</summary>
     public const double MenuColumnWidth = 52;
+
+    /// <summary>
+    /// The width of the AI label (decorator) column of a table whose rows carry a decorator: 16 (Carbon: <c>inline-size: $spacing-05</c>
+    /// on <c>.cds--table-column-decorator</c>).
+    /// </summary>
+    public const double DecoratorColumnWidth = CdsSpacing.Spacing05;
+
+    /// <summary>The inset of an expanded child row's content: <paramref name="inset"/>, and the decorator column's width when the table has one.</summary>
+    public static double ChildContentInset(double inset, bool decoratorColumn) => decoratorColumn ? inset + DecoratorColumnWidth : inset;
 
     /// <summary>
     /// The width a star or auto column is assumed to need at least when deciding whether the table scrolls sideways

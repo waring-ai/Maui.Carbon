@@ -13,6 +13,11 @@ public partial class CdsTabs
         nameof(Type), typeof(CdsTabsType), typeof(CdsTabs), CdsTabsType.Line,
         propertyChanged: static (b, _, _) => ((CdsTabs)b).Rebuild());
 
+    /// <summary>Bindable property for <see cref="Orientation"/>.</summary>
+    public static readonly BindableProperty OrientationProperty = BindableProperty.Create(
+        nameof(Orientation), typeof(CdsTabsOrientation), typeof(CdsTabs), CdsTabsOrientation.Horizontal,
+        propertyChanged: static (b, _, _) => ((CdsTabs)b).ApplyOrientation());
+
     /// <summary>Bindable property for <see cref="IsFullWidth"/>.</summary>
     public static readonly BindableProperty IsFullWidthProperty = BindableProperty.Create(
         nameof(IsFullWidth), typeof(bool), typeof(CdsTabs), false,
@@ -62,6 +67,20 @@ public partial class CdsTabs
     {
         get => (CdsTabsType)GetValue(TypeProperty);
         set => SetValue(TypeProperty, value);
+    }
+
+    /// <summary>
+    /// <see cref="CdsTabsOrientation.Horizontal"/> (default): a row of tabs above the panel. <see cref="CdsTabsOrientation.Vertical"/>:
+    /// Carbon's vertical tabs, a column of 64 high tabs a quarter of the width with the panel beside it; Up and Down move between
+    /// tabs, and the column scrolls when the control is shorter than its tabs. Vertical tabs show the label (up to two lines) and
+    /// the icon; <see cref="Type"/>, <see cref="IsFullWidth"/>, <see cref="IsIconOnly"/>, <see cref="IsDismissible"/> and secondary
+    /// labels apply to horizontal tabs only. Carbon shows horizontal tabs instead below the md breakpoint (672); switch the
+    /// orientation from your layout for small windows.
+    /// </summary>
+    public CdsTabsOrientation Orientation
+    {
+        get => (CdsTabsOrientation)GetValue(OrientationProperty);
+        set => SetValue(OrientationProperty, value);
     }
 
     /// <summary>Contained tabs share the width equally (from the md breakpoint, 672, up; auto width below). Works best with four or fewer tabs.</summary>

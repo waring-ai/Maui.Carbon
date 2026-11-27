@@ -35,6 +35,21 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="The AI label sits before the steppers; the field takes the AI aura.">
+            <cds:CdsNumberInput Label="Worker nodes" Value="6" Min="1" Max="64" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInput.Decorator>
+                    <cds:CdsAILabel Label="Why this is suggested" />
+                </cds:CdsNumberInput.Decorator>
+            </cds:CdsNumberInput>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="A label bar over a field bar: sm 32, md 40 (default), lg 48.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsNumberInputSkeleton />
+                <cds:CdsNumberInputSkeleton Size="Sm" HideLabel="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Use the buttons, the Up and Down keys, or type: the status reports value and direction.">
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsNumberInput Label="Worker nodes" Min="1" Max="10" Value="3" ValueChanged="OnValueChanged" />

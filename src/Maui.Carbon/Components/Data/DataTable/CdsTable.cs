@@ -104,6 +104,18 @@ public class CdsTable : CdsControl
     int _hoverVersion;
     bool _building;
 
+    // AI presence (Carbon's AI row, AI column and whole-table treatment). Nothing below exists until something in the table is AI.
+    Brush? _rowTint;
+    Brush? _rowHoverTint;
+    Brush? _tableTint;
+    bool _tintsBound;
+    bool _aiEnabled;
+    bool _showDecoratorColumn;
+    bool _decoratorColumn;
+    int _firstBodyRow;
+    CdsTableHeader? _decoratorHeader;
+    Grid? _aiOverlay;
+
     /// <summary>Creates an empty table.</summary>
     public CdsTable()
     {
@@ -196,6 +208,36 @@ public class CdsTable : CdsControl
         set => SetValue(ChildInsetProperty, value);
     }
 
+    /// <summary>
+    /// Whether the table has Carbon's whole-table AI treatment (<c>cds--data-table-container--ai-enabled</c>): an <c>ai-aura-start</c>
+    /// glow rising from the bottom of the body. The data table draws the gradient border around itself.
+    /// </summary>
+    internal bool IsAiEnabled
+    {
+        get => _aiEnabled;
+        set
+        {
+            if (_aiEnabled == value) return;
+            _aiEnabled = value;
+            if (_built) PlaceAiOverlay();
+        }
+    }
+
+    /// <summary>The table has a decorator column even when no row of its own has a decorator yet (rows supplied by a row source).</summary>
+    internal bool ShowDecoratorColumn
+    {
+        get => _showDecoratorColumn;
+        set
+        {
+            if (_showDecoratorColumn == value) return;
+            _showDecoratorColumn = value;
+            Rebuild();
+        }
+    }
+
+    /// <summary>The table has the 16 wide column of its rows' <see cref="CdsTableRow.Decorator"/>s, before its first column.</summary>
+    internal bool HasDecoratorColumn => _decoratorColumn;
+
     /// <summary>Runs <paramref name="change"/> and rebuilds once afterwards instead of once per change.</summary>
     internal void BatchUpdate(Action change)
     {
@@ -220,6 +262,35 @@ public class CdsTable : CdsControl
 
     /// <summary>The body rows that have views (all of them, unless the table is virtualized).</summary>
     internal int RealizedRowCount => _rowVisuals.Count(v => v.Index >= 0);
+
+    RowVisual? VisualAt(int index) => _rowVisuals.FirstOrDefault(v => v.Index == index);
+
+    /// <summary>The AI tint over a realized row (for tests); null until the row first shows AI.</summary>
+    internal Grid? AiLayerOf(int index) => VisualAt(index)?.AiLayer;
+
+    /// <summary>The AI tint over the child row of a realized row (for tests).</summary>
+    internal Grid? ChildAiOf(int index) => VisualAt(index)?.ChildAi;
+
+    /// <summary>The fill of a realized row (for tests).</summary>
+    internal BoxView? FillOf(int index) => VisualAt(index)?.Fill;
+
+    /// <summary>The rule under a realized row (for tests).</summary>
+    internal BoxView? RuleOf(int index) => VisualAt(index)?.Rule;
+
+    /// <summary>The cell hosts of a realized row that carry an AI column's gradient (for tests).</summary>
+    internal IReadOnlyList<Grid> AiHostsOf(int index) => VisualAt(index)?.AiHosts ?? [];
+
+    /// <summary>The content host of a realized row's child row (for tests).</summary>
+    internal Grid? ChildHostOf(int index) => VisualAt(index)?.ChildHost;
+
+    /// <summary>The AI tint in a column's header cell and its top line (for tests).</summary>
+    internal (Grid? Layer, BoxView? Line) HeaderAiOf(int column) => (_headers[column].AiLayer, _headers[column].AiLine);
+
+    /// <summary>The whole-table tint, while it is placed over the body (for tests).</summary>
+    internal Grid? AiOverlay => _aiOverlay?.Parent is null ? null : _aiOverlay;
+
+    /// <summary>Puts the pointer on a row (for tests, which have no pointer).</summary>
+    internal void HoverRow(int index) => SetHoverRow(index);
 
     /// <summary>The realized rows by data index (for tests).</summary>
     internal IReadOnlyList<(int Index, CdsTableRow Row)> RealizedRows =>
@@ -367,6 +438,8 @@ public class CdsTable : CdsControl
         }
         ComputeOffsets();
         UpdateWindow(force: true);
+        // Re-bound rows may have become AI rows, or stopped being one.
+        if (_decoratorColumn) RequestVisuals();
     }
 
     void OnHeadChanged(CdsTableHead? oldHead, CdsTableHead? newHead)
@@ -441,6 +514,7 @@ public class CdsTable : CdsControl
                 while (_rowVisuals.Count > _rows.Count) ParkLastRowVisual();
             }
             UpdateAccessibility();
+            if (_aiEnabled) PlaceAiOverlay();
             RequestVisuals();
             return;
         }
@@ -455,7 +529,10 @@ public class CdsTable : CdsControl
         {
             if (e.NewStartingIndex != _rowVisuals.Count || e.NewStartingIndex + added.Count != _rows.Count) return false;
             foreach (CdsTableRow r in added)
-                if (r.CellList.Count > _columns.Count) return false; // the row adds columns
+            {
+                if (r.CellList.Count + (_decoratorColumn ? 1 : 0) > _columns.Count) return false; // the row adds columns
+                if (r.Decorator is not null && !_decoratorColumn) return false; // the row adds the decorator column
+            }
             return _columns.Count > 0;
         }
         if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is { } removed)
@@ -559,6 +636,7 @@ public class CdsTable : CdsControl
             var hover = _hoverHeader == c;
             var focus = h.Hit is { IsFocused: true };
             SetColor(h.Fill, BoxView.ColorProperty, CdsTableTokens.HeaderFill(h.Sortable, hover || h.Pressed, active));
+            if (h.AiLine is not null) SetColor(h.AiLine, BoxView.ColorProperty, CdsAiTokens.BorderStrong);
             if (h.Label is not null) SetColor(h.Label, CdsText.TextColorProperty, CdsTableTokens.HeaderText);
             if (h.Ring is not null) h.Ring.IsActive = focus && h.Hit!.IsFocusFromKeyboard;
             if (h.Icon is not null && h.Source is not null)
@@ -587,10 +665,13 @@ public class CdsTable : CdsControl
             if (v.Index < 0) continue;
             var selected = v.Source.IsSelected;
             var hover = _hoverRow == v.Index;
-            var stripe = zebra && v.Index % 2 == 1;
-            var fill = CdsTableTokens.RowFill(selected, hover, stripe);
+            // An AI row (a shown AI label in its decorator) ignores the zebra stripe and has its own fills under the AI tint.
+            var ai = v.Source.IsAi;
+            var stripe = zebra && v.Index % 2 == 1 && !ai;
+            var fill = ai ? CdsTableTokens.AiRowFill(selected, hover) : CdsTableTokens.RowFill(selected, hover, stripe);
             SetColor(v.Fill, BoxView.ColorProperty, fill);
-            SetColor(v.Rule, BoxView.ColorProperty, CdsTableTokens.RowRule(selected, hover, zebra, stripe));
+            SetColor(v.Rule, BoxView.ColorProperty, CdsTableTokens.RowRule(selected, hover, zebra, stripe, ai));
+            UpdateRowAi(v, ai, hover);
             var active = selected || hover;
             foreach (var label in v.Labels) SetColor(label, CdsText.TextColorProperty, CdsTableTokens.CellText(active));
 
@@ -602,8 +683,9 @@ public class CdsTable : CdsControl
                 v.ChildFill!.IsVisible = expanded;
                 v.ChildRule!.IsVisible = expanded;
                 SetColor(v.ChildFill, BoxView.ColorProperty, fill);
-                SetColor(v.ChildRule, BoxView.ColorProperty, CdsTableTokens.RowRule(false, hover, zebra, stripe));
+                SetColor(v.ChildRule, BoxView.ColorProperty, CdsTableTokens.RowRule(false, hover, zebra, stripe, ai));
             }
+            UpdateChildAi(v, ai && expanded, hover);
             foreach (var (cell, view) in v.RevealViews)
                 view.Opacity = CdsTableTokens.IsOverflowRevealed(true, s_touch, hover, cell.KeepVisible) ? 1 : 0;
         }
@@ -707,17 +789,20 @@ public class CdsTable : CdsControl
 
         var head = Head?.HeaderList;
         var rows = _rows;
+        // Rows with a decorator (Carbon's TableDecoratorRow) get a 16 wide column before the first one.
+        _decoratorColumn = _showDecoratorColumn || rows.Any(r => r.Decorator is not null);
+        _decoratorHeader = _decoratorColumn ? CreateDecoratorHeader() : null;
         var rowColumns = virtualized || rows.Count == 0 ? 0 : rows.Max(r => r.CellList.Count);
-        var columnCount = Math.Max(head?.Count ?? 0, rowColumns);
+        var columnCount = Math.Max(head?.Count ?? 0, rowColumns) + (_decoratorColumn ? 1 : 0);
         _minimumWidth = 0;
         var widths = new GridLength[columnCount];
         var flush = new bool[columnCount];
         for (var c = 0; c < columnCount; c++)
         {
-            var width = head is not null && c < head.Count ? head[c].Width : GridLength.Star;
+            var width = HeadAt(c) is { } columnHead ? columnHead.Width : GridLength.Star;
             if (separate && width.IsAuto) width = GridLength.Star;
             widths[c] = width;
-            flush[c] = head is not null && c < head.Count && head[c].IsFlush;
+            flush[c] = HeadAt(c)?.IsFlush == true;
             _minimumWidth += width.IsAbsolute ? width.Value : CdsTableTokens.MinimumFlexibleColumnWidth;
         }
         foreach (var width in FillColumns(widths, flush))
@@ -737,9 +822,10 @@ public class CdsTable : CdsControl
         {
             header.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
             for (var c = 0; c < columnCount; c++)
-                BuildHeaderCell(header, c < head.Count ? head[c] : null, c, _rowHeight, _padTop, _padBottom, _topAligned);
+                BuildHeaderCell(header, HeadAt(c), c, _rowHeight, _padTop, _padBottom, _topAligned);
             if (!separate) _nextGridRow = 1;
         }
+        _firstBodyRow = _nextGridRow;
 
         if (!virtualized)
         {
@@ -780,7 +866,36 @@ public class CdsTable : CdsControl
             ComputeOffsets();
             UpdateWindow(force: true, applyVisuals: false);
         }
+        PlaceAiOverlay();
     }
+
+    /// <summary>The header of a column (the decorator column's own header first, when there is one); `null` past the head.</summary>
+    CdsTableHeader? HeadAt(int column)
+    {
+        if (_decoratorColumn)
+        {
+            if (column == 0) return _decoratorHeader;
+            column--;
+        }
+        var head = Head?.HeaderList;
+        return head is not null && column < head.Count ? head[column] : null;
+    }
+
+    /// <summary>The cell of a row in a column (the decorator column has none: the row's decorator is drawn there).</summary>
+    CdsTableCell? CellAt(CdsTableRow row, int column)
+    {
+        if (_decoratorColumn) column--;
+        return column >= 0 && column < row.CellList.Count ? row.CellList[column] : null;
+    }
+
+    static CdsTableHeader CreateDecoratorHeader() => new()
+    {
+        Width = new GridLength(CdsTableTokens.DecoratorColumnWidth),
+        IsSortable = false,
+        IsFlush = true,
+        Description = "AI",
+        Body = new BoxView { WidthRequest = 1, HeightRequest = 1, Color = Colors.Transparent, InputTransparent = true },
+    };
 
     /// <summary>Adds a body row (and its child row, when expandable) at the end of the shared body grid.</summary>
     void AppendRowVisual(CdsTableRow source, int index)
@@ -828,7 +943,7 @@ public class CdsTable : CdsControl
         foreach (var view in visual.Views)
         {
             // The child row's views are shown by ApplyVisuals when the row is expanded.
-            var child = view == visual.ChildHost || view == visual.ChildFill || view == visual.ChildRule;
+            var child = view == visual.ChildHost || view == visual.ChildFill || view == visual.ChildRule || view == visual.ChildAi;
             view.IsVisible = !child;
         }
         // The cells were detached while parked: catch up with their text.
@@ -859,7 +974,6 @@ public class CdsTable : CdsControl
     void BuildRowVisual(Grid grid, int gridRow, RowVisual visual, bool fixedHeight)
     {
         var source = visual.Source;
-        var head = Head?.HeaderList;
         var columnCount = _columns.Count;
         var span = Math.Max(1, columnCount);
         var height = _rowHeight;
@@ -879,17 +993,33 @@ public class CdsTable : CdsControl
         Hide(visual.Rule);
         Add(visual.Rule, 0, gridRow, span);
 
-        string? ColumnName(int c) => head is not null && c < head.Count && !head[c].IsFlush ? head[c].Text : null;
+        string? ColumnName(int c) => HeadAt(c) is { IsFlush: false } named ? named.Text : null;
         // A flush control in a tool column (selection, expand, row menu) needs no cell host: it has no padding and no
         // column name to group under, so it goes straight into the row. One host stays, to carry the row's height.
-        bool Bare(int c) => c < source.CellList.Count && source.CellList[c] is { Body: not null, IsFlush: true } && ColumnName(c) is null;
+        bool Bare(int c) => CellAt(source, c) is { Body: not null, IsFlush: true } && ColumnName(c) is null;
         var anyHosted = false;
         for (var c = 0; c < columnCount && !anyHosted; c++) anyHosted = !Bare(c);
 
         for (var c = 0; c < columnCount; c++)
         {
-            var cell = c < source.CellList.Count ? source.CellList[c] : null;
-            var headerAlign = head is not null && c < head.Count ? head[c].Align : CdsTableAlignment.Start;
+            if (c == 0 && _decoratorColumn)
+            {
+                // The row's AI label, in the decorator column. A decorator that is not an AI label draws nothing, as in Carbon.
+                var decoratorHost = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
+                if (source.Decorator is CdsAILabel label)
+                {
+                    if (label.Parent is Layout labelParent) labelParent.Remove(label);
+                    label.HorizontalOptions = LayoutOptions.Start;
+                    // Carbon centers it (translateY(-50%)), and in xl rows (top aligned) sets it at translateY(1px) of the cell's text line.
+                    label.VerticalOptions = _topAligned ? LayoutOptions.Start : LayoutOptions.Center;
+                    label.Margin = _topAligned ? new Thickness(0, _padTop + 1, 0, 0) : new Thickness(0);
+                    decoratorHost.Add(label);
+                }
+                Add(decoratorHost, 0, gridRow);
+                continue;
+            }
+            var cell = CellAt(source, c);
+            var headerAlign = HeadAt(c)?.Align ?? CdsTableAlignment.Start;
             var columnName = ColumnName(c);
             var align = cell?.Align ?? headerAlign;
             var flush = cell?.IsFlush == true;
@@ -902,6 +1032,13 @@ public class CdsTable : CdsControl
                 continue;
             }
             var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
+            if (HeadAt(c) is { IsAi: true })
+            {
+                // Carbon: td.cds--table-cell--column-slug gets the AI gradient.
+                EnsureTints();
+                host.Background = _rowTint;
+                visual.AiHosts.Add(host);
+            }
             View? content = null;
             if (cell?.Body is { } body)
             {
@@ -975,7 +1112,7 @@ public class CdsTable : CdsControl
         visual.ChildHost = new Grid
         {
             IsVisible = false,
-            Padding = new Thickness(ChildInset, CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
+            Padding = new Thickness(CdsTableTokens.ChildContentInset(ChildInset, _decoratorColumn), CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsSpacing.Spacing06),
         };
         Insert(visual.ChildHost);
         SetChildContent(visual, visual.Source);
@@ -1137,6 +1274,8 @@ public class CdsTable : CdsControl
         foreach (var (index, v) in bound) Place(v, _offsets[index]);
         if (_hoverRow >= 0 && !bound.ContainsKey(_hoverRow)) _hoverRow = -1;
         UpdateAccessibility();
+        // New slots were added after the whole-table tint: keep it on top.
+        if (changed && _aiEnabled) PlaceAiOverlay();
         if (changed && applyVisuals) RequestVisuals();
     }
 
@@ -1347,15 +1486,38 @@ public class CdsTable : CdsControl
         Hide(visual.Fill);
         grid.Add(visual.Fill, column, 0);
 
+        // An AI column (an AI label in its decorator): the AI gradient over the header fill, and the 1px ai-border-strong top line.
+        if (header is { IsAi: true })
+        {
+            EnsureTints();
+            var layer = new Grid { InputTransparent = true, Background = _rowTint };
+            Hide(layer);
+            AutomationProperties.SetExcludedWithChildren(layer, true);
+            var line = new BoxView { HeightRequest = 1, VerticalOptions = LayoutOptions.Start, InputTransparent = true };
+            Hide(line);
+            layer.Add(line);
+            grid.Add(layer, column, 0);
+            visual.AiLayer = layer;
+            visual.AiLine = line;
+        }
+
         // The Auto header row ignores the fill's minimum, so the host carries the size's height (as body cells do).
         var host = new Grid { BackgroundColor = Colors.Transparent, MinimumHeightRequest = height };
+        // The decorator sits in a column of its own at the end of the cell (Carbon: margin-inline-start: auto).
+        var decorator = header?.Decorator;
+        if (decorator is not null)
+        {
+            host.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            host.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+        }
+        var endPadding = decorator is null ? CdsTableTokens.CellPaddingX : 0;
         grid.Add(host, column, 0);
 
         if (header?.Body is { } body)
         {
             if (body.Parent is Layout old) old.Remove(body);
             body.VerticalOptions = LayoutOptions.Center;
-            if (!header.IsFlush) host.Padding = new Thickness(CdsTableTokens.CellPaddingX, 0);
+            if (!header.IsFlush) host.Padding = new Thickness(CdsTableTokens.CellPaddingX, 0, endPadding, 0);
             host.Add(body);
             SetHeaderName(header);
         }
@@ -1365,7 +1527,7 @@ public class CdsTable : CdsControl
             {
                 HorizontalTextAlignment = align == CdsTableAlignment.End ? TextAlignment.End : TextAlignment.Start,
                 VerticalOptions = topAligned ? LayoutOptions.Start : LayoutOptions.Center,
-                Padding = new Thickness(CdsTableTokens.CellPaddingX, padTop, CdsTableTokens.CellPaddingX, padBottom),
+                Padding = new Thickness(CdsTableTokens.CellPaddingX, padTop, endPadding, padBottom),
                 InputTransparent = true,
             };
             host.Add(visual.Label);
@@ -1394,7 +1556,7 @@ public class CdsTable : CdsControl
                 layout.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
                 layout.Add(visual.Icon, 1);
                 layout.Add(visual.Label, 2);
-                layout.Padding = new Thickness(0, 0, CdsTableTokens.CellPaddingX, 0);
+                layout.Padding = new Thickness(0, 0, endPadding, 0);
             }
             else
             {
@@ -1427,7 +1589,155 @@ public class CdsTable : CdsControl
             pointer.PointerExited += (_, _) => { if (_hoverHeader == index) _hoverHeader = -1; RequestVisuals(); };
             host.GestureRecognizers.Add(pointer);
         }
+        if (decorator is not null)
+        {
+            // Above the hit target: the label is its own button. Carbon centers it in the header (and sets it 8 from the end of a sort header).
+            if (decorator.Parent is Layout decoratorParent) decoratorParent.Remove(decorator);
+            decorator.HorizontalOptions = LayoutOptions.End;
+            decorator.VerticalOptions = topAligned ? LayoutOptions.Start : LayoutOptions.Center;
+            decorator.Margin = new Thickness(0, topAligned ? padTop + 1 : 0, sortable ? CdsSpacing.Spacing03 : CdsTableTokens.CellPaddingX, 0);
+            host.Add(decorator, 1, 0);
+        }
         if (header is not null && header.Body is null && !sortable) SetHeaderName(header);
+    }
+
+    // ----- AI presence -----
+
+    /// <summary>
+    /// Binds the aura tokens once, when the table first shows AI (a column, a row, or the whole table): the tint brushes are rebuilt
+    /// from the resolved colors whenever the theme changes, and handed to every view that shows one.
+    /// </summary>
+    void EnsureTints()
+    {
+        if (_tintsBound) return;
+        _tintsBound = true;
+        CdsColorProxies.Bind(this, OnTintColors, CdsAiTokens.AuraSmall, CdsAiTokens.AuraHoverStart, CdsAiTokens.Aura);
+    }
+
+    void OnTintColors(Color?[] colors)
+    {
+        _rowTint = colors[0] is { } small ? CdsAiTableGradient.Row(small) : null;
+        _rowHoverTint = colors[1] is { } hover ? CdsAiTableGradient.RowHover(hover) : null;
+        _tableTint = colors[2] is { } aura ? CdsAiTableGradient.FullTable(aura) : null;
+        foreach (var h in _headers)
+            if (h.AiLayer is not null) h.AiLayer.Background = _rowTint;
+        foreach (var v in _rowVisuals)
+        {
+            foreach (var host in v.AiHosts) host.Background = _rowTint;
+            if (v.AiLayer is not null) v.AiLayer.Background = v.AiHover ? _rowHoverTint : _rowTint;
+            if (v.ChildAi is not null) v.ChildAi.Background = v.AiHover ? _rowHoverTint : _rowTint;
+        }
+        if (_aiOverlay is not null) _aiOverlay.Background = _tableTint;
+    }
+
+    /// <summary>
+    /// Shows or hides an AI row's tint (and its 1px start edge): made on the first AI row a slot shows, then only toggled, so a pooled slot
+    /// re-bound from an AI row to another row clears it. The row's own fill is the token color the state picks.
+    /// </summary>
+    void UpdateRowAi(RowVisual v, bool ai, bool hover)
+    {
+        if (!ai)
+        {
+            if (v.AiLayer is { IsVisible: true } shown) shown.IsVisible = false;
+            return;
+        }
+        EnsureTints();
+        if (v.AiLayer is null) CreateRowAiLayer(v);
+        var layer = v.AiLayer!;
+        if (!layer.IsVisible) layer.IsVisible = true;
+        v.AiHover = hover;
+        layer.Background = hover ? _rowHoverTint : _rowTint;
+        SetColor(v.AiEdge!, BoxView.ColorProperty, CdsAiTokens.BorderStrong);
+    }
+
+    void CreateRowAiLayer(RowVisual v)
+    {
+        var grid = v.ChildGrid!;
+        var layer = new Grid { IsVisible = false, InputTransparent = true };
+        Hide(layer);
+        AutomationProperties.SetExcludedWithChildren(layer, true);
+        // Carbon: box-shadow: inset 1px 0 ai-border-strong on the row.
+        var edge = new BoxView { WidthRequest = 1, MinimumHeightRequest = _rowHeight, HorizontalOptions = LayoutOptions.Start, InputTransparent = true };
+        Hide(edge);
+        layer.Add(edge);
+        Grid.SetRow(layer, Grid.GetRow(v.Fill));
+        Grid.SetColumn(layer, 0);
+        Grid.SetColumnSpan(layer, Math.Max(1, _columns.Count));
+        grid.Children.Insert(grid.Children.IndexOf(v.Fill) + 1, layer);
+        v.Views.Add(layer);
+        v.AiLayer = layer;
+        v.AiEdge = edge;
+    }
+
+    /// <summary>The AI tint over the child row of an expanded AI row (Carbon: <c>tr.ai-label-row + .expandable-row</c>).</summary>
+    void UpdateChildAi(RowVisual v, bool ai, bool hover)
+    {
+        if (!ai)
+        {
+            if (v.ChildAi is { IsVisible: true } shown) shown.IsVisible = false;
+            return;
+        }
+        if (v.ChildFill is null || v.ChildGrid is not { } grid) return;
+        EnsureTints();
+        if (v.ChildAi is null)
+        {
+            var layer = new Grid { InputTransparent = true };
+            Hide(layer);
+            AutomationProperties.SetExcludedWithChildren(layer, true);
+            Grid.SetRow(layer, v.ChildGridRow);
+            Grid.SetColumn(layer, 0);
+            Grid.SetColumnSpan(layer, Math.Max(1, _columns.Count));
+            grid.Children.Insert(grid.Children.IndexOf(v.ChildFill) + 1, layer);
+            v.Views.Add(layer);
+            v.ChildAi = layer;
+        }
+        if (!v.ChildAi.IsVisible) v.ChildAi.IsVisible = true;
+        v.ChildAi.Background = hover ? _rowHoverTint : _rowTint;
+    }
+
+    /// <summary>
+    /// Puts the whole-table tint over the body rows (Carbon's <c>tbody::before</c>), or takes it away: after the rows of the shared grid
+    /// (spanning them) or last in the virtualized body, so it stays on top of rows added later. It takes no input.
+    /// </summary>
+    void PlaceAiOverlay()
+    {
+        var virtualized = IsVirtual;
+        if (!_aiEnabled || !virtualized && _nextGridRow <= _firstBodyRow)
+        {
+            if (_aiOverlay?.Parent is Layout current) current.Remove(_aiOverlay);
+            return;
+        }
+        EnsureTints();
+        if (_aiOverlay is null)
+        {
+            _aiOverlay = new Grid { InputTransparent = true };
+            Hide(_aiOverlay);
+            AutomationProperties.SetExcludedWithChildren(_aiOverlay, true);
+        }
+        var overlay = _aiOverlay;
+        overlay.Background = _tableTint;
+        if (virtualized)
+        {
+            var body = _virtualBody;
+            if (!ReferenceEquals(overlay.Parent, body) || !ReferenceEquals(body.Children[body.Children.Count - 1], overlay))
+            {
+                if (overlay.Parent is Layout old) old.Remove(overlay);
+                body.Add(overlay);
+            }
+            AbsoluteLayout.SetLayoutFlags(overlay, Microsoft.Maui.Layouts.AbsoluteLayoutFlags.All);
+            AbsoluteLayout.SetLayoutBounds(overlay, new Rect(0, 0, 1, 1));
+            return;
+        }
+        Grid.SetRow(overlay, _firstBodyRow);
+        Grid.SetRowSpan(overlay, _nextGridRow - _firstBodyRow);
+        Grid.SetColumn(overlay, 0);
+        Grid.SetColumnSpan(overlay, Math.Max(1, _columns.Count));
+        var grid = _bodyGrid;
+        if (!ReferenceEquals(overlay.Parent, grid) || !ReferenceEquals(grid.Children[grid.Children.Count - 1], overlay))
+        {
+            if (overlay.Parent is Layout old) old.Remove(overlay);
+            grid.Add(overlay);
+        }
     }
 
     static void SetHeaderName(CdsTableHeader header)
@@ -1503,6 +1813,9 @@ public class CdsTable : CdsControl
         public CdsHitTarget? Hit;
         public bool Sortable;
         public bool Pressed;
+        /// <summary>The AI gradient over the fill of an AI column's header, and its top line.</summary>
+        public Grid? AiLayer;
+        public BoxView? AiLine;
     }
 
     sealed class RowVisual
@@ -1520,6 +1833,7 @@ public class CdsTable : CdsControl
         int _cellCount;
         View?[] _bodies = [];
         bool _expandable;
+        View? _decorator;
 
         /// <summary>Remembers the row's structure, to tell whether parked views still fit it.</summary>
         public void Snapshot()
@@ -1527,11 +1841,12 @@ public class CdsTable : CdsControl
             _cellCount = Source.CellList.Count;
             _bodies = Source.CellList.Select(c => c.Body).ToArray();
             _expandable = Source.IsExpandable;
+            _decorator = Source.Decorator;
         }
 
         public bool Matches(CdsTableRow row)
         {
-            if (row.CellList.Count != _cellCount || row.IsExpandable != _expandable) return false;
+            if (row.CellList.Count != _cellCount || row.IsExpandable != _expandable || !ReferenceEquals(row.Decorator, _decorator)) return false;
             for (var i = 0; i < _cellCount; i++)
                 if (!ReferenceEquals(row.CellList[i].Body, _bodies[i])) return false;
             return true;
@@ -1539,6 +1854,14 @@ public class CdsTable : CdsControl
         public readonly List<CdsTableCell> TextCells = [];
         public BoxView Fill = null!;
         public BoxView Rule = null!;
+        /// <summary>The AI tint over an AI row's fill, with its 1px start edge; made on the first AI row this slot shows.</summary>
+        public Grid? AiLayer;
+        public BoxView? AiEdge;
+        /// <summary>The AI tint over the child row of an expanded AI row.</summary>
+        public Grid? ChildAi;
+        public bool AiHover;
+        /// <summary>The cell hosts of the AI columns, which carry the column's gradient.</summary>
+        public readonly List<Grid> AiHosts = [];
         /// <summary>The row is expandable: its child row's views are made on first expansion, in <see cref="ChildGrid"/>.</summary>
         public bool HasChildRow;
         public Grid? ChildGrid;

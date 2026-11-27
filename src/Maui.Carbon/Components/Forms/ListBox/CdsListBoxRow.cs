@@ -17,6 +17,9 @@ internal sealed class CdsListBoxRow : CdsControl
     readonly CdsHitTarget _hit;
     readonly bool _multi;
     bool _selected;
+    bool _mixed;
+    bool _bleed;
+    readonly double _inset;
     bool _highlighted;
     bool _showRing;
     bool _separatorVisible;
@@ -60,6 +63,7 @@ internal sealed class CdsListBoxRow : CdsControl
             _root.Add(_check, column);
         }
 
+        _inset = inset;
         _separator.Margin = new Thickness(inset, 0);
         foreach (var child in _root.Children.OfType<View>()) child.InputTransparent = true;
         _ring.InputTransparent = true;
@@ -68,6 +72,7 @@ internal sealed class CdsListBoxRow : CdsControl
         _hit.IsTabStop = false;
         _hit.IsSelected = isSelected;
         SemanticProperties.SetDescription(_hit, entry.Text);
+        SyncCheckedState();
         IsEnabled = !entry.IsDisabled;
 
         var cell = new Grid();
@@ -97,8 +102,40 @@ internal sealed class CdsListBoxRow : CdsControl
             _selected = value;
             _hit.IsSelected = value;
             if (_check is not null) _check.IsVisible = value;
+            SyncCheckedState();
             RefreshVisuals();
         }
+    }
+
+    /// <summary>The parent "select all" row is partially checked: some, not all, of the selectable items are chosen (a dash).</summary>
+    public bool IsMixed
+    {
+        get => _mixed;
+        set
+        {
+            if (_mixed == value) return;
+            _mixed = value;
+            SyncCheckedState();
+            RefreshVisuals();
+        }
+    }
+
+    /// <summary>The rule above the row is the parent row's bottom border, which bleeds to both edges of the list.</summary>
+    public bool SeparatorBleeds
+    {
+        get => _bleed;
+        set
+        {
+            if (_bleed == value) return;
+            _bleed = value;
+            _separator.Margin = new Thickness(value ? 0 : _inset, 0);
+        }
+    }
+
+    // The parent row also reports its checked state ("mixed" when null); other rows report IsSelected only.
+    void SyncCheckedState()
+    {
+        if (Entry.IsSelectAll) _hit.IsChecked = _mixed ? null : _selected;
     }
 
     /// <summary>The list's virtual focus is on this row.</summary>
@@ -164,11 +201,12 @@ internal sealed class CdsListBoxRow : CdsControl
         if (_box is not null)
         {
             var state = disabled ? CdsInteractionState.Disabled : CdsInteractionState.None;
-            var c = CdsCheckboxTokens.Resolve(state, _selected);
+            bool? check = _mixed ? null : _selected;
+            var c = CdsCheckboxTokens.Resolve(state, check);
             SetColor(_box, CdsCheckGlyph.BorderColorProperty, c.Border);
             SetColor(_box, CdsCheckGlyph.FillColorProperty, c.Fill);
             SetColor(_box, CdsCheckGlyph.MarkColorProperty, c.Mark);
-            _box.Mark = _selected ? CdsCheckMark.Check : CdsCheckMark.None;
+            _box.Mark = check switch { true => CdsCheckMark.Check, null => CdsCheckMark.Dash, _ => CdsCheckMark.None };
         }
         _ring.IsActive = !disabled && _highlighted && _showRing;
     }

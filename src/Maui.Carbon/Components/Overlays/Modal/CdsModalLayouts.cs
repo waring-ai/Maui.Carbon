@@ -12,6 +12,7 @@ internal sealed class CdsEdgeFade : Grid
         "FadeColor", typeof(Color), typeof(CdsEdgeFade), null,
         propertyChanged: static (b, _, _) => ((CdsEdgeFade)b).Rebuild());
 
+    Brush? _fill;
     readonly bool _vertical;
     readonly double _ramp;
     readonly double _solid;
@@ -40,8 +41,21 @@ internal sealed class CdsEdgeFade : Grid
         this.SetDynamicResource(FadeColorProperty, colorKey);
     }
 
+    /// <summary>A brush that replaces the flat surface-color fade (the AI modal paints its own fill); <c>null</c> restores it.</summary>
+    internal Brush? Fill
+    {
+        get => _fill;
+        set
+        {
+            _fill = value;
+            if (value is not null) Background = value;
+            else Rebuild();
+        }
+    }
+
     void Rebuild()
     {
+        if (_fill is not null) return;
         if (GetValue(FadeColorProperty) is not Color color) return;
         var total = _ramp + _solid;
         var split = total <= 0 ? 1 : _ramp / total;

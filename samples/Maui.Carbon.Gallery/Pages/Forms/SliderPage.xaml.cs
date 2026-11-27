@@ -10,6 +10,9 @@ public partial class SliderPage : GalleryPage
     {
         InitializeComponent();
         Sampling.ValueFormatter = v => $"{v:P0}";
+        Tooltipped.ValueFormatter = v => $"{v} GB";
+        // Show the tooltip without interaction: keyboard focus opens it, so give the first slider focus once it is on screen.
+        Tooltipped.Loaded += (_, _) => Tooltipped.Dispatcher.Dispatch(() => Tooltipped.Focus());
     }
 
     void OnValueChanged(object? sender, CdsSliderChangedEventArgs e) => Status.Text = $"{e.Value} GB";

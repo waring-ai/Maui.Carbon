@@ -3,6 +3,7 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:cds="https://github.com/waring-ai/Maui.Carbon"
                xmlns:g="clr-namespace:Maui.Carbon.Gallery.Infrastructure"
+               xmlns:data="clr-namespace:Maui.Carbon.Gallery.Pages.Data.Data"
                x:Class="Maui.Carbon.Gallery.Pages.Data.DataTablePage">
     <VerticalStackLayout Spacing="48">
 
@@ -124,6 +125,72 @@
                     <cds:CdsTableCell Text="31,870" />
                 </cds:CdsTableRow>
             </cds:CdsTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI table" Description="IsAiEnabled marks the whole table as AI generated: a 1px gradient border around it and the AI aura rising from the bottom of the body. Decorator is the AI label at the end of the title block that explains it. Carbon keeps the two apart, so a table can show a label without the styling or the styling needs its label set too.">
+            <cds:CdsDataTable x:Name="AiTable" Title="Recommendations" Description="Clusters AI suggests you resize, from the last 30 days of usage." IsAiEnabled="True" IsSortable="True" Size="Lg">
+                <cds:CdsDataTableHeader Key="name" Header="Name" Width="*" />
+                <cds:CdsDataTableHeader Key="region" Header="Region" Width="140" />
+                <cds:CdsDataTableHeader Key="status" Header="Status" Width="160" />
+                <cds:CdsDataTableHeader Key="nodes" Header="Nodes" Width="100" Align="End" />
+                <cds:CdsDataTable.Decorator>
+                    <cds:CdsAILabel Label="Why these recommendations">
+                        <cds:CdsAILabelContent>
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                <cds:CdsText Text="Ranked by memory pressure and idle capacity over the last 30 days." TypeStyle="Body01" />
+                            </VerticalStackLayout>
+                        </cds:CdsAILabelContent>
+                    </cds:CdsAILabel>
+                </cds:CdsDataTable.Decorator>
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI column" Description="Only the content of a column is AI generated: a Decorator on its header puts the AI label (mini) at the end of the header cell, an ai-aura-start-sm gradient behind the header and the column's cells and a 1px ai-border-strong line along the top of the header. The label is its own button; the column still sorts from the rest of the header. Status carries a label that is not AI (a toggletip): it is placed and nothing else changes.">
+            <cds:CdsDataTable x:Name="AiColumnTable" Title="Clusters" IsSortable="True" Size="Lg">
+                <cds:CdsDataTableHeader Key="name" Header="Name" Width="*" />
+                <cds:CdsDataTableHeader Key="region" Header="Region" Width="140" />
+                <cds:CdsDataTableHeader Key="status" Header="Status" Width="160">
+                    <cds:CdsDataTableHeader.Decorator>
+                        <cds:CdsToggletip Label="About status">
+                            <cds:CdsText Text="Reported by the cluster agent every minute." TypeStyle="Body01" />
+                        </cds:CdsToggletip>
+                    </cds:CdsDataTableHeader.Decorator>
+                </cds:CdsDataTableHeader>
+                <cds:CdsDataTableHeader Key="nodes" Header="Recommended nodes" Width="200" Align="End">
+                    <cds:CdsDataTableHeader.Decorator>
+                        <cds:CdsAILabel Label="How this was calculated">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Sized to keep peak memory under 70 percent." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsDataTableHeader.Decorator>
+                </cds:CdsDataTableHeader>
+            </cds:CdsDataTable>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI rows" Description="Only some rows are AI generated: RowDecoratorTemplate adds a 16 wide column of AI labels before the others (before the chevron). A row whose label is shown is an AI row: an ai-aura-start-sm gradient across the row, a 1px ai-border-strong edge and the AI fills for hover (ai-aura-hover-background) and selected. Row 3 is selected, row 1 is expanded and row 4 was edited: its label shows the revert button, and Carbon keeps the AI styling while it does. The rows without an AI label are plain.">
+            <cds:CdsDataTable x:Name="AiRowsTable" Title="Suggested clusters" Selection="Multi" IsExpandable="True" IsSortable="True" Size="Lg">
+                <cds:CdsDataTableHeader Key="name" Header="Name" Width="*" />
+                <cds:CdsDataTableHeader Key="region" Header="Region" Width="140" />
+                <cds:CdsDataTableHeader Key="status" Header="Status" Width="160" />
+                <cds:CdsDataTableHeader Key="nodes" Header="Nodes" Width="100" Align="End" />
+                <cds:CdsDataTable.RowDecoratorTemplate>
+                    <DataTemplate x:DataType="data:HCluster">
+                        <cds:CdsAILabel Label="Why this is suggested" IsVisible="{Binding IsAi, Mode=OneTime}" IsRevertActive="{Binding IsEdited, Mode=OneTime}">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="This row was added from a usage trend, not by a person." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </DataTemplate>
+                </cds:CdsDataTable.RowDecoratorTemplate>
+            </cds:CdsDataTable>
         </g:GalleryExample>
 
         <g:GalleryExample Title="Themes" Description="A compact table with a sorted column, zebra and a selected row (batch bar) in every theme zone, layered on a surface.">

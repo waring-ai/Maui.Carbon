@@ -24,6 +24,15 @@ public enum CdsTileKind
 /// <param name="ChevronBackground">Fill behind the chevron button (interactive expandable tiles, on hover).</param>
 public readonly record struct CdsTileVisuals(string Background, string? Border, string Icon, string? ChevronBackground);
 
+/// <summary>
+/// Color keys of an AI tile (a tile whose decorator is an <see cref="CdsAILabel"/>) in one state: the aura that rises from the bottom
+/// edge, the surface it fades into, and the border.
+/// </summary>
+/// <param name="AuraKey">The translucent aura at the bottom edge: <c>ai-aura-start</c>, or <c>ai-aura-hover-start</c> while the fill is the hover fill.</param>
+/// <param name="SurfaceKey">The surface the aura fades into: <c>layer-01</c>, or <c>ai-aura-hover-background</c> for the hover fill.</param>
+/// <param name="Border">A solid border key (<c>border-inverse</c>, selected tiles), or <c>null</c> for the 1px gradient border from <c>ai-border-start</c> to <c>ai-border-end</c>.</param>
+public readonly record struct CdsTileAiVisuals(string AuraKey, string SurfaceKey, string? Border);
+
 /// <summary>Maps a tile kind and state to Carbon tokens (from <c>packages/styles/scss/components/tile</c>).</summary>
 public static class CdsTileTokens
 {
@@ -42,6 +51,33 @@ public static class CdsTileTokens
         (CdsColorKeys.IconSecondary, CdsColorKeys.IconDisabled),
         (CdsColorKeys.IconInteractive, CdsColorKeys.IconDisabled),
     ];
+
+    /// <summary>
+    /// Resolves an AI tile's fill and border (Carbon's <c>_tile.scss</c> AI selectors). Every AI tile has the default aura over
+    /// <c>layer-01</c> and the gradient border. Clickable, selectable and radio tiles swap the fill for the hover fill
+    /// (<c>ai-aura-hover-start</c> over <c>ai-aura-hover-background</c>) on hover and press, selected selectable and radio tiles
+    /// get a <c>border-inverse</c> border (kept while hovered), and expandable and static tiles keep the default fill in every
+    /// state. Carbon does not restyle a disabled AI tile (its AI selectors outrank the disabled ones), so disabled keeps the
+    /// default fill and the selected border; it has no hover.
+    /// </summary>
+    public static CdsTileAiVisuals ResolveAi(CdsTileKind kind, CdsInteractionState state)
+    {
+        var selectable = kind is CdsTileKind.Selectable or CdsTileKind.Radio;
+        var border = selectable && state.HasFlag(CdsInteractionState.Selected) ? CdsColorKeys.BorderInverse : null;
+        var active = state.HasFlag(CdsInteractionState.Hover) || state.HasFlag(CdsInteractionState.Pressed);
+        var hoverFill = active && !state.HasFlag(CdsInteractionState.Disabled)
+            && kind is CdsTileKind.Clickable or CdsTileKind.Selectable or CdsTileKind.Radio;
+        return hoverFill
+            ? new(CdsAiTokens.AuraHoverStart, CdsAiTokens.AuraHoverBackground, border)
+            : new(CdsAiTokens.Aura, CdsColorKeys.Layer01, border);
+    }
+
+    /// <summary>
+    /// The end padding of a selectable or radio tile's body: 48 for the glyph, and with a decorator 72 (4.5rem, the design snapshot's
+    /// rule) so text stays clear of the AI label and the glyph beside it.
+    /// </summary>
+    internal static double SelectableEndPadding(bool hasDecorator) =>
+        hasDecorator ? CdsSpacing.Spacing09 + CdsSpacing.Spacing06 : CdsSpacing.Spacing09;
 
     /// <summary>
     /// Resolves the colors. Flags that matter: <see cref="CdsInteractionState.Disabled"/>, <see cref="CdsInteractionState.Hover"/>,

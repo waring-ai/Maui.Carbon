@@ -6,9 +6,12 @@ namespace Maui.Carbon.Gallery.Pages.Overlays;
     Summary = "A dialog over a scrim that blocks the page until the user responds.")]
 public partial class ModalPage : GalleryPage
 {
+    string? AiGenerated { get; set; }
+
     public ModalPage()
     {
         InitializeComponent();
+        AiGenerated = AiSummary.Text;
     }
 
     void OnCreateClicked(object? sender, EventArgs e) => OpenOnLoadModal.IsOpen = true;
@@ -30,6 +33,28 @@ public partial class ModalPage : GalleryPage
     void OnLgClicked(object? sender, EventArgs e) => LgModal.IsOpen = true;
 
     void OnComposedClicked(object? sender, EventArgs e) => ComposedModal.IsOpen = true;
+
+    void OnAiClicked(object? sender, EventArgs e) => AiModal.IsOpen = true;
+
+    void OnAiComposedClicked(object? sender, EventArgs e) => AiComposedModal.IsOpen = true;
+
+    void OnAiSummaryChanged(object? sender, TextChangedEventArgs e)
+    {
+        // Editing the generated text: the label becomes a revert button; the modal keeps its AI styling, as in Carbon.
+        if (AiSummary.Text != AiGenerated) AiModalLabel.IsRevertActive = true;
+    }
+
+    void OnAiRevert(object? sender, EventArgs e)
+    {
+        AiSummary.Text = AiGenerated;
+        AiModalLabel.IsRevertActive = false;
+    }
+
+    void OnAiSubmit(object? sender, EventArgs e)
+    {
+        AiModal.IsOpen = false;
+        Status.Text = "Summary saved";
+    }
 
     void OnOpenOnLoadSubmit(object? sender, EventArgs e)
     {

@@ -9,6 +9,18 @@ public enum CdsTabsType
     Contained,
 }
 
+/// <summary>Where the tabs of a <see cref="CdsTabs"/> sit.</summary>
+public enum CdsTabsOrientation
+{
+    /// <summary>A row of tabs above the panel (default).</summary>
+    Horizontal,
+    /// <summary>
+    /// Carbon's vertical tabs: a column of 64 high tabs at the start, a quarter of the width, with the panel beside it. Use them for
+    /// many sections or long labels, on medium and larger screens.
+    /// </summary>
+    Vertical,
+}
+
 /// <summary>How arrow keys behave in <see cref="CdsTabs"/> and <see cref="CdsContentSwitcher"/>.</summary>
 public enum CdsActivation
 {
@@ -29,6 +41,16 @@ public enum CdsActivation
 /// <param name="IsSemiBold">The selected label is semibold.</param>
 public readonly record struct CdsTabVisuals(
     string? Background, string Foreground, string SecondaryLabel, string Icon, string? BottomRule, string? TopRule, string CloseIcon, bool IsSemiBold);
+
+/// <summary>Colors of a vertical tab in one state. <c>null</c> means none.</summary>
+/// <param name="Background">Fill.</param>
+/// <param name="Foreground">Label and icon color.</param>
+/// <param name="StartEdge">The 3px edge at the start of the tab (<c>border-interactive</c> when selected).</param>
+/// <param name="EndRule">The 1px rule at the end of the tab, between it and the panel; none on the selected tab.</param>
+/// <param name="BottomRule">The 1px rule under the tab.</param>
+/// <param name="IsSemiBold">The selected label is semibold.</param>
+public readonly record struct CdsVerticalTabVisuals(
+    string Background, string Foreground, string StartEdge, string? EndRule, string BottomRule, bool IsSemiBold);
 
 /// <summary>Maps tab type and state to Carbon tokens (from <c>packages/styles/scss/components/tabs</c>).</summary>
 public static class CdsTabsTokens
@@ -78,6 +100,31 @@ public static class CdsTabsTokens
         if (type == CdsTabsType.Contained) return hasSecondaryLabel ? CdsSizing.XLarge : CdsSizing.Large;
         return CdsSizing.Medium;
     }
+
+    /// <summary>
+    /// Resolves a vertical tab (<c>.cds--tabs--vertical</c>): <c>layer-01</c> with 1px <c>border-subtle-01</c> rules under and after
+    /// it and a 3px <c>border-subtle-01</c> start edge; on hover <c>layer-hover-01</c> with a <c>border-strong-01</c> edge; selected, a
+    /// <c>border-interactive</c> edge, no end rule and a semibold <c>text-primary</c> label; disabled, <c>text-disabled</c>.
+    /// </summary>
+    public static CdsVerticalTabVisuals ResolveVertical(CdsInteractionState state, bool selected)
+    {
+        if (state.HasFlag(CdsInteractionState.Disabled))
+            return new(CdsColorKeys.Layer01, CdsColorKeys.TextDisabled, CdsColorKeys.BorderSubtle01, CdsColorKeys.BorderSubtle01, CdsColorKeys.BorderSubtle01, false);
+        if (selected)
+            return new(CdsColorKeys.Layer01, CdsColorKeys.TextPrimary, CdsColorKeys.BorderInteractive, null, CdsColorKeys.BorderSubtle01, true);
+        if (state.HasFlag(CdsInteractionState.Hover) || state.HasFlag(CdsInteractionState.Pressed))
+            return new(CdsColorKeys.LayerHover01, CdsColorKeys.TextPrimary, CdsColorKeys.BorderStrong01, CdsColorKeys.BorderSubtle01, CdsColorKeys.BorderSubtle01, false);
+        return new(CdsColorKeys.Layer01, CdsColorKeys.TextSecondary, CdsColorKeys.BorderSubtle01, CdsColorKeys.BorderSubtle01, CdsColorKeys.BorderSubtle01, false);
+    }
+
+    /// <summary>Height of a vertical tab: 4rem (Carbon's default xl layout size). Its label wraps to two lines.</summary>
+    public const double VerticalHeight = 64;
+
+    /// <summary>Width of the start edge of a vertical tab: 3px.</summary>
+    public const double VerticalEdgeWidth = 3;
+
+    /// <summary>The share of the width the vertical tab column takes: a quarter (4 of 16 grid columns, 2 of 8 at md).</summary>
+    public const double VerticalListFraction = 0.25;
 
     /// <summary>The smallest width of a tab with a label (80).</summary>
     public const double MinWidth = 80;

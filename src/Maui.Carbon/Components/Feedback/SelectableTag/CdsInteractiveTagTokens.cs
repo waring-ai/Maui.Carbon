@@ -76,8 +76,11 @@ public static class CdsInteractiveTagTokens
 /// <summary>Layout helper shared by the interactive tags: replaces the base tag's stack by a grid so labels truncate.</summary>
 internal static class CdsTagParts
 {
-    /// <summary>Moves the icon and label out of the base <paramref name="row"/> into a grid [icon][label *][trailing].</summary>
-    public static Grid Rebuild(Border pill, HorizontalStackLayout row, out CdsIcon icon, out CdsText label)
+    /// <summary>
+    /// Moves the icon and label out of the base <paramref name="row"/> into a grid [icon][label *][trailing], or with
+    /// <paramref name="withDecorator"/> [icon][label *][decorator][trailing] (the dismissible tag).
+    /// </summary>
+    public static Grid Rebuild(Border pill, HorizontalStackLayout row, out CdsIcon icon, out CdsText label, bool withDecorator = false)
     {
         icon = (CdsIcon)row.Children[0];
         label = (CdsText)row.Children[1];
@@ -85,6 +88,7 @@ internal static class CdsTagParts
         var grid = new Grid { VerticalOptions = LayoutOptions.Center, ColumnSpacing = 0 };
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+        if (withDecorator) grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         grid.Add(icon, 0);
         grid.Add(label, 1);

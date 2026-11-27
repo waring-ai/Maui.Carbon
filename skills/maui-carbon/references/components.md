@@ -28,7 +28,7 @@ Folders are under `src/Maui.Carbon/` in the repository:
 
 | Family | Types |
 |---|---|
-| AILabel | `CdsAILabel`, `CdsAILabelActions`, `CdsAILabelContent`, `CdsAiTreatment` |
+| AILabel | `CdsAILabel`, `CdsAILabelActions`, `CdsAILabelContent`, `CdsAiTreatment`, `CdsAiTokens` (an AI label is the `Decorator` of the text, number, select, list-box and date fields, checkboxes, radios and their groups, tiles, read-only and dismissible tags, `CdsModal`, `CdsComposedModal`, and of `CdsDataTable`, its headers and rows; `CdsDataTable.IsAiEnabled` turns on the whole-table AI treatment) |
 | AISkeleton | `CdsAISkeletonIcon`, `CdsAISkeletonPlaceholder`, `CdsAISkeletonText` |
 | ChatButton | `CdsChatButton` |
 
@@ -105,7 +105,7 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | OrderedList | `CdsListItem`, `CdsOrderedList`, `CdsUnorderedList` |
 | Pagination | `CdsPagination` |
 | PaginationNav | `CdsPaginationNav` |
-| StructuredList | `CdsStructuredList`, `CdsStructuredListColumn`, `CdsStructuredListRow` |
+| StructuredList | `CdsStructuredList`, `CdsStructuredListColumn`, `CdsStructuredListRow`, `CdsStructuredListSkeleton` |
 | TreeView | `CdsTreeNode`, `CdsTreeView` |
 
 ## Feedback
@@ -128,7 +128,7 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | SkeletonIcon | `CdsSkeletonIcon` |
 | SkeletonPlaceholder | `CdsSkeletonPlaceholder` |
 | SkeletonText | `CdsSkeletonText` |
-| Tag | `CdsTag` |
+| Tag | `CdsTag`, `CdsTagSkeleton` |
 | ToastNotification | `CdsToast`, `CdsToastNotification`, `CdsToastOptions` |
 
 ## FluidForms
@@ -158,17 +158,17 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | Dropdown | `CdsDropdown`, `CdsDropdownSkeleton` |
 | FileUploader | `CdsFileUploader`, `CdsFileUploaderItem`, `CdsUploadedFile`, `CdsFileUploaderSkeleton` (also the MVVM local-file picker; see [file-uploader](file-uploader.md)) |
 | Form | `CdsForm`, `CdsFormGroup`, `CdsFormItem`, `CdsFormLabel` |
-| MultiSelect | `CdsMultiSelect` |
-| NumberInput | `CdsNumberInput` |
-| PasswordInput | `CdsPasswordInput` |
+| MultiSelect | `CdsMultiSelect` (`SelectAllLabel` adds Carbon's "select all" parent row) |
+| NumberInput | `CdsNumberInput`, `CdsNumberInputSkeleton` |
+| PasswordInput | `CdsPasswordInput` (loads with `CdsTextInputSkeleton`) |
 | RadioButtonGroup | `CdsRadioButton`, `CdsRadioButtonGroup` |
 | Search | `CdsSearch` |
 | Select | `CdsSelect`, `CdsSelectItem`, `CdsSelectItemGroup` |
-| Slider | `CdsSlider` |
-| TextArea | `CdsTextArea` |
-| TextInput | `CdsTextInput` |
+| Slider | `CdsSlider` (with `HideTextInput`, each thumb shows its value in a tooltip) |
+| TextArea | `CdsTextArea`, `CdsTextAreaSkeleton` |
+| TextInput | `CdsTextInput`, `CdsTextInputSkeleton` |
 | TimePicker | `CdsTimePicker` |
-| Toggle | `CdsToggle` |
+| Toggle | `CdsToggle`, `CdsToggleSkeleton` |
 
 ## Layout
 
@@ -188,7 +188,7 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | HeaderPanel | `CdsHeaderPanel` |
 | Link | `CdsLink`, `CdsLinkSpan` |
 | PageHeader | `CdsPageHeader`, `CdsPageHeaderActions`, `CdsPageHeaderBreadcrumbBar`, `CdsPageHeaderContent`, `CdsPageHeaderContentText`, `CdsPageHeaderHeroImage`, `CdsPageHeaderTabBar` |
-| Tabs | `CdsTab`, `CdsTabs` |
+| Tabs | `CdsTab`, `CdsTabs` (`Orientation="Vertical"` for vertical tabs) |
 | UIShell | `CdsHeader`, `CdsHeaderGlobalAction`, `CdsHeaderGlobalBar`, `CdsHeaderMenu`, `CdsHeaderMenuButton`, `CdsHeaderMenuItem`, `CdsHeaderName`, `CdsHeaderNavigation`, `CdsHeaderSideNavItems`, `CdsSideNav`, `CdsSideNavDivider`, `CdsSideNavFooter`, `CdsSideNavHeader`, `CdsSideNavItems`, `CdsSideNavLink`, `CdsSideNavMenu`, `CdsSideNavMenuItem`, `CdsSkipToContent`, `CdsSwitcher`, `CdsSwitcherDivider`, `CdsSwitcherItem`, `CdsUIShell` |
 
 ## Overlays
@@ -198,7 +198,7 @@ Data shapes, axes and options are in [charts](charts.md). The shared types and t
 | DefinitionTooltip | `CdsDefinitionTooltip` |
 | Dialog | `CdsDialog` |
 | Modal | `CdsComposedModal`, `CdsModal`, `CdsModalBody`, `CdsModalFooter`, `CdsModalHeader` |
-| Popover | `CdsPopover` |
+| Popover | `CdsPopover` (`IsTabTip` for the tab tip variant) |
 | Toggletip | `CdsToggletip`, `CdsToggletipActions` |
 | Tooltip | `CdsTooltip` |
 

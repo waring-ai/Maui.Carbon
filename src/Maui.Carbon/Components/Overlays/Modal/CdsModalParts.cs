@@ -26,6 +26,11 @@ public class CdsModalHeader : ContentView
         nameof(IconDescription), typeof(string), typeof(CdsModalHeader), "Close",
         propertyChanged: static (b, _, n) => ((CdsModalHeader)b)._close.Description = (string?)n ?? "Close");
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsModalHeader), null,
+        propertyChanged: static (b, o, n) => ((CdsModalHeader)b).OnDecoratorChanged(o as View, n as View));
+
     readonly CdsText _label = new() { TypeStyle = CdsTypeStyle.Label01, Tone = CdsTextTone.Secondary, IsVisible = false, LineBreakMode = LineBreakMode.WordWrap };
     readonly CdsText _title = new() { TypeStyle = CdsTypeStyle.Heading03, LineBreakMode = LineBreakMode.WordWrap };
     readonly CdsModalCloseButton _close = new();
@@ -53,6 +58,9 @@ public class CdsModalHeader : ContentView
     /// <summary>Raised when the close button is activated.</summary>
     public event EventHandler? CloseButtonClicked;
 
+    /// <summary>Raised when <see cref="IsAiPresence"/> changes: the decorator became or stopped being an AI label.</summary>
+    internal event EventHandler? AiPresenceChanged;
+
     /// <summary>The small label above the title (a category or the name of the thing the modal is about).</summary>
     public string? Label
     {
@@ -73,6 +81,23 @@ public class CdsModalHeader : ContentView
         get => (string)GetValue(IconDescriptionProperty);
         set => SetValue(IconDescriptionProperty, value);
     }
+
+    /// <summary>
+    /// A view at the end of the header, before the close button (Carbon's <c>decorator</c> slot). A <see cref="CdsAILabel"/> is shown at
+    /// size <see cref="CdsAILabelSize.Sm"/> (32), 10px from the top and just before the close button, and gives the modal Carbon's AI
+    /// presence: the AI aura, the gradient border and the AI scrim. Like Carbon, the modal keeps that presence while the label shows its
+    /// revert button (<see cref="CdsAILabel.IsRevertActive"/>); the label is then centered on the close button's line. Any other view sits
+    /// 1rem from the top without AI styling. A <see cref="CdsModal"/> or <see cref="CdsComposedModal"/> forwards its own
+    /// <c>Decorator</c> here.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>Whether the <see cref="Decorator"/> is a <see cref="CdsAILabel"/>: the modal then takes Carbon's AI presence.</summary>
+    internal bool IsAiPresence => Decorator is CdsAILabel;
 
     /// <summary>Space between label and title (4 in a modal, 2 in a dialog).</summary>
     internal double LabelSpacing
@@ -101,8 +126,63 @@ public class CdsModalHeader : ContentView
         _title.IsVisible = !string.IsNullOrEmpty(Title);
     }
 
-    void UpdateTitleMeasure() =>
-        _title.Margin = new Thickness(0, 0, CdsModalSizing.HeadingEndPadding(Width), 0);
+    void OnDecoratorChanged(View? old, View? decorator)
+    {
+        var wasAi = old is CdsAILabel;
+        if (old is not null)
+        {
+            old.PropertyChanged -= OnDecoratorPropertyChanged;
+            old.SizeChanged -= OnDecoratorSizeChanged;
+            _root.Remove(old);
+        }
+        if (decorator is not null)
+        {
+            // Carbon: "AILabel always size sm".
+            if (decorator is CdsAILabel label) label.Size = CdsAILabelSize.Sm;
+            decorator.HorizontalOptions = LayoutOptions.End;
+            decorator.VerticalOptions = LayoutOptions.Start;
+            decorator.PropertyChanged += OnDecoratorPropertyChanged;
+            decorator.SizeChanged += OnDecoratorSizeChanged;
+            // Before the close button: it reads and tabs before it, as in Carbon's markup.
+            _root.Insert(_root.IndexOf(_close), decorator);
+        }
+        PlaceDecorator();
+        UpdateTitleMeasure();
+        if (wasAi != decorator is CdsAILabel) AiPresenceChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    void OnDecoratorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == CdsAILabel.IsRevertActiveProperty.PropertyName) PlaceDecorator();
+    }
+
+    void OnDecoratorSizeChanged(object? sender, EventArgs e) => UpdateTitleMeasure();
+
+    void PlaceDecorator()
+    {
+        if (Decorator is not { } decorator) return;
+        var ai = decorator as CdsAILabel;
+        var height = ai is not null ? CdsAILabelTokens.Side(CdsAILabelSize.Sm) : 0;
+        decorator.Margin = new Thickness(0, CdsModalSizing.DecoratorTopMargin(ai is not null, ai?.IsRevertActive == true, height), CdsModalSizing.CloseButtonSize, 0);
+    }
+
+    // Carbon reserves nothing for the decorator; here a long heading would run under it on a narrow modal, so the heading and the label
+    // above it stop short of the decorator and the gap before it.
+    double DecoratorReserve() => Decorator switch
+    {
+        null => 0,
+        CdsAILabel => CdsAILabelTokens.Side(CdsAILabelSize.Sm) + CdsSpacing.Spacing03,
+        { Width: > 0 } d => d.Width + CdsSpacing.Spacing03,
+        { WidthRequest: > 0 } d => d.WidthRequest + CdsSpacing.Spacing03,
+        _ => 0,
+    };
+
+    void UpdateTitleMeasure()
+    {
+        var reserve = DecoratorReserve();
+        _title.Margin = new Thickness(0, 0, Math.Max(CdsModalSizing.HeadingEndPadding(Width), reserve), 0);
+        _label.Margin = new Thickness(0, 0, reserve, 0);
+    }
 }
 
 /// <summary>
@@ -197,6 +277,15 @@ public class CdsModalBody : ContentView
 
     void UpdateFade() =>
         _fade.IsVisible = CdsModalSizing.ShowsFade(_scroller.ContentSize.Height, _scroller.Height, HasScrollingContent);
+
+    /// <summary>
+    /// In an AI modal the bottom fade paints the container's AI fill under it instead of flat <c>layer-01</c> (Carbon masks the content
+    /// there so the aura shows through); <c>null</c> restores the flat fade. For tests: the fade's current fill.
+    /// </summary>
+    internal void SetAiFade(Brush? fill) => _fade.Fill = fill;
+
+    /// <summary>The fill the bottom fade shows now (for tests).</summary>
+    internal Brush? FadeBackground => _fade.Background;
 
     static VisualElement? FindFocusable(Element? element)
     {

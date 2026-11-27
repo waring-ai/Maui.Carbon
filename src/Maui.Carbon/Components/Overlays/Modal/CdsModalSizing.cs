@@ -35,6 +35,23 @@ public static class CdsModalSizing
     /// <summary>Size of the close button (3rem).</summary>
     public const double CloseButtonSize = 48;
 
+    /// <summary>
+    /// Distance from the header's top edge to the top of a plain AI label in the header (<c>inset-block-start: 10px</c> of the
+    /// decorator in <c>_modal.scss</c>; Carbon's v12 flag uses 20px for its 40px close button, ours is 48px).
+    /// </summary>
+    public const double DecoratorTop = 10;
+
+    /// <summary>The line the revert-state AI label is centered on, from the header's top edge (<c>inset-block-start: 1.475rem</c>).</summary>
+    public const double RevertDecoratorCenter = 23.6;
+
+    /// <summary>
+    /// The top margin of the header's decorator: a plain AI label sits <see cref="DecoratorTop"/> from the top, a revert-state label is
+    /// centered on <see cref="RevertDecoratorCenter"/> (Carbon shifts it up by half its height with <c>translateY(-50%)</c>) and any
+    /// other decorator sits 1rem from the top.
+    /// </summary>
+    public static double DecoratorTopMargin(bool aiLabel, bool revertActive, double height) =>
+        !aiLabel ? CdsSpacing.Spacing05 : revertActive ? RevertDecoratorCenter - height / 2 : DecoratorTop;
+
     /// <summary>Height of the fade at the bottom of a scrolling body (80px: a 32px ramp over 48px of solid).</summary>
     public const double FadeHeight = 80;
 

@@ -1,3 +1,5 @@
+using Microsoft.Maui.Layouts;
+
 namespace Maui.Carbon;
 
 /// <summary>Layout direction of a group of choices (checkboxes, radio buttons).</summary>
@@ -261,4 +263,126 @@ internal sealed class CdsRadioGlyph : CdsGlyphView
 /// <summary>Wraps one choice in a wrapping row so it gets its trailing gap (a plain <see cref="ContentView"/> would be mistaken for a Carbon control).</summary>
 internal sealed class CdsChoiceCell : ContentView
 {
+}
+
+/// <summary>
+/// A row of one main view (a checkbox's box and label, a radio's circle and label, a group's legend) and Carbon's
+/// <c>decorator</c> slot after it. Carbon lays them out in a wrapping flex row: the decorator follows the end of the main view
+/// with <c>spacing-03</c> between, and drops to the next line (at the start edge) when the main view leaves no room for it, so
+/// a long label wraps first and the AI label never leaves the container. An AI label is shown at size mini (md when its kind is
+/// inline and the row allows it: single controls only; groups force the default kind), the inline kind is
+/// nudged up 1px as Carbon does.
+/// </summary>
+internal sealed class CdsDecoratedRow : Layout
+{
+    readonly bool _allowInline;
+    readonly bool _centersDecorator;
+    View? _decorator;
+
+    /// <param name="main">The label part; the decorator follows it.</param>
+    /// <param name="allowInline">Whether an inline AI label keeps its kind (single checkbox and radio) or is forced to default (groups).</param>
+    /// <param name="centersDecorator">Centers the decorator on the line (radio buttons) instead of top-aligning it (checkbox, legends).</param>
+    public CdsDecoratedRow(View main, bool allowInline, bool centersDecorator)
+    {
+        _allowInline = allowInline;
+        _centersDecorator = centersDecorator;
+        Add(main);
+    }
+
+    /// <summary>The view after the main one, or <c>null</c>.</summary>
+    public View? Decorator
+    {
+        get => _decorator;
+        set
+        {
+            if (ReferenceEquals(_decorator, value)) return;
+            if (_decorator is { } old)
+            {
+                old.PropertyChanged -= OnDecoratorPropertyChanged;
+                Remove(old);
+            }
+            _decorator = value;
+            if (value is null) return;
+            value.PropertyChanged += OnDecoratorPropertyChanged;
+            value.HorizontalOptions = LayoutOptions.Start;
+            value.VerticalOptions = LayoutOptions.Start;
+            Normalize(value);
+            Add(value);
+        }
+    }
+
+    // A decorator's size and kind are the control's to decide (Carbon clones the AI label with them).
+    void OnDecoratorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (sender is CdsAILabel label && (e.PropertyName == CdsAILabel.SizeProperty.PropertyName || e.PropertyName == CdsAILabel.KindProperty.PropertyName))
+            Normalize(label);
+    }
+
+    void Normalize(View decorator)
+    {
+        var inline = false;
+        if (decorator is CdsAILabel label)
+        {
+            inline = _allowInline && label.Kind == CdsAILabelKind.Inline;
+            if (!_allowInline && label.Kind != CdsAILabelKind.Default) label.Kind = CdsAILabelKind.Default;
+            var size = inline ? CdsAILabelSize.Md : CdsAILabelSize.Mini;
+            if (label.Size != size) label.Size = size;
+        }
+        // 8px after the label (Carbon: "> * { margin-inline-start: $spacing-03 }"); the inline kind sits 1px higher.
+        decorator.Margin = new Thickness(CdsSpacing.Spacing03, inline ? -1 : 0, 0, 0);
+    }
+
+    /// <summary>
+    /// MAUI gives a child the disabled state of its parent, which would turn off an AI label inside a disabled checkbox,
+    /// radio button or group. The AI label is never disabled with its control (Carbon: "should never be disabled as part of a
+    /// disabled or read-only state"), so the row is always enabled. What is inside it that must be disabled is: the hit
+    /// target sets its own state.
+    /// </summary>
+    protected override bool IsEnabledCore => true;
+
+    /// <inheritdoc/>
+    protected override ILayoutManager CreateLayoutManager() => new Manager(this);
+
+    readonly record struct Plan(double MainWidth, Size Main, Size Decorator, bool Wraps, double DecoratorX, double DecoratorY, Size Total);
+
+    sealed class Manager(CdsDecoratedRow row) : LayoutManager(row)
+    {
+        IView? Main => row.Count > 0 && row[0].Visibility != Visibility.Collapsed ? row[0] : null;
+
+        IView? Decorator => Main is not null && row.Count > 1 && row[1].Visibility != Visibility.Collapsed ? row[1] : null;
+
+        Plan Compute(double available, double heightConstraint)
+        {
+            if (Main is not { } main) return default;
+            // The main view takes its natural width, or all the width there is when that is less (its label then wraps).
+            var natural = main.Measure(double.PositiveInfinity, heightConstraint);
+            var mainWidth = double.IsFinite(available) ? Math.Min(natural.Width, Math.Max(0, available)) : natural.Width;
+            var mainSize = mainWidth < natural.Width ? main.Measure(mainWidth, heightConstraint) : natural;
+            if (Decorator is not { } decorator) return new Plan(mainWidth, mainSize, default, false, 0, 0, new Size(mainWidth, mainSize.Height));
+
+            var size = decorator.Measure(double.PositiveInfinity, heightConstraint);
+            // flex-wrap: wrap: the decorator goes to the next line when it does not fit after the main view.
+            var wraps = double.IsFinite(available) && mainWidth + size.Width > available + 0.01;
+            if (wraps)
+                return new Plan(mainWidth, mainSize, size, true, 0, mainSize.Height, new Size(Math.Max(mainWidth, size.Width), mainSize.Height + size.Height));
+            var height = Math.Max(mainSize.Height, size.Height);
+            var y = row._centersDecorator ? (height - size.Height) / 2 : 0;
+            return new Plan(mainWidth, mainSize, size, false, mainWidth, y, new Size(mainWidth + size.Width, height));
+        }
+
+        public override Size Measure(double widthConstraint, double heightConstraint)
+        {
+            var plan = Compute(widthConstraint, heightConstraint);
+            return plan.Total;
+        }
+
+        public override Size ArrangeChildren(Rect bounds)
+        {
+            var plan = Compute(bounds.Width, double.PositiveInfinity);
+            if (Main is { } main) main.Arrange(new Rect(bounds.X, bounds.Y, plan.MainWidth, plan.Main.Height));
+            if (Decorator is { } decorator)
+                decorator.Arrange(new Rect(bounds.X + plan.DecoratorX, bounds.Y + plan.DecoratorY, plan.Decorator.Width, plan.Decorator.Height));
+            return plan.Total;
+        }
+    }
 }

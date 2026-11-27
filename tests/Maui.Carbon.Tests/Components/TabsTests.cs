@@ -331,3 +331,73 @@ public class TabsRovingFocusTests
         Assert.All(others, h => Assert.False(h.IsTabStop));
     }
 }
+
+public class VerticalTabsTests
+{
+    static CdsTabs Make(int selected = 0)
+    {
+        var tabs = new CdsTabs { Orientation = CdsTabsOrientation.Vertical };
+        tabs.Items.Add(new CdsTab { Text = "Overview" });
+        tabs.Items.Add(new CdsTab { Text = "Access policies" });
+        tabs.Items.Add(new CdsTab { Text = "Billing", IsEnabled = false });
+        tabs.Items.Add(new CdsTab { Text = "Notifications" });
+        tabs.SelectedIndex = selected;
+        return tabs;
+    }
+
+    [Fact]
+    public void Vertical_tabs_stack_in_a_column_and_use_up_and_down()
+    {
+        var tabs = Make();
+        Assert.Equal(4, tabs.VerticalList!.Children.Count);
+        Assert.Equal(CdsRovingOrientation.Vertical, tabs.KeyOrientation);
+        Assert.False(tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right)));
+        Assert.True(tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Down)));
+        Assert.Equal(1, tabs.SelectedIndex);
+        // Skips the disabled tab.
+        tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Down));
+        Assert.Equal(3, tabs.SelectedIndex);
+        tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Up));
+        Assert.Equal(1, tabs.SelectedIndex);
+    }
+
+    [Fact]
+    public void Vertical_tabs_are_64_high_with_the_selected_edge()
+    {
+        var tabs = Make(selected: 1);
+        var views = tabs.TabViews;
+        Assert.All(views, v => Assert.Equal(CdsTabsTokens.VerticalHeight, v.MinimumHeightRequest));
+        Assert.Equal(CdsColorKeys.BorderInteractive, views[1].VerticalVisuals.StartEdge);
+        Assert.Null(views[1].VerticalVisuals.EndRule);
+        Assert.True(views[1].VerticalVisuals.IsSemiBold);
+        Assert.Equal(CdsColorKeys.BorderSubtle01, views[0].VerticalVisuals.StartEdge);
+        Assert.Equal(CdsColorKeys.TextDisabled, views[2].VerticalVisuals.Foreground);
+    }
+
+    [Fact]
+    public void Switching_back_to_horizontal_restores_the_row()
+    {
+        var tabs = Make(selected: 3);
+        tabs.Orientation = CdsTabsOrientation.Horizontal;
+        Assert.Empty(tabs.VerticalList!.Children);
+        Assert.Equal(CdsRovingOrientation.Horizontal, tabs.KeyOrientation);
+        Assert.Equal(3, tabs.SelectedIndex);
+        Assert.True(tabs.OnKeyDown(new CdsKeyEventArgs(CdsKey.Right)));
+        Assert.Equal(0, tabs.SelectedIndex);
+    }
+
+    [Theory]
+    [InlineData(false, false, false, CdsColorKeys.Layer01, CdsColorKeys.TextSecondary, CdsColorKeys.BorderSubtle01)]
+    [InlineData(false, true, false, CdsColorKeys.LayerHover01, CdsColorKeys.TextPrimary, CdsColorKeys.BorderStrong01)]
+    [InlineData(true, false, false, CdsColorKeys.Layer01, CdsColorKeys.TextPrimary, CdsColorKeys.BorderInteractive)]
+    [InlineData(false, false, true, CdsColorKeys.Layer01, CdsColorKeys.TextDisabled, CdsColorKeys.BorderSubtle01)]
+    public void Vertical_tokens_follow_carbon(bool selected, bool hover, bool disabled, string fill, string text, string edge)
+    {
+        var state = (hover ? CdsInteractionState.Hover : 0) | (disabled ? CdsInteractionState.Disabled : 0);
+        var v = CdsTabsTokens.ResolveVertical(state, selected);
+        Assert.Equal(fill, v.Background);
+        Assert.Equal(text, v.Foreground);
+        Assert.Equal(edge, v.StartEdge);
+        Assert.Equal(CdsColorKeys.BorderSubtle01, v.BottomRule);
+    }
+}

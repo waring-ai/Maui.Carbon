@@ -65,6 +65,19 @@ public partial class CdsDataTable
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsDataTable), null, propertyChanged: OnChromeChanged);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsDataTable), null,
+        propertyChanged: static (b, o, n) => ((CdsDataTable)b).OnDecoratorChanged((View?)o, (View?)n));
+
+    /// <summary>Bindable property for <see cref="IsAiEnabled"/>.</summary>
+    public static readonly BindableProperty IsAiEnabledProperty = BindableProperty.Create(
+        nameof(IsAiEnabled), typeof(bool), typeof(CdsDataTable), false, propertyChanged: OnChromeChanged);
+
+    /// <summary>Bindable property for <see cref="RowDecoratorTemplate"/>.</summary>
+    public static readonly BindableProperty RowDecoratorTemplateProperty = BindableProperty.Create(
+        nameof(RowDecoratorTemplate), typeof(DataTemplate), typeof(CdsDataTable), null, propertyChanged: OnLayoutChanged);
+
     /// <summary>Bindable property for <see cref="IsSearchable"/>.</summary>
     public static readonly BindableProperty IsSearchableProperty = BindableProperty.Create(
         nameof(IsSearchable), typeof(bool), typeof(CdsDataTable), false, propertyChanged: OnToolbarChanged);
@@ -259,6 +272,46 @@ public partial class CdsDataTable
     {
         get => (string?)GetValue(LabelProperty);
         set => SetValue(LabelProperty, value);
+    }
+
+    /// <summary>
+    /// A view at the end of the title block, beside the title and description (Carbon's <c>decorator</c> on <c>TableContainer</c>):
+    /// usually a <see cref="CdsAILabel"/> that explains what the AI did to the table. It is placed as it is (the label keeps its size)
+    /// and, with no title or description, sits alone at the end. It does not change the table's styling: Carbon keeps that in
+    /// <see cref="IsAiEnabled"/>.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    /// <summary>
+    /// Whether the entire table has AI generated content (Carbon's <c>aiEnabled</c>): a 1px <c>ai-border-start</c> to
+    /// <c>ai-border-end</c> gradient border around the table and an <c>ai-aura-start</c> glow rising from the bottom of the body. It is
+    /// independent of <see cref="Decorator"/>: set both, with a <see cref="CdsAILabel"/> as the decorator, so the label explains the styling.
+    /// Use it when AI is present in all aspects of the table; for a column or a row use the decorators of
+    /// <see cref="CdsDataTableHeader.Decorator"/> and <see cref="RowDecoratorTemplate"/>.
+    /// </summary>
+    public bool IsAiEnabled
+    {
+        get => (bool)GetValue(IsAiEnabledProperty);
+        set => SetValue(IsAiEnabledProperty, value);
+    }
+
+    /// <summary>
+    /// Builds the AI label of each row (Carbon's <c>TableDecoratorRow</c>) in a 16 wide column before every other column; the
+    /// view's binding context is the row object. A row whose view is a shown <see cref="CdsAILabel"/> is an AI row: an
+    /// <c>ai-aura-start-sm</c> gradient across the row, a 1px <c>ai-border-strong</c> line on its start edge and the AI hover and
+    /// selected fills; bind <c>IsVisible</c> to hide the label on a row that is not AI. The AI styling stays while a label shows its
+    /// revert button (<see cref="CdsAILabel.IsRevertActive"/>), as in Carbon. Rows are re-bound as the table scrolls, so bind everything
+    /// the label shows to the row object; the label is named with the row ("AI, Show information, cluster-01"). Without a template the
+    /// table has no AI rows and builds nothing for them.
+    /// </summary>
+    public DataTemplate? RowDecoratorTemplate
+    {
+        get => (DataTemplate?)GetValue(RowDecoratorTemplateProperty);
+        set => SetValue(RowDecoratorTemplateProperty, value);
     }
 
     /// <summary>Adds the toolbar search (<c>search</c>): a 48 magnifier that expands to a field; Escape clears it.</summary>

@@ -39,6 +39,14 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Skeleton" Description="A label bar over a skeleton track with its knob and a bar for the state text, md and sm.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsToggleSkeleton />
+                <cds:CdsToggleSkeleton Size="Sm" />
+                <cds:CdsToggleSkeleton HideLabel="True" />
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Click the switch, its label or its state text, or focus it with Tab and press Enter or Space. The knob slides over duration-fast-01 and jumps when reduced motion is on.">
             <VerticalStackLayout Spacing="16" HorizontalOptions="Start">
                 <cds:CdsToggle LabelText="Auto-scaling" LabelA="Disabled" LabelB="Enabled" Toggled="OnToggled" />

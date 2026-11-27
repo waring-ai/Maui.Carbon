@@ -64,7 +64,7 @@ internal sealed class CdsListBoxList
     public event EventHandler<int>? RowHovered;
 
     /// <summary>Rebuilds the rows. <paramref name="content"/> may supply a template view for a row.</summary>
-    public void Build(IReadOnlyList<ListBoxEntry> rows, Func<int, bool> isChosen, Func<int, ListBoxEntry, View?>? content)
+    public void Build(IReadOnlyList<ListBoxEntry> rows, Func<int, bool?> isChosen, Func<int, ListBoxEntry, View?>? content)
     {
         _stack.Clear();
         _rows.Clear();
@@ -72,7 +72,9 @@ internal sealed class CdsListBoxList
         for (var i = 0; i < rows.Count; i++)
         {
             var index = i;
-            var row = new CdsListBoxRow(rows[i], RowHeight, _inline, _multi, isChosen(i), content?.Invoke(i, rows[i]), ContentHeight);
+            var state = isChosen(i);
+            var row = new CdsListBoxRow(rows[i], RowHeight, _inline, _multi, state == true, content?.Invoke(i, rows[i]), ContentHeight);
+            row.IsMixed = state is null;
             row.Chosen += (_, _) => RowChosen?.Invoke(this, index);
             row.HoverChanged += (_, entered) =>
             {
@@ -85,15 +87,19 @@ internal sealed class CdsListBoxList
     }
 
     /// <summary>Re-applies highlight, ring, selection marks and separators.</summary>
-    public void Refresh(int highlighted, bool keyboard, Func<int, bool> isChosen)
+    public void Refresh(int highlighted, bool keyboard, Func<int, bool?> isChosen)
     {
         for (var i = 0; i < _rows.Count; i++)
         {
             var row = _rows[i];
-            row.IsChosen = isChosen(i);
+            var state = isChosen(i);
+            row.IsChosen = state == true;
+            row.IsMixed = state is null;
+            var afterSelectAll = i > 0 && _rows[i - 1].Entry.IsSelectAll;
+            row.SeparatorBleeds = afterSelectAll;
             row.IsHighlighted = i == highlighted;
             row.ShowFocusRing = keyboard;
-            row.SeparatorVisible = ListBoxLogic.SeparatorVisible(i, highlighted, _hovered, i > 0 && isChosen(i - 1), _multi);
+            row.SeparatorVisible = ListBoxLogic.SeparatorVisible(i, highlighted, _hovered, i > 0 && isChosen(i - 1) == true, _multi, afterSelectAll);
         }
     }
 

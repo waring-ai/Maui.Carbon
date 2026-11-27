@@ -87,8 +87,12 @@ public static class CdsAILabelTokens
         _ => CdsSize.Lg,
     };
 
-    /// <summary>Resolves the colors of the button for a kind and state.</summary>
-    public static CdsAILabelVisuals Resolve(CdsAILabelKind kind, bool hasText, CdsInteractionState state)
+    /// <summary>
+    /// Resolves the colors of the button for a kind and state. A <paramref name="foreground"/> key makes the inline kind take that
+    /// color for its text and square in every state and for its hover outline (Carbon's <c>currentColor</c> inside a tag); the
+    /// default kind ignores it.
+    /// </summary>
+    public static CdsAILabelVisuals Resolve(CdsAILabelKind kind, bool hasText, CdsInteractionState state, string? foreground = null)
     {
         var hover = state.HasFlag(CdsInteractionState.Hover) || state.HasFlag(CdsInteractionState.Pressed);
         var focus = state.HasFlag(CdsInteractionState.FocusVisible);
@@ -103,9 +107,10 @@ public static class CdsAILabelTokens
 
         // Inline: no box; with text it carries the border-inverse outline.
         string? edge = hasText ? CdsColorKeys.BorderInverse : null;
-        if (hover) edge = CdsColorKeys.IconSecondary;
+        if (hover) edge = foreground ?? CdsColorKeys.IconSecondary;
         if (focus) edge = CdsColorKeys.Focus;
         var inlineInner = focus && hasText ? CdsColorKeys.Focus : null;
+        if (foreground is not null) return new(null, edge, foreground, foreground, foreground, inlineInner);
         return hover
             ? new(null, edge, CdsColorKeys.TextSecondary, CdsColorKeys.TextSecondary, CdsColorKeys.IconSecondary, inlineInner)
             : new(null, edge, CdsColorKeys.TextPrimary, CdsColorKeys.TextPrimary, CdsColorKeys.IconPrimary, inlineInner);

@@ -153,6 +153,7 @@ public partial class CdsOverlayHost : Grid
                 overlay.Container.VerticalOptions = content.VerticalOptions;
             }
             _modalLayer.Children.Add(overlay.Container);
+            UpdateScrim();
             _modalLayer.IsVisible = true;
             _modalLayer.InputTransparent = false;
             SetPageBlocked(true);
@@ -211,11 +212,22 @@ public partial class CdsOverlayHost : Grid
         overlay.Container.DisconnectHandlers();
     }
 
+    /// <summary>
+    /// Colors the shared scrim for the topmost modal (<see cref="CdsOverlayOptions.ScrimColorKey"/>, default <c>overlay</c>). With no
+    /// modal left the scrim keeps its color while it fades out.
+    /// </summary>
+    internal void UpdateScrim()
+    {
+        var top = _overlays.LastOrDefault(o => o.Layer == CdsOverlayLayer.Modal);
+        if (top is not null) _scrim.SetDynamicResource(BoxView.ColorProperty, top.Options.ScrimColorKey ?? CdsColorKeys.Overlay);
+    }
+
     internal void Remove(CdsOverlay overlay)
     {
         _overlays.Remove(overlay);
         if (overlay.Layer == CdsOverlayLayer.Modal)
         {
+            UpdateScrim();
             var last = !HasModal;
             // The page takes input and focus again at once; only the picture fades out.
             if (last) SetPageBlocked(false);

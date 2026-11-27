@@ -32,6 +32,53 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A CdsAILabel as the Decorator shows at its mini size, 8px after the label (an inline one at md). Carbon gives the checkbox no AI styling of its own. The AI label is its own button: it is never disabled, even on a disabled or read-only checkbox, and activating it does not toggle the checkbox. A long label wraps first; the AI label drops to the next line when the label leaves no room.">
+            <VerticalStackLayout Spacing="16" HorizontalOptions="Start" WidthRequest="320">
+                <cds:CdsCheckbox Label="Enable autoscaling" IsChecked="True" HelperText="Suggested from your recent load">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because this cluster peaked at 90% CPU twice last week." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="Enable autoscaling" IsChecked="True">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" Kind="Inline" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="Enable autoscaling">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" IsRevertActive="True" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="Enable autoscaling" IsChecked="True" IsEnabled="False">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="Enable autoscaling" IsChecked="True" IsReadOnly="True">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="Accept the suggested terms" IsInvalid="True" InvalidText="You must accept the terms to continue">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+                <cds:CdsCheckbox Label="A long label fills the line, so the AI label drops under it" IsChecked="True">
+                    <cds:CdsCheckbox.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckbox.Decorator>
+                </cds:CdsCheckbox>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Hidden label" Description="HideLabel keeps the label only for screen readers, for example in a table row.">
             <cds:CdsCheckbox Label="Select row prod-eu-de-1" HideLabel="True" IsChecked="True" HorizontalOptions="Start" />
         </g:GalleryExample>
@@ -64,6 +111,11 @@
                             <cds:CdsCheckbox Label="Indeterminate" IsIndeterminate="True" />
                             <cds:CdsCheckbox Label="Invalid" IsInvalid="True" InvalidText="Required" />
                             <cds:CdsCheckbox Label="Disabled" IsChecked="True" IsEnabled="False" />
+                            <cds:CdsCheckbox Label="With AI label" IsChecked="True">
+                                <cds:CdsCheckbox.Decorator>
+                                    <cds:CdsAILabel Label="Why this is suggested" />
+                                </cds:CdsCheckbox.Decorator>
+                            </cds:CdsCheckbox>
                         </VerticalStackLayout>
                     </DataTemplate>
                 </g:ThemeStrip.Template>

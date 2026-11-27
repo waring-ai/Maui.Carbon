@@ -66,6 +66,134 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="With an AI label the tile takes the AI aura, gradient border and shadow, and the label (xs) sits 40 from the end, beside the checkbox glyph; the body keeps 72 of end padding. Selected tiles get the border-inverse border, and hover swaps to the hover fill. Clicking the label opens its callout and never toggles the tile.">
+            <g:WrapLayout>
+                <cds:CdsSelectableTile WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsSelectableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is recommended">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsSelectableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Recommended" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile IsSelected="True" WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsSelectableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is recommended">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsSelectableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Recommended" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile HasRoundedCorners="True" WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsSelectableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is recommended">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsSelectableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Monitoring" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Recommended" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile HasRoundedCorners="True" IsSelected="True" WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsSelectableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is recommended">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsSelectableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Audit trail" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Recommended" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+                <cds:CdsSelectableTile IsEnabled="False" WidthRequest="280" Margin="0,0,16,16">
+                    <cds:CdsSelectableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is recommended">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsSelectableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Dedicated hardware" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Not available" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsSelectableTile>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label in every theme" Description="Unselected and selected AI tiles in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsSelectableTile >
+                                <cds:CdsSelectableTile.Decorator>
+                                    <cds:CdsAILabel Label="Why this is recommended">
+                                        <cds:CdsAILabelContent>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsAILabelContent>
+                                    </cds:CdsAILabel>
+                                </cds:CdsSelectableTile.Decorator>
+                                <VerticalStackLayout Spacing="4">
+                                    <cds:CdsText Text="Log analysis" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="Recommended" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsSelectableTile>
+                            <cds:CdsSelectableTile IsSelected="True">
+                                <cds:CdsSelectableTile.Decorator>
+                                    <cds:CdsAILabel Label="Why this is recommended">
+                                        <cds:CdsAILabelContent>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="Recommended because you retain logs for 30 days." TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsAILabelContent>
+                                    </cds:CdsAILabel>
+                                </cds:CdsSelectableTile.Decorator>
+                                <VerticalStackLayout Spacing="4">
+                                    <cds:CdsText Text="Backups" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="Recommended" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsSelectableTile>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="On a layer" Description="On a layer-01 panel the tiles sit inside a CdsLayer.">
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>

@@ -16,12 +16,17 @@ public partial class CdsCheckbox : CdsControl
     CdsText? _label;
     CdsFormMessage? _message;
     readonly CdsHitTarget _hit;
+    // The grid holding the box, label and hit target: the root, or (once there is a decorator) a grid inside the row that
+    // puts the decorator after it.
+    Grid _content;
+    CdsDecoratedRow? _row;
     CdsInteractionState _inherited;
     string? _groupMessage;
 
     /// <summary>Creates an unchecked checkbox.</summary>
     public CdsCheckbox()
     {
+        _content = _root;
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
         _root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
@@ -46,6 +51,33 @@ public partial class CdsCheckbox : CdsControl
     {
         Label = label;
         IsChecked = isChecked;
+    }
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        if (decorator is null && _row is null) return;
+        EnsureRow().Decorator = decorator;
+    }
+
+    // A checkbox with a decorator wraps its box and label into one view, so the decorator can follow it and drop to the next
+    // line when a long label leaves no room. Checkboxes without one (table rows) keep the flat tree.
+    CdsDecoratedRow EnsureRow()
+    {
+        if (_row is not null) return _row;
+        var main = new Grid { RowSpacing = 0, ColumnSpacing = 0 };
+        main.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+        main.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+        foreach (View part in new View?[] { _boxHost, _label, _hit }.OfType<View>())
+        {
+            _root.Remove(part);
+            main.Add(part);
+        }
+        _content = main;
+        // After the main view, so the decorator is on top of the hit target and has its own tab stop after the checkbox.
+        _row = new CdsDecoratedRow(main, allowInline: true, centersDecorator: false);
+        _root.Insert(0, _row);
+        Grid.SetColumnSpan(_row, 2);
+        return _row;
     }
 
     /// <summary>Raised when <see cref="IsChecked"/> changes (by the user or in code).</summary>
@@ -156,7 +188,7 @@ public partial class CdsCheckbox : CdsControl
         AutomationProperties.SetExcludedWithChildren(_label, true);
         // Under the hit target, which spans both columns.
         Grid.SetColumn(_label, 1);
-        _root.Children.Insert(_root.Children.IndexOf(_hit), _label);
+        _content.Children.Insert(_content.Children.IndexOf(_hit), _label);
         return _label;
     }
 

@@ -29,6 +29,11 @@ public partial class CdsMultiSelect
         nameof(ShouldFilterItem), typeof(Func<object?, string, bool>), typeof(CdsMultiSelect), null,
         propertyChanged: static (b, _, _) => ((CdsMultiSelect)b).RefreshRows(keepHighlight: false));
 
+    /// <summary>Bindable property for <see cref="SelectAllLabel"/>.</summary>
+    public static readonly BindableProperty SelectAllLabelProperty = BindableProperty.Create(
+        nameof(SelectAllLabel), typeof(string), typeof(CdsMultiSelect), null,
+        propertyChanged: static (b, _, _) => ((CdsMultiSelect)b).RefreshRows(keepHighlight: true));
+
     /// <summary>
     /// The selected items (two-way). A list the application owns is updated in place when it allows it (an
     /// <c>ObservableCollection</c>); otherwise <see cref="CdsMultiSelect"/> assigns a new list.
@@ -37,6 +42,21 @@ public partial class CdsMultiSelect
     {
         get => (IList?)GetValue(SelectedItemsProperty);
         set => SetValue(SelectedItemsProperty, value);
+    }
+
+    /// <summary>
+    /// Text of the parent "select all" checkbox listed first in the open list (Carbon: an option with <c>isSelectAll</c>);
+    /// <c>null</c> (default) shows none. Word it "All" or "All roles", not as an action, and do not use it where choosing
+    /// everything and choosing nothing mean the same (filters). The row is checked when every selectable item is chosen,
+    /// partially checked (a dash) when some are, and a click clears the selection when anything is chosen or selects every
+    /// enabled item when nothing is. It never appears in <see cref="SelectedItems"/> or the count tag. With
+    /// <see cref="IsFilterable"/> it follows Carbon's FilterableMultiSelect: it acts on the items the filter shows, leaves
+    /// disabled items alone and is hidden while no enabled item is shown; otherwise it follows Carbon's MultiSelect.
+    /// </summary>
+    public string? SelectAllLabel
+    {
+        get => (string?)GetValue(SelectAllLabelProperty);
+        set => SetValue(SelectAllLabelProperty, value);
     }
 
     /// <summary>Turns the field into a text input that narrows the list as you type; the list stays open while choosing. Not for filterable lists in forms with <see cref="CdsListBox.Type"/> inline.</summary>

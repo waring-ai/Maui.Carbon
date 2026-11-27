@@ -18,6 +18,13 @@
             <cds:CdsSlider x:Name="Sampling" Label="Sampling rate" Min="0" Max="1" Step="0.05" Value="0.25" HideTextInput="True" HorizontalOptions="Start" WidthRequest="520" />
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Value tooltip" Description="With HideTextInput each thumb shows its value in a tooltip on hover, keyboard focus and while it is dragged, formatted by ValueFormatter. The first slider has focus so its tooltip is shown; a range has one tooltip per handle.">
+            <VerticalStackLayout Spacing="64" HorizontalOptions="Start" WidthRequest="640" Padding="0,48,0,0">
+                <cds:CdsSlider x:Name="Tooltipped" Label="Memory (GB)" Min="0" Max="64" Step="2" Value="24" HideTextInput="True" />
+                <cds:CdsSlider Label="Latency budget (ms)" IsRange="True" Min="0" Max="500" Value="80" UpperValue="320" InputLabel="Minimum latency" InputLabelUpper="Maximum latency" HideTextInput="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="States" Description="Invalid outlines the box in support-error with a text-error message; warning shows the support-warning icon. Read-only hides the thumb and keeps the value. Disabled uses border-disabled and text-disabled.">
             <VerticalStackLayout Spacing="32" HorizontalOptions="Start" WidthRequest="640">
                 <cds:CdsSlider Label="Replicas" Min="1" Max="10" Value="14" IsInvalid="True" InvalidText="Value is out of range" />

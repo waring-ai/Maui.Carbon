@@ -7,6 +7,11 @@ public partial class CdsCheckboxGroup
         nameof(Legend), typeof(string), typeof(CdsCheckboxGroup), null,
         propertyChanged: static (b, _, _) => ((CdsCheckboxGroup)b).UpdateChrome());
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsCheckboxGroup), null,
+        propertyChanged: static (b, _, n) => ((CdsCheckboxGroup)b).OnDecoratorChanged((View?)n));
+
     /// <summary>Bindable property for <see cref="Orientation"/>.</summary>
     public static readonly BindableProperty OrientationProperty = BindableProperty.Create(
         nameof(Orientation), typeof(CdsChoiceOrientation), typeof(CdsCheckboxGroup), CdsChoiceOrientation.Vertical,
@@ -47,6 +52,18 @@ public partial class CdsCheckboxGroup
     {
         get => (string?)GetValue(LegendProperty);
         set => SetValue(LegendProperty, value);
+    }
+
+    /// <summary>
+    /// A view shown right after the legend, 8px from it (Carbon's decorator slot); it needs a <see cref="Legend"/> and shows
+    /// nothing without one. A <see cref="CdsAILabel"/> is always shown at its mini size with the default kind, as in Carbon. It
+    /// is its own button and tab stop and stays interactive while the group is disabled or read-only. The group has no AI
+    /// styling of its own; when the person edits the AI selection, set <see cref="CdsAILabel.IsRevertActive"/>.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
     }
 
     /// <summary>Vertical (default, 8px apart) or horizontal (wrapping row, 16px apart).</summary>

@@ -2,6 +2,11 @@ namespace Maui.Carbon;
 
 public abstract partial class CdsFormField
 {
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsFormField), null,
+        propertyChanged: static (b, _, n) => ((CdsFormField)b).OnDecoratorChanged((View?)n));
+
     /// <summary>Bindable property for <see cref="Label"/>.</summary>
     public static readonly BindableProperty LabelProperty = BindableProperty.Create(
         nameof(Label), typeof(string), typeof(CdsFormField), null, propertyChanged: OnChromeChanged);
@@ -110,5 +115,22 @@ public abstract partial class CdsFormField
     {
         get => (bool)GetValue(IsInlineProperty);
         set => SetValue(IsInlineProperty, value);
+    }
+
+    /// <summary>
+    /// A view at the end of the field (Carbon's <c>decorator</c>), usually a <see cref="CdsAILabel"/> marking an AI-generated value. The
+    /// label is shown at its mini size and the field takes Carbon's AI presence (the AI aura and an <c>ai-border-strong</c> rule)
+    /// until the label's <see cref="CdsAILabel.IsRevertActive"/> is set, which you do when the person edits the value.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        Chrome.Decorator = decorator;
+        RefreshVisuals();
     }
 }

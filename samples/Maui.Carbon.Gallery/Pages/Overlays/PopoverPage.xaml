@@ -28,6 +28,34 @@
             </HorizontalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Tab tip" Description="IsTabTip attaches the popover to a toolbar or header: square corners, no caret, no gap to the trigger, aligned to the start (BottomStart) or end (BottomEnd) of the trigger. While open, the trigger takes the layer-01 fill of the content so the two read as one tab. Use a ghost icon button as the trigger.">
+            <Border StrokeThickness="0" BackgroundColor="{DynamicResource CdsBackground}" HeightRequest="360" HorizontalOptions="Fill">
+                <Grid RowDefinitions="Auto,1,*">
+                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="8,0">
+                        <cds:CdsPopover x:Name="TabTipStartPopover" IsTabTip="True" Placement="BottomStart" IsOpen="True">
+                            <cds:CdsIconButton Icon="Settings" Label="Display settings" Kind="Ghost" Size="Lg" Clicked="OnTabTipStartClicked" />
+                            <cds:CdsPopover.PopoverContent>
+                                <VerticalStackLayout Padding="16" Spacing="8" WidthRequest="256">
+                                    <cds:CdsText Text="Display" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="Choose how dense the cluster list is." TypeStyle="Body01" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsPopover.PopoverContent>
+                        </cds:CdsPopover>
+                        <cds:CdsPopover x:Name="TabTipEndPopover" Grid.Column="2" IsTabTip="True" Placement="BottomEnd">
+                            <cds:CdsIconButton Icon="Filter" Label="Filter clusters" Kind="Ghost" Size="Lg" Clicked="OnTabTipEndClicked" />
+                            <cds:CdsPopover.PopoverContent>
+                                <VerticalStackLayout Padding="16" Spacing="8" WidthRequest="256">
+                                    <cds:CdsText Text="Filter" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="Region and status filters go here." TypeStyle="Body01" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsPopover.PopoverContent>
+                        </cds:CdsPopover>
+                    </Grid>
+                    <BoxView Grid.Row="1" HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" />
+                </Grid>
+            </Border>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Inside a theme zone" Description="The popover is shown in the page's overlay host but mirrors the trigger's theme and layer.">
             <cds:CdsTheme Theme="G100">
                 <ContentView Padding="24">

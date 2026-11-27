@@ -45,6 +45,35 @@
                 <cds:CdsButton Text="Move cluster" Kind="Tertiary" Clicked="OnComposedClicked" />
             </g:GalleryExample>
 
+            <g:GalleryExample Title="AI presence" Description="Put a CdsAILabel in the Decorator slot when AI generated the whole content. The label is shown small before the close button; the container takes the AI aura, gradient border and drop shadow, and the scrim turns the AI overlay color. Editing the text sets IsRevertActive: the label becomes a revert button and, as in Carbon, the modal keeps its AI styling. Use the label on a single field instead when only part of the content is AI.">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsButton Text="Summarize incident" Kind="Tertiary" Clicked="OnAiClicked" />
+                    <cds:CdsButton Text="Generating summary" Kind="Tertiary" Clicked="OnAiComposedClicked" />
+                </HorizontalStackLayout>
+            </g:GalleryExample>
+
+            <g:GalleryExample Title="AI header, inline" Description="The AI header of a modal laid out in the page flow, in every theme: the label sits 10px from the top, just before the 48px close button. The inline frame uses the tile treatment; the open modal paints the container fill, the inner glow and the flat 64px footer band.">
+                <g:ThemeStrip>
+                    <g:ThemeStrip.Template>
+                        <DataTemplate>
+                            <Border WidthRequest="320" StrokeShape="Rectangle" Padding="1" cds:CdsAiTreatment.IsActive="True">
+                                <VerticalStackLayout>
+                                    <cds:CdsModalHeader Label="Incident INC-2041" Title="Summarize incident">
+                                        <cds:CdsModalHeader.Decorator>
+                                            <cds:CdsAILabel AiText="AI" Label="Show information" />
+                                        </cds:CdsModalHeader.Decorator>
+                                    </cds:CdsModalHeader>
+                                    <cds:CdsModalBody HasForm="True">
+                                        <cds:CdsText Text="Three nodes in prod-us-east-1 ran out of memory after the 02:00 UTC patch." TypeStyle="Body01" />
+                                    </cds:CdsModalBody>
+                                    <cds:CdsModalFooter PrimaryButtonText="Save summary" SecondaryButtonText="Cancel" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </g:ThemeStrip.Template>
+                </g:ThemeStrip>
+            </g:GalleryExample>
+
             <g:GalleryExample Title="Parts, inline" Description="The same parts laid out in the page flow (the web preview's inline aid), in every theme. A real modal is shown by the page host over the whole window.">
                 <g:ThemeStrip>
                     <g:ThemeStrip.Template>
@@ -118,6 +147,32 @@
         <cds:CdsModal x:Name="LgModal" Size="Lg" Heading="Node inventory" PrimaryButtonText="Export CSV" SecondaryButtonText="Close" IsFullWidth="False">
             <cds:CdsText Text="Large modals hold complex content such as a table. When the body scrolls a lot, move up a size or use a page." TypeStyle="Body01" />
         </cds:CdsModal>
+
+        <cds:CdsModal x:Name="AiModal" Size="Sm" Label="Incident INC-2041" Heading="Summarize incident" PrimaryButtonText="Save summary"
+                      SecondaryButtonText="Cancel" HasForm="True" RequestSubmit="OnAiSubmit">
+            <cds:CdsModal.Decorator>
+                <cds:CdsAILabel x:Name="AiModalLabel" Label="Why this summary" RevertClicked="OnAiRevert">
+                    <cds:CdsAILabelContent>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                            <cds:CdsText Text="Written from the incident timeline and the alerts linked to it." TypeStyle="Body01" />
+                        </VerticalStackLayout>
+                    </cds:CdsAILabelContent>
+                </cds:CdsAILabel>
+            </cds:CdsModal.Decorator>
+            <cds:CdsTextArea x:Name="AiSummary" Label="Summary" Text="Three worker nodes in prod-us-east-1 ran out of memory after the 02:00 UTC patch. Pods were rescheduled within four minutes and no data was lost."
+                             TextChanged="OnAiSummaryChanged" />
+        </cds:CdsModal>
+
+        <cds:CdsComposedModal x:Name="AiComposedModal" Size="Sm">
+            <cds:CdsComposedModal.Decorator>
+                <cds:CdsAILabel Label="Why this is generated" />
+            </cds:CdsComposedModal.Decorator>
+            <cds:CdsModalHeader Label="Incident INC-2041" Title="Generating summary" />
+            <cds:CdsModalBody>
+                <cds:CdsText Text="Reading the timeline and the linked alerts. This takes a few seconds." TypeStyle="Body01" />
+            </cds:CdsModalBody>
+        </cds:CdsComposedModal>
 
         <cds:CdsComposedModal x:Name="ComposedModal" Size="Sm" RequestClose="OnComposedRequestClose">
             <cds:CdsModalHeader Label="Cluster" Title="Move to another region" />

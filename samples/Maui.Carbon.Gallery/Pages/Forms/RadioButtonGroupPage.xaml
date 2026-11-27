@@ -29,6 +29,97 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A CdsAILabel as the group's Decorator follows the legend, 8px after it, always at its mini size with the default kind (as in Carbon), and needs a legend. A radio's own Decorator follows its label, or the circle when the label is on the left, and is centered on the radio. Neither gives the radios any AI styling; the AI labels are never disabled, selecting a radio never opens them, and the arrow keys only move between the radios.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsRadioButtonGroup Legend="Deployment region" Orientation="Vertical" SelectedValue="eu-de" WidthRequest="300">
+                    <cds:CdsRadioButtonGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Preselected because most of your clusters run in this region." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsRadioButtonGroup.Decorator>
+                    <cds:CdsRadioButton Label="Frankfurt" Value="eu-de" />
+                    <cds:CdsRadioButton Label="London" Value="eu-gb" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Region" Orientation="Vertical" SelectedValue="eu-de" WidthRequest="300">
+                    <cds:CdsRadioButton Label="Frankfurt" Value="eu-de">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested">
+                                <cds:CdsAILabelContent>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="Recommended: lowest latency for your team." TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                </cds:CdsAILabelContent>
+                            </cds:CdsAILabel>
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                    <cds:CdsRadioButton Label="London" Value="eu-gb">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" Kind="Inline" />
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                    <cds:CdsRadioButton Label="Paris" Value="eu-fr">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" IsRevertActive="True" />
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Label on the left" Orientation="Vertical" LabelPosition="Left" SelectedValue="eu-de" WidthRequest="300">
+                    <cds:CdsRadioButtonGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsRadioButtonGroup.Decorator>
+                    <cds:CdsRadioButton Label="Frankfurt" Value="eu-de">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" />
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                    <cds:CdsRadioButton Label="London" Value="eu-gb" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Read-only" Orientation="Vertical" IsReadOnly="True" SelectedValue="eu-de" WidthRequest="300">
+                    <cds:CdsRadioButtonGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsRadioButtonGroup.Decorator>
+                    <cds:CdsRadioButton Label="Frankfurt" Value="eu-de">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" />
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                    <cds:CdsRadioButton Label="London" Value="eu-gb" />
+                </cds:CdsRadioButtonGroup>
+                <cds:CdsRadioButtonGroup Legend="Disabled" Orientation="Vertical" IsEnabled="False" SelectedValue="eu-de" WidthRequest="300">
+                    <cds:CdsRadioButtonGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsRadioButtonGroup.Decorator>
+                    <cds:CdsRadioButton Label="Frankfurt" Value="eu-de">
+                        <cds:CdsRadioButton.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" />
+                        </cds:CdsRadioButton.Decorator>
+                    </cds:CdsRadioButton>
+                    <cds:CdsRadioButton Label="London" Value="eu-gb" />
+                </cds:CdsRadioButtonGroup>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label, horizontal" Description="In a horizontal group each radio keeps its AI label with it; the row wraps between radios.">
+            <cds:CdsRadioButtonGroup Legend="Update policy" SelectedValue="auto" WidthRequest="520">
+                <cds:CdsRadioButtonGroup.Decorator>
+                    <cds:CdsAILabel Label="Why this is suggested" />
+                </cds:CdsRadioButtonGroup.Decorator>
+                <cds:CdsRadioButton Label="Automatic" Value="auto">
+                    <cds:CdsRadioButton.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsRadioButton.Decorator>
+                </cds:CdsRadioButton>
+                <cds:CdsRadioButton Label="Manual" Value="manual" />
+                <cds:CdsRadioButton Label="Never" Value="never" />
+            </cds:CdsRadioButtonGroup>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="States" Description="Invalid turns the rings support-error and shows the message; warning shows a triangle. Read-only uses an icon-disabled ring and the selection cannot change. Disabled uses icon-disabled and text-disabled.">
             <HorizontalStackLayout Spacing="48">
                 <cds:CdsRadioButtonGroup Legend="Invalid" Orientation="Vertical" IsInvalid="True" InvalidText="Choose a cluster type" HelperText="Hidden while invalid" WidthRequest="240">
@@ -67,7 +158,14 @@
                 <g:ThemeStrip.Template>
                     <DataTemplate>
                         <cds:CdsRadioButtonGroup Legend="Cluster type" Orientation="Vertical" SelectedValue="multi" HelperText="Fixed after creation">
-                            <cds:CdsRadioButton Label="Single zone" Value="single" />
+                            <cds:CdsRadioButtonGroup.Decorator>
+                                <cds:CdsAILabel Label="Why this is suggested" />
+                            </cds:CdsRadioButtonGroup.Decorator>
+                            <cds:CdsRadioButton Label="Single zone" Value="single">
+                                <cds:CdsRadioButton.Decorator>
+                                    <cds:CdsAILabel Label="Why this is suggested" />
+                                </cds:CdsRadioButton.Decorator>
+                            </cds:CdsRadioButton>
                             <cds:CdsRadioButton Label="Multizone" Value="multi" />
                         </cds:CdsRadioButtonGroup>
                     </DataTemplate>

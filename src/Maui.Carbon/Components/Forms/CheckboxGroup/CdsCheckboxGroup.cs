@@ -17,6 +17,7 @@ public partial class CdsCheckboxGroup : CdsControl
     readonly ContentView _itemsHost = new();
     readonly CdsFormMessage _message = new();
     readonly CdsItemCollection<CdsCheckbox> _items = [];
+    CdsDecoratedRow? _legendRow;
 
     /// <summary>Creates an empty group.</summary>
     public CdsCheckboxGroup()
@@ -72,9 +73,24 @@ public partial class CdsCheckboxGroup : CdsControl
     {
         _legend.Text = Legend;
         _legend.IsVisible = !string.IsNullOrEmpty(Legend);
+        // The decorator follows the legend, so it shows only with one (Carbon renders both in the same header).
+        if (_legendRow is not null) _legendRow.IsVisible = _legend.IsVisible;
         CdsSemantics.SetGroupName(_root, Legend);
         RebuildItems();
         RefreshVisuals();
+    }
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        if (decorator is null && _legendRow is null) return;
+        if (_legendRow is null)
+        {
+            _root.Remove(_legend);
+            _legendRow = new CdsDecoratedRow(_legend, allowInline: false, centersDecorator: false) { IsVisible = _legend.IsVisible };
+            // First child: the legend row comes before the boxes in the focus order.
+            _root.Insert(0, _legendRow);
+        }
+        _legendRow.Decorator = decorator;
     }
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => RebuildItems();

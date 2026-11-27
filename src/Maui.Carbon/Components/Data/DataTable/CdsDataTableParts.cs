@@ -42,6 +42,10 @@ public class CdsDataTableHeader : BindableObject
     public static readonly BindableProperty StringFormatProperty = BindableProperty.Create(
         nameof(StringFormat), typeof(string), typeof(CdsDataTableHeader), null, propertyChanged: OnChanged);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsDataTableHeader), null, propertyChanged: OnChanged);
+
     internal event EventHandler? Changed;
 
     /// <summary>The column id: sort and search results and <see cref="CdsDataTable.SortKey"/> refer to it. Unique per table.</summary>
@@ -104,6 +108,19 @@ public class CdsDataTableHeader : BindableObject
     {
         get => (string?)GetValue(StringFormatProperty);
         set => SetValue(StringFormatProperty, value);
+    }
+
+    /// <summary>
+    /// A view at the end of the header cell, after the label and the sort arrow (Carbon's <c>decorator</c> on a column). A
+    /// <see cref="CdsAILabel"/> is shown at its mini size and gives the whole column Carbon's AI presence: an <c>ai-aura-start-sm</c>
+    /// gradient in the header cell and in every cell of the column, and a 1px <c>ai-border-strong</c> line along the top of the header.
+    /// Only the label's type counts, so the styling stays while it shows its revert button (<see cref="CdsAILabel.IsRevertActive"/>).
+    /// Any other view is placed in the slot without AI styling. The label is its own button and does not sort the column.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
     }
 
     /// <summary>The value of this column in a row.</summary>

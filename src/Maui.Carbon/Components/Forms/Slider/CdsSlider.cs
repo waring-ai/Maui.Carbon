@@ -44,6 +44,10 @@ public partial class CdsSlider : CdsControl
     bool _upperOut;
     bool _typing;
     string? _announcedInvalid;
+    CdsSliderThumbTooltip? _lowerTip;
+    CdsSliderThumbTooltip? _upperTip;
+    Grid? _thumbAnchor;
+    bool _tipRange;
 
     /// <summary>Creates a single slider from 0 to 100.</summary>
     public CdsSlider()
@@ -78,6 +82,7 @@ public partial class CdsSlider : CdsControl
         tap.Tapped += OnTapped;
         _track.GestureRecognizers.Add(tap);
         _track.SizeChanged += (_, _) => UpdateThumbs();
+        Unloaded += (_, _) => DisposeTooltips();
 
         _container.Add(_lowerBox, 0);
         _container.Add(_minText, 1);
@@ -97,6 +102,16 @@ public partial class CdsSlider : CdsControl
 
     /// <inheritdoc/>
     protected internal override bool WantsNavigationKeys => true;
+
+    /// <summary>The thumbs (for tests).</summary>
+    internal CdsHitTarget LowerThumb => _lowerHit;
+
+    internal CdsHitTarget UpperThumb => _upperHit;
+
+    /// <summary>The value tooltips, once a thumb has asked for one (for tests).</summary>
+    internal CdsSliderThumbTooltip? LowerTooltip => _lowerTip;
+
+    internal CdsSliderThumbTooltip? UpperTooltip => _upperTip;
 
     /// <summary>The message row under the slider (for tests).</summary>
     internal CdsFormMessage Message => _message;
@@ -145,6 +160,7 @@ public partial class CdsSlider : CdsControl
 
         _lowerHit.IsEnabled = !disabled;
         _upperHit.IsEnabled = !disabled;
+        if (disabled) DisposeTooltips();
         SemanticProperties.SetHint(_lowerEntry, message.Text);
         SemanticProperties.SetHint(_upperEntry, message.Text);
         UpdateThumbs();
@@ -198,6 +214,8 @@ public partial class CdsSlider : CdsControl
         _upperHit.IsReadOnly = IsReadOnly;
         _lowerWrap.IsVisible = showThumbs;
         _upperWrap.IsVisible = showThumbs && IsRange;
+        if (!TooltipsOn || _tipRange != IsRange) DisposeTooltips();
+        _tipRange = IsRange;
         UpdateTexts();
         UpdateAccessibility();
         RefreshVisuals();
@@ -305,6 +323,56 @@ public partial class CdsSlider : CdsControl
             _lowerWrap.WidthRequest = 24;
             _lowerWrap.TranslationX = lowerX - 12;
         }
+        _lowerTip?.Refresh(_lowerWrap.TranslationX);
+        _upperTip?.Refresh(_upperWrap.TranslationX);
+    }
+
+    // ---- value tooltips (HideTextInput) ------------------------------------------------------------------------
+
+    // Carbon shows one tooltip per thumb when the number box is hidden; a read-only or disabled slider has none.
+    bool TooltipsOn => HideTextInput && !IsReadOnly && IsEnabled;
+
+    CdsSliderThumbTooltip Tip(SliderHandle handle) => handle == SliderHandle.Lower
+        ? _lowerTip ??= NewTip(handle)
+        : _upperTip ??= NewTip(handle);
+
+    CdsSliderThumbTooltip NewTip(SliderHandle handle) => new(
+        this,
+        () => ThumbAnchor(handle),
+        () => FormatValue(handle == SliderHandle.Lower ? Value : UpperValue),
+        // popover-offset: the 8px of the 14px thumb wrapper; the range handles' wrappers use the caret height.
+        () => IsRange ? CdsPopoverSurface.TooltipCaretHeight : CdsSpacing.Spacing03);
+
+    // The tooltip for an input that starts (created on demand) or ends (only if it exists).
+    CdsSliderThumbTooltip? TipFor(SliderHandle handle, bool on) =>
+        on ? (TooltipsOn ? Tip(handle) : null) : handle == SliderHandle.Lower ? _lowerTip : _upperTip;
+
+    // Carbon's single thumb wrapper is 14x14 and a range handle's 16x24: the same as our range wrap, and an invisible
+    // 14x14 box in the middle of the 24x24 single one (whose thumb is a 14px circle).
+    VisualElement ThumbAnchor(SliderHandle handle)
+    {
+        if (IsRange) return handle == SliderHandle.Lower ? _lowerWrap : _upperWrap;
+        if (_thumbAnchor is null)
+        {
+            _thumbAnchor = new Grid
+            {
+                WidthRequest = 14,
+                HeightRequest = 14,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center,
+                InputTransparent = true,
+            };
+            AutomationProperties.SetExcludedWithChildren(_thumbAnchor, true);
+            _lowerWrap.Insert(0, _thumbAnchor);
+        }
+        return _thumbAnchor;
+    }
+
+    void DisposeTooltips()
+    {
+        _lowerTip?.Dispose();
+        _upperTip?.Dispose();
+        _lowerTip = _upperTip = null;
     }
 
     // A screen reader's increment or decrement steps like the Right and Left arrows; it reads the new value itself.
@@ -324,11 +392,14 @@ public partial class CdsSlider : CdsControl
         {
             _focused = handle;
             CdsFocusTracker.SetFocused(this);
+            // Focus caused by a click or tap does not open the tooltip (Tooltip.tsx focusByMouse); hover and drag do.
+            if (hit.IsFocusFromKeyboard) TipFor(handle, true)?.FocusChanged(true);
             RefreshVisuals();
         };
         hit.Unfocused += (_, _) =>
         {
             if (_focused == handle) _focused = null;
+            TipFor(handle, false)?.FocusChanged(false);
             RefreshVisuals();
         };
         hit.Pressed += (_, _) =>
@@ -345,11 +416,13 @@ public partial class CdsSlider : CdsControl
         pointer.PointerEntered += (_, _) =>
         {
             _hover = handle;
+            TipFor(handle, true)?.HoverChanged(true);
             RefreshVisuals();
         };
         pointer.PointerExited += (_, _) =>
         {
             if (_hover == handle) _hover = null;
+            TipFor(handle, false)?.HoverChanged(false);
             RefreshVisuals();
         };
         wrap.GestureRecognizers.Add(pointer);
@@ -364,6 +437,7 @@ public partial class CdsSlider : CdsControl
                 _dragHandle = IsRange ? _pressed ?? _focused ?? SliderHandle.Lower : SliderHandle.Lower;
                 _dragStart = FractionOf(_dragHandle);
                 _dragging = true;
+                TipFor(_dragHandle, true)?.DragChanged(true);
                 RefreshVisuals();
                 break;
             case GestureStatus.Running when _dragging:
@@ -375,6 +449,7 @@ public partial class CdsSlider : CdsControl
             case GestureStatus.Canceled:
                 _dragging = false;
                 _pressed = null;
+                TipFor(_dragHandle, false)?.DragChanged(false);
                 RefreshVisuals();
                 break;
         }

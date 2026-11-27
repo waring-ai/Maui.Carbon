@@ -31,6 +31,8 @@ public partial class CdsModal : CdsContainer
         {
             if (_bodyPart is not null) _bodyPart.Body = null;
             if (_footer is not null) _footer.Body = null;
+            // The decorator is shown again by the next header.
+            if (_header is not null) _header.Decorator = null;
             _header = null;
             _bodyPart = null;
             _footer = null;
@@ -111,6 +113,7 @@ public partial class CdsModal : CdsContainer
             _header.Title = Heading;
             _header.IconDescription = CloseButtonLabel;
             _header.IsCloseEnabled = !IsLoading;
+            _header.Decorator = Decorator;
         }
         if (_bodyPart is not null)
         {

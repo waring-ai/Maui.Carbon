@@ -59,6 +59,10 @@ public class CdsAILabel : CdsControl
     public static readonly BindableProperty RevertLabelProperty = BindableProperty.Create(
         nameof(RevertLabel), typeof(string), typeof(CdsAILabel), "Revert to AI input", propertyChanged: OnChanged);
 
+    /// <summary>Bindable property for <see cref="ForegroundKey"/>.</summary>
+    public static readonly BindableProperty ForegroundKeyProperty = BindableProperty.Create(
+        nameof(ForegroundKey), typeof(string), typeof(CdsAILabel), null, propertyChanged: OnChanged);
+
     /// <summary>Bindable property for <see cref="Callout"/>.</summary>
     public static readonly BindableProperty CalloutProperty = BindableProperty.Create(
         nameof(Callout), typeof(CdsAILabelContent), typeof(CdsAILabel), null);
@@ -174,6 +178,17 @@ public class CdsAILabel : CdsControl
         set => SetValue(RevertLabelProperty, value);
     }
 
+    /// <summary>
+    /// The color key (a <see cref="CdsColorKeys"/> constant) the inline kind takes for its text, square and hover outline instead of
+    /// <c>text-primary</c> and <c>icon-primary</c>: Carbon's <c>currentColor</c> for a label inside a tag, which a
+    /// <see cref="CdsTag"/> sets to its own text color. <c>null</c> (the default) keeps the Carbon colors. The default kind ignores it.
+    /// </summary>
+    public string? ForegroundKey
+    {
+        get => (string?)GetValue(ForegroundKeyProperty);
+        set => SetValue(ForegroundKeyProperty, value);
+    }
+
     /// <summary>The callout: an <see cref="CdsAILabelContent"/> holding the explanation and optionally actions.</summary>
     public CdsAILabelContent? Callout
     {
@@ -187,7 +202,7 @@ public class CdsAILabel : CdsControl
     /// <inheritdoc/>
     protected override void ApplyVisuals()
     {
-        var v = CdsAILabelTokens.Resolve(Kind, !string.IsNullOrEmpty(TextLabel), State);
+        var v = CdsAILabelTokens.Resolve(Kind, !string.IsNullOrEmpty(TextLabel), State, ForegroundKey);
         SetBrush(_box, BackgroundProperty, v.Background);
         SetBrush(_box, Border.StrokeProperty, v.Border);
         SetBrush(_ring, Border.StrokeProperty, v.InnerRing);

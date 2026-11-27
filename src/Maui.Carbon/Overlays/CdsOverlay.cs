@@ -123,7 +123,7 @@ public sealed class CdsOverlay
         var height = Container.Height;
         if (width <= 0 || height <= 0) return;
 
-        var result = CdsPlacementResolver.Resolve(anchorBounds, new Size(width, height), hostSize, Options.Placement, Options.Offset, Options.AutoFlip);
+        var result = CdsPlacementResolver.Resolve(anchorBounds, new Size(width, height), hostSize, Options.Placement, Options.Offset, Options.AutoFlip, Options.EdgeMargin);
         ActualPlacement = result.Placement;
         CaretOffset = result.CaretOffset;
         // An explicit width (the measured one) lets wrapping content re-measure its height under that constraint;

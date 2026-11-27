@@ -187,6 +187,9 @@ public abstract partial class CdsListBox : CdsFormField
     /// <summary>Whether a row is the chosen one (single select) or checked (multi-select).</summary>
     internal abstract bool IsRowChosen(ListBoxEntry row);
 
+    /// <summary>The checkbox state of a row: <c>true</c> checked, <c>false</c> unchecked, <c>null</c> mixed (only the parent "select all" row of a multi-select).</summary>
+    internal virtual bool? RowCheckState(ListBoxEntry row) => IsRowChosen(row);
+
     /// <summary>Chooses (or toggles) the row at <paramref name="index"/> of <see cref="VisibleRows"/>.</summary>
     internal abstract void ChooseRow(int index);
 
@@ -210,7 +213,7 @@ public abstract partial class CdsListBox : CdsFormField
                 HideOverlay(keepOpenFlag: true);
                 return;
             }
-            _list.Build(_model.Rows, i => IsRowChosen(_model.Rows[i]), CreateRowContent);
+            _list.Build(_model.Rows, i => RowCheckState(_model.Rows[i]), CreateRowContent);
             RefreshList(scroll: true);
         }
         else if (IsOpen)
@@ -235,7 +238,7 @@ public abstract partial class CdsListBox : CdsFormField
     void RefreshList(bool scroll)
     {
         if (_list is null) return;
-        _list.Refresh(_model.Highlighted, _keyboardHighlight, i => i < _model.Rows.Count && IsRowChosen(_model.Rows[i]));
+        _list.Refresh(_model.Highlighted, _keyboardHighlight, i => i < _model.Rows.Count ? RowCheckState(_model.Rows[i]) : false);
         if (scroll) _list.ScrollTo(_model.Highlighted);
     }
 
@@ -256,7 +259,8 @@ public abstract partial class CdsListBox : CdsFormField
     {
         if (_overlay is null || _model.Rows.Count == 0) return null;
         if (_model.HighlightedRow is not { } row) return ListBoxLogic.CountAnnouncement(_model.Rows.Count);
-        return ListBoxLogic.RowAnnouncement(row, _model.Highlighted, _model.Rows.Count, IsRowChosen(row), IsMultiple);
+        var state = RowCheckState(row);
+        return ListBoxLogic.RowAnnouncement(row, _model.Highlighted, _model.Rows.Count, state == true, IsMultiple, mixed: state is null);
     }
 
     // The list uses virtual focus, so the screen reader stays on the trigger and never moves to a row (the web's
@@ -383,7 +387,7 @@ public abstract partial class CdsListBox : CdsFormField
         var rows = _model.Rows;
         var metrics = ListMetrics;
         var list = new CdsListBoxList(UsesInlineType, IsMultiple, Label ?? Placeholder, metrics.Row, metrics.Max, metrics.Content);
-        list.Build(rows, i => IsRowChosen(rows[i]), CreateRowContent);
+        list.Build(rows, i => RowCheckState(rows[i]), CreateRowContent);
         list.RowChosen += (_, i) => OnRowChosen(i);
         list.RowHovered += (_, i) =>
         {
@@ -399,7 +403,7 @@ public abstract partial class CdsListBox : CdsFormField
         }
         else if (_keyboardHighlight) _model.HighlightValueOrFirst(HighlightOnOpen);
         else _model.HighlightValue(HighlightOnOpen);
-        list.Refresh(_model.Highlighted, _keyboardHighlight, i => IsRowChosen(rows[i]));
+        list.Refresh(_model.Highlighted, _keyboardHighlight, i => RowCheckState(rows[i]));
 
         // An inline field hugs its value, so its menu is not tied to the field's width: 18rem to 30rem
         // (.cds--dropdown--inline .cds--list-box__menu).

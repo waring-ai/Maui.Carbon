@@ -50,6 +50,12 @@ public sealed class CdsOverlayOptions
     /// <summary>Flip to the opposite side when the preferred side does not fit. Default <c>true</c>.</summary>
     public bool AutoFlip { get; set; } = true;
 
+    /// <summary>
+    /// Margin kept between an anchored popup and the host edges. Default 8; a tab tip popover sets 0 so it can sit flush
+    /// with the edge of the window it is attached to.
+    /// </summary>
+    public double EdgeMargin { get; set; } = CdsPlacementResolver.EdgeMargin;
+
     /// <summary>Make the popup exactly as wide as the anchor (list boxes). Default <c>false</c>.</summary>
     public bool MatchAnchorWidth { get; set; }
 
@@ -78,6 +84,12 @@ public sealed class CdsOverlayOptions
     /// scrim with its own surface and handles those taps itself.
     /// </summary>
     public Action? ScrimTapped { get; set; }
+
+    /// <summary>
+    /// The color key of the scrim behind a modal overlay; <c>null</c> (the default) is <c>overlay</c>. An AI modal uses <c>ai-overlay</c>.
+    /// The host shows one scrim for every open modal and colors it for the topmost one.
+    /// </summary>
+    public string? ScrimColorKey { get; set; }
 
     /// <summary>The popup ignores input (hover tooltips).</summary>
     public bool InputTransparent { get; set; }

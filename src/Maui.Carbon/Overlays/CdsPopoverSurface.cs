@@ -4,20 +4,26 @@ namespace Maui.Carbon;
 
 /// <summary>
 /// The floating surface shared by popovers, tooltips and toggletips: a 2px-radius box on <c>layer-01</c> (or
-/// <c>background-inverse</c> when high contrast) with an optional 12x6 caret pointing at the anchor and a
+/// <c>background-inverse</c> when high contrast) with an optional caret (12x6 unless sized otherwise) pointing at the anchor and a
 /// <c>shadow</c> drop shadow. Give the content its own padding. Call <see cref="Track"/> with the overlay that shows it.
 /// </summary>
 public sealed class CdsPopoverSurface : Grid
 {
-    /// <summary>Caret size along the edge.</summary>
+    /// <summary>Default caret size along the edge.</summary>
     public const double CaretWidth = 12;
 
-    /// <summary>Caret depth away from the edge.</summary>
+    /// <summary>Default caret depth away from the edge.</summary>
     public const double CaretHeight = 6;
+
+    // Carbon's icon tooltip (and so the slider thumb tooltip) uses a smaller caret: popover-caret-width 8, -height 4.
+    internal const double TooltipCaretWidth = 8;
+    internal const double TooltipCaretHeight = 4;
 
     readonly Border _box = new() { StrokeThickness = 0, Padding = 0, StrokeShape = new RoundRectangle { CornerRadius = 2 } };
     readonly Polygon _caret = new() { IsVisible = false, InputTransparent = true, WidthRequest = CaretWidth, HeightRequest = CaretWidth };
     readonly bool _hasCaret;
+    readonly double _caretWidth;
+    readonly double _caretHeight;
 
     /// <summary>Creates a surface.</summary>
     /// <param name="content">The content (with its own padding).</param>
@@ -26,9 +32,14 @@ public sealed class CdsPopoverSurface : Grid
     /// <param name="dropShadow">Add the Carbon drop shadow.</param>
     /// <param name="border">Add a 1px <c>border-subtle-01</c> outline.</param>
     /// <param name="maxWidth">Maximum content width (Carbon popover 368, tooltip 288).</param>
-    public CdsPopoverSurface(View content, bool hasCaret = true, bool highContrast = false, bool dropShadow = true, bool border = false, double maxWidth = 368)
+    /// <param name="caretWidth">Caret size along the edge; default <see cref="CaretWidth"/> (the icon tooltip is 8).</param>
+    /// <param name="caretHeight">Caret depth away from the edge; default <see cref="CaretHeight"/> (the icon tooltip is 4).</param>
+    public CdsPopoverSurface(View content, bool hasCaret = true, bool highContrast = false, bool dropShadow = true, bool border = false, double maxWidth = 368,
+        double caretWidth = CaretWidth, double caretHeight = CaretHeight)
     {
         _hasCaret = hasCaret;
+        _caretWidth = caretWidth;
+        _caretHeight = caretHeight;
         var fill = highContrast ? CdsColorKeys.BackgroundInverse : CdsColorKeys.Layer01;
         CdsTokens.SetColor(_box, BackgroundColorProperty, fill);
         CdsTokens.SetBrush(_caret, Shape.FillProperty, fill);
@@ -58,8 +69,14 @@ public sealed class CdsPopoverSurface : Grid
         overlay.Positioned += (_, _) => UpdateCaret(overlay.ActualPlacement, overlay.CaretOffset);
     }
 
-    /// <summary>The overlay offset that puts the content <paramref name="gap"/> away from the anchor, caret included.</summary>
-    public double OffsetFor(double gap) => _hasCaret ? Math.Max(0, gap - CaretHeight) : 0;
+    /// <summary>Gap between the anchor and a surface without a caret (Carbon: <c>spacing-02</c>).</summary>
+    public const double NoCaretGap = CdsSpacing.Spacing02;
+
+    /// <summary>
+    /// The overlay offset that puts the content <paramref name="gap"/> away from the anchor, caret included. A surface
+    /// without a caret keeps <see cref="NoCaretGap"/> from the anchor whatever <paramref name="gap"/> is.
+    /// </summary>
+    public double OffsetFor(double gap) => _hasCaret ? Math.Max(0, gap - _caretHeight) : NoCaretGap;
 
     /// <summary>Places the caret on the edge facing the anchor.</summary>
     public void UpdateCaret(CdsPlacement placement, double caretOffset)
@@ -76,11 +93,11 @@ public sealed class CdsPopoverSurface : Grid
 
         // The box leaves room for the caret on the anchor side.
         _box.Margin = vertical
-            ? new Thickness(0, popupBelow ? CaretHeight : 0, 0, popupBelow ? 0 : CaretHeight)
-            : new Thickness(popupRight ? CaretHeight : 0, 0, popupRight ? 0 : CaretHeight, 0);
+            ? new Thickness(0, popupBelow ? _caretHeight : 0, 0, popupBelow ? 0 : _caretHeight)
+            : new Thickness(popupRight ? _caretHeight : 0, 0, popupRight ? 0 : _caretHeight, 0);
 
-        var w = CaretWidth;
-        var h = CaretHeight;
+        var w = _caretWidth;
+        var h = _caretHeight;
         _caret.Points = vertical
             ? (popupBelow ? [new(0, h), new(w / 2, 0), new(w, h)] : [new(0, 0), new(w / 2, h), new(w, 0)])
             : (popupRight ? [new(h, 0), new(0, w / 2), new(h, w)] : [new(0, 0), new(h, w / 2), new(0, w)]);

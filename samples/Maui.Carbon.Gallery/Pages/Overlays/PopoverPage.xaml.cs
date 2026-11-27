@@ -15,6 +15,10 @@ public partial class PopoverPage : GalleryPage
 
     void OnContrastClicked(object? sender, EventArgs e) => ContrastPopover.IsOpen = !ContrastPopover.IsOpen;
 
+    void OnTabTipStartClicked(object? sender, EventArgs e) => TabTipStartPopover.IsOpen = !TabTipStartPopover.IsOpen;
+
+    void OnTabTipEndClicked(object? sender, EventArgs e) => TabTipEndPopover.IsOpen = !TabTipEndPopover.IsOpen;
+
     void OnZoneClicked(object? sender, EventArgs e) => ZonePopover.IsOpen = !ZonePopover.IsOpen;
 
     void OnApplyClicked(object? sender, EventArgs e)

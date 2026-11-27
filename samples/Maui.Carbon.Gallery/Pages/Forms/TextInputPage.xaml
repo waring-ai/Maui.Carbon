@@ -28,6 +28,40 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A CdsAILabel as the Decorator shows at its mini size at the end of the field and gives it the AI aura and a border-interactive rule. With IsRevertActive (after the person edits the value) it becomes a revert button and the AI styling goes.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInput Label="Cluster name" Text="prod-eu-de-2" HelperText="Suggested by AI">
+                    <cds:CdsTextInput.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested from the names of your other clusters in this region." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsTextInput.Decorator>
+                </cds:CdsTextInput>
+                <cds:CdsTextInput Label="Cluster name" Text="prod-eu-de-2" IsInvalid="True" InvalidText="This name is taken">
+                    <cds:CdsTextInput.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsTextInput.Decorator>
+                </cds:CdsTextInput>
+                <cds:CdsTextInput Label="Cluster name" Text="prod-eu-de-edited">
+                    <cds:CdsTextInput.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" IsRevertActive="True" />
+                    </cds:CdsTextInput.Decorator>
+                </cds:CdsTextInput>
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Skeleton" Description="The loading placeholder of a text or password input: a label bar over a field bar as tall as the input's size.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextInputSkeleton />
+                <cds:CdsTextInputSkeleton Size="Sm" HideLabel="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Validation on completion: type a name with spaces and press Return.">
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsTextInput x:Name="NameInput" Label="Cluster name" Placeholder="e.g. prod-eu-de-1" Completed="OnNameCompleted" TextChanged="OnNameChanged" />

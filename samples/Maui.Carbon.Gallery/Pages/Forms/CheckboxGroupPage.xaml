@@ -23,6 +23,50 @@
             </cds:CdsCheckboxGroup>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A CdsAILabel as the group's Decorator follows the legend, 8px after it, always at its mini size with the default kind (as in Carbon). Individual checkboxes can carry their own AI label after their label. Neither gives the checkboxes any AI styling, and the AI labels stay active when the group is disabled or read-only. Needs a legend.">
+            <HorizontalStackLayout Spacing="48">
+                <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="Suggested from your last project" WidthRequest="300">
+                    <cds:CdsCheckboxGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because you chose these channels in your last project." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsCheckboxGroup.Decorator>
+                    <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Slack" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Notify me by" WidthRequest="300">
+                    <cds:CdsCheckboxGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" IsRevertActive="True" />
+                    </cds:CdsCheckboxGroup.Decorator>
+                    <cds:CdsCheckbox Label="Email" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Slack" IsChecked="True" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Alert types" IsReadOnly="True" WidthRequest="300">
+                    <cds:CdsCheckboxGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckboxGroup.Decorator>
+                    <cds:CdsCheckbox Label="Errors" IsChecked="True">
+                        <cds:CdsCheckbox.Decorator>
+                            <cds:CdsAILabel Label="Why this is suggested" />
+                        </cds:CdsCheckbox.Decorator>
+                    </cds:CdsCheckbox>
+                    <cds:CdsCheckbox Label="Warnings" />
+                </cds:CdsCheckboxGroup>
+                <cds:CdsCheckboxGroup Legend="Add-ons" IsEnabled="False" WidthRequest="300">
+                    <cds:CdsCheckboxGroup.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" />
+                    </cds:CdsCheckboxGroup.Decorator>
+                    <cds:CdsCheckbox Label="Log retention" IsChecked="True" />
+                    <cds:CdsCheckbox Label="Backups" />
+                </cds:CdsCheckboxGroup>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="States" Description="Invalid turns every box border support-error and replaces the helper text with the message. Warning adds a triangle. Read-only boxes are outlined and cannot be toggled. Disabled dims the legend and every box.">
             <HorizontalStackLayout Spacing="48">
                 <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="Pick at least one" IsInvalid="True" InvalidText="Select at least one channel" WidthRequest="260">
@@ -59,6 +103,9 @@
                 <g:ThemeStrip.Template>
                     <DataTemplate>
                         <cds:CdsCheckboxGroup Legend="Notify me by" HelperText="Change this later">
+                            <cds:CdsCheckboxGroup.Decorator>
+                                <cds:CdsAILabel Label="Why this is suggested" />
+                            </cds:CdsCheckboxGroup.Decorator>
                             <cds:CdsCheckbox Label="Email" IsChecked="True" />
                             <cds:CdsCheckbox Label="Slack" />
                         </cds:CdsCheckboxGroup>

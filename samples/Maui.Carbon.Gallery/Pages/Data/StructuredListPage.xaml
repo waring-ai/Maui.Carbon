@@ -97,6 +97,10 @@
             </ContentView>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Skeleton" Description="A header of three bars (8%, 30% and 15% columns, scaled to the width) over empty rows; RowCount sets how many.">
+            <cds:CdsStructuredListSkeleton RowCount="4" />
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Themes" Description="The same selectable list in every theme zone.">
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>

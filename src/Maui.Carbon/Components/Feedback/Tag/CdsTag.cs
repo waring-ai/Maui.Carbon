@@ -99,6 +99,7 @@ public partial class CdsTag : CdsControl
         Pill.StrokeThickness = v.Border is null ? 0 : 1;
         SetColor(_label, Label.TextColorProperty, v.Foreground);
         SetColor(_icon, CdsIcon.ColorProperty, v.Foreground);
+        ApplyDecoratorColor(v.Foreground);
     }
 
     /// <summary>Re-applies layout after a property change.</summary>
@@ -120,7 +121,7 @@ public partial class CdsTag : CdsControl
         _label.Text = Text;
         // The row measures its children unconstrained, so cap the label for the ellipsis to appear inside 208.
         var trailing = HasTrailingContent ? height : 0;
-        _label.MaximumWidthRequest = Math.Max(0, Pill.MaximumWidthRequest - start - end - (hasIcon ? 16 + CdsSpacing.Spacing02 : 0) - trailing);
+        _label.MaximumWidthRequest = Math.Max(0, Pill.MaximumWidthRequest - start - end - (hasIcon ? 16 + CdsSpacing.Spacing02 : 0) - trailing - DecoratorSpace);
         if (!string.IsNullOrEmpty(Text)) ToolTipProperties.SetText(Pill, Text);
         RefreshVisuals();
     }

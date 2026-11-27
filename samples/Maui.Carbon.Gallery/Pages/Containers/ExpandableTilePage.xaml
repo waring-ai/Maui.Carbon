@@ -86,6 +86,74 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A decorator makes the tile the interactive variant (as in Carbon): the AI label and the 48px chevron are separate controls, and only the chevron toggles the tile. The aura, gradient border and shadow stay in every state; HasRoundedCorners rounds the chevron corner too.">
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
+                <cds:CdsExpandableTile  WidthRequest="320" CollapsedDescription="Show certificate details" ExpandedDescription="Hide certificate details">
+                    <cds:CdsExpandableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is flagged">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Flagged because the certificate expires before your next release." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsExpandableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Issued for api.example.com and *.example.com by Example CA. Renews automatically 30 days before it expires." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+                <cds:CdsExpandableTile IsExpanded="True" HasRoundedCorners="True" WidthRequest="320" CollapsedDescription="Show certificate details" ExpandedDescription="Hide certificate details">
+                    <cds:CdsExpandableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is flagged">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Flagged because the certificate expires before your next release." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsExpandableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
+                    </VerticalStackLayout>
+                    <cds:CdsExpandableTile.ExpandedContent>
+                        <cds:CdsText Text="Issued for api.example.com and *.example.com by Example CA. Renews automatically 30 days before it expires." Tone="Secondary" />
+                    </cds:CdsExpandableTile.ExpandedContent>
+                </cds:CdsExpandableTile>
+            </HorizontalStackLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label in every theme" Description="The collapsed AI tile in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsExpandableTile CollapsedDescription="Show details" ExpandedDescription="Hide details">
+                            <cds:CdsExpandableTile.Decorator>
+                                <cds:CdsAILabel Label="Why this is flagged">
+                                    <cds:CdsAILabelContent>
+                                        <VerticalStackLayout Spacing="8">
+                                            <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Text="Flagged because the certificate expires before your next release." TypeStyle="Body01" />
+                                        </VerticalStackLayout>
+                                    </cds:CdsAILabelContent>
+                                </cds:CdsAILabel>
+                            </cds:CdsExpandableTile.Decorator>
+                            <cds:CdsText Text="TLS certificate" TypeStyle="HeadingCompact01" />
+                            <cds:CdsExpandableTile.ExpandedContent>
+                                <cds:CdsText Text="Expires in 12 days" Tone="Secondary" />
+                            </cds:CdsExpandableTile.ExpandedContent>
+                        </cds:CdsExpandableTile>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Themes" Description="The same tile in White, Gray 10, Gray 90 and Gray 100, on layers where it sits on a layer-01 surface.">
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>

@@ -88,6 +88,17 @@ public class CdsRadioTile : CdsTileBase
     protected override CdsTileKind TileKind => CdsTileKind.Radio;
 
     /// <inheritdoc/>
+    protected override CdsAILabelSize? DecoratorSize => CdsAILabelSize.Xs;
+
+    // Carbon moves the label from 16 to 40 when the check mark appears (inset-inline-end transition, fast-02 standard productive).
+    /// <inheritdoc/>
+    protected override double DecoratorEndInset => IsChecked ? CdsSpacing.Spacing08 : CdsSpacing.Spacing05;
+
+    /// <inheritdoc/>
+    protected override void OnDecoratorReplaced() =>
+        BodyHost.Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsTileTokens.SelectableEndPadding(Decorator is not null), CdsSpacing.Spacing05);
+
+    /// <inheritdoc/>
     protected override CdsInteractionState TokenState
     {
         get
@@ -123,6 +134,7 @@ public class CdsRadioTile : CdsTileBase
     void OnCheckedChanged(bool value)
     {
         _hit.IsChecked = value;
+        UpdateDecoratorInset(animate: true);
         RefreshVisuals();
         CheckedChanged?.Invoke(this, new CheckedChangedEventArgs(value));
         CheckedPropertyChanged?.Invoke(this, EventArgs.Empty);

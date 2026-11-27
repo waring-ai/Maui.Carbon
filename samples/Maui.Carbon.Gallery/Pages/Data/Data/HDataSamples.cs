@@ -3,6 +3,12 @@ namespace Maui.Carbon.Gallery.Pages.Data.Data;
 /// <summary>A Kubernetes cluster row of the data table samples.</summary>
 public sealed record HCluster(string Id, string Name, string Region, CdsIconIndicatorKind Status, string StatusText, int Nodes, string Version, string Created)
 {
+    /// <summary>AI generated the row (its decorator shows an AI label).</summary>
+    public bool IsAi { get; init; }
+
+    /// <summary>Someone edited the AI generated row: its label shows the revert button.</summary>
+    public bool IsEdited { get; init; }
+
     /// <summary>The text of an expanded row.</summary>
     public string Details => $"Kubernetes {Version} in {Region}. Created {Created}. {Nodes} worker nodes.";
 }
@@ -30,6 +36,15 @@ public static class HDataSamples
 
     /// <summary>The first <paramref name="count"/> sample clusters.</summary>
     public static IReadOnlyList<HCluster> Clusters(int count = 8) => s_clusters.Take(Math.Clamp(count, 0, s_clusters.Length)).ToList();
+
+    /// <summary>
+    /// The first <paramref name="count"/> sample clusters as an AI suggested list: the 1st, 3rd, 4th and 6th are AI generated, and the 4th
+    /// was edited since (its label shows the revert button).
+    /// </summary>
+    public static IReadOnlyList<HCluster> AiClusters(int count = 6) =>
+        s_clusters.Take(Math.Clamp(count, 0, s_clusters.Length))
+            .Select((c, i) => c with { IsAi = i is 0 or 2 or 3 or 5, IsEdited = i == 3 })
+            .ToList();
 
     /// <summary>All sample clusters.</summary>
     public static IReadOnlyList<HCluster> AllClusters => s_clusters;

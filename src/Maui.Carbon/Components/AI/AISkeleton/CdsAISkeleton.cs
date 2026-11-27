@@ -42,7 +42,7 @@ internal enum AiSkeletonShape
 }
 
 /// <summary>
-/// The shared AI skeleton block: a rounded <c>tag-background-blue</c> fill with a transparent to <c>interactive</c> (50% opacity) to
+/// The shared AI skeleton block: a rounded <c>ai-skeleton-background</c> fill with a transparent to <c>ai-skeleton-element-background</c> (50% opacity) to
 /// transparent band sliding across it every 1250ms. Static (the band rests in the middle) when motion is reduced. Decorative.
 /// </summary>
 internal sealed class CdsAiShimmerView : Border
@@ -89,7 +89,7 @@ internal sealed class CdsAiShimmerView : Border
 
 /// <summary>
 /// The AI version of <see cref="CdsSkeletonText"/>: a bar standing in for a line, heading or paragraph of AI-generated text while it
-/// loads: 16 high (24 for a heading), fully rounded, <c>tag-background-blue</c> with a fast sliding <c>interactive</c> shimmer, 8 between
+/// loads: 16 high (24 for a heading), fully rounded, <c>ai-skeleton-background</c> with a fast sliding <c>ai-skeleton-element-background</c> shimmer, 8 between
 /// lines. Use it only where the pending content is AI-generated (in a container that carries an <see cref="CdsAILabel"/>); use the
 /// plain skeletons elsewhere. Match the size of the content it stands in for. Skeletons are invisible to screen readers: mark the
 /// loading region busy and announce progress ("Generating summary") yourself.
@@ -174,7 +174,7 @@ public class CdsAISkeletonText : CdsControl
 }
 
 /// <summary>
-/// The AI version of <see cref="CdsSkeletonPlaceholder"/>: a rounded (8) <c>tag-background-blue</c> box with the AI shimmer, 100 x 100 by
+/// The AI version of <see cref="CdsSkeletonPlaceholder"/>: a rounded (8) <c>ai-skeleton-background</c> box with the AI shimmer, 100 x 100 by
 /// default; set <c>WidthRequest</c> and <c>HeightRequest</c> to match the content it replaces (a generated chart or image).
 /// </summary>
 public class CdsAISkeletonPlaceholder : CdsControl

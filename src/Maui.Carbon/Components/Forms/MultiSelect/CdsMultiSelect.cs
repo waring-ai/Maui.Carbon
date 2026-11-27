@@ -22,6 +22,9 @@ public partial class CdsMultiSelect : CdsListBox
     /// <summary>The field text shown beside the count tag: <see cref="CdsListBox.Placeholder"/>.</summary>
     protected readonly CdsText ValueText = new() { LineBreakMode = LineBreakMode.TailTruncation, MaxLines = 1, VerticalOptions = LayoutOptions.Center };
 
+    /// <summary>Stands in for the parent row in the list; never a data item, never in the selection.</summary>
+    static readonly object SelectAllValue = new();
+
     readonly SelectionSet _selection = new();
     readonly CdsListBoxSelectionTag _tag = new() { IsVisible = false, Margin = new Thickness(0, 0, CdsSpacing.Spacing03, 0) };
     readonly CdsListBoxIconButton _clearText = new(CdsIconName.Close, 13) { IsVisible = false, Margin = new Thickness(0, 0, 5, 0) };
@@ -100,16 +103,39 @@ public partial class CdsMultiSelect : CdsListBox
                 : v => v is not null && _snapshot.Exists(s => Equals(s, v));
             rows = ListBoxLogic.SelectedFirst(rows, first);
         }
+        // Carbon pins the parent first and keeps it out of the filter result and the selected-first sort.
+        if (!string.IsNullOrEmpty(SelectAllLabel) && MultiSelectAllModel.IsShown(IsFilterable, rows))
+            rows = [new ListBoxEntry(SelectAllValue, SelectAllLabel, IsSelectAll: true), .. rows];
         return rows;
     }
 
+    List<ListBoxEntry> DataRows() => [.. VisibleRows.Where(r => !r.IsSelectAll)];
+
     /// <inheritdoc/>
-    internal override bool IsRowChosen(ListBoxEntry row) => _selection.Contains(row.Value);
+    internal override bool? RowCheckState(ListBoxEntry row) =>
+        row.IsSelectAll ? MultiSelectAllModel.State(IsFilterable, DataRows(), _selection.Items) : IsRowChosen(row);
+
+    /// <inheritdoc/>
+    internal override bool IsRowChosen(ListBoxEntry row) => !row.IsSelectAll && _selection.Contains(row.Value);
 
     /// <inheritdoc/>
     internal override void ChooseRow(int index)
     {
-        _selection.Toggle(VisibleRows[index].Value);
+        var row = VisibleRows[index];
+        var data = DataRows();
+        if (row.IsSelectAll)
+        {
+            if (!_selection.Replace(MultiSelectAllModel.Activate(IsFilterable, data, _selection.Items))) return;
+        }
+        else
+        {
+            var added = _selection.Toggle(row.Value);
+            // Filling in the last enabled item turns the selection into "every enabled item" while the parent is listed
+            // (and, filterable, matches the filter text), as Carbon's Selection.tsx does.
+            if (added && VisibleRows.Any(r => r.IsSelectAll) && MultiSelectAllModel.MatchesFilter(SelectAllLabel!, IsFilterable ? Entry.Text : null)
+                && MultiSelectAllModel.CollapseOnAdd(data, _selection.Items) is { } all)
+                _selection.Replace(all);
+        }
         Commit();
         if (SelectionFeedback == CdsMultiSelectFeedback.Top && SortSelectedFirst) RefreshRows(keepHighlight: true);
     }

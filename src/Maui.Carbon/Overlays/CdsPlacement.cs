@@ -38,15 +38,17 @@ public readonly record struct CdsPlacementResult(Rect Frame, CdsPlacement Placem
 /// <summary>Pure placement math for anchored popups (tested on its own).</summary>
 public static class CdsPlacementResolver
 {
-    /// <summary>Margin kept between a popup and the host edges.</summary>
+    /// <summary>Default margin kept between a popup and the host edges (see <see cref="CdsOverlayOptions.EdgeMargin"/>).</summary>
     public const double EdgeMargin = 8;
 
     /// <summary>
     /// Places a popup of <paramref name="popup"/> size next to <paramref name="anchor"/> inside a host of
     /// <paramref name="host"/> size, flipping to the opposite side when the preferred side does not fit and the
     /// opposite side fits better, then clamping into the host. An anchor entirely outside the host is not clamped.
+    /// <paramref name="edgeMargin"/> is the margin kept to the host edges (0 lets a popup sit flush with an edge, as a
+    /// tab tip popover does).
     /// </summary>
-    public static CdsPlacementResult Resolve(Rect anchor, Size popup, Size host, CdsPlacement preferred, double offset = 0, bool autoFlip = true)
+    public static CdsPlacementResult Resolve(Rect anchor, Size popup, Size host, CdsPlacement preferred, double offset = 0, bool autoFlip = true, double edgeMargin = EdgeMargin)
     {
         // An anchor scrolled out of view takes its popup with it (as a web popover scrolls away with its trigger):
         // clamping it into the host would float it over unrelated content.
@@ -61,8 +63,8 @@ public static class CdsPlacementResolver
         if (autoFlip)
         {
             var side = Side(preferred);
-            var space = Space(side, anchor, host);
-            var opposite = Space(Opposite(side), anchor, host);
+            var space = Space(side, anchor, host, edgeMargin);
+            var opposite = Space(Opposite(side), anchor, host, edgeMargin);
             var needed = (side is 'T' or 'B' ? popup.Height : popup.Width) + offset;
             if (space < needed && opposite > space) placement = Flip(preferred);
         }
@@ -70,10 +72,10 @@ public static class CdsPlacementResolver
         var frame = Place(anchor, popup, placement, offset);
 
         // Clamp into the host (cross axis first, then main axis as a last resort).
-        var maxX = Math.Max(EdgeMargin, host.Width - popup.Width - EdgeMargin);
-        var maxY = Math.Max(EdgeMargin, host.Height - popup.Height - EdgeMargin);
-        var x = Math.Clamp(frame.X, Math.Min(EdgeMargin, maxX), maxX);
-        var y = Math.Clamp(frame.Y, Math.Min(EdgeMargin, maxY), maxY);
+        var maxX = Math.Max(edgeMargin, host.Width - popup.Width - edgeMargin);
+        var maxY = Math.Max(edgeMargin, host.Height - popup.Height - edgeMargin);
+        var x = Math.Clamp(frame.X, Math.Min(edgeMargin, maxX), maxX);
+        var y = Math.Clamp(frame.Y, Math.Min(edgeMargin, maxY), maxY);
         frame = new Rect(x, y, popup.Width, popup.Height);
 
         var caret = Side(placement) is 'T' or 'B'
@@ -108,12 +110,12 @@ public static class CdsPlacementResolver
 
     static char Opposite(char side) => side switch { 'T' => 'B', 'B' => 'T', 'L' => 'R', _ => 'L' };
 
-    static double Space(char side, Rect a, Size host) => side switch
+    static double Space(char side, Rect a, Size host, double margin) => side switch
     {
-        'T' => a.Top - EdgeMargin,
-        'B' => host.Height - a.Bottom - EdgeMargin,
-        'L' => a.Left - EdgeMargin,
-        _ => host.Width - a.Right - EdgeMargin,
+        'T' => a.Top - margin,
+        'B' => host.Height - a.Bottom - margin,
+        'L' => a.Left - margin,
+        _ => host.Width - a.Right - margin,
     };
 
     /// <summary>The same alignment on the opposite side.</summary>

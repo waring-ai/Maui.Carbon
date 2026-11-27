@@ -70,6 +70,18 @@ public partial class DataTablePage : GalleryPage
         HDataSamples.AddClusterColumns(NoMatchTable);
         NoMatchTable.ItemsSource = HDataSamples.Clusters(4);
 
+        // AI presence: the whole table, one column, some rows.
+        HDataSamples.Bind(AiTable);
+        AiTable.ItemsSource = HDataSamples.Clusters(5);
+        HDataSamples.Bind(AiColumnTable);
+        AiColumnTable.ItemsSource = HDataSamples.Clusters(5);
+        HDataSamples.Bind(AiRowsTable);
+        AiRowsTable.ExpandedRowTemplate = HDataSamples.ExpandedTemplate();
+        var aiClusters = HDataSamples.AiClusters(6);
+        AiRowsTable.ItemsSource = aiClusters;
+        AiRowsTable.SelectedRows = new List<object> { aiClusters[2] };
+        AiRowsTable.ExpandedRows = new List<object> { aiClusters[0] };
+
         // Paged table.
         HDataSamples.AddClusterColumns(PagedTable);
         ShowPage();

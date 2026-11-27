@@ -28,9 +28,12 @@ internal static class ExpandableTileModel
         _ => false,
     };
 
-    /// <summary>The variant for content, honoring an explicit <paramref name="forced"/> override.</summary>
-    public static bool UseInteractiveVariant(bool? forced, Element? above, Element? below) =>
-        forced ?? (ContainsInteractive(above) || ContainsInteractive(below));
+    /// <summary>
+    /// The variant for content, honoring an explicit <paramref name="forced"/> override. A decorator makes the tile interactive
+    /// (Carbon: <c>hasInteractive = ... || Boolean(decorator)</c>), because the decorator is a control of its own.
+    /// </summary>
+    public static bool UseInteractiveVariant(bool? forced, Element? above, Element? below, bool hasDecorator = false) =>
+        forced ?? (hasDecorator || ContainsInteractive(above) || ContainsInteractive(below));
 
     /// <summary>Bottom padding of the expanded content: 16, or 48 (the chevron row) when the chevron shows a label.</summary>
     public static double ExpandedBottomPadding(bool chevronHasLabel) => chevronHasLabel ? 48 : CdsSpacing.Spacing05;

@@ -64,6 +64,11 @@ public partial class CdsTextInput
         nameof(Keyboard), typeof(Keyboard), typeof(CdsTextInput), Keyboard.Default,
         propertyChanged: static (b, _, n) => ((CdsTextInput)b).Entry.Keyboard = (Keyboard)n);
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsTextInput), null,
+        propertyChanged: static (b, _, n) => ((CdsTextInput)b).OnDecoratorChanged((View?)n));
+
     /// <summary>The value (two-way).</summary>
     public string? Text
     {
@@ -167,6 +172,23 @@ public partial class CdsTextInput
     {
         get => (Keyboard)GetValue(KeyboardProperty);
         set => SetValue(KeyboardProperty, value);
+    }
+
+    /// <summary>
+    /// A view at the end of the field (Carbon's <c>decorator</c>), usually a <see cref="CdsAILabel"/> marking an AI-generated value. The
+    /// label is shown at its mini size and the field takes Carbon's AI presence (the AI aura and an <c>ai-border-strong</c> rule)
+    /// until the label's <see cref="CdsAILabel.IsRevertActive"/> is set, which you do when the person edits the value.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        Chrome.Decorator = decorator;
+        RefreshVisuals();
     }
 
     static void OnChromeChanged(BindableObject b, object? o, object? n) => ((CdsTextInput)b).UpdateChrome();

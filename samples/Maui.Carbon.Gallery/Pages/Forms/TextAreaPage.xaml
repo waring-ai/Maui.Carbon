@@ -26,6 +26,13 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Skeleton" Description="A label bar over a 100px field bar.">
+            <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsTextAreaSkeleton />
+                <cds:CdsTextAreaSkeleton HideLabel="True" />
+            </VerticalStackLayout>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="A 40-character limit: the counter follows as you type.">
             <VerticalStackLayout Spacing="16" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsTextArea Label="Change reason" Rows="3" EnableCounter="True" MaxCount="40" TextChanged="OnTextChanged" />

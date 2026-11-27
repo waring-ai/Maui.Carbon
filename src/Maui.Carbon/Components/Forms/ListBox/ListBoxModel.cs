@@ -4,7 +4,8 @@ namespace Maui.Carbon;
 /// <param name="Value">The data item the row stands for.</param>
 /// <param name="Text">The row text (from <c>ItemToString</c>).</param>
 /// <param name="IsDisabled">Disabled rows are skipped by the highlight and cannot be chosen.</param>
-internal readonly record struct ListBoxEntry(object? Value, string Text, bool IsDisabled = false);
+/// <param name="IsSelectAll">The parent "select all" row of a multi-select (Carbon's <c>isSelectAll</c> item); its <paramref name="Value"/> is never a data item.</param>
+internal readonly record struct ListBoxEntry(object? Value, string Text, bool IsDisabled = false, bool IsSelectAll = false);
 
 /// <summary>What the owner should do after a key reached a list box.</summary>
 internal enum ListBoxAction
@@ -234,12 +235,13 @@ internal static class ListBoxLogic
     /// What a screen reader hears for a highlighted row: its text, its state ("selected" for the chosen row of a single
     /// select; "checked" or "not checked" in a multi-select; "unavailable" for a disabled row) and its position, as
     /// <c>aria-activedescendant</c> with <c>aria-selected</c>, <c>aria-posinset</c> and <c>aria-setsize</c> would:
-    /// "Frankfurt, selected, 3 of 4".
+    /// "Frankfurt, selected, 3 of 4". The parent "select all" row of a multi-select is "partially checked" when
+    /// <paramref name="mixed"/> (<c>aria-checked="mixed"</c>).
     /// </summary>
-    public static string RowAnnouncement(ListBoxEntry row, int index, int count, bool chosen, bool multi)
+    public static string RowAnnouncement(ListBoxEntry row, int index, int count, bool chosen, bool multi, bool mixed = false)
     {
         var parts = new List<string>(4) { row.Text };
-        if (multi) parts.Add(chosen ? "checked" : "not checked");
+        if (multi) parts.Add(mixed ? "partially checked" : chosen ? "checked" : "not checked");
         else if (chosen) parts.Add("selected");
         if (row.IsDisabled) parts.Add("unavailable");
         parts.Add($"{index + 1} of {count}");
@@ -309,11 +311,13 @@ internal static class ListBoxLogic
 
     /// <summary>
     /// Whether the 1px <c>border-subtle-01</c> rule above a row is drawn: never on the first row, and not next to the
-    /// highlighted or hovered row, nor (single-select) below the selected row.
+    /// highlighted or hovered row, nor (single-select) below the selected row. The rule below the parent "select all" row
+    /// (<paramref name="afterSelectAll"/>) is the parent's own border and is always drawn.
     /// </summary>
-    public static bool SeparatorVisible(int index, int highlighted, int hovered, bool previousSelected, bool multi)
+    public static bool SeparatorVisible(int index, int highlighted, int hovered, bool previousSelected, bool multi, bool afterSelectAll = false)
     {
         if (index <= 0) return false;
+        if (afterSelectAll) return true;
         if (index == highlighted || index - 1 == highlighted) return false;
         if (index == hovered || index - 1 == hovered) return false;
         if (!multi && previousSelected) return false;

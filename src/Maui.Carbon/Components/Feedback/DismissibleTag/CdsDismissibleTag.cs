@@ -20,6 +20,7 @@ public class CdsDismissibleTag : CdsTag
     readonly Border _hoverCircle = new() { StrokeThickness = 0, InputTransparent = true };
     readonly Border _focusCircle = new() { StrokeThickness = 1, InputTransparent = true, IsVisible = false, BackgroundColor = Colors.Transparent };
     readonly CdsIcon _closeIcon = new(CdsIconName.Close, 16) { InputTransparent = true };
+    Grid? _grid;
     CdsHitTarget? _closeHit;
     CdsIcon _iconView = null!;
     CdsText _labelView = null!;
@@ -51,10 +52,18 @@ public class CdsDismissibleTag : CdsTag
     /// <inheritdoc/>
     protected override bool HasTrailingContent => true;
 
+    // Carbon renders any decorator of a dismissible tag as it is; only the AI label is restyled.
+    private protected override bool ShowsAnyDecorator => true;
+
+    private protected override void AttachDecorator(View decorator) => _grid?.Add(decorator, 2);
+
+    private protected override void DetachDecorator(View decorator) => _grid?.Remove(decorator);
+
     /// <inheritdoc/>
     protected override View BuildChrome(Border pill)
     {
-        var grid = CdsTagParts.Rebuild(pill, Row, out _iconView, out _labelView);
+        var grid = CdsTagParts.Rebuild(pill, Row, out _iconView, out _labelView, withDecorator: true);
+        _grid = grid;
         AutomationProperties.SetExcludedWithChildren(_hoverCircle, true);
 
         _closeHit = CreateHitTarget();
@@ -67,7 +76,7 @@ public class CdsDismissibleTag : CdsTag
         pointer.PointerEntered += (_, _) => SetCloseHover(true);
         pointer.PointerExited += (_, _) => SetCloseHover(false);
         _closeRoot.GestureRecognizers.Add(pointer);
-        grid.Add(_closeRoot, 2);
+        grid.Add(_closeRoot, 3);
         return pill;
     }
 
@@ -84,6 +93,7 @@ public class CdsDismissibleTag : CdsTag
         Pill.StrokeThickness = v.Border is null ? 0 : 1;
         SetColor(_labelView, Label.TextColorProperty, v.Foreground);
         SetColor(_iconView, CdsIcon.ColorProperty, v.Foreground);
+        ApplyDecoratorColor(v.Foreground);
 
         var close = CdsInteractiveTagTokens.Close(Type, _closeHover, Is(CdsInteractionState.Disabled));
         SetColor(_hoverCircle, BackgroundColorProperty, close.Hover);

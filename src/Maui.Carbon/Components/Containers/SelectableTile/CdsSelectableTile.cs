@@ -55,6 +55,16 @@ public class CdsSelectableTile : CdsTileBase
     protected override CdsTileKind TileKind => CdsTileKind.Selectable;
 
     /// <inheritdoc/>
+    protected override CdsAILabelSize? DecoratorSize => CdsAILabelSize.Xs;
+
+    /// <inheritdoc/>
+    protected override double DecoratorEndInset => CdsSpacing.Spacing08;
+
+    /// <inheritdoc/>
+    protected override void OnDecoratorReplaced() =>
+        BodyHost.Padding = new Thickness(CdsSpacing.Spacing05, CdsSpacing.Spacing05, CdsTileTokens.SelectableEndPadding(Decorator is not null), CdsSpacing.Spacing05);
+
+    /// <inheritdoc/>
     protected override CdsInteractionState TokenState => IsSelected ? State | CdsInteractionState.Selected : State;
 
     /// <inheritdoc/>

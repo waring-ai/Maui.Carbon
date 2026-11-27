@@ -74,7 +74,9 @@ public class CdsTileGroup : CdsContainer
     protected internal override bool WantsNavigationKeys => true;
 
     /// <inheritdoc/>
-    protected internal override bool OnKeyDown(CdsKeyEventArgs e) => _tiles.Count > 0 && _roving.HandleKey(e);
+    protected internal override bool OnKeyDown(CdsKeyEventArgs e) =>
+        // An AI label on a tile takes its own keys: an arrow pressed on it must not move the group's choice.
+        _tiles.Count > 0 && !CdsFocusTracker.FocusChain().Any(c => c is CdsAILabel) && _roving.HandleKey(e);
 
     /// <summary>The index of the tile that has the group's one tab stop, or -1 when no tile can take focus.</summary>
     internal int TabStopIndex => _roving.TabStopIndex;

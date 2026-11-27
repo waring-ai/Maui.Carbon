@@ -52,6 +52,11 @@ public partial class CdsCheckbox
         nameof(IsReadOnly), typeof(bool), typeof(CdsCheckbox), false,
         propertyChanged: static (b, _, _) => ((CdsCheckbox)b).RefreshVisuals());
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsCheckbox), null,
+        propertyChanged: static (b, _, n) => ((CdsCheckbox)b).OnDecoratorChanged((View?)n));
+
     /// <summary>Bindable property for <see cref="Command"/>.</summary>
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
         nameof(Command), typeof(System.Windows.Input.ICommand), typeof(CdsCheckbox), null,
@@ -136,6 +141,20 @@ public partial class CdsCheckbox
     {
         get => (bool)GetValue(IsReadOnlyProperty);
         set => SetValue(IsReadOnlyProperty, value);
+    }
+
+    /// <summary>
+    /// A view shown right after the label, 8px from it (Carbon's decorator slot). A <see cref="CdsAILabel"/> is shown at its
+    /// mini size, or md when its <see cref="CdsAILabel.Kind"/> is inline. It is its own button and tab stop: it stays
+    /// interactive while the checkbox is disabled or read-only, and activating it does not toggle the checkbox. The checkbox has
+    /// no AI styling of its own; when the person edits the AI value, set <see cref="CdsAILabel.IsRevertActive"/>. A long
+    /// label wraps before the decorator, which drops to the next line when the label leaves no room. It also shows when
+    /// <see cref="HideLabel"/> is set.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
     }
 
     /// <summary>Command run after the user toggles the checkbox.</summary>

@@ -49,6 +49,8 @@ public sealed class CdsFieldChrome : Grid
     readonly CdsText _message = new() { TypeStyle = CdsTypeStyle.HelperText01, Tone = CdsTextTone.Helper, IsVisible = false };
     readonly Dictionary<(BindableObject, BindableProperty), string?> _applied = [];
     readonly CdsMessageAlert _alert = new();
+    View? _decorator;
+    string? _aiFillKey;
     bool _inline;
     bool _inlineHugs;
     CdsSize _size = CdsSize.Md;
@@ -251,6 +253,53 @@ public sealed class CdsFieldChrome : Grid
     /// </summary>
     internal bool IsRuleSuppressed { get; set; }
 
+    /// <summary>
+    /// A view at the end of the field, after the status icon and before the control's own trailing parts such as a chevron or
+    /// steppers (Carbon's <c>decorator</c> slot). A <see cref="CdsAILabel"/> is shown at its mini size and gives the field Carbon's AI
+    /// presence: the AI aura (<c>ai-aura-start-sm</c>) rises from the bottom of the field and the bottom rule turns <c>ai-border-strong</c>. When the person
+    /// edits the AI value, set <see cref="CdsAILabel.IsRevertActive"/>. The label then becomes a revert button and the field drops the AI
+    /// styling until the value is reverted. Any other view is placed in the slot without AI styling.
+    /// </summary>
+    public View? Decorator
+    {
+        get => _decorator;
+        set
+        {
+            if (ReferenceEquals(_decorator, value)) return;
+            if (_decorator is not null)
+            {
+                _decorator.PropertyChanged -= OnDecoratorPropertyChanged;
+                Trailing.Remove(_decorator);
+            }
+            _decorator = value;
+            if (value is not null)
+            {
+                // Carbon's fields render an AI label at size mini (16).
+                if (value is CdsAILabel label) label.Size = CdsAILabelSize.Mini;
+                value.Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0);
+                value.VerticalOptions = LayoutOptions.Center;
+                value.PropertyChanged += OnDecoratorPropertyChanged;
+                // After the status icon (when it is in the trailing row), before everything the control added.
+                Trailing.Insert(Trailing.IndexOf(_statusIcon) + 1, value);
+            }
+            Apply(_lastState);
+        }
+    }
+
+    /// <summary>
+    /// Whether the field shows Carbon's AI presence: its <see cref="Decorator"/> is a <see cref="CdsAILabel"/> that is not in its revert
+    /// state.
+    /// </summary>
+    public bool IsAiPresence => _decorator is CdsAILabel { IsRevertActive: false };
+
+    void OnDecoratorPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == CdsAILabel.IsRevertActiveProperty.PropertyName) Apply(_lastState);
+    }
+
+    /// <summary>The surface color key under the AI aura while it is shown (for tests); <c>null</c> without one.</summary>
+    internal string? AiFillKey => _aiFillKey;
+
     /// <summary>The 1px bottom rule (for controls that animate or hide it).</summary>
     public BoxView Rule => _rule;
 
@@ -291,9 +340,13 @@ public sealed class CdsFieldChrome : Grid
         var hover = state.HasFlag(CdsInteractionState.Hover) && !disabled && !readOnly;
 
         var fluid = IsFluidLayout;
+        // AI presence (Carbon's ai-gradient on a decorated field): the aura over the field fill and an ai-border-strong rule.
+        var ai = IsAiPresence && !disabled && !readOnly && !IsFlat;
         Set(_field, VisualElement.BackgroundColorProperty, FieldFillKey(fluid, readOnly, hover, IsFlat));
+        SetAiFill(ai ? (hover ? CdsColorKeys.FieldHover01 : CdsColorKeys.Field01) : null);
         Set(_rule, BoxView.ColorProperty,
-            RuleColorKeyOverride ?? (IsFlat ? null : disabled ? DisabledRuleColorKey : readOnly ? CdsColorKeys.BorderSubtle01 : CdsColorKeys.BorderStrong01));
+            RuleColorKeyOverride ?? (IsFlat ? null : disabled ? DisabledRuleColorKey : readOnly ? CdsColorKeys.BorderSubtle01
+                : ai ? CdsAiTokens.BorderStrong : CdsColorKeys.BorderStrong01));
         Set(_fluidFill, VisualElement.BackgroundColorProperty, IsFlat ? null : CdsColorKeys.Field01);
         Set(_label, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
         Set(_counter, Microsoft.Maui.Controls.Label.TextColorProperty, disabled ? CdsColorKeys.TextDisabled : CdsColorKeys.TextSecondary);
@@ -391,6 +444,24 @@ public sealed class CdsFieldChrome : Grid
             _field.MinimumHeightRequest = -1;
             _field.HeightRequest = _fieldHeight;
         }
+    }
+
+    // The AI aura is a gradient brush, which wins over the token-bound BackgroundColor while it is set. It is rebuilt from the bound
+    // colors when the theme or layer changes, and cleared to give the flat fill back.
+    void SetAiFill(string? surfaceKey)
+    {
+        if (_aiFillKey == surfaceKey) return;
+        _aiFillKey = surfaceKey;
+        if (surfaceKey is null)
+        {
+            CdsColorProxies.Unbind(_field);
+            _field.ClearValue(VisualElement.BackgroundProperty);
+            return;
+        }
+        CdsColorProxies.Bind(_field, colors =>
+        {
+            if (colors[0] is { } aura && colors[1] is { } surface) _field.Background = CdsAiTreatment.CreateFill(aura, surface);
+        }, CdsAiTokens.AuraSmall, surfaceKey);
     }
 
     void Set(Element target, BindableProperty property, string? key)

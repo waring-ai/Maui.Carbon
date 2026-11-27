@@ -87,6 +87,24 @@
             <cds:CdsTabs x:Name="ManyTabs" WidthRequest="420" HorizontalOptions="Start" />
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Vertical" Description="Orientation Vertical: a column of 64 high layer-01 tabs a quarter of the width, with the panel beside it. Hover is layer-hover-01 with a border-strong-01 start edge; the selected tab has a 3px border-interactive edge and no end rule. Up and Down move between tabs. Labels wrap to two lines.">
+            <cds:CdsTabs Orientation="Vertical" Label="Account settings" SelectedIndex="1" HeightRequest="320">
+                <cds:CdsTab Text="Profile">
+                    <cds:CdsText Text="Name, email and time zone." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Access policies and service IDs">
+                    <cds:CdsText Text="Who can manage prod-us-south and its keys." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Notifications">
+                    <cds:CdsText Text="Email and Slack alerts for cluster events." TypeStyle="Body01" />
+                </cds:CdsTab>
+                <cds:CdsTab Text="Billing" IsEnabled="False" />
+                <cds:CdsTab Text="Audit log">
+                    <cds:CdsText Text="Changes made in the last 90 days." TypeStyle="Body01" />
+                </cds:CdsTab>
+            </cds:CdsTabs>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Interactive" Description="Click, or Tab into the row and use Left, Right, Home and End. Activation Manual only moves focus; Enter or Space select.">
             <VerticalStackLayout Spacing="16">
                 <cds:CdsTabs x:Name="InteractiveTabs" Activation="Manual" SelectionChanged="OnSelectionChanged">

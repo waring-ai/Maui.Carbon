@@ -18,6 +18,11 @@ public class CdsRadioButtonGroup : CdsControl
         nameof(Legend), typeof(string), typeof(CdsRadioButtonGroup), null,
         propertyChanged: static (b, _, _) => ((CdsRadioButtonGroup)b).UpdateChrome());
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsRadioButtonGroup), null,
+        propertyChanged: static (b, _, n) => ((CdsRadioButtonGroup)b).OnDecoratorChanged((View?)n));
+
     /// <summary>Bindable property for <see cref="SelectedValue"/>.</summary>
     public static readonly BindableProperty SelectedValueProperty = BindableProperty.Create(
         nameof(SelectedValue), typeof(object), typeof(CdsRadioButtonGroup), null, BindingMode.TwoWay,
@@ -73,6 +78,7 @@ public class CdsRadioButtonGroup : CdsControl
     readonly ContentView _itemsHost = new();
     readonly CdsFormMessage _message = new() { Margin = new Thickness(0, 6, 0, 0) };
     readonly CdsItemCollection<CdsRadioButton> _items = [];
+    CdsDecoratedRow? _legendRow;
     // One Tab stop for the group; it returns to the selected radio once focus leaves (RemembersFocus off).
     readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Both, wraps: true) { RemembersFocus = false, HandlesHomeEnd = false };
     bool _syncing;
@@ -105,6 +111,19 @@ public class CdsRadioButtonGroup : CdsControl
     {
         get => (string?)GetValue(LegendProperty);
         set => SetValue(LegendProperty, value);
+    }
+
+    /// <summary>
+    /// A view shown right after the legend, 8px from it (Carbon's decorator slot); it needs a <see cref="Legend"/> and shows
+    /// nothing without one. A <see cref="CdsAILabel"/> is always shown at its mini size with the default kind, as in Carbon. It
+    /// is its own button and tab stop: it stays interactive while the group is disabled or read-only, and the arrow keys
+    /// pressed on it do not move the selection. The group has no AI styling of its own; when the person edits the AI
+    /// selection, set <see cref="CdsAILabel.IsRevertActive"/>.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
     }
 
     /// <summary>The <see cref="CdsRadioButton.Value"/> of the selected radio, or <c>null</c> (two-way). Nothing is preselected unless you set it.</summary>
@@ -183,8 +202,17 @@ public class CdsRadioButtonGroup : CdsControl
     /// <inheritdoc/>
     protected internal override bool OnKeyDown(CdsKeyEventArgs e)
     {
-        if (RadioGroupModel.Direction(e.Key) == 0 || _roving.TabStopIndex < 0) return false;
+        if (RadioGroupModel.Direction(e.Key) == 0 || _roving.TabStopIndex < 0 || IsFocusOnForeignControl()) return false;
         return _roving.HandleKey(e);
+    }
+
+    // The focus chain runs through the group when a decorator (an AI label) inside it has focus: its arrow keys are not ours.
+    bool IsFocusOnForeignControl()
+    {
+        if (CdsFocusTracker.Focused is not { } focused || focused is CdsRadioButton) return false;
+        for (Element? e = focused.Parent; e is not null; e = e.Parent)
+            if (ReferenceEquals(e, this)) return true;
+        return false;
     }
 
     /// <summary>The radio that is in the Tab order (the selected one, else the first enabled one), or <c>null</c>.</summary>
@@ -232,9 +260,30 @@ public class CdsRadioButtonGroup : CdsControl
     {
         _legend.Text = Legend;
         _legend.IsVisible = !string.IsNullOrEmpty(Legend);
+        // The decorator follows the legend, so it shows only with one (React: legendText && decorator).
+        if (_legendRow is not null) _legendRow.IsVisible = _legend.IsVisible;
         CdsSemantics.SetGroupName(_root, Legend);
         RebuildItems();
         RefreshVisuals();
+    }
+
+    void OnDecoratorChanged(View? decorator)
+    {
+        if (decorator is null && _legendRow is null) return;
+        if (_legendRow is null)
+        {
+            _root.Remove(_legend);
+            // The gap under the legend moves to the row: it stays below the decorator when that wraps.
+            _legendRow = new CdsDecoratedRow(_legend, allowInline: false, centersDecorator: false)
+            {
+                IsVisible = _legend.IsVisible,
+                Margin = _legend.Margin,
+            };
+            _legend.Margin = 0;
+            // First child: the legend row comes before the radios in the focus order.
+            _root.Insert(0, _legendRow);
+        }
+        _legendRow.Decorator = decorator;
     }
 
     void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)

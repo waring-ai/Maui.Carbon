@@ -43,6 +43,17 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="The AI label sits before the chevron; the field takes the AI aura and a border-interactive rule.">
+            <cds:CdsSelect Label="Region" WidthRequest="400" HorizontalOptions="Start" SelectedIndex="1">
+                <cds:CdsSelect.Decorator>
+                    <cds:CdsAILabel Label="Why this is suggested" />
+                </cds:CdsSelect.Decorator>
+                <cds:CdsSelectItem Value="us-south" Text="Dallas (us-south)" />
+                <cds:CdsSelectItem Value="eu-de" Text="Frankfurt (eu-de)" />
+                <cds:CdsSelectItem Value="jp-tok" Text="Tokyo (jp-tok)" />
+            </cds:CdsSelect>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Skeleton" Description="The loading placeholder: a label bar over a field bar.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsSelectSkeleton />

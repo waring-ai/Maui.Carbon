@@ -14,6 +14,27 @@
             </Grid>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Select all" Description="SelectAllLabel adds Carbon's parent checkbox first in the list: partially checked (a dash) while some items are chosen. A click clears when anything is chosen, selects every enabled item when nothing is. It never counts as a selected item.">
+            <Grid HeightRequest="340" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Choose roles" SelectAllLabel="All roles" ItemsSource="{x:Static data:GListData.AccessRoles}"
+                                    SelectedItems="{x:Static data:GListData.SelectedAccessRoles}" VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Select all with a disabled item" Description="Disabled items are not counted and are never chosen by the parent row.">
+            <Grid HeightRequest="340" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Choose roles" SelectAllLabel="All roles" ItemsSource="{x:Static data:GListData.AccessRoles}"
+                                    IsItemDisabled="{x:Static data:GListData.IsOwnerRole}" SelectedItems="{x:Static data:GListData.SelectedEnabledRoles}" VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="Filterable with select all" Description="Filterable lists follow Carbon's FilterableMultiSelect: the parent stays first, acts on the items the filter shows and is hidden while only disabled items match.">
+            <Grid HeightRequest="340" WidthRequest="400" HorizontalOptions="Start">
+                <cds:CdsMultiSelect Label="Roles" Placeholder="Filter roles" IsFilterable="True" SelectAllLabel="All roles" ItemsSource="{x:Static data:GListData.AccessRoles}"
+                                    IsItemDisabled="{x:Static data:GListData.IsOwnerRole}" SelectedItems="{x:Static data:GListData.SelectedAccessRoles}" VerticalOptions="Start" IsOpen="True" />
+            </Grid>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="Nothing selected" Description="Without a selection the field shows only its text and no tag.">
             <VerticalStackLayout Spacing="24" WidthRequest="400" HorizontalOptions="Start">
                 <cds:CdsMultiSelect Label="Notify me about" Placeholder="Choose events" ItemsSource="{x:Static data:GListData.Events}" />

@@ -84,6 +84,106 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="The label (xs) sits 16 from the end until a tile is chosen, then slides to 40 to make room for the check mark. The chosen tile shows the border-inverse border over the AI fill. The label takes its own taps and keys: arrows pressed on it do not move the choice.">
+            <cds:CdsTileGroup Legend="Plan with AI suggestion" SelectedValue="std" HorizontalOptions="Start">
+                <HorizontalStackLayout Spacing="16">
+                    <cds:CdsRadioTile Value="dev" WidthRequest="260">
+                        <cds:CdsRadioTile.Decorator>
+                            <cds:CdsAILabel Label="Why this plan is suggested">
+                                <cds:CdsAILabelContent>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="Suggested from your last 30 days of usage." TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                </cds:CdsAILabelContent>
+                            </cds:CdsAILabel>
+                        </cds:CdsRadioTile.Decorator>
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Development" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="1 zone, no SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                    <cds:CdsRadioTile Value="std" WidthRequest="260">
+                        <cds:CdsRadioTile.Decorator>
+                            <cds:CdsAILabel Label="Why this plan is suggested">
+                                <cds:CdsAILabelContent>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="Suggested from your last 30 days of usage." TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                </cds:CdsAILabelContent>
+                            </cds:CdsAILabel>
+                        </cds:CdsRadioTile.Decorator>
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Standard" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="3 zones, 99.9% SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                    <cds:CdsRadioTile Value="pro" HasRoundedCorners="True" WidthRequest="260">
+                        <cds:CdsRadioTile.Decorator>
+                            <cds:CdsAILabel Label="Why this plan is suggested">
+                                <cds:CdsAILabelContent>
+                                    <VerticalStackLayout Spacing="8">
+                                        <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="Suggested from your last 30 days of usage." TypeStyle="Body01" />
+                                    </VerticalStackLayout>
+                                </cds:CdsAILabelContent>
+                            </cds:CdsAILabel>
+                        </cds:CdsRadioTile.Decorator>
+                        <VerticalStackLayout Spacing="4">
+                            <cds:CdsText Text="Premium" TypeStyle="HeadingCompact01" />
+                            <cds:CdsText Text="3 zones, 99.99% SLA" Tone="Secondary" />
+                        </VerticalStackLayout>
+                    </cds:CdsRadioTile>
+                </HorizontalStackLayout>
+            </cds:CdsTileGroup>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label in every theme" Description="A group with the second tile chosen, in White, Gray 10, Gray 90 and Gray 100.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <cds:CdsTileGroup Legend="Plan" SelectedValue="std">
+                            <VerticalStackLayout Spacing="8">
+                                <cds:CdsRadioTile Value="dev">
+                                    <cds:CdsRadioTile.Decorator>
+                                        <cds:CdsAILabel Label="Why this plan is suggested">
+                                            <cds:CdsAILabelContent>
+                                                <VerticalStackLayout Spacing="8">
+                                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                    <cds:CdsText Text="Suggested from your last 30 days of usage." TypeStyle="Body01" />
+                                                </VerticalStackLayout>
+                                            </cds:CdsAILabelContent>
+                                        </cds:CdsAILabel>
+                                    </cds:CdsRadioTile.Decorator>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Development" TypeStyle="HeadingCompact01" />
+                                        <cds:CdsText Text="1 zone" Tone="Secondary" />
+                                    </VerticalStackLayout>
+                                </cds:CdsRadioTile>
+                                <cds:CdsRadioTile Value="std">
+                                    <cds:CdsRadioTile.Decorator>
+                                        <cds:CdsAILabel Label="Why this plan is suggested">
+                                            <cds:CdsAILabelContent>
+                                                <VerticalStackLayout Spacing="8">
+                                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                    <cds:CdsText Text="Suggested from your last 30 days of usage." TypeStyle="Body01" />
+                                                </VerticalStackLayout>
+                                            </cds:CdsAILabelContent>
+                                        </cds:CdsAILabel>
+                                    </cds:CdsRadioTile.Decorator>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Standard" TypeStyle="HeadingCompact01" />
+                                        <cds:CdsText Text="3 zones" Tone="Secondary" />
+                                    </VerticalStackLayout>
+                                </cds:CdsRadioTile>
+                            </VerticalStackLayout>
+                        </cds:CdsTileGroup>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="On a layer" Description="On a layer-01 panel the group sits inside a CdsLayer.">
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>

@@ -27,6 +27,12 @@ public partial class CdsTabs : CdsControl
     readonly CdsTabScrollButton _left;
     readonly CdsTabScrollButton _right;
     readonly CdsRovingFocus _roving = new(CdsRovingOrientation.Horizontal, wraps: true) { RemembersFocus = false };
+    readonly Grid _root = new() { RowSpacing = 0, ColumnSpacing = 0 };
+    readonly Grid _strip = new();
+    // Vertical tabs, built on first use: a layer-01 column with a 1px end rule, scrolling its stack of tabs.
+    Grid? _column;
+    ScrollView? _columnScroll;
+    VerticalStackLayout? _list;
     int _applied = -2;
     bool _rebuilding;
     bool _fullWidthActive;
@@ -43,16 +49,13 @@ public partial class CdsTabs : CdsControl
         _left = new CdsTabScrollButton(this, CdsIconName.ChevronLeft, -1) { HorizontalOptions = LayoutOptions.Start, IsVisible = false };
         _right = new CdsTabScrollButton(this, CdsIconName.ChevronRight, 1) { HorizontalOptions = LayoutOptions.End, IsVisible = false };
 
-        var strip = new Grid();
-        strip.Add(_scroll);
-        strip.Add(_left);
-        strip.Add(_right);
+        _strip.Add(_scroll);
+        _strip.Add(_left);
+        _strip.Add(_right);
 
-        var stack = new VerticalStackLayout { Spacing = 0 };
-        stack.Add(strip);
-        stack.Add(_panel);
         HorizontalOptions = LayoutOptions.Fill;
-        SetChrome(stack);
+        LayoutRoot();
+        SetChrome(_root);
 
         _roving.CanFocus = i => i >= 0 && i < _items.Count && _items[i].IsEnabled;
         _roving.PreferredIndex = () => _applied;
@@ -79,6 +82,17 @@ public partial class CdsTabs : CdsControl
     internal bool HasSecondaryLabels => _items.Any(t => !string.IsNullOrEmpty(t.SecondaryLabel));
 
     internal bool IsFullWidthActive => _fullWidthActive;
+
+    internal bool IsVertical => Orientation == CdsTabsOrientation.Vertical;
+
+    /// <summary>The stack of vertical tabs, or <c>null</c> before the tabs were first vertical (for tests).</summary>
+    internal VerticalStackLayout? VerticalList => _list;
+
+    /// <summary>The tab views in order (for tests).</summary>
+    internal IReadOnlyList<CdsTabItemView> TabViews => _views;
+
+    /// <summary>The roving focus orientation in effect (for tests).</summary>
+    internal CdsRovingOrientation KeyOrientation => _roving.Orientation;
 
     /// <inheritdoc/>
     protected internal override bool WantsNavigationKeys => true;
@@ -126,6 +140,15 @@ public partial class CdsTabs : CdsControl
     {
         if (index < 0 || index >= _views.Count) return;
         var view = _views[index];
+        if (IsVertical)
+        {
+            if (_columnScroll is { } scroll)
+            {
+                var y = TabsModel.ScrollToReveal(view.Y, view.Y + view.Height, scroll.ScrollY, scroll.Height);
+                if (Math.Abs(y - scroll.ScrollY) > 0.5) _ = scroll.ScrollToAsync(0, y, false);
+            }
+            return;
+        }
         var x = TabsModel.ScrollToReveal(view.X, view.X + view.Width, _scroll.ScrollX, _scroll.Width);
         if (Math.Abs(x - _scroll.ScrollX) > 0.5) _ = _scroll.ScrollToAsync(x, 0, false);
     }
@@ -192,6 +215,56 @@ public partial class CdsTabs : CdsControl
             Rebuild();
     }
 
+    void ApplyOrientation()
+    {
+        LayoutRoot();
+        Rebuild();
+    }
+
+    // Horizontal: the tab strip above the panel. Vertical: the tab column (a quarter of the width) beside the panel.
+    void LayoutRoot()
+    {
+        var vertical = IsVertical;
+        _root.Children.Clear();
+        _root.RowDefinitions.Clear();
+        _root.ColumnDefinitions.Clear();
+        _roving.Orientation = vertical ? CdsRovingOrientation.Vertical : CdsRovingOrientation.Horizontal;
+        if (!vertical)
+        {
+            _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            _root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            _root.Add(_strip, 0, 0);
+            _root.Add(_panel, 0, 1);
+            return;
+        }
+        var column = EnsureColumn();
+        var fraction = CdsTabsTokens.VerticalListFraction;
+        _root.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(fraction, GridUnitType.Star)));
+        _root.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1 - fraction, GridUnitType.Star)));
+        _root.Add(column, 0, 0);
+        _root.Add(_panel, 1, 0);
+    }
+
+    Grid EnsureColumn()
+    {
+        if (_column is not null) return _column;
+        _list = new VerticalStackLayout { Spacing = 0 };
+        _columnScroll = new ScrollView
+        {
+            Orientation = ScrollOrientation.Vertical,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Default,
+            Content = _list,
+        };
+        // Carbon: the column is layer-01 with an inset 1px border-subtle rule at its end, under the tabs.
+        var rule = new BoxView { WidthRequest = 1, HorizontalOptions = LayoutOptions.End, InputTransparent = true };
+        CdsTokens.SetColor(rule, BoxView.ColorProperty, CdsColorKeys.BorderSubtle01);
+        _column = new Grid();
+        CdsTokens.SetColor(_column, BackgroundColorProperty, CdsColorKeys.Layer01);
+        _column.Add(rule);
+        _column.Add(_columnScroll);
+        return _column;
+    }
+
     void OnStripSizeChanged(object? sender, EventArgs e)
     {
         var full = IsFullWidth && Type == CdsTabsType.Contained && !IsIconOnly && _scroll.Width >= CdsBreakpoints.Md;
@@ -205,19 +278,26 @@ public partial class CdsTabs : CdsControl
         _rebuilding = true;
         try
         {
-            _fullWidthActive = IsFullWidth && Type == CdsTabsType.Contained && !IsIconOnly && _scroll.Width >= CdsBreakpoints.Md;
+            var vertical = IsVertical;
+            _fullWidthActive = !vertical && IsFullWidth && Type == CdsTabsType.Contained && !IsIconOnly && _scroll.Width >= CdsBreakpoints.Md;
             _row.Children.Clear();
             _row.ColumnDefinitions.Clear();
+            _list?.Children.Clear();
             _views.Clear();
             _row.HorizontalOptions = _fullWidthActive ? LayoutOptions.Fill : LayoutOptions.Start;
             for (var i = 0; i < _items.Count; i++)
             {
                 var view = new CdsTabItemView(this, i);
                 _views.Add(view);
+                if (vertical)
+                {
+                    _list!.Add(view);
+                    continue;
+                }
                 _row.ColumnDefinitions.Add(new ColumnDefinition(_fullWidthActive ? GridLength.Star : GridLength.Auto));
                 _row.Add(view, i);
             }
-            CdsSemantics.SetGroup(_row, Label, CdsSemanticGroupKind.List);
+            CdsSemantics.SetGroup(vertical ? _list! : _row, Label, CdsSemanticGroupKind.List);
             _left.Refresh();
             _right.Refresh();
         }
@@ -248,7 +328,7 @@ public partial class CdsTabs : CdsControl
 
     void UpdateScrollButtons()
     {
-        var overflow = _row.Width > _scroll.Width + 0.5 && _scroll.Width > 0;
+        var overflow = !IsVertical && _row.Width > _scroll.Width + 0.5 && _scroll.Width > 0;
         _left.IsVisible = overflow && _scroll.ScrollX > 0.5;
         _right.IsVisible = overflow && _scroll.ScrollX + _scroll.Width < _row.Width - 0.5;
         _left.Refresh();

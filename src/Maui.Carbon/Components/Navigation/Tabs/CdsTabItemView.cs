@@ -18,6 +18,9 @@ internal sealed class CdsTabItemView : CdsControl
     readonly CdsHitTarget _hit;
     bool _closeHover;
     CdsTabVisuals _visuals;
+    // Vertical tabs only, built on first use: the 3px start edge and the 1px end rule.
+    BoxView? _startEdge;
+    BoxView? _endRule;
 
     public CdsTabItemView(CdsTabs owner, int index)
     {
@@ -73,6 +76,16 @@ internal sealed class CdsTabItemView : CdsControl
     public void Update(CdsTab tab, bool selected)
     {
         IsTabSelected = selected;
+        if (_owner.IsVertical)
+        {
+            UpdateVertical(tab, selected);
+            return;
+        }
+        if (_startEdge is not null) _startEdge.IsVisible = false;
+        if (_endRule is not null) _endRule.IsVisible = false;
+        _bottomRule.HeightRequest = 2;
+        _label.MaxLines = 1;
+        HorizontalOptions = LayoutOptions.Fill;
         var type = _owner.Type;
         var iconOnly = _owner.IsIconOnly && tab.Icon is not null;
         var hasSecondary = type == CdsTabsType.Contained && _owner.HasSecondaryLabels;
@@ -123,10 +136,79 @@ internal sealed class CdsTabItemView : CdsControl
         RefreshVisuals();
     }
 
+    // Carbon's vertical tab: 64 high and as wide as the column, a label of up to two lines (and the icon) 16 from each side,
+    // a 1px rule under it and after it and a 3px edge at its start. No secondary label, close icon or icon-only form.
+    void UpdateVertical(CdsTab tab, bool selected)
+    {
+        IsEnabled = tab.IsEnabled;
+        SetState(CdsInteractionState.Selected, selected);
+        if (_startEdge is null)
+        {
+            _startEdge = new BoxView { WidthRequest = CdsTabsTokens.VerticalEdgeWidth, HorizontalOptions = LayoutOptions.Start, InputTransparent = true };
+            _endRule = new BoxView { WidthRequest = 1, HorizontalOptions = LayoutOptions.End, InputTransparent = true };
+            // Above the fill and under the focus ring.
+            _root.Insert(_root.IndexOf(_ring), _startEdge);
+            _root.Insert(_root.IndexOf(_ring), _endRule);
+        }
+        _startEdge.IsVisible = true;
+
+        _label.IsVisible = true;
+        _label.Text = tab.Text;
+        _label.MaxLines = 2;
+        _icon.Icon = tab.Icon;
+        _icon.IsVisible = tab.Icon is not null;
+        _icon.Margin = new Thickness(CdsSpacing.Spacing03, 0, 0, 0);
+        _icon.HorizontalOptions = LayoutOptions.End;
+        Grid.SetColumn(_icon, 1);
+        Grid.SetColumnSpan(_icon, 1);
+        _secondary.IsVisible = false;
+        _close.IsVisible = false;
+        _content.Margin = new Thickness(CdsSpacing.Spacing05, 0);
+        _topRule.IsVisible = false;
+        _bottomRule.HeightRequest = 1;
+
+        _root.HeightRequest = CdsTabsTokens.VerticalHeight;
+        MinimumHeightRequest = CdsTabsTokens.VerticalHeight;
+        WidthRequest = -1;
+        MinimumWidthRequest = -1;
+        MaximumWidthRequest = double.PositiveInfinity;
+        HorizontalOptions = LayoutOptions.Fill;
+        Margin = Thickness.Zero;
+
+        SemanticProperties.SetDescription(_hit, tab.Text ?? string.Empty);
+        _hit.ClearValue(ToolTipProperties.TextProperty);
+        _hit.IsSelected = selected;
+        RefreshVisuals();
+    }
+
+    /// <summary>The vertical visuals last applied (for tests); default while horizontal.</summary>
+    internal CdsVerticalTabVisuals VerticalVisuals { get; private set; }
+
+    void ApplyVertical()
+    {
+        var v = CdsTabsTokens.ResolveVertical(State, IsTabSelected);
+        VerticalVisuals = v;
+        SetColor(_fill, BoxView.ColorProperty, v.Background);
+        SetColor(_startEdge!, BoxView.ColorProperty, v.StartEdge);
+        SetColor(_endRule!, BoxView.ColorProperty, v.EndRule);
+        _endRule!.IsVisible = v.EndRule is not null;
+        SetColor(_bottomRule, BoxView.ColorProperty, v.BottomRule);
+        _bottomRule.IsVisible = true;
+        SetColor(_label, Label.TextColorProperty, v.Foreground);
+        _label.TypeStyle = v.IsSemiBold ? CdsTypeStyle.HeadingCompact01 : CdsTypeStyle.BodyCompact01;
+        SetColor(_icon, CdsIcon.ColorProperty, v.Foreground);
+        _ring.IsActive = Is(CdsInteractionState.FocusVisible);
+    }
+
     protected override void OnActivated() => _owner.OnTabActivated(Index);
 
     protected override void ApplyVisuals()
     {
+        if (_owner.IsVertical && _startEdge is not null)
+        {
+            ApplyVertical();
+            return;
+        }
         var iconOnly = _owner.IsIconOnly && _icon.Icon is not null;
         _visuals = CdsTabsTokens.Resolve(_owner.Type, State, IsTabSelected, iconOnly);
         var v = _visuals;

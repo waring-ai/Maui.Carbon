@@ -24,6 +24,8 @@ internal sealed class CdsModalSurface : Grid
     readonly CdsModalMode _mode;
     readonly bool _dialogSizing;
     CdsOverlayHost? _host;
+    CdsModalAiColors? _aiColors;
+    bool _flat;
 
     public CdsModalSurface(CdsModalMode mode, CdsModalSize size, bool dialogSizing, CdsModalHeader? header, CdsModalBody? body, CdsModalFooter? footer)
     {
@@ -35,9 +37,15 @@ internal sealed class CdsModalSurface : Grid
         Footer = footer is { HasContent: true } ? footer : null;
 
         _box = new Border { StrokeThickness = 1, StrokeShape = new Rectangle(), Padding = 0, Content = _panel };
-        CdsTokens.SetBrush(_box, Border.StrokeProperty, CdsModalTokens.ContainerBorder);
-        CdsTokens.SetColor(_box, BackgroundColorProperty, CdsModalTokens.ContainerFill);
+        // An AI modal never binds the flat tokens: they would resolve after the gradient and paint over it.
+        var ai = header?.IsAiPresence == true;
+        if (!ai) BindFlat();
         _panel.SetParts(header, body, Footer);
+        if (header is not null)
+        {
+            header.AiPresenceChanged += OnHeaderAiPresenceChanged;
+            if (ai) SetAi(true);
+        }
 
         if (mode == CdsModalMode.Modal)
         {
@@ -72,6 +80,89 @@ internal sealed class CdsModalSurface : Grid
     /// <summary>Raised when the area around the container is tapped (modal mode).</summary>
     public event EventHandler? BackdropTapped;
 
+    /// <summary>Raised when the container turns the AI presence on or off.</summary>
+    public event EventHandler? AiChanged;
+
+    /// <summary>
+    /// Whether the container shows Carbon's AI presence: the header's decorator is an AI label (it stays on while the label shows its
+    /// revert button, as in Carbon's <c>:has(.cds--ai-label)</c> selectors).
+    /// </summary>
+    public bool IsAi { get; private set; }
+
+    /// <summary>The color key of the scrim behind this container: <c>ai-overlay</c> for an AI modal, else <c>null</c> (the host's default).</summary>
+    public string? ScrimColorKey => IsAi ? CdsAiTokens.Overlay : null;
+
+    /// <summary>The container's box (for tests).</summary>
+    internal Border Box => _box;
+
+    /// <summary>
+    /// Turns Carbon's AI presence of the container on or off: a fill with the aura rising from the bottom edge (the bottom 64px stay
+    /// flat when there is a footer) and the inner glow, a 1px <c>ai-border-start</c> to <c>ai-border-end</c> gradient border and the
+    /// <c>0 24px 40px</c> <c>ai-drop-shadow</c>. Every color is bound once to its token, so theme and layer switches rebuild the brushes.
+    /// </summary>
+    public void SetAi(bool on)
+    {
+        if (IsAi == on) return;
+        IsAi = on;
+        if (on)
+        {
+            if (_flat)
+            {
+                // The flat border token must not repaint over the gradient when the theme changes: park the border on transparent.
+                _box.RemoveDynamicResource(BackgroundColorProperty);
+                CdsTokens.SetBrush(_box, Border.StrokeProperty, null);
+                _flat = false;
+            }
+            // Two targets: a color proxy binds at most four keys.
+            CdsColorProxies.Bind(_panel, colors =>
+            {
+                if (colors[0] is { } start && colors[1] is { } end && colors[2] is { } surface && colors[3] is { } glow)
+                {
+                    _aiColors = new CdsModalAiColors(start, end, surface, glow);
+                    RebuildAiFill();
+                }
+            }, CdsAiTokens.Aura, CdsAiTokens.AuraEnd, CdsModalTokens.ContainerFill, CdsAiTokens.InnerShadow);
+            CdsColorProxies.Bind(_box, colors =>
+            {
+                if (colors[0] is { } start && colors[1] is { } end) _box.Stroke = CdsAiTreatment.CreateBorder(start, end);
+            }, CdsAiTokens.BorderStart, CdsAiTokens.BorderEnd);
+            CdsTokens.SetShadow(_box, CdsAiTokens.DropShadow, offsetY: 24, radius: 40);
+            _box.SizeChanged += OnBoxSizeChanged;
+        }
+        else
+        {
+            _box.SizeChanged -= OnBoxSizeChanged;
+            CdsColorProxies.Unbind(_panel);
+            CdsColorProxies.Unbind(_box);
+            CdsTokens.SetShadow(_box, null);
+            _aiColors = null;
+            BodyPart?.SetAiFade(null);
+            // The gradient stays until the flat fill replaces it, and the border is parked on transparent: bind the tokens again.
+            _box.Background = null;
+            BindFlat();
+        }
+        AiChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    void BindFlat()
+    {
+        _flat = true;
+        CdsTokens.SetBrush(_box, Border.StrokeProperty, CdsModalTokens.ContainerBorder);
+        CdsTokens.SetColor(_box, BackgroundColorProperty, CdsModalTokens.ContainerFill);
+    }
+
+    void OnHeaderAiPresenceChanged(object? sender, EventArgs e) => SetAi(Header?.IsAiPresence == true);
+
+    void OnBoxSizeChanged(object? sender, EventArgs e) => RebuildAiFill();
+
+    void RebuildAiFill()
+    {
+        if (_aiColors is not { } colors) return;
+        var footer = Footer is null ? 0 : CdsModalSizing.FooterHeight;
+        _box.Background = CdsModalAiFill.CreateFill(colors, _box.Height, footer);
+        BodyPart?.SetAiFade(_box.Height > 0 ? CdsModalAiFill.CreateFade(colors, _box.Height, footer) : null);
+    }
+
     /// <summary>Gives the container its accessible name.</summary>
     public void SetName(string? name) => CdsSemantics.SetGroupName(_box, name);
 
@@ -93,6 +184,8 @@ internal sealed class CdsModalSurface : Grid
     /// <summary>Stops following the host and hands the parts back so they can be shown again.</summary>
     public void Release()
     {
+        if (Header is not null) Header.AiPresenceChanged -= OnHeaderAiPresenceChanged;
+        SetAi(false);
         if (_host is not null) _host.SizeChanged -= OnHostSizeChanged;
         _host = null;
         _panel.Release();
@@ -174,6 +267,8 @@ internal sealed class CdsModalPresenter(VisualElement owner)
 {
     CdsOverlay? _overlay;
     CdsModalSurface? _surface;
+    CdsOverlayOptions? _options;
+    CdsOverlayHost? _host;
     bool _hiding;
 
     public bool IsShown => _overlay is not null;
@@ -190,6 +285,11 @@ internal sealed class CdsModalPresenter(VisualElement owner)
         _surface = surface;
         var host = CdsOverlayHost.Find(owner) ?? CdsOverlayService.FindCurrentHost();
         options.InitialFocus = focus;
+        // An AI modal dims the page with ai-overlay; the host colors the scrim of the topmost modal.
+        options.ScrimColorKey = surface.ScrimColorKey;
+        _options = options;
+        _host = host;
+        surface.AiChanged += OnAiChanged;
         surface.Attach(host);
         _overlay = CdsOverlayService.Open(surface, options, owner);
         _overlay.Closed += OnClosed;
@@ -214,10 +314,21 @@ internal sealed class CdsModalPresenter(VisualElement owner)
         _hiding = false;
     }
 
+    // The decorator changed while the modal is open: recolor the scrim (it is one view the host fades for every modal).
+    void OnAiChanged(object? sender, EventArgs e)
+    {
+        if (_options is null || _surface is null) return;
+        _options.ScrimColorKey = _surface.ScrimColorKey;
+        _host?.UpdateScrim();
+    }
+
     void OnClosed(object? sender, EventArgs e)
     {
         if (sender is CdsOverlay o) o.Closed -= OnClosed;
         _overlay = null;
+        if (_surface is not null) _surface.AiChanged -= OnAiChanged;
+        _options = null;
+        _host = null;
         _surface?.Release();
         _surface = null;
         Released?.Invoke(this, EventArgs.Empty);

@@ -52,7 +52,8 @@ public class ThemingTests
     {
         foreach (var theme in Enum.GetValues<CdsThemeName>())
             Assert.Equal(CdsColorKeys.All.Count, CdsPaletteData.Get(theme).Length);
-        Assert.Equal(197, CdsColorKeys.All.Count);
+        // 197 Carbon theme tokens plus the 21 ai-* tokens.
+        Assert.Equal(218, CdsColorKeys.All.Count);
     }
 
     [Fact]

@@ -61,6 +61,134 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="AI label" Description="A tile whose decorator is an AI label takes Carbon's AI presence: an aura rising from the bottom edge into the layer-01 fill, a 1px gradient border, and a soft drop shadow. The label sits 16 from the top and end. Clickable tiles swap to the hover fill on hover. HasRoundedCorners gives the tile a 4px radius, and a label in its revert state keeps the AI styling, as in Carbon. Keep the first line short: nothing reserves room for the label.">
+            <g:WrapLayout>
+                <cds:CdsTile WidthRequest="240" Margin="0,0,16,16">
+                    <cds:CdsTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Storage used" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="4.2 TB of 10 TB" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+                <cds:CdsTile WidthRequest="240" HasRoundedCorners="True" Margin="0,0,16,16">
+                    <cds:CdsTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Storage used" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="4.2 TB of 10 TB" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+                <cds:CdsClickableTile WidthRequest="240" Margin="0,0,16,16">
+                    <cds:CdsClickableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsClickableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="View clusters" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="12 clusters in 4 regions" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsClickableTile>
+                <cds:CdsClickableTile WidthRequest="240" HasRoundedCorners="True" Margin="0,0,16,16">
+                    <cds:CdsClickableTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsClickableTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="View clusters" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="12 clusters in 4 regions" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsClickableTile>
+                <cds:CdsTile WidthRequest="240" Margin="0,0,16,16">
+                    <cds:CdsTile.Decorator>
+                        <cds:CdsAILabel Label="Why this is suggested" IsRevertActive="True">
+                            <cds:CdsAILabelContent>
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                    <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                </VerticalStackLayout>
+                            </cds:CdsAILabelContent>
+                        </cds:CdsAILabel>
+                    </cds:CdsTile.Decorator>
+                    <VerticalStackLayout Spacing="4">
+                        <cds:CdsText Text="Edited quota" TypeStyle="HeadingCompact01" />
+                        <cds:CdsText Text="Reverted values show" Tone="Secondary" />
+                    </VerticalStackLayout>
+                </cds:CdsTile>
+            </g:WrapLayout>
+        </g:GalleryExample>
+
+        <g:GalleryExample Title="AI label in every theme" Description="The aura, border, hover fill and shadow follow the theme.">
+            <g:ThemeStrip>
+                <g:ThemeStrip.Template>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsTile >
+                                <cds:CdsTile.Decorator>
+                                    <cds:CdsAILabel Label="Why this is suggested">
+                                        <cds:CdsAILabelContent>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsAILabelContent>
+                                    </cds:CdsAILabel>
+                                </cds:CdsTile.Decorator>
+                                <VerticalStackLayout Spacing="4">
+                                    <cds:CdsText Text="Storage used" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="4.2 TB of 10 TB" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsTile>
+                            <cds:CdsClickableTile HasRoundedCorners="True">
+                                <cds:CdsClickableTile.Decorator>
+                                    <cds:CdsAILabel Label="Why this is suggested">
+                                        <cds:CdsAILabelContent>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                <cds:CdsText Text="Suggested because your last three exports ran past the 10 TB quota." TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsAILabelContent>
+                                    </cds:CdsAILabel>
+                                </cds:CdsClickableTile.Decorator>
+                                <VerticalStackLayout Spacing="4">
+                                    <cds:CdsText Text="View clusters" TypeStyle="HeadingCompact01" />
+                                    <cds:CdsText Text="12 clusters" Tone="Secondary" />
+                                </VerticalStackLayout>
+                            </cds:CdsClickableTile>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </g:ThemeStrip.Template>
+            </g:ThemeStrip>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="On a layer" Description="A tile on a layer-01 surface sits inside a CdsLayer so it steps up to layer-02.">
             <g:ThemeStrip Layered="True">
                 <g:ThemeStrip.Template>

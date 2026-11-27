@@ -37,12 +37,18 @@ public class CdsRadioButton : CdsControl
         nameof(IsReadOnly), typeof(bool), typeof(CdsRadioButton), false,
         propertyChanged: static (b, _, _) => ((CdsRadioButton)b).RefreshVisuals());
 
+    /// <summary>Bindable property for <see cref="Decorator"/>.</summary>
+    public static readonly BindableProperty DecoratorProperty = BindableProperty.Create(
+        nameof(Decorator), typeof(View), typeof(CdsRadioButton), null,
+        propertyChanged: static (b, _, n) => ((CdsRadioButton)b).OnDecoratorChanged((View?)n));
+
     readonly Grid _root = new() { ColumnSpacing = 0, RowSpacing = 0 };
     readonly Grid _circleHost = new() { WidthRequest = 18, HeightRequest = 18, VerticalOptions = LayoutOptions.Start, HorizontalOptions = LayoutOptions.Start };
     readonly CdsRadioGlyph _circle = new();
     readonly CdsFocusRing _ring = new(CdsFocusRingStyle.Offset, CdsRadius.Circle(18));
     readonly CdsText _label = new() { LineBreakMode = LineBreakMode.WordWrap, VerticalOptions = LayoutOptions.Start };
     readonly CdsHitTarget _hit;
+    CdsDecoratedRow? _row;
     CdsInteractionState _inherited;
 
     /// <summary>Creates an unselected radio button.</summary>
@@ -120,6 +126,21 @@ public class CdsRadioButton : CdsControl
         set => SetValue(IsReadOnlyProperty, value);
     }
 
+    /// <summary>
+    /// A view shown after the label (after the circle when the label is on the left), 8px from it and centered on the line
+    /// (Carbon's decorator slot). A <see cref="CdsAILabel"/> is shown at its mini size, or md when its
+    /// <see cref="CdsAILabel.Kind"/> is inline. It is its own button and tab stop: it stays interactive while the radio, or its
+    /// group, is disabled or read-only, and activating it does not select the radio. It shows only while the radio has a
+    /// <see cref="Label"/> (also when <see cref="HideLabel"/> is set). The radio has no AI styling of its own; when the person
+    /// edits the AI value, set <see cref="CdsAILabel.IsRevertActive"/>. A long label wraps before the decorator, which drops to
+    /// the next line when the label leaves no room.
+    /// </summary>
+    public View? Decorator
+    {
+        get => (View?)GetValue(DecoratorProperty);
+        set => SetValue(DecoratorProperty, value);
+    }
+
     internal bool IsEffectivelyDisabled => Is(CdsInteractionState.Disabled) || _inherited.HasFlag(CdsInteractionState.Disabled);
 
     internal bool IsEffectivelyReadOnly => IsReadOnly || _inherited.HasFlag(CdsInteractionState.ReadOnly);
@@ -169,8 +190,28 @@ public class CdsRadioButton : CdsControl
         _hit.IsReadOnly = state.HasFlag(CdsInteractionState.ReadOnly) && !state.HasFlag(CdsInteractionState.Disabled);
     }
 
+    void OnDecoratorChanged(View? decorator)
+    {
+        if (decorator is null && _row is null) return;
+        if (_row is null)
+        {
+            // Wrapped on first use: radios without a decorator keep the flat tree.
+            _row = new CdsDecoratedRow(_root, allowInline: true, centersDecorator: true);
+            SetChrome(_row);
+        }
+        _row.Decorator = decorator;
+        UpdateDecoratorVisibility();
+    }
+
+    // React renders the decorator only with a label text (a hidden label still counts).
+    void UpdateDecoratorVisibility()
+    {
+        if (_row?.Decorator is { } decorator) decorator.IsVisible = !string.IsNullOrEmpty(Label);
+    }
+
     void UpdateChrome()
     {
+        UpdateDecoratorVisibility();
         _label.Text = Label;
         _label.IsVisible = !HideLabel && !string.IsNullOrEmpty(Label);
         var left = (_groupPosition ?? LabelPosition) == CdsRadioLabelPosition.Left;

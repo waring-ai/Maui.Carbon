@@ -5,9 +5,10 @@ namespace Maui.Carbon;
 /// <summary>
 /// The shared surface of every tile: a square <c>layer-01</c> fill with 16px padding, at least 64 high and 128 wide,
 /// optionally a 1px border, and a 2px inset focus ring. Tiles use only <c>-01</c> tokens, so a <see cref="CdsLayer"/>
-/// around them steps the fill up one layer. Derive to build a tile variant.
+/// around them steps the fill up one layer. Derive to build a tile variant. A <see cref="Decorator"/> that is an
+/// <see cref="CdsAILabel"/> gives the tile Carbon's AI presence (aura, gradient border, shadow).
 /// </summary>
-public abstract class CdsTileBase : CdsContainer
+public abstract partial class CdsTileBase : CdsContainer
 {
     /// <summary>The tile surface: fill and 1px border.</summary>
     protected readonly Border Surface = new()
@@ -74,9 +75,8 @@ public abstract class CdsTileBase : CdsContainer
         var state = TokenState;
         var v = CdsTileTokens.Resolve(TileKind, state);
         ApplyContentTone(state.HasFlag(CdsInteractionState.Disabled));
-        Surface.StrokeThickness = BorderThickness;
-        SetColor(Surface, BackgroundColorProperty, v.Background);
-        SetBrush(Surface, Border.StrokeProperty, v.Border);
+        if (IsAiPresence) ApplyAiSurface(state);
+        else ApplyFlatSurface(v);
         Ring.IsActive = Is(CdsInteractionState.FocusVisible);
         ApplyTileVisuals(v);
     }

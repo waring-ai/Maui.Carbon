@@ -103,15 +103,38 @@ public class AILabelTokenTests
 public class AiTreatmentTests
 {
     [Fact]
-    public void Tokens_come_from_existing_color_keys()
+    public void Tokens_are_carbons_ai_theme_tokens()
     {
-        Assert.Equal(CdsColorKeys.Highlight, CdsAiTokens.Aura);
-        Assert.Equal(CdsColorKeys.TagBackgroundBlue, CdsAiTokens.BorderStart);
-        Assert.Equal(CdsColorKeys.BorderInteractive, CdsAiTokens.BorderEnd);
-        Assert.Equal(CdsColorKeys.Background, CdsAiTokens.CalloutBackground);
-        Assert.Equal(CdsColorKeys.TagBackgroundBlue, CdsAiTokens.SkeletonBackground);
-        Assert.Equal(CdsColorKeys.Interactive, CdsAiTokens.SkeletonElement);
+        Assert.Equal(CdsColorKeys.AiAuraStart, CdsAiTokens.Aura);
+        Assert.Equal(CdsColorKeys.AiAuraStartSm, CdsAiTokens.AuraSmall);
+        Assert.Equal(CdsColorKeys.AiBorderStart, CdsAiTokens.BorderStart);
+        Assert.Equal(CdsColorKeys.AiBorderEnd, CdsAiTokens.BorderEnd);
+        Assert.Equal(CdsColorKeys.AiBorderStrong, CdsAiTokens.BorderStrong);
+        Assert.Equal(CdsColorKeys.AiPopoverBackground, CdsAiTokens.CalloutBackground);
+        Assert.Equal(CdsColorKeys.AiSkeletonBackground, CdsAiTokens.SkeletonBackground);
+        Assert.Equal(CdsColorKeys.AiSkeletonElementBackground, CdsAiTokens.SkeletonElement);
         Assert.Equal(0.5, CdsAiTokens.SkeletonElementOpacity);
+    }
+
+    [Theory]
+    [InlineData(CdsThemeName.White, "ai-aura-start", 69, 137, 255, 0.1)]
+    [InlineData(CdsThemeName.G100, "ai-border-strong", 120, 169, 255, 1.0)]
+    [InlineData(CdsThemeName.White, "ai-overlay", 0, 17, 65, 0.5)]
+    public void Ai_token_values_match_carbon(CdsThemeName theme, string token, int r, int g, int b, double a)
+    {
+        var c = CdsPalettes.GetTokenColor(theme, token);
+        Assert.Equal((r, g, b), ((int)Math.Round(c.Red * 255), (int)Math.Round(c.Green * 255), (int)Math.Round(c.Blue * 255)));
+        Assert.Equal(a, c.Alpha, 2);
+    }
+
+    [Fact]
+    public void A_translucent_aura_is_composited_over_the_surface()
+    {
+        var aura = new Color(69 / 255f, 137 / 255f, 1f, 0.1f);
+        var fill = CdsAiTreatment.CreateFill(aura, Colors.White);
+        var start = fill.GradientStops[0].Color;
+        Assert.Equal(1f, start.Alpha, 3);
+        Assert.Equal((0.9f * 1f) + (0.1f * 69 / 255f), start.Red, 3);
     }
 
     [Fact]
