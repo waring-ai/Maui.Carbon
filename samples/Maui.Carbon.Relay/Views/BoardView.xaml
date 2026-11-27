@@ -49,112 +49,117 @@
                 </cds:CdsPageHeaderContent>
             </cds:CdsPageHeader>
 
-            <VerticalStackLayout Padding="32,24,32,48" Spacing="16">
-                <!-- Loading -->
-                <HorizontalStackLayout Spacing="16" IsVisible="{Binding IsLoading}">
-                    <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
-                    <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
-                    <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
-                    <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
-                </HorizontalStackLayout>
-
-                <!-- No active sprint -->
-                <cds:CdsTile IsVisible="{Binding IsEmpty}" HorizontalOptions="Start" MaximumWidthRequest="560">
-                    <VerticalStackLayout Spacing="12" Padding="8,16">
-                        <cds:CdsIcon Icon="Plan" Size="32" Description="" HorizontalOptions="Start" />
-                        <cds:CdsText Text="No sprint is running" TypeStyle="Heading03" />
-                        <cds:CdsText Text="{Binding EmptyText}" TypeStyle="Body01" Tone="Secondary" />
-                        <HorizontalStackLayout>
-                            <cds:CdsButton Text="Go to backlog and sprints" Icon="ArrowRight" Size="Md" Command="{Binding GoToBacklogCommand}" />
+            <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+            <cds:CdsGrid FullWidth="True">
+                <cds:CdsColumn>
+                    <VerticalStackLayout Padding="0,24,0,48" Spacing="16">
+                        <!-- Loading -->
+                        <HorizontalStackLayout Spacing="16" IsVisible="{Binding IsLoading}">
+                            <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
+                            <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
+                            <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
+                            <cds:CdsSkeletonPlaceholder WidthRequest="256" HeightRequest="420" />
                         </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </cds:CdsTile>
 
-                <!-- Board -->
-                <VerticalStackLayout Spacing="16" IsVisible="{Binding ShowBoard}">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                        <VerticalStackLayout Spacing="8">
-                            <cds:CdsText Text="Quick filters" TypeStyle="Label01" Tone="Secondary" />
-                            <HorizontalStackLayout Spacing="8">
-                                <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Filters}" Spacing="8">
+                        <!-- No active sprint -->
+                        <cds:CdsTile IsVisible="{Binding IsEmpty}" HorizontalOptions="Start" MaximumWidthRequest="560">
+                            <VerticalStackLayout Spacing="12" Padding="8,16">
+                                <cds:CdsIcon Icon="Plan" Size="32" Description="" HorizontalOptions="Start" />
+                                <cds:CdsText Text="No sprint is running" TypeStyle="Heading03" />
+                                <cds:CdsText Text="{Binding EmptyText}" TypeStyle="Body01" Tone="Secondary" />
+                                <HorizontalStackLayout>
+                                    <cds:CdsButton Text="Go to backlog and sprints" Icon="ArrowRight" Size="Md" Command="{Binding GoToBacklogCommand}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </cds:CdsTile>
+
+                        <!-- Board -->
+                        <VerticalStackLayout Spacing="16" IsVisible="{Binding ShowBoard}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <VerticalStackLayout Spacing="8">
+                                    <cds:CdsText Text="Quick filters" TypeStyle="Label01" Tone="Secondary" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding Filters}" Spacing="8">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:BoardFilter">
+                                                    <cds:CdsOperationalTag Text="{Binding Text}" Size="Md"
+                                                                           Type="{Binding IsActive, Converter={x:Static p:BoardConverters.FilterTag}}"
+                                                                           Icon="{Binding IsActive, Converter={x:Static p:BoardConverters.FilterIcon}}"
+                                                                           Clicked="OnFilterClicked" />
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </HorizontalStackLayout>
+                                        <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Command="{Binding ClearFiltersCommand}"
+                                                       IsVisible="{Binding HasActiveFilters}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Spacing="16" VerticalOptions="End">
+                                    <cds:CdsIconButton Icon="WarningAlt" Kind="Ghost" Size="Lg" Label="{Binding BlockedLabel}"
+                                                       BadgeCount="{Binding BlockedCount, Converter={x:Static p:Converters.BadgeCount}}"
+                                                       IsSelected="{Binding ShowBlockedOnly}" Command="{Binding ToggleBlockedCommand}" />
+                                    <cds:CdsToggle LabelText="Select cards" Size="Sm" IsToggled="{Binding IsSelectMode}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Grid>
+
+                            <!-- Select mode bar -->
+                            <Grid x:Name="SelectBar" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,0,0,0" HeightRequest="48"
+                                  IsVisible="{Binding IsSelectMode}">
+                                <cds:CdsText Text="{Binding SelectionText}" TypeStyle="BodyCompact01" VerticalOptions="Center" />
+                                <cds:CdsButton Grid.Column="1" Text="Clear selection" Kind="Ghost" Size="Md" Command="{Binding ClearSelectionCommand}" />
+                                <cds:CdsMenuButton Grid.Column="2" Label="Move selected to" Kind="Primary" Size="Lg" MenuAlignment="BottomEnd"
+                                                   IsEnabled="{Binding HasSelection}" p:ItemsBinding.Source="{Binding BulkTargets}">
+                                    <p:ItemsBinding.Template>
+                                        <DataTemplate x:DataType="vm:BoardBulkTarget">
+                                            <cds:CdsMenuItem Text="{Binding Text}" Clicked="OnBulkMove" />
+                                        </DataTemplate>
+                                    </p:ItemsBinding.Template>
+                                </cds:CdsMenuButton>
+                            </Grid>
+
+                            <cds:CdsText Text="{Binding SummaryText}" TypeStyle="Label01" Tone="Helper" />
+
+                            <ScrollView x:Name="BoardScroller" Orientation="Horizontal" HorizontalScrollBarVisibility="Default">
+                                <HorizontalStackLayout x:Name="ColumnsStack" Spacing="16" BindableLayout.ItemsSource="{Binding Columns}">
                                     <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:BoardFilter">
-                                            <cds:CdsOperationalTag Text="{Binding Text}" Size="Md"
-                                                                   Type="{Binding IsActive, Converter={x:Static p:BoardConverters.FilterTag}}"
-                                                                   Icon="{Binding IsActive, Converter={x:Static p:BoardConverters.FilterIcon}}"
-                                                                   Clicked="OnFilterClicked" />
+                                        <DataTemplate x:DataType="vm:BoardColumn">
+                                            <Grid WidthRequest="256" VerticalOptions="Start" BackgroundColor="{DynamicResource CdsLayer01}">
+                                                <VerticalStackLayout Padding="8,12,8,8" Spacing="12">
+                                                    <VerticalStackLayout Spacing="6" Padding="8,0">
+                                                        <HorizontalStackLayout Spacing="8">
+                                                            <cds:CdsText Text="{Binding Title}" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
+                                                            <cds:CdsTag Text="{Binding CountText}" Type="HighContrast" Size="Sm" VerticalOptions="Center" />
+                                                        </HorizontalStackLayout>
+                                                        <HorizontalStackLayout HeightRequest="28">
+                                                            <cds:CdsTag Text="{Binding WipText}" Size="Md" VerticalOptions="Center"
+                                                                        Type="{Binding Wip, Converter={x:Static p:BoardConverters.WipTag}}"
+                                                                        Icon="{Binding Wip, Converter={x:Static p:BoardConverters.WipIcon}}" />
+                                                        </HorizontalStackLayout>
+                                                    </VerticalStackLayout>
+                                                    <cds:CdsLayer>
+                                                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cards}"
+                                                                             BindableLayout.ItemTemplateSelector="{StaticResource CardSelector}" />
+                                                    </cds:CdsLayer>
+                                                    <cds:CdsText Text="{Binding EmptyText}" TypeStyle="Label01" Tone="Helper" Padding="8,8,8,16"
+                                                                 IsVisible="{Binding IsEmpty}" />
+                                                </VerticalStackLayout>
+                                                <BoxView Color="{DynamicResource CdsOverlay}" IsVisible="{Binding IsBusy}" />
+                                                <Border IsVisible="{Binding IsBusy}" StrokeThickness="0" Padding="12,8" Margin="8,104,8,0"
+                                                        VerticalOptions="Start" HorizontalOptions="Center" BackgroundColor="{DynamicResource CdsLayer01}">
+                                                    <HorizontalStackLayout Spacing="8">
+                                                        <cds:CdsLoading IsSmall="True" WithOverlay="False" IsActive="{Binding IsBusy}"
+                                                                        Description="{Binding BusyText}" VerticalOptions="Center" />
+                                                        <cds:CdsText Text="{Binding BusyText}" TypeStyle="Label01" VerticalOptions="Center" MaxLines="2" />
+                                                    </HorizontalStackLayout>
+                                                </Border>
+                                            </Grid>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </HorizontalStackLayout>
-                                <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Command="{Binding ClearFiltersCommand}"
-                                               IsVisible="{Binding HasActiveFilters}" />
-                            </HorizontalStackLayout>
+                            </ScrollView>
                         </VerticalStackLayout>
-                        <HorizontalStackLayout Grid.Column="1" Spacing="16" VerticalOptions="End">
-                            <cds:CdsIconButton Icon="WarningAlt" Kind="Ghost" Size="Lg" Label="{Binding BlockedLabel}"
-                                               BadgeCount="{Binding BlockedCount, Converter={x:Static p:Converters.BadgeCount}}"
-                                               IsSelected="{Binding ShowBlockedOnly}" Command="{Binding ToggleBlockedCommand}" />
-                            <cds:CdsToggle LabelText="Select cards" Size="Sm" IsToggled="{Binding IsSelectMode}" VerticalOptions="Center" />
-                        </HorizontalStackLayout>
-                    </Grid>
-
-                    <!-- Select mode bar -->
-                    <Grid x:Name="SelectBar" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,0,0,0" HeightRequest="48"
-                          IsVisible="{Binding IsSelectMode}">
-                        <cds:CdsText Text="{Binding SelectionText}" TypeStyle="BodyCompact01" VerticalOptions="Center" />
-                        <cds:CdsButton Grid.Column="1" Text="Clear selection" Kind="Ghost" Size="Md" Command="{Binding ClearSelectionCommand}" />
-                        <cds:CdsMenuButton Grid.Column="2" Label="Move selected to" Kind="Primary" Size="Lg" MenuAlignment="BottomEnd"
-                                           IsEnabled="{Binding HasSelection}" p:ItemsBinding.Source="{Binding BulkTargets}">
-                            <p:ItemsBinding.Template>
-                                <DataTemplate x:DataType="vm:BoardBulkTarget">
-                                    <cds:CdsMenuItem Text="{Binding Text}" Clicked="OnBulkMove" />
-                                </DataTemplate>
-                            </p:ItemsBinding.Template>
-                        </cds:CdsMenuButton>
-                    </Grid>
-
-                    <cds:CdsText Text="{Binding SummaryText}" TypeStyle="Label01" Tone="Helper" />
-
-                    <ScrollView x:Name="BoardScroller" Orientation="Horizontal" HorizontalScrollBarVisibility="Default">
-                        <HorizontalStackLayout x:Name="ColumnsStack" Spacing="16" BindableLayout.ItemsSource="{Binding Columns}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="vm:BoardColumn">
-                                    <Grid WidthRequest="256" VerticalOptions="Start" BackgroundColor="{DynamicResource CdsLayer01}">
-                                        <VerticalStackLayout Padding="8,12,8,8" Spacing="12">
-                                            <VerticalStackLayout Spacing="6" Padding="8,0">
-                                                <HorizontalStackLayout Spacing="8">
-                                                    <cds:CdsText Text="{Binding Title}" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
-                                                    <cds:CdsTag Text="{Binding CountText}" Type="HighContrast" Size="Sm" VerticalOptions="Center" />
-                                                </HorizontalStackLayout>
-                                                <HorizontalStackLayout HeightRequest="28">
-                                                    <cds:CdsTag Text="{Binding WipText}" Size="Md" VerticalOptions="Center"
-                                                                Type="{Binding Wip, Converter={x:Static p:BoardConverters.WipTag}}"
-                                                                Icon="{Binding Wip, Converter={x:Static p:BoardConverters.WipIcon}}" />
-                                                </HorizontalStackLayout>
-                                            </VerticalStackLayout>
-                                            <cds:CdsLayer>
-                                                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Cards}"
-                                                                     BindableLayout.ItemTemplateSelector="{StaticResource CardSelector}" />
-                                            </cds:CdsLayer>
-                                            <cds:CdsText Text="{Binding EmptyText}" TypeStyle="Label01" Tone="Helper" Padding="8,8,8,16"
-                                                         IsVisible="{Binding IsEmpty}" />
-                                        </VerticalStackLayout>
-                                        <BoxView Color="{DynamicResource CdsOverlay}" IsVisible="{Binding IsBusy}" />
-                                        <Border IsVisible="{Binding IsBusy}" StrokeThickness="0" Padding="12,8" Margin="8,104,8,0"
-                                                VerticalOptions="Start" HorizontalOptions="Center" BackgroundColor="{DynamicResource CdsLayer01}">
-                                            <HorizontalStackLayout Spacing="8">
-                                                <cds:CdsLoading IsSmall="True" WithOverlay="False" IsActive="{Binding IsBusy}"
-                                                                Description="{Binding BusyText}" VerticalOptions="Center" />
-                                                <cds:CdsText Text="{Binding BusyText}" TypeStyle="Label01" VerticalOptions="Center" MaxLines="2" />
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </Grid>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </HorizontalStackLayout>
-                    </ScrollView>
-                </VerticalStackLayout>
-            </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </cds:CdsColumn>
+            </cds:CdsGrid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentView>

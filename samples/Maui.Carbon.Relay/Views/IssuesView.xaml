@@ -28,109 +28,114 @@
                     </cds:CdsPageHeaderContent>
                 </cds:CdsPageHeader>
 
-                <VerticalStackLayout Padding="32,24,32,48" Spacing="16">
-                    <!-- Kept under 576 wide: the inline actionable notification's wide (same-row action) layout overflows. -->
-                    <cds:CdsActionableNotification Kind="Info" IsInline="True" IsLowContrast="True" WidthRequest="560" HorizontalOptions="Start"
-                                                   Title="{Binding UndoText}" ActionButtonLabel="Undo"
-                                                   ActionCommand="{Binding UndoDeleteCommand}"
-                                                   IsVisible="{Binding HasUndo}" CloseRequested="OnUndoClosed" />
+                <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+                <cds:CdsGrid FullWidth="True">
+                    <cds:CdsColumn>
+                        <VerticalStackLayout Padding="0,24,0,48" Spacing="16">
+                            <!-- Kept under 576 wide: the inline actionable notification's wide (same-row action) layout overflows. -->
+                            <cds:CdsActionableNotification Kind="Info" IsInline="True" IsLowContrast="True" WidthRequest="560" HorizontalOptions="Start"
+                                                           Title="{Binding UndoText}" ActionButtonLabel="Undo"
+                                                           ActionCommand="{Binding UndoDeleteCommand}"
+                                                           IsVisible="{Binding HasUndo}" CloseRequested="OnUndoClosed" />
 
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                        <cds:CdsContentSwitcher SelectedIndex="{Binding ScopeIndex}" Size="Md" WidthRequest="420">
-                            <cds:CdsSwitch Text="All issues" />
-                            <cds:CdsSwitch Text="Assigned to me" />
-                            <cds:CdsSwitch Text="Watching" />
-                        </cds:CdsContentSwitcher>
-                        <cds:CdsPopover x:Name="FilterPopover" Grid.Column="2" Placement="BottomEnd" HasCaret="False" HasDropShadow="True"
-                                        IsOpen="{Binding IsFilterPanelOpen}">
-                            <cds:CdsButton Text="Filters" Icon="Filter" Kind="Ghost" Size="Md" Command="{Binding ToggleFilterPanelCommand}" />
-                            <cds:CdsPopover.PopoverContent>
-                                <ScrollView MaximumHeightRequest="560" WidthRequest="340">
-                                    <VerticalStackLayout Padding="16" Spacing="20">
-                                        <cds:CdsText Text="Filter issues" TypeStyle="Heading02" />
-                                        <cds:CdsCheckboxGroup x:Name="StatusGroup" Legend="Status" />
-                                        <VerticalStackLayout Spacing="8">
-                                            <cds:CdsText Text="Type" TypeStyle="Label01" Tone="Secondary" />
-                                            <FlexLayout x:Name="TypeTags" Wrap="Wrap" />
-                                        </VerticalStackLayout>
-                                        <cds:CdsMultiSelect x:Name="PriorityFilter" Label="Priority" Placeholder="Any priority"
-                                                            ItemsSource="{Binding AllPriorities}" SelectionChanged="OnPrioritiesChanged" />
-                                        <cds:CdsMultiSelect x:Name="LabelFilter" Label="Labels" Placeholder="Any label" IsFilterable="True"
-                                                            ItemsSource="{Binding AllLabels}" SelectionChanged="OnLabelsChanged" />
-                                        <cds:CdsComboBox Label="Assignee" ItemsSource="{Binding AssigneeOptions}"
-                                                         SelectedItem="{Binding AssigneeFilter}" />
-                                        <cds:CdsDropdown Label="Project" ItemsSource="{Binding ProjectOptions}"
-                                                         SelectedItem="{Binding ProjectFilter}" />
-                                        <cds:CdsToggle LabelText="Open issues only" IsToggled="{Binding OpenOnly}" Size="Sm" />
-                                        <cds:CdsButtonSet>
-                                            <cds:CdsButton Text="Clear filters" Kind="Secondary" Size="Md" Command="{Binding ClearFiltersCommand}" />
-                                            <cds:CdsButton Text="Done" Kind="Primary" Size="Md" Command="{Binding ToggleFilterPanelCommand}" />
-                                        </cds:CdsButtonSet>
-                                    </VerticalStackLayout>
-                                </ScrollView>
-                            </cds:CdsPopover.PopoverContent>
-                        </cds:CdsPopover>
-                    </Grid>
-
-                    <FlexLayout Wrap="Wrap" AlignItems="Center" IsVisible="{Binding HasAppliedFilters}"
-                                BindableLayout.ItemsSource="{Binding AppliedFilters}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:FilterChip">
-                                <cds:CdsDismissibleTag Text="{Binding Text}" Type="HighContrast" Size="Md" Margin="0,0,8,8" Dismissed="OnChipDismissed" />
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </FlexLayout>
-
-                    <Grid>
-                        <cds:CdsDataTableSkeleton RowCount="10" ColumnCount="8" ShowHeader="True" ShowToolbar="True" IsVisible="{Binding IsLoading}" />
-                        <VerticalStackLayout Spacing="0" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
-                            <cds:CdsDataTable x:Name="Table"
-                                              Title="{Binding CountText}"
-                                              Description="Sorted by most recently updated unless you choose a column."
-                                              Size="Md"
-                                              IsSortable="True"
-                                              Selection="Multi"
-                                              IsExpandable="True"
-                                              IsSearchable="True"
-                                              IsPersistentSearch="True"
-                                              SearchPlaceholder="Search by key, summary or label"
-                                              SearchText="{Binding SearchText}"
-                                              OverflowMenuOnHover="False"
-                                              ItemsSource="{Binding Rows}"
-                                              SelectionChanged="OnSelectionChanged"
-                                              SortChanged="OnSortChanged">
-                                <cds:CdsDataTable.BatchActions>
-                                    <cds:CdsDataTableBatchAction Label="Assign to me" Icon="User" Invoked="OnBatchAssign" />
-                                    <cds:CdsDataTableBatchAction Label="Start" Icon="Play" Invoked="OnBatchStart" />
-                                    <cds:CdsDataTableBatchAction Label="Mark done" Icon="Checkmark" Invoked="OnBatchDone" />
-                                    <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" Invoked="OnBatchDelete" />
-                                </cds:CdsDataTable.BatchActions>
-                                <cds:CdsDataTable.ToolbarContent>
-                                    <cds:CdsButton Text="Create issue" Icon="Add" Size="Md" Command="{Binding CreateIssueCommand}" />
-                                </cds:CdsDataTable.ToolbarContent>
-                                <cds:CdsDataTable.ExpandedRowTemplate>
-                                    <DataTemplate x:DataType="vm:IssueRow">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32" Padding="0,8">
-                                            <VerticalStackLayout Spacing="8">
-                                                <cds:CdsText Text="{Binding Summary}" TypeStyle="Body01" MaxLines="3" />
-                                                <HorizontalStackLayout Spacing="16">
-                                                    <cds:CdsText Text="{Binding ProjectName}" TypeStyle="Label01" Tone="Secondary" />
-                                                    <cds:CdsText Text="{Binding LabelsText}" TypeStyle="Label01" Tone="Secondary" />
-                                                    <cds:CdsText Text="{Binding DueText, StringFormat='Due {0}'}" TypeStyle="Label01" Tone="Secondary" />
-                                                </HorizontalStackLayout>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
+                                <cds:CdsContentSwitcher SelectedIndex="{Binding ScopeIndex}" Size="Md" WidthRequest="420">
+                                    <cds:CdsSwitch Text="All issues" />
+                                    <cds:CdsSwitch Text="Assigned to me" />
+                                    <cds:CdsSwitch Text="Watching" />
+                                </cds:CdsContentSwitcher>
+                                <cds:CdsPopover x:Name="FilterPopover" Grid.Column="2" Placement="BottomEnd" HasCaret="False" HasDropShadow="True"
+                                                IsOpen="{Binding IsFilterPanelOpen}">
+                                    <cds:CdsButton Text="Filters" Icon="Filter" Kind="Ghost" Size="Md" Command="{Binding ToggleFilterPanelCommand}" />
+                                    <cds:CdsPopover.PopoverContent>
+                                        <ScrollView MaximumHeightRequest="560" WidthRequest="340">
+                                            <VerticalStackLayout Padding="16" Spacing="20">
+                                                <cds:CdsText Text="Filter issues" TypeStyle="Heading02" />
+                                                <cds:CdsCheckboxGroup x:Name="StatusGroup" Legend="Status" />
+                                                <VerticalStackLayout Spacing="8">
+                                                    <cds:CdsText Text="Type" TypeStyle="Label01" Tone="Secondary" />
+                                                    <FlexLayout x:Name="TypeTags" Wrap="Wrap" />
+                                                </VerticalStackLayout>
+                                                <cds:CdsMultiSelect x:Name="PriorityFilter" Label="Priority" Placeholder="Any priority"
+                                                                    ItemsSource="{Binding AllPriorities}" SelectionChanged="OnPrioritiesChanged" />
+                                                <cds:CdsMultiSelect x:Name="LabelFilter" Label="Labels" Placeholder="Any label" IsFilterable="True"
+                                                                    ItemsSource="{Binding AllLabels}" SelectionChanged="OnLabelsChanged" />
+                                                <cds:CdsComboBox Label="Assignee" ItemsSource="{Binding AssigneeOptions}"
+                                                                 SelectedItem="{Binding AssigneeFilter}" />
+                                                <cds:CdsDropdown Label="Project" ItemsSource="{Binding ProjectOptions}"
+                                                                 SelectedItem="{Binding ProjectFilter}" />
+                                                <cds:CdsToggle LabelText="Open issues only" IsToggled="{Binding OpenOnly}" Size="Sm" />
+                                                <cds:CdsButtonSet>
+                                                    <cds:CdsButton Text="Clear filters" Kind="Secondary" Size="Md" Command="{Binding ClearFiltersCommand}" />
+                                                    <cds:CdsButton Text="Done" Kind="Primary" Size="Md" Command="{Binding ToggleFilterPanelCommand}" />
+                                                </cds:CdsButtonSet>
                                             </VerticalStackLayout>
-                                            <cds:CdsButton Grid.Column="1" Text="Open issue" Kind="Ghost" Size="Sm" Icon="ArrowRight"
-                                                           VerticalOptions="Start" Clicked="OnOpenExpanded" />
-                                        </Grid>
+                                        </ScrollView>
+                                    </cds:CdsPopover.PopoverContent>
+                                </cds:CdsPopover>
+                            </Grid>
+
+                            <FlexLayout Wrap="Wrap" AlignItems="Center" IsVisible="{Binding HasAppliedFilters}"
+                                        BindableLayout.ItemsSource="{Binding AppliedFilters}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:FilterChip">
+                                        <cds:CdsDismissibleTag Text="{Binding Text}" Type="HighContrast" Size="Md" Margin="0,0,8,8" Dismissed="OnChipDismissed" />
                                     </DataTemplate>
-                                </cds:CdsDataTable.ExpandedRowTemplate>
-                            </cds:CdsDataTable>
-                            <cds:CdsPagination x:Name="Pager" Size="Md" PageSizes="10, 25, 50, 100"
-                                               PageSize="{Binding PageSize}" Page="{Binding Page}" TotalItems="{Binding TotalCount}"
-                                               PageChanged="OnPageChanged" />
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+
+                            <Grid>
+                                <cds:CdsDataTableSkeleton RowCount="10" ColumnCount="8" ShowHeader="True" ShowToolbar="True" IsVisible="{Binding IsLoading}" />
+                                <VerticalStackLayout Spacing="0" IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}">
+                                    <cds:CdsDataTable x:Name="Table"
+                                                      Title="{Binding CountText}"
+                                                      Description="Sorted by most recently updated unless you choose a column."
+                                                      Size="Md"
+                                                      IsSortable="True"
+                                                      Selection="Multi"
+                                                      IsExpandable="True"
+                                                      IsSearchable="True"
+                                                      IsPersistentSearch="True"
+                                                      SearchPlaceholder="Search by key, summary or label"
+                                                      SearchText="{Binding SearchText}"
+                                                      OverflowMenuOnHover="False"
+                                                      ItemsSource="{Binding Rows}"
+                                                      SelectionChanged="OnSelectionChanged"
+                                                      SortChanged="OnSortChanged">
+                                        <cds:CdsDataTable.BatchActions>
+                                            <cds:CdsDataTableBatchAction Label="Assign to me" Icon="User" Invoked="OnBatchAssign" />
+                                            <cds:CdsDataTableBatchAction Label="Start" Icon="Play" Invoked="OnBatchStart" />
+                                            <cds:CdsDataTableBatchAction Label="Mark done" Icon="Checkmark" Invoked="OnBatchDone" />
+                                            <cds:CdsDataTableBatchAction Label="Delete" Icon="TrashCan" Invoked="OnBatchDelete" />
+                                        </cds:CdsDataTable.BatchActions>
+                                        <cds:CdsDataTable.ToolbarContent>
+                                            <cds:CdsButton Text="Create issue" Icon="Add" Size="Md" Command="{Binding CreateIssueCommand}" />
+                                        </cds:CdsDataTable.ToolbarContent>
+                                        <cds:CdsDataTable.ExpandedRowTemplate>
+                                            <DataTemplate x:DataType="vm:IssueRow">
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="32" Padding="0,8">
+                                                    <VerticalStackLayout Spacing="8">
+                                                        <cds:CdsText Text="{Binding Summary}" TypeStyle="Body01" MaxLines="3" />
+                                                        <HorizontalStackLayout Spacing="16">
+                                                            <cds:CdsText Text="{Binding ProjectName}" TypeStyle="Label01" Tone="Secondary" />
+                                                            <cds:CdsText Text="{Binding LabelsText}" TypeStyle="Label01" Tone="Secondary" />
+                                                            <cds:CdsText Text="{Binding DueText, StringFormat='Due {0}'}" TypeStyle="Label01" Tone="Secondary" />
+                                                        </HorizontalStackLayout>
+                                                    </VerticalStackLayout>
+                                                    <cds:CdsButton Grid.Column="1" Text="Open issue" Kind="Ghost" Size="Sm" Icon="ArrowRight"
+                                                                   VerticalOptions="Start" Clicked="OnOpenExpanded" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </cds:CdsDataTable.ExpandedRowTemplate>
+                                    </cds:CdsDataTable>
+                                    <cds:CdsPagination x:Name="Pager" Size="Md" PageSizes="10, 25, 50, 100"
+                                                       PageSize="{Binding PageSize}" Page="{Binding Page}" TotalItems="{Binding TotalCount}"
+                                                       PageChanged="OnPageChanged" />
+                                </VerticalStackLayout>
+                            </Grid>
                         </VerticalStackLayout>
-                    </Grid>
-                </VerticalStackLayout>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
             </VerticalStackLayout>
         </ScrollView>
 

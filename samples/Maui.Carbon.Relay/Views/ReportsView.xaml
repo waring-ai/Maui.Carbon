@@ -19,168 +19,173 @@
                 </cds:CdsPageHeaderContent>
             </cds:CdsPageHeader>
 
-            <VerticalStackLayout Padding="32,24,32,48" Spacing="24">
-                <!-- Filters -->
-                <FlexLayout Wrap="Wrap" AlignItems="End" Direction="Row">
-                    <cds:CdsContentSwitcher Label="Report range" SelectedIndex="{Binding RangeIndex}" Size="Md" WidthRequest="336" Margin="0,0,24,8">
-                        <cds:CdsSwitch Text="Week" />
-                        <cds:CdsSwitch Text="Month" />
-                        <cds:CdsSwitch Text="Quarter" />
-                    </cds:CdsContentSwitcher>
-                    <cds:CdsDatePicker Type="Range" Label="Custom start" EndLabel="Custom end" Size="Md"
-                                       StartDate="{Binding CustomStart}" EndDate="{Binding CustomEnd}" MaxDate="{Binding Today}"
-                                       Margin="0,0,8,8" />
-                    <cds:CdsButton Text="Clear dates" Kind="Ghost" Size="Md" Icon="Close" Command="{Binding ClearCustomRangeCommand}"
-                                   IsVisible="{Binding HasCustomRange}" Margin="0,0,24,8" />
-                    <cds:CdsDropdown Label="Project" ItemsSource="{Binding ProjectOptions}" SelectedItem="{Binding ProjectFilter}"
-                                     Size="Md" WidthRequest="240" Margin="16,0,0,8" />
-                </FlexLayout>
+            <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+            <cds:CdsGrid FullWidth="True">
+                <cds:CdsColumn>
+                    <VerticalStackLayout Padding="0,24,0,48" Spacing="24">
+                        <!-- Filters -->
+                        <FlexLayout Wrap="Wrap" AlignItems="End" Direction="Row">
+                            <cds:CdsContentSwitcher Label="Report range" SelectedIndex="{Binding RangeIndex}" Size="Md" WidthRequest="336" Margin="0,0,24,8">
+                                <cds:CdsSwitch Text="Week" />
+                                <cds:CdsSwitch Text="Month" />
+                                <cds:CdsSwitch Text="Quarter" />
+                            </cds:CdsContentSwitcher>
+                            <cds:CdsDatePicker Type="Range" Label="Custom start" EndLabel="Custom end" Size="Md"
+                                               StartDate="{Binding CustomStart}" EndDate="{Binding CustomEnd}" MaxDate="{Binding Today}"
+                                               Margin="0,0,8,8" />
+                            <cds:CdsButton Text="Clear dates" Kind="Ghost" Size="Md" Icon="Close" Command="{Binding ClearCustomRangeCommand}"
+                                           IsVisible="{Binding HasCustomRange}" Margin="0,0,24,8" />
+                            <cds:CdsDropdown Label="Project" ItemsSource="{Binding ProjectOptions}" SelectedItem="{Binding ProjectFilter}"
+                                             Size="Md" WidthRequest="240" Margin="16,0,0,8" />
+                        </FlexLayout>
 
-                <!-- Summary tiles -->
-                <cds:CdsGrid Margin="-32,0">
-                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                        <!-- Summary tiles -->
+                        <cds:CdsGrid>
+                            <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                                <cds:CdsTile>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Created" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding CreatedTotal}" TypeStyle="Heading05" />
+                                        <cds:CdsText Text="{Binding RangeText}" TypeStyle="Label01" Tone="Helper" />
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </cds:CdsColumn>
+                            <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                                <cds:CdsTile>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Resolved" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding ResolvedTotal}" TypeStyle="Heading05" />
+                                        <cds:CdsText Text="{Binding ResolutionRateText, StringFormat='{0} of created'}" TypeStyle="Label01" Tone="Helper" />
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </cds:CdsColumn>
+                            <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                                <cds:CdsTile>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Net backlog change" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding NetText}" TypeStyle="Heading05" />
+                                        <cds:CdsText Text="{Binding NetHelper}" TypeStyle="Label01" Tone="Helper" />
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </cds:CdsColumn>
+                            <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
+                                <cds:CdsTile>
+                                    <VerticalStackLayout Spacing="4">
+                                        <cds:CdsText Text="Open now" TypeStyle="Label01" Tone="Secondary" />
+                                        <cds:CdsText Text="{Binding OpenNow}" TypeStyle="Heading05" />
+                                        <cds:CdsText Text="{Binding OpenNowHelper}" TypeStyle="Label01" Tone="Helper" />
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </cds:CdsColumn>
+                        </cds:CdsGrid>
+
+                        <!-- Created vs resolved chart -->
                         <cds:CdsTile>
-                            <VerticalStackLayout Spacing="4">
-                                <cds:CdsText Text="Created" TypeStyle="Label01" Tone="Secondary" />
-                                <cds:CdsText Text="{Binding CreatedTotal}" TypeStyle="Heading05" />
-                                <cds:CdsText Text="{Binding RangeText}" TypeStyle="Label01" Tone="Helper" />
+                            <VerticalStackLayout Spacing="16">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+                                    <VerticalStackLayout Spacing="2">
+                                        <cds:CdsText Text="Created vs resolved" TypeStyle="Heading03" />
+                                        <cds:CdsText Text="{Binding RangeText}" TypeStyle="BodyCompact01" Tone="Secondary" />
+                                    </VerticalStackLayout>
+                                    <!-- Legend: each series is named in text and by its position in the pair, not by color alone. -->
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="24" VerticalOptions="Start">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <BoxView WidthRequest="12" HeightRequest="12" Color="{DynamicResource CdsDataVis01}" VerticalOptions="Center" />
+                                            <cds:CdsText Text="Created (left bar)" TypeStyle="Label01" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="8">
+                                            <BoxView WidthRequest="12" HeightRequest="12" Color="{DynamicResource CdsDataVis02}" VerticalOptions="Center" />
+                                            <cds:CdsText Text="Resolved (right bar)" TypeStyle="Label01" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </HorizontalStackLayout>
+                                </Grid>
+
+                                <cds:CdsSkeletonPlaceholder HeightRequest="296" WidthRequest="-1" HorizontalOptions="Fill" IsVisible="{Binding IsBusy}" />
+
+                                <Grid ColumnDefinitions="40,*" RowDefinitions="Auto,220,Auto,Auto" ColumnSpacing="8" RowSpacing="8"
+                                      IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}"
+                                      SemanticProperties.Description="{Binding ChartDescription}">
+                                    <cds:CdsText Grid.ColumnSpan="2" Text="Issues" TypeStyle="Label01" Tone="Helper" />
+
+                                    <!-- Value axis: labels centered on their grid lines. -->
+                                    <FlexLayout Grid.Row="1" Direction="Column" JustifyContent="SpaceBetween" Margin="0,-8"
+                                                BindableLayout.ItemsSource="{Binding AxisLabels}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <cds:CdsText Text="{Binding .}" TypeStyle="Label01" Tone="Secondary" HeightRequest="16"
+                                                             HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <FlexLayout Grid.Row="1" Grid.Column="1" Direction="Column" JustifyContent="SpaceBetween"
+                                                BindableLayout.ItemsSource="{Binding AxisLabels}" InputTransparent="True">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" />
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <BoxView Grid.Row="1" Grid.Column="1" HeightRequest="1" VerticalOptions="End" Color="{DynamicResource CdsBorderStrong01}" />
+
+                                    <!-- Bars: one group per bucket, created then resolved. -->
+                                    <FlexLayout Grid.Row="1" Grid.Column="1" Direction="Row" AlignItems="Stretch"
+                                                BindableLayout.ItemsSource="{Binding Bars}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ChartBar">
+                                                <Grid FlexLayout.Grow="1" FlexLayout.Basis="0" ColumnDefinitions="*,2*,2*,*" ColumnSpacing="2"
+                                                      SemanticProperties.Description="{Binding Description}">
+                                                    <cds:CdsTooltip Grid.Column="1" Text="{Binding CreatedTip}" Role="Description" Placement="Top"
+                                                                    HorizontalOptions="Fill" VerticalOptions="End">
+                                                        <BoxView HeightRequest="{Binding CreatedHeight}" Color="{DynamicResource CdsDataVis01}" />
+                                                    </cds:CdsTooltip>
+                                                    <cds:CdsTooltip Grid.Column="2" Text="{Binding ResolvedTip}" Role="Description" Placement="Top"
+                                                                    HorizontalOptions="Fill" VerticalOptions="End">
+                                                        <BoxView HeightRequest="{Binding ResolvedHeight}" Color="{DynamicResource CdsDataVis02}" />
+                                                    </cds:CdsTooltip>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+
+                                    <!-- Category axis -->
+                                    <FlexLayout Grid.Row="2" Grid.Column="1" Direction="Row" BindableLayout.ItemsSource="{Binding Bars}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:ChartBar">
+                                                <cds:CdsText FlexLayout.Grow="1" FlexLayout.Basis="0" Text="{Binding Label}" TypeStyle="Label01" Tone="Secondary"
+                                                             HorizontalTextAlignment="Center" MaxLines="1" />
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <cds:CdsText Grid.Row="3" Grid.Column="1" Text="{Binding XAxisTitle}" TypeStyle="Label01" Tone="Helper"
+                                                 HorizontalTextAlignment="Center" />
+                                </Grid>
                             </VerticalStackLayout>
                         </cds:CdsTile>
-                    </cds:CdsColumn>
-                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
-                        <cds:CdsTile>
-                            <VerticalStackLayout Spacing="4">
-                                <cds:CdsText Text="Resolved" TypeStyle="Label01" Tone="Secondary" />
-                                <cds:CdsText Text="{Binding ResolvedTotal}" TypeStyle="Heading05" />
-                                <cds:CdsText Text="{Binding ResolutionRateText, StringFormat='{0} of created'}" TypeStyle="Label01" Tone="Helper" />
-                            </VerticalStackLayout>
-                        </cds:CdsTile>
-                    </cds:CdsColumn>
-                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
-                        <cds:CdsTile>
-                            <VerticalStackLayout Spacing="4">
-                                <cds:CdsText Text="Net backlog change" TypeStyle="Label01" Tone="Secondary" />
-                                <cds:CdsText Text="{Binding NetText}" TypeStyle="Heading05" />
-                                <cds:CdsText Text="{Binding NetHelper}" TypeStyle="Label01" Tone="Helper" />
-                            </VerticalStackLayout>
-                        </cds:CdsTile>
-                    </cds:CdsColumn>
-                    <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="4">
-                        <cds:CdsTile>
-                            <VerticalStackLayout Spacing="4">
-                                <cds:CdsText Text="Open now" TypeStyle="Label01" Tone="Secondary" />
-                                <cds:CdsText Text="{Binding OpenNow}" TypeStyle="Heading05" />
-                                <cds:CdsText Text="{Binding OpenNowHelper}" TypeStyle="Label01" Tone="Helper" />
-                            </VerticalStackLayout>
-                        </cds:CdsTile>
-                    </cds:CdsColumn>
-                </cds:CdsGrid>
 
-                <!-- Created vs resolved chart -->
-                <cds:CdsTile>
-                    <VerticalStackLayout Spacing="16">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
-                            <VerticalStackLayout Spacing="2">
-                                <cds:CdsText Text="Created vs resolved" TypeStyle="Heading03" />
-                                <cds:CdsText Text="{Binding RangeText}" TypeStyle="BodyCompact01" Tone="Secondary" />
-                            </VerticalStackLayout>
-                            <!-- Legend: each series is named in text and by its position in the pair, not by color alone. -->
-                            <HorizontalStackLayout Grid.Column="1" Spacing="24" VerticalOptions="Start">
-                                <HorizontalStackLayout Spacing="8">
-                                    <BoxView WidthRequest="12" HeightRequest="12" Color="{DynamicResource CdsDataVis01}" VerticalOptions="Center" />
-                                    <cds:CdsText Text="Created (left bar)" TypeStyle="Label01" VerticalOptions="Center" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="8">
-                                    <BoxView WidthRequest="12" HeightRequest="12" Color="{DynamicResource CdsDataVis02}" VerticalOptions="Center" />
-                                    <cds:CdsText Text="Resolved (right bar)" TypeStyle="Label01" VerticalOptions="Center" />
-                                </HorizontalStackLayout>
-                            </HorizontalStackLayout>
-                        </Grid>
-
-                        <cds:CdsSkeletonPlaceholder HeightRequest="296" WidthRequest="-1" HorizontalOptions="Fill" IsVisible="{Binding IsBusy}" />
-
-                        <Grid ColumnDefinitions="40,*" RowDefinitions="Auto,220,Auto,Auto" ColumnSpacing="8" RowSpacing="8"
-                              IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}"
-                              SemanticProperties.Description="{Binding ChartDescription}">
-                            <cds:CdsText Grid.ColumnSpan="2" Text="Issues" TypeStyle="Label01" Tone="Helper" />
-
-                            <!-- Value axis: labels centered on their grid lines. -->
-                            <FlexLayout Grid.Row="1" Direction="Column" JustifyContent="SpaceBetween" Margin="0,-8"
-                                        BindableLayout.ItemsSource="{Binding AxisLabels}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <cds:CdsText Text="{Binding .}" TypeStyle="Label01" Tone="Secondary" HeightRequest="16"
-                                                     HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                            <FlexLayout Grid.Row="1" Grid.Column="1" Direction="Column" JustifyContent="SpaceBetween"
-                                        BindableLayout.ItemsSource="{Binding AxisLabels}" InputTransparent="True">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" />
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                            <BoxView Grid.Row="1" Grid.Column="1" HeightRequest="1" VerticalOptions="End" Color="{DynamicResource CdsBorderStrong01}" />
-
-                            <!-- Bars: one group per bucket, created then resolved. -->
-                            <FlexLayout Grid.Row="1" Grid.Column="1" Direction="Row" AlignItems="Stretch"
-                                        BindableLayout.ItemsSource="{Binding Bars}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ChartBar">
-                                        <Grid FlexLayout.Grow="1" FlexLayout.Basis="0" ColumnDefinitions="*,2*,2*,*" ColumnSpacing="2"
-                                              SemanticProperties.Description="{Binding Description}">
-                                            <cds:CdsTooltip Grid.Column="1" Text="{Binding CreatedTip}" Role="Description" Placement="Top"
-                                                            HorizontalOptions="Fill" VerticalOptions="End">
-                                                <BoxView HeightRequest="{Binding CreatedHeight}" Color="{DynamicResource CdsDataVis01}" />
-                                            </cds:CdsTooltip>
-                                            <cds:CdsTooltip Grid.Column="2" Text="{Binding ResolvedTip}" Role="Description" Placement="Top"
-                                                            HorizontalOptions="Fill" VerticalOptions="End">
-                                                <BoxView HeightRequest="{Binding ResolvedHeight}" Color="{DynamicResource CdsDataVis02}" />
-                                            </cds:CdsTooltip>
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-
-                            <!-- Category axis -->
-                            <FlexLayout Grid.Row="2" Grid.Column="1" Direction="Row" BindableLayout.ItemsSource="{Binding Bars}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ChartBar">
-                                        <cds:CdsText FlexLayout.Grow="1" FlexLayout.Basis="0" Text="{Binding Label}" TypeStyle="Label01" Tone="Secondary"
-                                                     HorizontalTextAlignment="Center" MaxLines="1" />
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                            <cds:CdsText Grid.Row="3" Grid.Column="1" Text="{Binding XAxisTitle}" TypeStyle="Label01" Tone="Helper"
-                                         HorizontalTextAlignment="Center" />
-                        </Grid>
+                        <!-- Workload -->
+                        <VerticalStackLayout Spacing="8">
+                            <cds:CdsText Text="Workload" TypeStyle="Heading03" />
+                            <cds:CdsText Text="{Binding WorkloadCaption, StringFormat='Open issues and story points per assignee. {0}.'}" TypeStyle="Body01" Tone="Secondary" />
+                            <cds:CdsSkeletonPlaceholder HeightRequest="320" WidthRequest="-1" HorizontalOptions="Fill" Margin="0,8,0,0" IsVisible="{Binding IsBusy}" />
+                            <cds:CdsTable x:Name="WorkloadTable" Size="Md" Label="Open work per assignee" UseZebraStyles="False" Margin="0,8,0,0"
+                                          IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}">
+                                <cds:CdsTable.Head>
+                                    <cds:CdsTableHead>
+                                        <cds:CdsTableHeader Text="Assignee" Width="*" />
+                                        <cds:CdsTableHeader Text="Role" Width="200" />
+                                        <cds:CdsTableHeader Text="Open issues" Align="End" Width="120" />
+                                        <cds:CdsTableHeader Text="Open points" Align="End" Width="120" />
+                                        <cds:CdsTableHeader Text="Share of points" Align="End" Width="140" />
+                                        <cds:CdsTableHeader Text="Load" Width="200" />
+                                    </cds:CdsTableHead>
+                                </cds:CdsTable.Head>
+                            </cds:CdsTable>
+                            <cds:CdsText Text="No open work in this project." TypeStyle="Body01" Tone="Secondary"
+                                         IsVisible="{Binding HasWorkload, Converter={x:Static p:Converters.Not}}" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-                </cds:CdsTile>
-
-                <!-- Workload -->
-                <VerticalStackLayout Spacing="8">
-                    <cds:CdsText Text="Workload" TypeStyle="Heading03" />
-                    <cds:CdsText Text="{Binding WorkloadCaption, StringFormat='Open issues and story points per assignee. {0}.'}" TypeStyle="Body01" Tone="Secondary" />
-                    <cds:CdsSkeletonPlaceholder HeightRequest="320" WidthRequest="-1" HorizontalOptions="Fill" Margin="0,8,0,0" IsVisible="{Binding IsBusy}" />
-                    <cds:CdsTable x:Name="WorkloadTable" Size="Md" Label="Open work per assignee" UseZebraStyles="False" Margin="0,8,0,0"
-                                  IsVisible="{Binding IsBusy, Converter={x:Static p:Converters.Not}}">
-                        <cds:CdsTable.Head>
-                            <cds:CdsTableHead>
-                                <cds:CdsTableHeader Text="Assignee" Width="*" />
-                                <cds:CdsTableHeader Text="Role" Width="200" />
-                                <cds:CdsTableHeader Text="Open issues" Align="End" Width="120" />
-                                <cds:CdsTableHeader Text="Open points" Align="End" Width="120" />
-                                <cds:CdsTableHeader Text="Share of points" Align="End" Width="140" />
-                                <cds:CdsTableHeader Text="Load" Width="200" />
-                            </cds:CdsTableHead>
-                        </cds:CdsTable.Head>
-                    </cds:CdsTable>
-                    <cds:CdsText Text="No open work in this project." TypeStyle="Body01" Tone="Secondary"
-                                 IsVisible="{Binding HasWorkload, Converter={x:Static p:Converters.Not}}" />
-                </VerticalStackLayout>
-            </VerticalStackLayout>
+                </cds:CdsColumn>
+            </cds:CdsGrid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentView>

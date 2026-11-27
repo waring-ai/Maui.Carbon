@@ -25,123 +25,128 @@
                     </cds:CdsPageHeaderContent>
                 </cds:CdsPageHeader>
 
-                <VerticalStackLayout Padding="32,24,32,48" Spacing="24">
-                    <!-- Filters -->
-                    <VerticalStackLayout Spacing="16">
-                        <cds:CdsSearch Label="Search projects" Placeholder="Search by name, key or description" Size="Lg"
-                                       Text="{Binding SearchText}" />
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                            <FlexLayout x:Name="FilterTags" Wrap="Wrap" AlignItems="Center">
-                                <!-- Category chips are inserted here from code (one per category). -->
-                                <BoxView x:Name="FilterDivider" WidthRequest="1" HeightRequest="24" Margin="0,0,8,8" Color="{DynamicResource CdsBorderSubtle01}" />
-                                <cds:CdsSelectableTag Text="Starred" Icon="Star" IsSelected="{Binding StarredOnly}" Margin="0,0,8,8" />
-                                <cds:CdsSelectableTag Text="Show archived" IsSelected="{Binding ShowArchived}" Margin="0,0,8,8" />
-                                <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Margin="0,0,0,8"
-                                               IsVisible="{Binding HasFilters}" Command="{Binding ClearFiltersCommand}" />
-                            </FlexLayout>
-                            <cds:CdsText Grid.Column="1" Text="{Binding CountText}" TypeStyle="Label01" Tone="Secondary"
-                                         VerticalOptions="Start" Margin="0,6,0,0"
-                                         IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}" />
-                        </Grid>
-                    </VerticalStackLayout>
+                <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+                <cds:CdsGrid FullWidth="True">
+                    <cds:CdsColumn>
+                        <VerticalStackLayout Padding="0,24,0,48" Spacing="24">
+                            <!-- Filters -->
+                            <VerticalStackLayout Spacing="16">
+                                <cds:CdsSearch Label="Search projects" Placeholder="Search by name, key or description" Size="Lg"
+                                               Text="{Binding SearchText}" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                    <FlexLayout x:Name="FilterTags" Wrap="Wrap" AlignItems="Center">
+                                        <!-- Category chips are inserted here from code (one per category). -->
+                                        <BoxView x:Name="FilterDivider" WidthRequest="1" HeightRequest="24" Margin="0,0,8,8" Color="{DynamicResource CdsBorderSubtle01}" />
+                                        <cds:CdsSelectableTag Text="Starred" Icon="Star" IsSelected="{Binding StarredOnly}" Margin="0,0,8,8" />
+                                        <cds:CdsSelectableTag Text="Show archived" IsSelected="{Binding ShowArchived}" Margin="0,0,8,8" />
+                                        <cds:CdsButton Text="Clear filters" Kind="Ghost" Size="Sm" Margin="0,0,0,8"
+                                                       IsVisible="{Binding HasFilters}" Command="{Binding ClearFiltersCommand}" />
+                                    </FlexLayout>
+                                    <cds:CdsText Grid.Column="1" Text="{Binding CountText}" TypeStyle="Label01" Tone="Secondary"
+                                                 VerticalOptions="Start" Margin="0,6,0,0"
+                                                 IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}" />
+                                </Grid>
+                            </VerticalStackLayout>
 
-                    <!-- Loading: skeleton cards in the same grid -->
-                    <cds:CdsGrid x:Name="SkeletonGrid" Margin="-32,0" IsVisible="{Binding IsLoading}"
-                                 BindableLayout.ItemsSource="{Binding SkeletonCards}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="x:Int32">
-                                <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="8" SpanMax="4">
-                                    <cds:CdsTile Margin="0,0,0,32">
-                                        <VerticalStackLayout Spacing="12">
-                                            <cds:CdsAspectRatio CustomRatio="5.5" Margin="-16,-16,-16,4">
-                                                <cds:CdsSkeletonPlaceholder WidthRequest="-1" HeightRequest="-1" HorizontalOptions="Fill" VerticalOptions="Fill" />
-                                            </cds:CdsAspectRatio>
-                                            <HorizontalStackLayout Spacing="12">
-                                                <cds:CdsSkeletonIcon Size="24" VerticalOptions="Center" />
-                                                <cds:CdsSkeletonText IsHeading="True" WidthPercent="60" WidthRequest="220" VerticalOptions="Center" />
-                                            </HorizontalStackLayout>
-                                            <cds:CdsSkeletonText IsParagraph="True" LineCount="2" />
-                                            <HorizontalStackLayout Spacing="16">
-                                                <cds:CdsSkeletonIcon Size="16" />
-                                                <cds:CdsSkeletonText WidthRequest="120" />
-                                                <cds:CdsSkeletonIcon Size="16" />
-                                                <cds:CdsSkeletonText WidthRequest="80" />
-                                            </HorizontalStackLayout>
-                                        </VerticalStackLayout>
-                                    </cds:CdsTile>
-                                </cds:CdsColumn>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </cds:CdsGrid>
+                            <!-- Loading: skeleton cards in the same grid -->
+                            <cds:CdsGrid x:Name="SkeletonGrid" IsVisible="{Binding IsLoading}"
+                                         BindableLayout.ItemsSource="{Binding SkeletonCards}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:Int32">
+                                        <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="8" SpanMax="4">
+                                            <cds:CdsTile Margin="0,0,0,32">
+                                                <VerticalStackLayout Spacing="12">
+                                                    <cds:CdsAspectRatio CustomRatio="5.5" Margin="-16,-16,-16,4">
+                                                        <cds:CdsSkeletonPlaceholder WidthRequest="-1" HeightRequest="-1" HorizontalOptions="Fill" VerticalOptions="Fill" />
+                                                    </cds:CdsAspectRatio>
+                                                    <HorizontalStackLayout Spacing="12">
+                                                        <cds:CdsSkeletonIcon Size="24" VerticalOptions="Center" />
+                                                        <cds:CdsSkeletonText IsHeading="True" WidthPercent="60" WidthRequest="220" VerticalOptions="Center" />
+                                                    </HorizontalStackLayout>
+                                                    <cds:CdsSkeletonText IsParagraph="True" LineCount="2" />
+                                                    <HorizontalStackLayout Spacing="16">
+                                                        <cds:CdsSkeletonIcon Size="16" />
+                                                        <cds:CdsSkeletonText WidthRequest="120" />
+                                                        <cds:CdsSkeletonIcon Size="16" />
+                                                        <cds:CdsSkeletonText WidthRequest="80" />
+                                                    </HorizontalStackLayout>
+                                                </VerticalStackLayout>
+                                            </cds:CdsTile>
+                                        </cds:CdsColumn>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </cds:CdsGrid>
 
-                    <!-- Project cards -->
-                    <cds:CdsGrid x:Name="CardGrid" Margin="-32,0"
-                                 IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}"
-                                 BindableLayout.ItemsSource="{Binding Cards}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ProjectCard">
-                                <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="8" SpanMax="4">
-                                    <Grid Margin="0,0,0,32">
-                                        <cds:CdsClickableTile AccessibleName="{Binding AccessibleName}" Clicked="OnCardClicked" VerticalOptions="Fill">
-                                            <VerticalStackLayout Spacing="0">
-                                                <!-- Cover band: the category's tag color with its icon. -->
-                                                <cds:CdsAspectRatio CustomRatio="5.5" Margin="-16,-16,-16,16" p:ProjectsTint.Fill="{Binding Category}">
-                                                    <cds:CdsIcon Icon="{Binding Category, Converter={x:Static p:Converters.CategoryIcon}}" Size="32"
-                                                                 Description="{Binding CategoryText}" p:ProjectsTint.Ink="{Binding Category}"
-                                                                 HorizontalOptions="Start" VerticalOptions="End" Margin="16" />
-                                                </cds:CdsAspectRatio>
-                                                <cds:CdsText Text="{Binding Name}" TypeStyle="Heading03" MaxLines="1" LineBreakMode="TailTruncation" />
-                                                <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
-                                                    <cds:CdsTag Text="{Binding Key}" Type="Gray" Size="Sm" />
-                                                    <cds:CdsTag Text="{Binding CategoryText}" Size="Sm"
-                                                                Type="{Binding Category, Converter={x:Static p:Converters.CategoryTag}}"
-                                                                Icon="{Binding Category, Converter={x:Static p:Converters.CategoryIcon}}" />
-                                                    <cds:CdsTag Text="Archived" Type="WarmGray" Size="Sm" IsVisible="{Binding IsArchived}" />
-                                                </HorizontalStackLayout>
-                                                <cds:CdsText Text="{Binding Description}" TypeStyle="Body01" Tone="Secondary" Margin="0,12,0,0"
-                                                             MaxLines="2" LineBreakMode="TailTruncation" HeightRequest="40" />
-                                                <FlexLayout Wrap="Wrap" AlignItems="Center" Margin="0,16,32,0">
-                                                    <HorizontalStackLayout Spacing="6" Margin="0,0,20,4">
-                                                        <cds:CdsIcon Icon="User" Size="16" Description="Lead" VerticalOptions="Center" />
-                                                        <cds:CdsText Text="{Binding LeadName}" TypeStyle="Label01" VerticalOptions="Center" />
-                                                    </HorizontalStackLayout>
-                                                    <HorizontalStackLayout Spacing="6" Margin="0,0,20,4">
-                                                        <cds:CdsIcon Icon="Report" Size="16" Description="Issues" VerticalOptions="Center" />
-                                                        <cds:CdsText Text="{Binding OpenIssuesText}" TypeStyle="Label01" VerticalOptions="Center" />
-                                                    </HorizontalStackLayout>
-                                                    <HorizontalStackLayout Spacing="6" Margin="0,0,0,4">
-                                                        <cds:CdsIcon Icon="Calendar" Size="16" Description="Target date" VerticalOptions="Center" />
-                                                        <cds:CdsText Text="{Binding TargetText}" TypeStyle="Label01" VerticalOptions="Center" />
-                                                    </HorizontalStackLayout>
-                                                </FlexLayout>
-                                            </VerticalStackLayout>
-                                        </cds:CdsClickableTile>
-                                        <!-- The star sits over the tile, not inside it: a clickable tile has exactly one action. -->
-                                        <cds:CdsIconButton Icon="{Binding IsStarred, Converter={x:Static p:ProjectsConverters.StarIcon}}"
-                                                           Label="{Binding StarLabel}"
-                                                           Kind="Ghost" Size="Md" TooltipPlacement="Left"
-                                                           HorizontalOptions="End" VerticalOptions="Start" Margin="0,8,8,0"
-                                                           Clicked="OnStarClicked" />
-                                    </Grid>
-                                </cds:CdsColumn>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </cds:CdsGrid>
+                            <!-- Project cards -->
+                            <cds:CdsGrid x:Name="CardGrid"
+                                         IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}"
+                                         BindableLayout.ItemsSource="{Binding Cards}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ProjectCard">
+                                        <cds:CdsColumn SpanSm="4" SpanMd="4" SpanLg="8" SpanMax="4">
+                                            <Grid Margin="0,0,0,32">
+                                                <cds:CdsClickableTile AccessibleName="{Binding AccessibleName}" Clicked="OnCardClicked" VerticalOptions="Fill">
+                                                    <VerticalStackLayout Spacing="0">
+                                                        <!-- Cover band: the category's tag color with its icon. -->
+                                                        <cds:CdsAspectRatio CustomRatio="5.5" Margin="-16,-16,-16,16" p:ProjectsTint.Fill="{Binding Category}">
+                                                            <cds:CdsIcon Icon="{Binding Category, Converter={x:Static p:Converters.CategoryIcon}}" Size="32"
+                                                                         Description="{Binding CategoryText}" p:ProjectsTint.Ink="{Binding Category}"
+                                                                         HorizontalOptions="Start" VerticalOptions="End" Margin="16" />
+                                                        </cds:CdsAspectRatio>
+                                                        <cds:CdsText Text="{Binding Name}" TypeStyle="Heading03" MaxLines="1" LineBreakMode="TailTruncation" />
+                                                        <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                                                            <cds:CdsTag Text="{Binding Key}" Type="Gray" Size="Sm" />
+                                                            <cds:CdsTag Text="{Binding CategoryText}" Size="Sm"
+                                                                        Type="{Binding Category, Converter={x:Static p:Converters.CategoryTag}}"
+                                                                        Icon="{Binding Category, Converter={x:Static p:Converters.CategoryIcon}}" />
+                                                            <cds:CdsTag Text="Archived" Type="WarmGray" Size="Sm" IsVisible="{Binding IsArchived}" />
+                                                        </HorizontalStackLayout>
+                                                        <cds:CdsText Text="{Binding Description}" TypeStyle="Body01" Tone="Secondary" Margin="0,12,0,0"
+                                                                     MaxLines="2" LineBreakMode="TailTruncation" HeightRequest="40" />
+                                                        <FlexLayout Wrap="Wrap" AlignItems="Center" Margin="0,16,32,0">
+                                                            <HorizontalStackLayout Spacing="6" Margin="0,0,20,4">
+                                                                <cds:CdsIcon Icon="User" Size="16" Description="Lead" VerticalOptions="Center" />
+                                                                <cds:CdsText Text="{Binding LeadName}" TypeStyle="Label01" VerticalOptions="Center" />
+                                                            </HorizontalStackLayout>
+                                                            <HorizontalStackLayout Spacing="6" Margin="0,0,20,4">
+                                                                <cds:CdsIcon Icon="Report" Size="16" Description="Issues" VerticalOptions="Center" />
+                                                                <cds:CdsText Text="{Binding OpenIssuesText}" TypeStyle="Label01" VerticalOptions="Center" />
+                                                            </HorizontalStackLayout>
+                                                            <HorizontalStackLayout Spacing="6" Margin="0,0,0,4">
+                                                                <cds:CdsIcon Icon="Calendar" Size="16" Description="Target date" VerticalOptions="Center" />
+                                                                <cds:CdsText Text="{Binding TargetText}" TypeStyle="Label01" VerticalOptions="Center" />
+                                                            </HorizontalStackLayout>
+                                                        </FlexLayout>
+                                                    </VerticalStackLayout>
+                                                </cds:CdsClickableTile>
+                                                <!-- The star sits over the tile, not inside it: a clickable tile has exactly one action. -->
+                                                <cds:CdsIconButton Icon="{Binding IsStarred, Converter={x:Static p:ProjectsConverters.StarIcon}}"
+                                                                   Label="{Binding StarLabel}"
+                                                                   Kind="Ghost" Size="Md" TooltipPlacement="Left"
+                                                                   HorizontalOptions="End" VerticalOptions="Start" Margin="0,8,8,0"
+                                                                   Clicked="OnStarClicked" />
+                                            </Grid>
+                                        </cds:CdsColumn>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </cds:CdsGrid>
 
-                    <!-- Empty state: filters match nothing -->
-                    <VerticalStackLayout Spacing="0" Padding="0,32,0,0" MaximumWidthRequest="480" HorizontalOptions="Start"
-                                         IsVisible="{Binding IsEmpty}">
-                        <cds:CdsIcon Icon="Search" Size="48" HorizontalOptions="Start" Description="" />
-                        <cds:CdsText Text="No projects match your filters" TypeStyle="Heading03" Margin="0,24,0,8"
-                                     SemanticProperties.HeadingLevel="Level2" />
-                        <cds:CdsText Text="Try another search, choose a different category, or turn on Show archived to include projects that have wrapped up."
-                                     TypeStyle="Body01" Tone="Secondary" />
-                        <HorizontalStackLayout Spacing="16" Margin="0,24,0,0">
-                            <cds:CdsButton Text="Clear filters" Kind="Tertiary" Size="Md" Command="{Binding ClearFiltersCommand}" />
-                            <cds:CdsButton Text="New project" Kind="Ghost" Icon="Add" Size="Md" Command="{Binding NewProjectCommand}" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
+                            <!-- Empty state: filters match nothing -->
+                            <VerticalStackLayout Spacing="0" Padding="0,32,0,0" MaximumWidthRequest="480" HorizontalOptions="Start"
+                                                 IsVisible="{Binding IsEmpty}">
+                                <cds:CdsIcon Icon="Search" Size="48" HorizontalOptions="Start" Description="" />
+                                <cds:CdsText Text="No projects match your filters" TypeStyle="Heading03" Margin="0,24,0,8"
+                                             SemanticProperties.HeadingLevel="Level2" />
+                                <cds:CdsText Text="Try another search, choose a different category, or turn on Show archived to include projects that have wrapped up."
+                                             TypeStyle="Body01" Tone="Secondary" />
+                                <HorizontalStackLayout Spacing="16" Margin="0,24,0,0">
+                                    <cds:CdsButton Text="Clear filters" Kind="Tertiary" Size="Md" Command="{Binding ClearFiltersCommand}" />
+                                    <cds:CdsButton Text="New project" Kind="Ghost" Icon="Add" Size="Md" Command="{Binding NewProjectCommand}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
             </VerticalStackLayout>
         </ScrollView>
 

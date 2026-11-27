@@ -4,7 +4,7 @@ using Maui.Carbon.Gallery.Pages.Layout.Data;
 namespace Maui.Carbon.Gallery.Pages.Layout;
 
 [GalleryPage("Grid", GalleryCategory.Layout, Order = 10,
-    Summary = "The 16-column responsive layout grid: spans and offsets per breakpoint, wide, narrow and condensed gutters.")]
+    Summary = "The 16-column responsive layout grid: spans and offsets per breakpoint, wide, narrow and condensed gutters, nested subgrids.")]
 public partial class GridPage : GalleryPage
 {
     public GridPage()
@@ -29,6 +29,14 @@ public partial class GridPage : GalleryPage
 
         foreach (var grid in new[] { WideGrid, NarrowGrid, CondensedGrid })
             for (var i = 0; i < 4; i++) grid.Add(LayoutDemos.Column("lg 4", lg: 4, sm: 2, md: 4));
+
+        for (var i = 1; i <= 16; i++) NestedGrid.Add(LayoutDemos.Column(i.ToString(), span: 1));
+        var wideSubgrid = new CdsGrid();
+        for (var i = 0; i < 2; i++) wideSubgrid.Add(LayoutDemos.Column("Subgrid, span 4", span: 4));
+        NestedGrid.Add(new CdsColumn { Span = 8, Content = wideSubgrid, Margin = new Thickness(0, 8, 0, 0) });
+        var narrowSubgrid = new CdsGrid { Mode = CdsGridMode.Narrow };
+        for (var i = 0; i < 4; i++) narrowSubgrid.Add(LayoutDemos.Column("Narrow, 2", span: 2));
+        NestedGrid.Add(new CdsColumn { Span = 8, Content = narrowSubgrid, Margin = new Thickness(0, 8, 0, 0) });
 
         var title = new CdsStack { Gap = 2 };
         title.Add(new CdsText("Clusters", CdsTypeStyle.Heading04));

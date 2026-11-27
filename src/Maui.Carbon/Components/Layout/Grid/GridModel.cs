@@ -19,6 +19,12 @@ internal readonly record struct GridResponsive(int? Base, int? Sm, int? Md, int?
     }
 }
 
+/// <summary>
+/// What a grid tells each child it places: the columns the child spans, the gutters on either side of its column box and
+/// the breakpoint. A grid inside that child (directly, or deeper inside a column) lays out as a subgrid on these columns.
+/// </summary>
+internal readonly record struct GridSubgrid(int Columns, double BleedStart, double BleedEnd, CdsBreakpoint Breakpoint);
+
 /// <summary>One child placed in the grid. <c>Hidden</c> children (span 0 or collapsed) take no space.</summary>
 internal readonly record struct GridCell(int Index, int Row, int Column, int Span, bool Hidden);
 
@@ -45,19 +51,22 @@ internal static class GridModel
     /// <summary>The widest a grid gets unless it is full width (99rem).</summary>
     public const double MaxWidth = CdsBreakpoints.Max;
 
-    /// <summary>The span of a child at a breakpoint: its resolved value, or the full row; clamped to 0 (hidden) through the column count.</summary>
-    public static int ResolveSpan(GridResponsive span, CdsBreakpoint breakpoint)
+    /// <summary>
+    /// The span of a child at a breakpoint: its resolved value, or the full row; clamped to 0 (hidden) through the column
+    /// count (the breakpoint's, or a subgrid's <paramref name="columns"/>).
+    /// </summary>
+    public static int ResolveSpan(GridResponsive span, CdsBreakpoint breakpoint, int? columns = null)
     {
-        var columns = breakpoint.Columns();
-        return Math.Clamp(span.For(breakpoint) ?? columns, 0, columns);
+        var count = columns ?? breakpoint.Columns();
+        return Math.Clamp(span.For(breakpoint) ?? count, 0, count);
     }
 
     /// <summary>
     /// The offset of a child at a breakpoint: the number of columns between the start of the row and the child, clamped to
     /// the column count minus one; <c>null</c> when unset (the child follows the previous one).
     /// </summary>
-    public static int? ResolveOffset(GridResponsive offset, CdsBreakpoint breakpoint) =>
-        offset.For(breakpoint) is { } value ? Math.Clamp(value, 0, breakpoint.Columns() - 1) : null;
+    public static int? ResolveOffset(GridResponsive offset, CdsBreakpoint breakpoint, int? columns = null) =>
+        offset.For(breakpoint) is { } value ? Math.Clamp(value, 0, (columns ?? breakpoint.Columns()) - 1) : null;
 
     /// <summary>
     /// Places children left to right, wrapping to a new row when a child no longer fits. A span of 0 hides the child. An offset
@@ -109,14 +118,31 @@ internal static class GridModel
         };
         var margin = Math.Min(breakpoint.Margin(), total / 2);
         var inner = Math.Max(0, total - 2 * margin);
-        var (start, end, rowGap) = mode switch
-        {
-            CdsGridMode.Narrow => (0d, WideGutter / 2, 0d),
-            CdsGridMode.Condensed => (CondensedGutter / 2, CondensedGutter / 2, CondensedGutter),
-            _ => (WideGutter / 2, WideGutter / 2, 0d),
-        };
+        var (start, end, rowGap) = Gutters(mode);
         return new GridMetrics(columns, margin, left, inner, inner / columns, start, end, rowGap);
     }
+
+    /// <summary>
+    /// The column geometry of a subgrid <paramref name="width"/> wide placed in a parent's column box (Carbon's
+    /// <c>cds--subgrid</c>): it has as many columns as the parent column spans and reaches over the parent's gutters on
+    /// both sides (negative margins of the parent's gutter start and end), so its columns line up with the parent's. It
+    /// has no outer margin and no maximum width; its own <paramref name="mode"/> sets the gutters inside it.
+    /// </summary>
+    public static GridMetrics SubgridMetrics(double width, GridSubgrid parent, CdsGridMode mode)
+    {
+        var columns = Math.Max(1, parent.Columns);
+        var total = Math.Max(0, width + parent.BleedStart + parent.BleedEnd);
+        var (start, end, rowGap) = Gutters(mode);
+        return new GridMetrics(columns, 0, -parent.BleedStart, total, total / columns, start, end, rowGap);
+    }
+
+    /// <summary>The gutter before and after each column box, and the row gap, of a mode.</summary>
+    static (double Start, double End, double RowGap) Gutters(CdsGridMode mode) => mode switch
+    {
+        CdsGridMode.Narrow => (0d, WideGutter / 2, 0d),
+        CdsGridMode.Condensed => (CondensedGutter / 2, CondensedGutter / 2, CondensedGutter),
+        _ => (WideGutter / 2, WideGutter / 2, 0d),
+    };
 
     /// <summary>The breakpoint a grid uses: an explicit one, else the page's, else the one its own width falls in.</summary>
     public static CdsBreakpoint Effective(CdsBreakpoint? explicitBreakpoint, CdsBreakpoint? context, double width) =>

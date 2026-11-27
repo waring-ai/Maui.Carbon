@@ -49,4 +49,37 @@ public class StackTests
         Assert.Equal(0, stack.Spacing);
         stack.Orientation = StackOrientation.Horizontal;
     }
+
+    [Fact]
+    public void Fluid_gap_follows_the_page_width()
+    {
+        var stack = new CdsStack { Gap = 5, FluidGap = 3 };
+        var scope = new ContentView { Content = stack };
+        scope.Resources[CdsContextKeys.ViewportWidth] = 1000d;
+        Assert.Equal(50, stack.Spacing, 6);
+        scope.Resources[CdsContextKeys.ViewportWidth] = 1600d;
+        Assert.Equal(80, stack.Spacing, 6);
+        stack.FluidGap = 9;
+        Assert.Equal(4, stack.FluidGap);
+        Assert.Equal(160, stack.Spacing, 6);
+        stack.FluidGap = 1;
+        Assert.Equal(0, stack.Spacing);
+    }
+
+    [Fact]
+    public void Raw_gap_beats_fluid_gap_and_clearing_it_restores_the_step()
+    {
+        var stack = new CdsStack { Gap = 5, FluidGap = 2 };
+        var scope = new ContentView { Content = stack };
+        scope.Resources[CdsContextKeys.ViewportWidth] = 1000d;
+        stack.GapValue = 12;
+        Assert.Equal(12, stack.Spacing);
+        stack.GapValue = null;
+        Assert.Equal(20, stack.Spacing, 6);
+        stack.FluidGap = null;
+        Assert.Equal(16, stack.Spacing);
+    }
+
+    [Fact]
+    public void Fluid_gap_without_a_page_width_is_zero() => Assert.Equal(0, new CdsStack { FluidGap = 4 }.Spacing);
 }

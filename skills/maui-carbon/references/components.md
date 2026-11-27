@@ -19,7 +19,7 @@ Folders are under `src/Maui.Carbon/` in the repository:
 | Theme resources and scopes | `CdsResources`, `CdsThemeManager`, `CdsThemeName`, `CdsTheme`, `CdsLayer` | `Theming` |
 | Text and typography | `CdsText`, `CdsTypography`, `CdsTypeSpec`, `CdsTypeStyle`, `CdsFonts` | `Typography`, `Generated` |
 | Icons | `CdsIcon`, `CdsIcons`, `CdsGlyph`, `CdsIconName` | `Icons`, `Generated/CdsIcons.g.cs` |
-| Tokens | `CdsColorKeys`, `CdsSpacing`, `CdsSizing`, `CdsDuration`, `CdsEasing`, `CdsSize` | `Generated`, `Foundation` |
+| Tokens | `CdsColorKeys`, `CdsSpacing`, `CdsFluidSpacing`, `CdsSizing`, `CdsDuration`, `CdsEasing`, `CdsSize` | `Generated`, `Foundation` |
 | Overlay infrastructure | `CdsOverlayHost`, `CdsOverlayService`, `CdsOverlayOptions`, `CdsOverlay`, `CdsPlacement` | `Overlays` |
 | Motion | `CdsMotion`, `CdsCubicBezier` | `Motion` |
 | Layout helpers | `CdsDeck` (one active child of many kept attached: app screens, large panes; cheaper to switch than `IsVisible`), `CdsMaxWidthBox`, `CdsEqualWidthRow` | `Foundation` |

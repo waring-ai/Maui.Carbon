@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
   Sign-in, following Carbon's login pattern: step 1 asks for the email, step 2 for the password. On the lg breakpoint
-  a Gray 100 theme zone shows the product story beside the form (hidden below lg).
+  a Gray 100 theme zone shows the product story beside the form (hidden below lg). The story is the app's one expressive
+  surface, so its padding and gaps use Carbon's fluid spacing (a share of the page width) and its headline a fluid type style
+  that steps up with the breakpoint; the form stays on the fixed productive scale.
 -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -68,10 +70,12 @@
                 </Grid>
             </ScrollView>
             <cds:CdsTheme x:Name="BrandZone" Grid.Column="1" Theme="G100">
-                <Grid x:Name="Brand" Padding="64" RowDefinitions="*,Auto">
-                    <VerticalStackLayout Spacing="24" VerticalOptions="Center" MaximumWidthRequest="560" HorizontalOptions="Start">
+                <!-- fluid-spacing-03 (5% of the page width) all round: about 53 at lg, growing to 80 and beyond at max. -->
+                <Grid x:Name="Brand" cds:CdsFluidSpacing.Padding="3" RowDefinitions="*,Auto">
+                    <!-- fluid-spacing-02 (2%) between the story's parts: about 21 at lg, 32 at max. -->
+                    <cds:CdsStack FluidGap="2" VerticalOptions="Center" MaximumWidthRequest="560" HorizontalOptions="Start">
                         <cds:CdsText Text="Relay" TypeStyle="Heading03" Tone="Secondary" />
-                        <cds:CdsText Text="Plan, track and ship work your whole team can see." TypeStyle="Heading06" />
+                        <cds:CdsText Text="Plan, track and ship work your whole team can see." TypeStyle="FluidHeading05" />
                         <cds:CdsText Text="Issues, boards, sprints and reports in one place, with an assistant that summarizes what changed while you were away."
                                      TypeStyle="Body02" Tone="Secondary" />
                         <HorizontalStackLayout Spacing="8">
@@ -80,7 +84,7 @@
                             <cds:CdsTag Text="Reports" Type="Teal" />
                             <cds:CdsTag Text="AI summaries" Type="Magenta" />
                         </HorizontalStackLayout>
-                    </VerticalStackLayout>
+                    </cds:CdsStack>
                     <cds:CdsText Grid.Row="1" Text="Sample app for Maui.Carbon. All data is fictional." TypeStyle="Label01" Tone="Helper" />
                 </Grid>
             </cds:CdsTheme>

@@ -71,252 +71,257 @@
                     </cds:CdsPageHeaderContent>
                 </cds:CdsPageHeader>
 
-                <Grid Padding="32,24,32,48">
-                    <!-- Loading -->
-                    <Grid ColumnDefinitions="*,352" ColumnSpacing="32" IsVisible="{Binding IsLoading}">
-                        <VerticalStackLayout Spacing="24">
-                            <cds:CdsSkeletonText WidthPercent="60" IsHeading="True" />
-                            <cds:CdsSkeletonText IsParagraph="True" LineCount="4" />
-                            <cds:CdsSkeletonText IsParagraph="True" LineCount="3" />
-                            <cds:CdsSkeletonPlaceholder HeightRequest="160" HorizontalOptions="Fill" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="24">
-                            <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
-                            <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
-                            <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
-                            <cds:CdsSkeletonText IsParagraph="True" LineCount="3" />
-                        </VerticalStackLayout>
-                    </Grid>
-
-                    <!-- Not found -->
-                    <VerticalStackLayout Spacing="16" Padding="0,32,0,0" MaximumWidthRequest="560" HorizontalOptions="Start"
-                                         IsVisible="{Binding IsNotFound}">
-                        <cds:CdsIcon Icon="Search" Size="48" Color="{DynamicResource CdsIconSecondary}" HorizontalOptions="Start" />
-                        <cds:CdsText Text="{Binding Key, StringFormat='No issue matches {0}'}" TypeStyle="Heading03" />
-                        <cds:CdsText Text="The issue may have been deleted or moved, or the link has a typo. Find it from the issue list instead."
-                                     TypeStyle="Body01" Tone="Secondary" />
-                        <HorizontalStackLayout Margin="0,8,0,0">
-                            <cds:CdsButton Text="Back to issues" Icon="ArrowLeft" Size="Md" Command="{Binding GoBackCommand}" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-
-                    <!-- Content -->
-                    <Grid ColumnDefinitions="*,352" ColumnSpacing="32" IsVisible="{Binding HasIssue}">
-                        <cds:CdsTabs x:Name="Tabs" Type="Contained" Label="Issue sections" SelectedIndex="{Binding SelectedTabIndex}" PanelPadding="16,24,16,32" VerticalOptions="Start">
-                            <cds:CdsTab x:Name="DetailsTab" Text="Details">
-                                <VerticalStackLayout Spacing="32">
-                                    <VerticalStackLayout Spacing="8">
-                                        <cds:CdsText Text="Description" TypeStyle="HeadingCompact02" />
-                                        <cds:CdsText Text="{Binding Description}" TypeStyle="Body01" />
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasReproSteps}">
-                                        <cds:CdsText Text="Steps to reproduce" TypeStyle="HeadingCompact02" />
-                                        <cds:CdsOrderedList p:ItemsBinding.Source="{Binding ReproSteps}">
-                                            <p:ItemsBinding.Template>
-                                                <DataTemplate x:DataType="x:String">
-                                                    <cds:CdsListItem Text="{Binding .}" />
-                                                </DataTemplate>
-                                            </p:ItemsBinding.Template>
-                                        </cds:CdsOrderedList>
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStackTrace}">
-                                        <cds:CdsText Text="Stack trace" TypeStyle="HeadingCompact02" />
-                                        <cds:CdsCodeSnippet Type="Multi" IsWrapText="True" Code="{Binding StackTrace}" Feedback="Stack trace copied"
-                                                            CopyButtonDescription="Copy stack trace" />
-                                    </VerticalStackLayout>
-
-                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasBranch}">
-                                        <cds:CdsText Text="Branch" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
-                                        <cds:CdsCodeSnippet Type="Inline" Code="{Binding Branch}" Feedback="Branch name copied"
-                                                            CopyButtonDescription="Copy branch name" VerticalOptions="Center" />
-                                    </HorizontalStackLayout>
-
-                                    <cds:CdsAccordion>
-                                        <cds:CdsAccordionItem Title="{Binding LinkedTitle}" IsOpen="True">
-                                            <VerticalStackLayout Spacing="0">
-                                                <cds:CdsText Text="No linked issues." TypeStyle="Body01" Tone="Secondary"
-                                                             IsVisible="{Binding HasLinkedIssues, Converter={x:Static p:Converters.Not}}" />
-                                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding LinkedIssues}"
-                                                                     BindableLayout.ItemTemplate="{StaticResource IssueLinkRow}" />
-                                            </VerticalStackLayout>
-                                        </cds:CdsAccordionItem>
-                                        <cds:CdsAccordionItem Title="{Binding ChildTitle}" IsOpen="True">
-                                            <VerticalStackLayout Spacing="0">
-                                                <cds:CdsText Text="No child issues. Issues that name this one as their parent show here." TypeStyle="Body01" Tone="Secondary"
-                                                             IsVisible="{Binding HasChildIssues, Converter={x:Static p:Converters.Not}}" />
-                                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ChildIssues}"
-                                                                     BindableLayout.ItemTemplate="{StaticResource IssueLinkRow}" />
-                                            </VerticalStackLayout>
-                                        </cds:CdsAccordionItem>
-                                    </cds:CdsAccordion>
-                                </VerticalStackLayout>
-                            </cds:CdsTab>
-
-                            <cds:CdsTab x:Name="CommentsTab" Text="Comments" SecondaryLabel="{Binding CommentCountText}">
+                <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+                <cds:CdsGrid FullWidth="True">
+                    <cds:CdsColumn>
+                        <Grid Padding="0,24,0,48">
+                            <!-- Loading -->
+                            <Grid ColumnDefinitions="*,352" ColumnSpacing="32" IsVisible="{Binding IsLoading}">
                                 <VerticalStackLayout Spacing="24">
-                                    <cds:CdsText Text="No comments yet. Ask a question or share what you found." TypeStyle="Body01" Tone="Secondary"
-                                                 IsVisible="{Binding HasComments, Converter={x:Static p:Converters.Not}}" />
-                                    <VerticalStackLayout Spacing="24" BindableLayout.ItemsSource="{Binding Comments}">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:CommentRow">
-                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                                    <Border WidthRequest="32" HeightRequest="32" StrokeThickness="0" VerticalOptions="Start"
-                                                            BackgroundColor="{DynamicResource CdsLayerAccent01}">
-                                                        <Border.StrokeShape>
-                                                            <RoundRectangle CornerRadius="16" />
-                                                        </Border.StrokeShape>
-                                                        <cds:CdsText Text="{Binding Initials}" TypeStyle="Label01" HorizontalOptions="Center" VerticalOptions="Center" />
-                                                    </Border>
-                                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                                        <HorizontalStackLayout Spacing="8">
-                                                            <cds:CdsText Text="{Binding Author}" TypeStyle="HeadingCompact01" />
-                                                            <cds:CdsText Text="{Binding WhenText}" TypeStyle="Label01" Tone="Helper" VerticalOptions="Center" />
-                                                        </HorizontalStackLayout>
-                                                        <cds:CdsText Text="{Binding Body}" TypeStyle="Body01" />
+                                    <cds:CdsSkeletonText WidthPercent="60" IsHeading="True" />
+                                    <cds:CdsSkeletonText IsParagraph="True" LineCount="4" />
+                                    <cds:CdsSkeletonText IsParagraph="True" LineCount="3" />
+                                    <cds:CdsSkeletonPlaceholder HeightRequest="160" HorizontalOptions="Fill" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="24">
+                                    <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
+                                    <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
+                                    <cds:CdsSkeletonPlaceholder HeightRequest="64" HorizontalOptions="Fill" />
+                                    <cds:CdsSkeletonText IsParagraph="True" LineCount="3" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <!-- Not found -->
+                            <VerticalStackLayout Spacing="16" Padding="0,32,0,0" MaximumWidthRequest="560" HorizontalOptions="Start"
+                                                 IsVisible="{Binding IsNotFound}">
+                                <cds:CdsIcon Icon="Search" Size="48" Color="{DynamicResource CdsIconSecondary}" HorizontalOptions="Start" />
+                                <cds:CdsText Text="{Binding Key, StringFormat='No issue matches {0}'}" TypeStyle="Heading03" />
+                                <cds:CdsText Text="The issue may have been deleted or moved, or the link has a typo. Find it from the issue list instead."
+                                             TypeStyle="Body01" Tone="Secondary" />
+                                <HorizontalStackLayout Margin="0,8,0,0">
+                                    <cds:CdsButton Text="Back to issues" Icon="ArrowLeft" Size="Md" Command="{Binding GoBackCommand}" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Content -->
+                            <Grid ColumnDefinitions="*,352" ColumnSpacing="32" IsVisible="{Binding HasIssue}">
+                                <cds:CdsTabs x:Name="Tabs" Type="Contained" Label="Issue sections" SelectedIndex="{Binding SelectedTabIndex}" PanelPadding="16,24,16,32" VerticalOptions="Start">
+                                    <cds:CdsTab x:Name="DetailsTab" Text="Details">
+                                        <VerticalStackLayout Spacing="32">
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="Description" TypeStyle="HeadingCompact02" />
+                                                <cds:CdsText Text="{Binding Description}" TypeStyle="Body01" />
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasReproSteps}">
+                                                <cds:CdsText Text="Steps to reproduce" TypeStyle="HeadingCompact02" />
+                                                <cds:CdsOrderedList p:ItemsBinding.Source="{Binding ReproSteps}">
+                                                    <p:ItemsBinding.Template>
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <cds:CdsListItem Text="{Binding .}" />
+                                                        </DataTemplate>
+                                                    </p:ItemsBinding.Template>
+                                                </cds:CdsOrderedList>
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasStackTrace}">
+                                                <cds:CdsText Text="Stack trace" TypeStyle="HeadingCompact02" />
+                                                <cds:CdsCodeSnippet Type="Multi" IsWrapText="True" Code="{Binding StackTrace}" Feedback="Stack trace copied"
+                                                                    CopyButtonDescription="Copy stack trace" />
+                                            </VerticalStackLayout>
+
+                                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasBranch}">
+                                                <cds:CdsText Text="Branch" TypeStyle="HeadingCompact01" VerticalOptions="Center" />
+                                                <cds:CdsCodeSnippet Type="Inline" Code="{Binding Branch}" Feedback="Branch name copied"
+                                                                    CopyButtonDescription="Copy branch name" VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+
+                                            <cds:CdsAccordion>
+                                                <cds:CdsAccordionItem Title="{Binding LinkedTitle}" IsOpen="True">
+                                                    <VerticalStackLayout Spacing="0">
+                                                        <cds:CdsText Text="No linked issues." TypeStyle="Body01" Tone="Secondary"
+                                                                     IsVisible="{Binding HasLinkedIssues, Converter={x:Static p:Converters.Not}}" />
+                                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding LinkedIssues}"
+                                                                             BindableLayout.ItemTemplate="{StaticResource IssueLinkRow}" />
                                                     </VerticalStackLayout>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
-                                    <VerticalStackLayout Spacing="16" MaximumWidthRequest="720" HorizontalOptions="Fill">
-                                        <cds:CdsTextArea Label="Add a comment" Placeholder="Share an update, ask a question or mention what you tried"
-                                                         Rows="4" EnableCounter="True" MaxCount="{x:Static vm:IssueDetailViewModel.CommentMaxLength}"
-                                                         Text="{Binding NewComment}" />
-                                        <HorizontalStackLayout Spacing="16">
-                                            <cds:CdsButton Text="Comment" Size="Md" Command="{Binding PostCommentCommand}"
-                                                           IsVisible="{Binding IsPostingComment, Converter={x:Static p:Converters.Not}}" />
-                                            <cds:CdsInlineLoading Description="Posting comment…" IsVisible="{Binding IsPostingComment}"
-                                                                  Status="{Binding IsPostingComment, Converter={x:Static p:Converters.BusyLoading}}" />
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </cds:CdsTab>
+                                                </cds:CdsAccordionItem>
+                                                <cds:CdsAccordionItem Title="{Binding ChildTitle}" IsOpen="True">
+                                                    <VerticalStackLayout Spacing="0">
+                                                        <cds:CdsText Text="No child issues. Issues that name this one as their parent show here." TypeStyle="Body01" Tone="Secondary"
+                                                                     IsVisible="{Binding HasChildIssues, Converter={x:Static p:Converters.Not}}" />
+                                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ChildIssues}"
+                                                                             BindableLayout.ItemTemplate="{StaticResource IssueLinkRow}" />
+                                                    </VerticalStackLayout>
+                                                </cds:CdsAccordionItem>
+                                            </cds:CdsAccordion>
+                                        </VerticalStackLayout>
+                                    </cds:CdsTab>
 
-                            <cds:CdsTab x:Name="ActivityTab" Text="Activity">
-                                <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Activity}">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="vm:IssueActivityRow">
-                                            <Grid ColumnDefinitions="32,*" ColumnSpacing="12">
-                                                <BoxView WidthRequest="1" HorizontalOptions="Center" Margin="0,28,0,0"
-                                                         Color="{DynamicResource CdsBorderSubtle01}"
-                                                         IsVisible="{Binding IsLast, Converter={x:Static p:Converters.Not}}" />
-                                                <Border WidthRequest="28" HeightRequest="28" StrokeThickness="1" VerticalOptions="Start"
-                                                        Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsLayer01}">
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="14" />
-                                                    </Border.StrokeShape>
-                                                    <cds:CdsIcon Icon="{Binding Kind, Converter={x:Static p:IssueDetailConverters.ActivityIcon}}" Size="16"
-                                                                 Color="{DynamicResource CdsIconSecondary}" HorizontalOptions="Center" VerticalOptions="Center" />
-                                                </Border>
-                                                <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="0,4,0,24">
-                                                    <cds:CdsText Text="{Binding Sentence}" TypeStyle="BodyCompact01" />
-                                                    <cds:CdsText Text="{Binding WhenText}" TypeStyle="Label01" Tone="Helper" />
-                                                </VerticalStackLayout>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </VerticalStackLayout>
-                            </cds:CdsTab>
+                                    <cds:CdsTab x:Name="CommentsTab" Text="Comments" SecondaryLabel="{Binding CommentCountText}">
+                                        <VerticalStackLayout Spacing="24">
+                                            <cds:CdsText Text="No comments yet. Ask a question or share what you found." TypeStyle="Body01" Tone="Secondary"
+                                                         IsVisible="{Binding HasComments, Converter={x:Static p:Converters.Not}}" />
+                                            <VerticalStackLayout Spacing="24" BindableLayout.ItemsSource="{Binding Comments}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:CommentRow">
+                                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                                            <Border WidthRequest="32" HeightRequest="32" StrokeThickness="0" VerticalOptions="Start"
+                                                                    BackgroundColor="{DynamicResource CdsLayerAccent01}">
+                                                                <Border.StrokeShape>
+                                                                    <RoundRectangle CornerRadius="16" />
+                                                                </Border.StrokeShape>
+                                                                <cds:CdsText Text="{Binding Initials}" TypeStyle="Label01" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                            </Border>
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                                                <HorizontalStackLayout Spacing="8">
+                                                                    <cds:CdsText Text="{Binding Author}" TypeStyle="HeadingCompact01" />
+                                                                    <cds:CdsText Text="{Binding WhenText}" TypeStyle="Label01" Tone="Helper" VerticalOptions="Center" />
+                                                                </HorizontalStackLayout>
+                                                                <cds:CdsText Text="{Binding Body}" TypeStyle="Body01" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="16" MaximumWidthRequest="720" HorizontalOptions="Fill">
+                                                <cds:CdsTextArea Label="Add a comment" Placeholder="Share an update, ask a question or mention what you tried"
+                                                                 Rows="4" EnableCounter="True" MaxCount="{x:Static vm:IssueDetailViewModel.CommentMaxLength}"
+                                                                 Text="{Binding NewComment}" />
+                                                <HorizontalStackLayout Spacing="16">
+                                                    <cds:CdsButton Text="Comment" Size="Md" Command="{Binding PostCommentCommand}"
+                                                                   IsVisible="{Binding IsPostingComment, Converter={x:Static p:Converters.Not}}" />
+                                                    <cds:CdsInlineLoading Description="Posting comment…" IsVisible="{Binding IsPostingComment}"
+                                                                          Status="{Binding IsPostingComment, Converter={x:Static p:Converters.BusyLoading}}" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </cds:CdsTab>
 
-                            <cds:CdsTab x:Name="AttachmentsTab" Text="Attachments" SecondaryLabel="{Binding AttachmentCountText}">
-                                <VerticalStackLayout Spacing="24" MaximumWidthRequest="560" HorizontalOptions="Start">
-                                    <cds:CdsFileUploader x:Name="Uploader" Variant="Drop" Multiple="True" Size="Md"
-                                                         LabelTitle="Attach files"
-                                                         LabelDescription="Max file size is 25 MB. Logs, screenshots and screen recordings help most."
-                                                         DropLabel="Drag and drop files here or click to upload"
-                                                         FilesAdded="OnFilesAdded" />
-                                    <VerticalStackLayout Spacing="8">
-                                        <cds:CdsText Text="Attached files" TypeStyle="HeadingCompact01" />
-                                        <cds:CdsText Text="Nothing attached yet." TypeStyle="Body01" Tone="Secondary"
-                                                     IsVisible="{Binding HasAttachments, Converter={x:Static p:Converters.Not}}" />
-                                        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Attachments}">
+                                    <cds:CdsTab x:Name="ActivityTab" Text="Activity">
+                                        <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Activity}">
                                             <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="vm:AttachmentRow">
-                                                    <VerticalStackLayout Spacing="4">
-                                                        <cds:CdsFileUploaderItem Name="{Binding Name}" Status="Edit" Size="Md"
-                                                                                 IconDescription="Remove file" Deleted="OnAttachmentDeleted" />
-                                                        <cds:CdsText Text="{Binding Details}" TypeStyle="Label01" Tone="Helper" />
-                                                    </VerticalStackLayout>
+                                                <DataTemplate x:DataType="vm:IssueActivityRow">
+                                                    <Grid ColumnDefinitions="32,*" ColumnSpacing="12">
+                                                        <BoxView WidthRequest="1" HorizontalOptions="Center" Margin="0,28,0,0"
+                                                                 Color="{DynamicResource CdsBorderSubtle01}"
+                                                                 IsVisible="{Binding IsLast, Converter={x:Static p:Converters.Not}}" />
+                                                        <Border WidthRequest="28" HeightRequest="28" StrokeThickness="1" VerticalOptions="Start"
+                                                                Stroke="{DynamicResource CdsBorderSubtle01}" BackgroundColor="{DynamicResource CdsLayer01}">
+                                                            <Border.StrokeShape>
+                                                                <RoundRectangle CornerRadius="14" />
+                                                            </Border.StrokeShape>
+                                                            <cds:CdsIcon Icon="{Binding Kind, Converter={x:Static p:IssueDetailConverters.ActivityIcon}}" Size="16"
+                                                                         Color="{DynamicResource CdsIconSecondary}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                        </Border>
+                                                        <VerticalStackLayout Grid.Column="1" Spacing="2" Padding="0,4,0,24">
+                                                            <cds:CdsText Text="{Binding Sentence}" TypeStyle="BodyCompact01" />
+                                                            <cds:CdsText Text="{Binding WhenText}" TypeStyle="Label01" Tone="Helper" />
+                                                        </VerticalStackLayout>
+                                                    </Grid>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </cds:CdsTab>
-                        </cds:CdsTabs>
+                                    </cds:CdsTab>
 
-                        <!-- Side column: fields save as soon as they change. -->
-                        <cds:CdsTile Grid.Column="1" VerticalOptions="Start" Padding="16,16,16,24">
-                            <VerticalStackLayout Spacing="24">
-                                <cds:CdsText Text="Fields" TypeStyle="HeadingCompact02" />
-                                <cds:CdsSelect Label="Status" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
+                                    <cds:CdsTab x:Name="AttachmentsTab" Text="Attachments" SecondaryLabel="{Binding AttachmentCountText}">
+                                        <VerticalStackLayout Spacing="24" MaximumWidthRequest="560" HorizontalOptions="Start">
+                                            <cds:CdsFileUploader x:Name="Uploader" Variant="Drop" Multiple="True" Size="Md"
+                                                                 LabelTitle="Attach files"
+                                                                 LabelDescription="Max file size is 25 MB. Logs, screenshots and screen recordings help most."
+                                                                 DropLabel="Drag and drop files here or click to upload"
+                                                                 FilesAdded="OnFilesAdded" />
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsText Text="Attached files" TypeStyle="HeadingCompact01" />
+                                                <cds:CdsText Text="Nothing attached yet." TypeStyle="Body01" Tone="Secondary"
+                                                             IsVisible="{Binding HasAttachments, Converter={x:Static p:Converters.Not}}" />
+                                                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Attachments}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:AttachmentRow">
+                                                            <VerticalStackLayout Spacing="4">
+                                                                <cds:CdsFileUploaderItem Name="{Binding Name}" Status="Edit" Size="Md"
+                                                                                         IconDescription="Remove file" Deleted="OnAttachmentDeleted" />
+                                                                <cds:CdsText Text="{Binding Details}" TypeStyle="Label01" Tone="Helper" />
+                                                            </VerticalStackLayout>
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </VerticalStackLayout>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </cds:CdsTab>
+                                </cds:CdsTabs>
 
-                                <VerticalStackLayout Spacing="8">
-                                    <Border x:Name="AssigneeFrame" StrokeThickness="0" Padding="0" Margin="-8" StrokeShape="Rectangle"
-                                            cds:CdsAiTreatment.IsActive="{Binding IsAssigneeAiFilled}">
-                                        <Grid Padding="8">
-                                            <cds:CdsDropdown Label="Assignee" ItemsSource="{Binding AssigneeOptions}" SelectedItem="{Binding SelectedAssignee}" />
-                                            <cds:CdsAILabel x:Name="AssigneeAiLabel" Size="Mini" HorizontalOptions="End" VerticalOptions="Start"
-                                                            Label="Why this assignee is suggested" RevertLabel="Revert to the previous assignee"
-                                                            IsRevertActive="{Binding IsAssigneeAiFilled}" IsVisible="{Binding ShowAssigneeAiLabel}"
-                                                            RevertClicked="OnRevertAssignee">
-                                                <cds:CdsAILabelContent x:Name="AiCallout">
-                                                    <cds:CdsAILabelContent.Actions>
-                                                        <cds:CdsAILabelActions>
-                                                            <cds:CdsButton Text="Assign" Clicked="OnApplySuggestionClicked" />
-                                                        </cds:CdsAILabelActions>
-                                                    </cds:CdsAILabelContent.Actions>
-                                                    <VerticalStackLayout Spacing="8" WidthRequest="248">
-                                                        <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
-                                                        <cds:CdsText Text="{Binding SuggestedName}" TypeStyle="Heading02" />
-                                                        <cds:CdsText Text="{Binding SuggestionConfidenceText}" TypeStyle="Label01" Tone="Secondary" />
-                                                        <cds:CdsText Text="{Binding SuggestionReason}" TypeStyle="Body01" />
-                                                        <cds:CdsText Text="Suggested from who closed similar issues in this component and how much open work they have."
-                                                                     TypeStyle="HelperText01" Tone="Helper" />
-                                                    </VerticalStackLayout>
-                                                </cds:CdsAILabelContent>
-                                            </cds:CdsAILabel>
+                                <!-- Side column: fields save as soon as they change. -->
+                                <cds:CdsTile Grid.Column="1" VerticalOptions="Start" Padding="16,16,16,24">
+                                    <VerticalStackLayout Spacing="24">
+                                        <cds:CdsText Text="Fields" TypeStyle="HeadingCompact02" />
+                                        <cds:CdsSelect Label="Status" ItemsSource="{Binding StatusOptions}" SelectedItem="{Binding SelectedStatus}" />
+
+                                        <VerticalStackLayout Spacing="8">
+                                            <Border x:Name="AssigneeFrame" StrokeThickness="0" Padding="0" Margin="-8" StrokeShape="Rectangle"
+                                                    cds:CdsAiTreatment.IsActive="{Binding IsAssigneeAiFilled}">
+                                                <Grid Padding="8">
+                                                    <cds:CdsDropdown Label="Assignee" ItemsSource="{Binding AssigneeOptions}" SelectedItem="{Binding SelectedAssignee}" />
+                                                    <cds:CdsAILabel x:Name="AssigneeAiLabel" Size="Mini" HorizontalOptions="End" VerticalOptions="Start"
+                                                                    Label="Why this assignee is suggested" RevertLabel="Revert to the previous assignee"
+                                                                    IsRevertActive="{Binding IsAssigneeAiFilled}" IsVisible="{Binding ShowAssigneeAiLabel}"
+                                                                    RevertClicked="OnRevertAssignee">
+                                                        <cds:CdsAILabelContent x:Name="AiCallout">
+                                                            <cds:CdsAILabelContent.Actions>
+                                                                <cds:CdsAILabelActions>
+                                                                    <cds:CdsButton Text="Assign" Clicked="OnApplySuggestionClicked" />
+                                                                </cds:CdsAILabelActions>
+                                                            </cds:CdsAILabelContent.Actions>
+                                                            <VerticalStackLayout Spacing="8" WidthRequest="248">
+                                                                <cds:CdsText Text="AI explained" TypeStyle="Label01" Tone="Secondary" />
+                                                                <cds:CdsText Text="{Binding SuggestedName}" TypeStyle="Heading02" />
+                                                                <cds:CdsText Text="{Binding SuggestionConfidenceText}" TypeStyle="Label01" Tone="Secondary" />
+                                                                <cds:CdsText Text="{Binding SuggestionReason}" TypeStyle="Body01" />
+                                                                <cds:CdsText Text="Suggested from who closed similar issues in this component and how much open work they have."
+                                                                             TypeStyle="HelperText01" Tone="Helper" />
+                                                            </VerticalStackLayout>
+                                                        </cds:CdsAILabelContent>
+                                                    </cds:CdsAILabel>
+                                                </Grid>
+                                            </Border>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding HasSuggestion}" Margin="0,8,0,0">
+                                                <cds:CdsText Text="{Binding SuggestedName, StringFormat='Suggested: {0}'}" TypeStyle="HelperText01" Tone="Secondary"
+                                                             VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                                <cds:CdsButton Grid.Column="1" Text="Assign" Kind="Ghost" Size="Sm" Command="{Binding ApplySuggestionCommand}" />
+                                            </Grid>
+                                            <cds:CdsText Text="Assigned from the AI suggestion. Use the revert button to undo." TypeStyle="HelperText01" Tone="Helper"
+                                                         IsVisible="{Binding IsAssigneeAiFilled}" Margin="0,8,0,0" />
+                                        </VerticalStackLayout>
+
+                                        <cds:CdsDatePicker Label="Due date" Type="Single" Value="{Binding DueDate}" Placeholder="mm/dd/yyyy" />
+
+                                        <VerticalStackLayout Spacing="8">
+                                            <HorizontalStackLayout Spacing="4">
+                                                <cds:CdsText Text="Story points" TypeStyle="Label01" Tone="Secondary" VerticalOptions="Center" />
+                                                <cds:CdsToggletip Label="About story points" Placement="BottomStart" VerticalOptions="Center"
+                                                                  Text="Story points size the effort, not the hours: 1 is a quick change, 13 is a big piece of work. The team uses 1, 2, 3, 5, 8 and 13; split anything larger." />
+                                            </HorizontalStackLayout>
+                                            <cds:CdsNumberInput Label="Story points" HideLabel="True" Min="0" Max="40" Step="1" AllowEmpty="True"
+                                                                Value="{Binding StoryPoints}" />
+                                        </VerticalStackLayout>
+
+                                        <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" />
+
+                                        <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="8">
+                                            <cds:CdsText Text="Reporter" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Grid.Column="1" Text="{Binding ReporterName}" TypeStyle="BodyCompact01" />
+                                            <cds:CdsText Grid.Row="1" Text="Created" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Grid.Row="1" Grid.Column="1" Text="{Binding CreatedText}" TypeStyle="BodyCompact01" />
+                                            <cds:CdsText Grid.Row="2" Text="Updated" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Grid.Row="2" Grid.Column="1" Text="{Binding UpdatedText}" TypeStyle="BodyCompact01" />
+                                            <cds:CdsText Grid.Row="3" Text="Watchers" TypeStyle="Label01" Tone="Secondary" />
+                                            <cds:CdsText Grid.Row="3" Grid.Column="1" Text="{Binding WatchersText}" TypeStyle="BodyCompact01" />
                                         </Grid>
-                                    </Border>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding HasSuggestion}" Margin="0,8,0,0">
-                                        <cds:CdsText Text="{Binding SuggestedName, StringFormat='Suggested: {0}'}" TypeStyle="HelperText01" Tone="Secondary"
-                                                     VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                                        <cds:CdsButton Grid.Column="1" Text="Assign" Kind="Ghost" Size="Sm" Command="{Binding ApplySuggestionCommand}" />
-                                    </Grid>
-                                    <cds:CdsText Text="Assigned from the AI suggestion. Use the revert button to undo." TypeStyle="HelperText01" Tone="Helper"
-                                                 IsVisible="{Binding IsAssigneeAiFilled}" Margin="0,8,0,0" />
-                                </VerticalStackLayout>
-
-                                <cds:CdsDatePicker Label="Due date" Type="Single" Value="{Binding DueDate}" Placeholder="mm/dd/yyyy" />
-
-                                <VerticalStackLayout Spacing="8">
-                                    <HorizontalStackLayout Spacing="4">
-                                        <cds:CdsText Text="Story points" TypeStyle="Label01" Tone="Secondary" VerticalOptions="Center" />
-                                        <cds:CdsToggletip Label="About story points" Placement="BottomStart" VerticalOptions="Center"
-                                                          Text="Story points size the effort, not the hours: 1 is a quick change, 13 is a big piece of work. The team uses 1, 2, 3, 5, 8 and 13; split anything larger." />
-                                    </HorizontalStackLayout>
-                                    <cds:CdsNumberInput Label="Story points" HideLabel="True" Min="0" Max="40" Step="1" AllowEmpty="True"
-                                                        Value="{Binding StoryPoints}" />
-                                </VerticalStackLayout>
-
-                                <BoxView HeightRequest="1" Color="{DynamicResource CdsBorderSubtle01}" />
-
-                                <Grid ColumnDefinitions="96,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="8">
-                                    <cds:CdsText Text="Reporter" TypeStyle="Label01" Tone="Secondary" />
-                                    <cds:CdsText Grid.Column="1" Text="{Binding ReporterName}" TypeStyle="BodyCompact01" />
-                                    <cds:CdsText Grid.Row="1" Text="Created" TypeStyle="Label01" Tone="Secondary" />
-                                    <cds:CdsText Grid.Row="1" Grid.Column="1" Text="{Binding CreatedText}" TypeStyle="BodyCompact01" />
-                                    <cds:CdsText Grid.Row="2" Text="Updated" TypeStyle="Label01" Tone="Secondary" />
-                                    <cds:CdsText Grid.Row="2" Grid.Column="1" Text="{Binding UpdatedText}" TypeStyle="BodyCompact01" />
-                                    <cds:CdsText Grid.Row="3" Text="Watchers" TypeStyle="Label01" Tone="Secondary" />
-                                    <cds:CdsText Grid.Row="3" Grid.Column="1" Text="{Binding WatchersText}" TypeStyle="BodyCompact01" />
-                                </Grid>
-                            </VerticalStackLayout>
-                        </cds:CdsTile>
-                    </Grid>
-                </Grid>
+                                    </VerticalStackLayout>
+                                </cds:CdsTile>
+                            </Grid>
+                        </Grid>
+                    </cds:CdsColumn>
+                </cds:CdsGrid>
             </VerticalStackLayout>
         </ScrollView>
 

@@ -45,6 +45,10 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Nested grids" Description="A grid inside a grid column is a subgrid on the parent's columns: it has as many columns as the column spans, no outer margin, and its columns line up with the 16 above. Each subgrid sets its own gutter mode: the right one is narrow, so its content hangs into the gutter.">
+            <cds:CdsGrid x:Name="NestedGrid" Breakpoint="Lg" />
+        </g:GalleryExample>
+
         <g:GalleryExample Title="In context" Description="A console overview page on the page's own breakpoint: the title spans the row, filters take 4 of 16 (the full row below lg), content the other 12.">
             <cds:CdsGrid x:Name="PageGrid" FullWidth="True" />
         </g:GalleryExample>

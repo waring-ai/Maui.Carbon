@@ -18,105 +18,110 @@
                 </cds:CdsPageHeaderContent>
             </cds:CdsPageHeader>
 
-            <VerticalStackLayout Padding="32,24,32,48" Spacing="16">
-                <cds:CdsSearch Label="Search people" Placeholder="Search by name, role, location or skill" Size="Lg"
-                               Text="{Binding SearchText}" />
+            <!-- The page grid: its column box lines up with the page header at every breakpoint, and grids inside it are subgrids on its columns. -->
+            <cds:CdsGrid FullWidth="True">
+                <cds:CdsColumn>
+                    <VerticalStackLayout Padding="0,24,0,48" Spacing="16">
+                        <cds:CdsSearch Label="Search people" Placeholder="Search by name, role, location or skill" Size="Lg"
+                                       Text="{Binding SearchText}" />
 
-                <Grid ColumnDefinitions="*,288" ColumnSpacing="24">
-                    <!-- Table -->
-                    <Grid>
-                        <cds:CdsDataTableSkeleton RowCount="12" ColumnCount="5" ShowHeader="True" ShowToolbar="False" IsVisible="{Binding IsLoading}" />
-                        <cds:CdsDataTable x:Name="Table"
-                                          IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}"
-                                          Title="{Binding CountText}"
-                                          Description="Open issues are assigned work that is not done or cancelled."
-                                          Size="Lg"
-                                          IsSortable="True"
-                                          Selection="Radio"
-                                          ItemsSource="{Binding Rows}"
-                                          SelectionChanged="OnSelectionChanged">
-                            <cds:CdsDataTable.EmptyContent>
-                                <VerticalStackLayout Spacing="8" Padding="16,24">
-                                    <cds:CdsText Text="No people match your search" TypeStyle="Heading02" />
-                                    <cds:CdsText Text="Search by name, role, location or a skill such as Kotlin." TypeStyle="Body01" Tone="Secondary" />
-                                    <cds:CdsButton Text="Clear search" Kind="Tertiary" Size="Md" Margin="0,16,0,0" HorizontalOptions="Start"
-                                                   Command="{Binding ClearSearchCommand}" />
-                                </VerticalStackLayout>
-                            </cds:CdsDataTable.EmptyContent>
-                        </cds:CdsDataTable>
-                    </Grid>
-
-                    <!-- Detail panel -->
-                    <cds:CdsTile Grid.Column="1" VerticalOptions="Start" IsVisible="{Binding HasSelection}">
-                        <cds:CdsSection>
-                            <VerticalStackLayout Spacing="24">
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
-                                    <cds:CdsTooltip Text="{Binding Selected.AvatarTooltip}" Placement="Bottom" Role="Description" VerticalOptions="Start">
-                                        <Border StrokeThickness="0" WidthRequest="48" HeightRequest="48"
-                                                BackgroundColor="{DynamicResource CdsLayerAccent01}">
-                                            <Border.StrokeShape>
-                                                <Ellipse />
-                                            </Border.StrokeShape>
-                                            <cds:CdsText Text="{Binding Selected.Initials}" TypeStyle="HeadingCompact02"
-                                                         HorizontalOptions="Center" VerticalOptions="Center" />
-                                        </Border>
-                                    </cds:CdsTooltip>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
-                                        <cds:CdsHeading Text="{Binding Selected.Name}" TypeStyle="Heading03" />
-                                        <cds:CdsText Text="{Binding Selected.JobTitle}" TypeStyle="Body01" Tone="Secondary" />
-                                    </VerticalStackLayout>
-                                </Grid>
-
-                                <cds:CdsTag Text="{Binding Selected.RoleText}" Size="Md" HorizontalOptions="Start"
-                                            Type="{Binding Selected.Role, Converter={x:Static p:Converters.RoleTag}}" />
-
-                                <cds:CdsSection>
-                                    <VerticalStackLayout Spacing="8">
-                                        <cds:CdsHeading Text="Contact" TypeStyle="HeadingCompact01" />
-                                        <cds:CdsLink Text="{Binding Selected.Email}" Href="{Binding Selected.MailTo}" Icon="Launch" />
-                                        <cds:CdsText Text="{Binding Selected.Location, StringFormat='Works from {0}'}" TypeStyle="Body01" Tone="Secondary" />
-                                    </VerticalStackLayout>
-                                </cds:CdsSection>
-
-                                <cds:CdsSection>
-                                    <VerticalStackLayout Spacing="8">
-                                        <cds:CdsHeading Text="Skills" TypeStyle="HeadingCompact01" />
-                                        <cds:CdsUnorderedList p:ItemsBinding.Source="{Binding Selected.Skills}">
-                                            <p:ItemsBinding.Template>
-                                                <DataTemplate x:DataType="x:String">
-                                                    <cds:CdsListItem Text="{Binding .}" />
-                                                </DataTemplate>
-                                            </p:ItemsBinding.Template>
-                                        </cds:CdsUnorderedList>
-                                    </VerticalStackLayout>
-                                </cds:CdsSection>
-
-                                <cds:CdsSection>
-                                    <VerticalStackLayout Spacing="12">
-                                        <cds:CdsHeading Text="{Binding OpenIssuesHeading}" TypeStyle="HeadingCompact01" />
-                                        <cds:CdsText Text="Nothing open is assigned right now." TypeStyle="Body01" Tone="Secondary"
-                                                     IsVisible="{Binding HasOpenIssues, Converter={x:Static p:Converters.Not}}" />
-                                        <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding SelectedIssues}">
-                                            <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="vm:TeamIssueLink">
-                                                    <VerticalStackLayout Spacing="4">
-                                                        <cds:CdsLink Text="{Binding Key}" Clicked="OnIssueClicked" HorizontalOptions="Start" />
-                                                        <cds:CdsText Text="{Binding Title}" TypeStyle="Body01" MaxLines="2" LineBreakMode="TailTruncation" />
-                                                        <cds:CdsIconIndicator Size="16" Label="{Binding StatusText}"
-                                                                              Kind="{Binding Status, Converter={x:Static p:Converters.StatusIndicator}}" />
-                                                    </VerticalStackLayout>
-                                                </DataTemplate>
-                                            </BindableLayout.ItemTemplate>
+                        <Grid ColumnDefinitions="*,288" ColumnSpacing="24">
+                            <!-- Table -->
+                            <Grid>
+                                <cds:CdsDataTableSkeleton RowCount="12" ColumnCount="5" ShowHeader="True" ShowToolbar="False" IsVisible="{Binding IsLoading}" />
+                                <cds:CdsDataTable x:Name="Table"
+                                                  IsVisible="{Binding IsLoading, Converter={x:Static p:Converters.Not}}"
+                                                  Title="{Binding CountText}"
+                                                  Description="Open issues are assigned work that is not done or cancelled."
+                                                  Size="Lg"
+                                                  IsSortable="True"
+                                                  Selection="Radio"
+                                                  ItemsSource="{Binding Rows}"
+                                                  SelectionChanged="OnSelectionChanged">
+                                    <cds:CdsDataTable.EmptyContent>
+                                        <VerticalStackLayout Spacing="8" Padding="16,24">
+                                            <cds:CdsText Text="No people match your search" TypeStyle="Heading02" />
+                                            <cds:CdsText Text="Search by name, role, location or a skill such as Kotlin." TypeStyle="Body01" Tone="Secondary" />
+                                            <cds:CdsButton Text="Clear search" Kind="Tertiary" Size="Md" Margin="0,16,0,0" HorizontalOptions="Start"
+                                                           Command="{Binding ClearSearchCommand}" />
                                         </VerticalStackLayout>
-                                        <cds:CdsText Text="{Binding MoreIssuesText}" TypeStyle="Label01" Tone="Secondary"
-                                                     IsVisible="{Binding HasMoreIssues}" />
+                                    </cds:CdsDataTable.EmptyContent>
+                                </cds:CdsDataTable>
+                            </Grid>
+
+                            <!-- Detail panel -->
+                            <cds:CdsTile Grid.Column="1" VerticalOptions="Start" IsVisible="{Binding HasSelection}">
+                                <cds:CdsSection>
+                                    <VerticalStackLayout Spacing="24">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                                            <cds:CdsTooltip Text="{Binding Selected.AvatarTooltip}" Placement="Bottom" Role="Description" VerticalOptions="Start">
+                                                <Border StrokeThickness="0" WidthRequest="48" HeightRequest="48"
+                                                        BackgroundColor="{DynamicResource CdsLayerAccent01}">
+                                                    <Border.StrokeShape>
+                                                        <Ellipse />
+                                                    </Border.StrokeShape>
+                                                    <cds:CdsText Text="{Binding Selected.Initials}" TypeStyle="HeadingCompact02"
+                                                                 HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Border>
+                                            </cds:CdsTooltip>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                                <cds:CdsHeading Text="{Binding Selected.Name}" TypeStyle="Heading03" />
+                                                <cds:CdsText Text="{Binding Selected.JobTitle}" TypeStyle="Body01" Tone="Secondary" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <cds:CdsTag Text="{Binding Selected.RoleText}" Size="Md" HorizontalOptions="Start"
+                                                    Type="{Binding Selected.Role, Converter={x:Static p:Converters.RoleTag}}" />
+
+                                        <cds:CdsSection>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsHeading Text="Contact" TypeStyle="HeadingCompact01" />
+                                                <cds:CdsLink Text="{Binding Selected.Email}" Href="{Binding Selected.MailTo}" Icon="Launch" />
+                                                <cds:CdsText Text="{Binding Selected.Location, StringFormat='Works from {0}'}" TypeStyle="Body01" Tone="Secondary" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsSection>
+
+                                        <cds:CdsSection>
+                                            <VerticalStackLayout Spacing="8">
+                                                <cds:CdsHeading Text="Skills" TypeStyle="HeadingCompact01" />
+                                                <cds:CdsUnorderedList p:ItemsBinding.Source="{Binding Selected.Skills}">
+                                                    <p:ItemsBinding.Template>
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <cds:CdsListItem Text="{Binding .}" />
+                                                        </DataTemplate>
+                                                    </p:ItemsBinding.Template>
+                                                </cds:CdsUnorderedList>
+                                            </VerticalStackLayout>
+                                        </cds:CdsSection>
+
+                                        <cds:CdsSection>
+                                            <VerticalStackLayout Spacing="12">
+                                                <cds:CdsHeading Text="{Binding OpenIssuesHeading}" TypeStyle="HeadingCompact01" />
+                                                <cds:CdsText Text="Nothing open is assigned right now." TypeStyle="Body01" Tone="Secondary"
+                                                             IsVisible="{Binding HasOpenIssues, Converter={x:Static p:Converters.Not}}" />
+                                                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding SelectedIssues}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:TeamIssueLink">
+                                                            <VerticalStackLayout Spacing="4">
+                                                                <cds:CdsLink Text="{Binding Key}" Clicked="OnIssueClicked" HorizontalOptions="Start" />
+                                                                <cds:CdsText Text="{Binding Title}" TypeStyle="Body01" MaxLines="2" LineBreakMode="TailTruncation" />
+                                                                <cds:CdsIconIndicator Size="16" Label="{Binding StatusText}"
+                                                                                      Kind="{Binding Status, Converter={x:Static p:Converters.StatusIndicator}}" />
+                                                            </VerticalStackLayout>
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </VerticalStackLayout>
+                                                <cds:CdsText Text="{Binding MoreIssuesText}" TypeStyle="Label01" Tone="Secondary"
+                                                             IsVisible="{Binding HasMoreIssues}" />
+                                            </VerticalStackLayout>
+                                        </cds:CdsSection>
                                     </VerticalStackLayout>
                                 </cds:CdsSection>
-                            </VerticalStackLayout>
-                        </cds:CdsSection>
-                    </cds:CdsTile>
-                </Grid>
-            </VerticalStackLayout>
+                            </cds:CdsTile>
+                        </Grid>
+                    </VerticalStackLayout>
+                </cds:CdsColumn>
+            </cds:CdsGrid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentView>

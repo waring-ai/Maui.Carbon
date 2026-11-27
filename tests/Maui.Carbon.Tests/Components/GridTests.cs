@@ -294,3 +294,128 @@ public class GridControlTests
         Assert.True(zero.IsVisible);
     }
 }
+
+public class SubgridTests
+{
+    static readonly GridMetrics Parent = GridModel.Metrics(1056, CdsBreakpoint.Lg, CdsGridMode.Wide, false, CdsGridAlign.Center);
+
+    static GridSubgrid CellOf(GridMetrics parent, int span) =>
+        new(span, parent.GutterStart, parent.GutterEnd, CdsBreakpoint.Lg);
+
+    [Fact]
+    public void A_subgrid_has_the_parent_span_as_columns_and_lines_up_with_the_parent()
+    {
+        var sub = GridModel.SubgridMetrics(Parent.BoxWidth(8), CellOf(Parent, 8), CdsGridMode.Wide);
+        Assert.Equal(8, sub.Columns);
+        Assert.Equal(0, sub.Margin);
+        Assert.Equal(Parent.Pitch, sub.Pitch);
+        // The subgrid sits in the parent's column box at column 0; its column k is the parent's column k.
+        for (var k = 0; k < 8; k++) Assert.Equal(Parent.BoxX(k), Parent.BoxX(0) + sub.BoxX(k));
+        Assert.Equal(Parent.BoxWidth(4), sub.BoxWidth(4));
+    }
+
+    [Fact]
+    public void A_narrow_subgrid_hangs_into_the_parent_gutter()
+    {
+        var sub = GridModel.SubgridMetrics(Parent.BoxWidth(8), CellOf(Parent, 8), CdsGridMode.Narrow);
+        Assert.Equal(-16, sub.BoxX(0));
+        Assert.Equal(Parent.BoxWidth(2) + 16, sub.BoxWidth(2));
+    }
+
+    [Fact]
+    public void A_wide_subgrid_in_a_narrow_grid_reaches_over_its_hang()
+    {
+        var narrow = GridModel.Metrics(1056, CdsBreakpoint.Lg, CdsGridMode.Narrow, false, CdsGridAlign.Center);
+        var sub = GridModel.SubgridMetrics(narrow.BoxWidth(8), CellOf(narrow, 8), CdsGridMode.Wide);
+        Assert.Equal(64, sub.Pitch);
+        Assert.Equal(Parent.BoxX(0), narrow.BoxX(0) + sub.BoxX(0));
+    }
+
+    [Fact]
+    public void A_condensed_subgrid_has_a_one_pixel_gutter_and_row_gap()
+    {
+        var sub = GridModel.SubgridMetrics(Parent.BoxWidth(4), CellOf(Parent, 4), CdsGridMode.Condensed);
+        Assert.Equal(4, sub.Columns);
+        Assert.Equal(2 * 64 - 1, sub.BoxWidth(2));
+        Assert.Equal(1, sub.RowGap);
+    }
+
+    [Fact]
+    public void Spans_and_offsets_count_the_subgrid_columns()
+    {
+        Assert.Equal(8, GridModel.ResolveSpan(new GridResponsive(null, null, null, null, null, null), CdsBreakpoint.Lg, 8));
+        Assert.Equal(8, GridModel.ResolveSpan(new GridResponsive(12, null, null, null, null, null), CdsBreakpoint.Lg, 8));
+        Assert.Equal(7, GridModel.ResolveOffset(new GridResponsive(10, null, null, null, null, null), CdsBreakpoint.Lg, 8));
+    }
+
+    [Fact]
+    public void A_grid_placed_in_a_grid_is_a_subgrid_on_its_columns()
+    {
+        var outer = new CdsGrid { Breakpoint = CdsBreakpoint.Lg };
+        var inner = new CdsGrid();
+        CdsGrid.SetSpan(inner, 8);
+        CdsGrid.SetOffset(inner, 8);
+        var a = new BoxView { HeightRequest = 20 };
+        var b = new BoxView { HeightRequest = 20 };
+        CdsGrid.SetSpan(a, 4);
+        inner.Add(a);
+        inner.Add(b);
+        outer.Add(inner);
+
+        var o = (ICrossPlatformLayout)outer;
+        o.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        o.CrossPlatformArrange(new Rect(0, 0, 1056, 40));
+        Assert.Equal(16 + 8 * 64 + 16, inner.Frame.X);
+        Assert.Equal(8 * 64 - 32, inner.Frame.Width);
+        Assert.Equal(CdsBreakpoint.Lg, inner.GetEffectiveBreakpoint(inner.Frame.Width));
+
+        var i = (ICrossPlatformLayout)inner;
+        i.CrossPlatformMeasure(inner.Frame.Width, double.PositiveInfinity);
+        i.CrossPlatformArrange(new Rect(0, 0, inner.Frame.Width, 40));
+        // No outer margin: a starts where the parent's column 8 starts, and an unset span is the subgrid's full row.
+        Assert.Equal(0, a.Frame.X);
+        Assert.Equal(4 * 64 - 32, a.Frame.Width);
+        Assert.Equal(0, b.Frame.X);
+        Assert.Equal(8 * 64 - 32, b.Frame.Width);
+    }
+
+    [Fact]
+    public void A_grid_deeper_inside_a_column_is_a_subgrid_too()
+    {
+        var outer = new CdsGrid { Breakpoint = CdsBreakpoint.Lg };
+        var inner = new CdsGrid { Mode = CdsGridMode.Narrow };
+        var cell = new BoxView { HeightRequest = 20 };
+        CdsGrid.SetSpan(cell, 2);
+        inner.Add(cell);
+        var stack = new CdsStack();
+        stack.Add(new Label());
+        stack.Add(inner);
+        outer.Add(new CdsColumn { Span = 4, Content = stack });
+
+        var o = (ICrossPlatformLayout)outer;
+        o.CrossPlatformMeasure(1056, double.PositiveInfinity);
+        o.CrossPlatformArrange(new Rect(0, 0, 1056, 40));
+
+        var i = (ICrossPlatformLayout)inner;
+        i.CrossPlatformMeasure(4 * 64 - 32, double.PositiveInfinity);
+        i.CrossPlatformArrange(new Rect(0, 0, 4 * 64 - 32, 20));
+        Assert.Equal(-16, cell.Frame.X);
+        Assert.Equal(2 * 64 - 16, cell.Frame.Width);
+    }
+
+    [Fact]
+    public void A_grid_moved_out_of_a_grid_is_top_level_again()
+    {
+        var outer = new CdsGrid { Breakpoint = CdsBreakpoint.Lg };
+        var inner = new CdsGrid();
+        CdsGrid.SetSpan(inner, 8);
+        outer.Add(inner);
+        ((ICrossPlatformLayout)outer).CrossPlatformMeasure(1056, double.PositiveInfinity);
+        Assert.NotNull(inner.ParentCell());
+
+        outer.Remove(inner);
+        Assert.Null(inner.GetValue(CdsGrid.CellProperty));
+        Assert.Null(inner.ParentCell());
+        Assert.Equal(CdsBreakpoint.Sm, inner.GetEffectiveBreakpoint(480));
+    }
+}

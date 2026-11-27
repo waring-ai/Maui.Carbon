@@ -69,6 +69,7 @@ The 8px mini-unit. `CdsSpacing.Spacing01`…`Spacing13`: 2, 4, 8, 12, 16, 24, 32
 | 64+ | page-level sections, expressive layouts |
 
 - Put gaps on the container (`CdsStack Gap`, grid spacing), not margins on children; components stay margin-free.
+- Fluid spacing (`fluid-spacing-01`…`04`: 0, 2, 5 and 10% of the page width) is only for space between sections of expressive pages, never inside components: `CdsStack FluidGap="1..4"`, or the attached `cds:CdsFluidSpacing.Padding` / `Margin` whose thickness values are steps (`"3,0"` is `fluid-spacing-03` left and right). `CdsFluidSpacing.Resolve(step, width)` gives the value in code.
 - Proximity carries meaning: related items closer, groups further apart. Use a consistent gap for one relationship across the product.
 - Control heights: `CdsSizing.Small` 32, `Medium` 40 (default for inputs, tabs), `Large` 48 (default for buttons), `XLarge` 64, `X2Large` 80. Controls on one row share one size (`CdsSize`). Use `Sm` in dense tables and toolbars, `Md` in forms, `Lg`/`Xl` sparingly for prominent standalone actions.
 
@@ -87,7 +88,8 @@ The 2x grid: `CdsGrid` with `CdsColumn` children (or the attached `CdsGrid.Span`
 - Columns have 16px padding on each side (32px gutters); text aligns to the padding edge. `CdsGrid Mode`: `Wide` (default, for text and most layouts), `Narrow` (content hangs into the gutter; type next to imagery), `Condensed` (1px gutters for tiles that read as one unit).
 - Set spans per breakpoint (`SpanSm`, `SpanMd`, `SpanLg`…; a missing one inherits the smaller); `Span 0` hides a column at that size. Typical: full width on Sm, half on Md, a third or a quarter on Lg.
 - Forms and reading content stay narrow even on wide screens (a form about 8 of 16 columns, or a fixed 576 to 672 width); tables and dashboards take the full width.
-- Grids nest: a column can hold its own `CdsGrid`.
+- Page body: put the content under a `CdsPageHeader` in one `CdsGrid FullWidth="True"` with a full-row `CdsColumn` (vertical padding only). The column box sits at the breakpoint margin plus 16, the same inset as the page header, so body and header line up at every breakpoint; a fixed horizontal padding does not.
+- Grids nest: a `CdsGrid` inside a column (directly or deeper in it) is a subgrid. It has as many columns as the column spans, its columns line up with the page's, and it adds no outer margin. Its own `Mode` sets its gutters, so a narrow subgrid can sit in a wide grid. Don't cancel margins by hand with negative margins.
 - Fixed boxes come from the size scale (8, 16, 24, 32, 48, 64, 80) and aspect ratios 1:1, 2:1, 2:3, 3:2, 4:3, 16:9 (`CdsAspectRatio`).
 - `CdsBreakpointExtensions.FromWidth(width)` gives the breakpoint for custom adaptive layout. On phones, design for Sm first: one column, full-width controls, the primary action reachable.
 

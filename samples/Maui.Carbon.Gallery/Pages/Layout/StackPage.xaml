@@ -56,6 +56,20 @@
             </VerticalStackLayout>
         </g:GalleryExample>
 
+        <g:GalleryExample Title="Fluid spacing" Description="Between sections of an expressive page, FluidGap 1 to 4 uses fluid-spacing-01 to -04 (0, 2, 5 and 10 percent of the page width), so the space grows with the window. CdsFluidSpacing.Padding and Margin take the same steps per side; here the sections are inset by fluid-spacing-02. Never use fluid spacing inside components.">
+            <cds:CdsStack FluidGap="3" cds:CdsFluidSpacing.Padding="2,0">
+                <cds:CdsStack Gap="3">
+                    <cds:CdsText Text="Build on a trusted cloud" TypeStyle="Heading05" />
+                    <cds:CdsText Text="Run workloads in 60 regions with one control plane." TypeStyle="Body02" Tone="Secondary" />
+                </cds:CdsStack>
+                <cds:CdsStack Gap="3">
+                    <cds:CdsText Text="Secure by default" TypeStyle="Heading03" />
+                    <cds:CdsText Text="Every cluster is encrypted at rest and in transit, with keys you control." TypeStyle="Body01" Tone="Secondary" />
+                </cds:CdsStack>
+                <cds:CdsButton Text="Start a free trial" HorizontalOptions="Start" />
+            </cds:CdsStack>
+        </g:GalleryExample>
+
         <g:GalleryExample Title="In context" Description="A form section: gap 6 between fields inside a group, gap 7 between groups, a title above its content.">
             <cds:CdsStack Gap="7" WidthRequest="360" HorizontalOptions="Start">
                 <cds:CdsStack Gap="6">

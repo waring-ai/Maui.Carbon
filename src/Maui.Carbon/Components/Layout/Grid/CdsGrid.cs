@@ -12,6 +12,13 @@ namespace Maui.Carbon;
 /// structure, not inside components (use <see cref="CdsStack"/> there). The grid is centered and never wider than
 /// 1584 unless <see cref="FullWidth"/>. The breakpoint comes from the page (<see cref="CdsContextKeys.Breakpoint"/>) unless
 /// <see cref="Breakpoint"/> is set, and falls back to the grid's own width.
+/// <para>
+/// A grid inside a grid's column (the column itself, its content, or deeper inside it) is a subgrid, as in Carbon: it has
+/// as many columns as that column spans, reaches over the column's gutters so its columns line up with the parent's, and
+/// adds no outer margin. It takes the parent's breakpoint unless <see cref="Breakpoint"/> is set, ignores
+/// <see cref="FullWidth"/> and <see cref="Align"/>, and its own <see cref="Mode"/> sets the gutters inside it (a narrow
+/// subgrid in a wide grid, say). Its children's spans count the parent's columns.
+/// </para>
 /// </summary>
 public class CdsGrid : Layout
 {
@@ -80,6 +87,18 @@ public class CdsGrid : Layout
     internal static readonly BindableProperty HiddenBySpanProperty = BindableProperty.CreateAttached(
         "CdsHiddenBySpan", typeof(bool), typeof(CdsGrid), false);
 
+    // Set by the grid on each child it places: the child's columns, gutters and breakpoint. A grid inside the child reads
+    // it from the nearest grid's direct child up its parents and lays out as a subgrid. A grid that is the child, or the
+    // content of a column child, is invalidated here; one deeper is re-measured because the column's width changes with
+    // every change of these values.
+    internal static readonly BindableProperty CellProperty = BindableProperty.CreateAttached(
+        "CdsGridCell", typeof(GridSubgrid?), typeof(CdsGrid), null,
+        propertyChanged: static (b, _, _) =>
+        {
+            if (b is CdsGrid nested) ((IView)nested).InvalidateMeasure();
+            else if (b is ContentView { Content: CdsGrid inner }) ((IView)inner).InvalidateMeasure();
+        });
+
     /// <summary>Creates a wide grid that follows the page breakpoint.</summary>
     public CdsGrid()
     {
@@ -93,21 +112,21 @@ public class CdsGrid : Layout
         set => SetValue(ModeProperty, value);
     }
 
-    /// <summary>Lifts the 1584 maximum width. Default <c>false</c>.</summary>
+    /// <summary>Lifts the 1584 maximum width. Default <c>false</c>. A subgrid has no maximum width of its own.</summary>
     public bool FullWidth
     {
         get => (bool)GetValue(FullWidthProperty);
         set => SetValue(FullWidthProperty, value);
     }
 
-    /// <summary>Where the grid sits when wider than its maximum. Default <see cref="CdsGridAlign.Center"/>.</summary>
+    /// <summary>Where the grid sits when wider than its maximum. Default <see cref="CdsGridAlign.Center"/>. Not used by a subgrid.</summary>
     public CdsGridAlign Align
     {
         get => (CdsGridAlign)GetValue(AlignProperty);
         set => SetValue(AlignProperty, value);
     }
 
-    /// <summary>Forces a breakpoint (column count and margin) instead of the page's. Default <c>null</c>.</summary>
+    /// <summary>Forces a breakpoint (column count and margin) instead of the page's (a subgrid's: the parent's). Default <c>null</c>.</summary>
     public CdsBreakpoint? Breakpoint
     {
         get => (CdsBreakpoint?)GetValue(BreakpointProperty);
@@ -115,8 +134,22 @@ public class CdsGrid : Layout
     }
 
     /// <summary>The breakpoint in effect for a grid <paramref name="width"/> wide.</summary>
-    public CdsBreakpoint GetEffectiveBreakpoint(double width) =>
-        GridModel.Effective(Breakpoint, (CdsBreakpoint?)GetValue(ContextBreakpointProperty), width);
+    public CdsBreakpoint GetEffectiveBreakpoint(double width) => EffectiveBreakpoint(width, ParentCell());
+
+    internal CdsBreakpoint EffectiveBreakpoint(double width, GridSubgrid? parent) =>
+        GridModel.Effective(Breakpoint, parent?.Breakpoint ?? (CdsBreakpoint?)GetValue(ContextBreakpointProperty), width);
+
+    /// <summary>
+    /// The column this grid sits in when it is nested in another grid: what that grid set on its direct child on the way
+    /// up (stopping at the page), or <c>null</c> for a top-level grid.
+    /// </summary>
+    internal GridSubgrid? ParentCell()
+    {
+        Element cell = this;
+        for (var parent = Parent; parent is not null and not Page; cell = parent, parent = parent.Parent)
+            if (parent is CdsGrid) return (GridSubgrid?)cell.GetValue(CellProperty);
+        return null;
+    }
 
     /// <summary>Gets <see cref="SpanProperty"/>.</summary>
     public static int? GetSpan(BindableObject view) => (int?)view.GetValue(SpanProperty);
@@ -180,6 +213,8 @@ public class CdsGrid : Layout
     protected override void OnChildRemoved(Element child, int oldLogicalIndex)
     {
         base.OnChildRemoved(child, oldLogicalIndex);
+        // A grid moved out of this one is a top-level grid again.
+        child.ClearValue(CellProperty);
         // A child hidden for a span of 0 leaves the grid as it came in: visible.
         if (child is VisualElement view && (bool)view.GetValue(HiddenBySpanProperty))
         {
@@ -202,8 +237,11 @@ sealed class CdsGridLayoutManager(CdsGrid grid) : LayoutManager(grid)
 
     Plan MakePlan(double width)
     {
-        var breakpoint = grid.GetEffectiveBreakpoint(width);
-        var metrics = GridModel.Metrics(width, breakpoint, grid.Mode, grid.FullWidth, grid.Align);
+        var parent = grid.ParentCell();
+        var breakpoint = grid.EffectiveBreakpoint(width, parent);
+        var metrics = parent is { } cell
+            ? GridModel.SubgridMetrics(width, cell, grid.Mode)
+            : GridModel.Metrics(width, breakpoint, grid.Mode, grid.FullWidth, grid.Align);
         var views = new List<IView>();
         var items = new List<(int, int?)>();
         var byConsumer = new List<bool>();
@@ -215,13 +253,26 @@ sealed class CdsGridLayoutManager(CdsGrid grid) : LayoutManager(grid)
                          && !(child is BindableObject flagged && (bool)flagged.GetValue(CdsGrid.HiddenBySpanProperty));
             byConsumer.Add(hidden);
             if (child is BindableObject b)
-                items.Add((hidden ? 0 : GridModel.ResolveSpan(CdsGrid.SpanOf(b), breakpoint), GridModel.ResolveOffset(CdsGrid.OffsetOf(b), breakpoint)));
+                items.Add((hidden ? 0 : GridModel.ResolveSpan(CdsGrid.SpanOf(b), breakpoint, metrics.Columns),
+                    GridModel.ResolveOffset(CdsGrid.OffsetOf(b), breakpoint, metrics.Columns)));
             else
                 items.Add((hidden ? 0 : metrics.Columns, null));
         }
         var plan = new Plan(metrics, GridModel.Place(metrics.Columns, items), views, byConsumer);
         SyncSpanVisibility(plan);
+        StampCells(plan, breakpoint);
         return plan;
+    }
+
+    // Tell every placed child its columns, so a grid inside it lays out as a subgrid on them.
+    static void StampCells(Plan plan, CdsBreakpoint breakpoint)
+    {
+        foreach (var cell in plan.Cells)
+        {
+            if (cell.Hidden || plan.Views[cell.Index] is not BindableObject child) continue;
+            child.SetValue(CdsGrid.CellProperty,
+                new GridSubgrid(cell.Span, plan.Metrics.GutterStart, plan.Metrics.GutterEnd, breakpoint));
+        }
     }
 
     // Skipping a span-0 child in arrange leaves its platform view at its last frame: still drawn over the reflowed
