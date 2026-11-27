@@ -91,7 +91,7 @@ The 2x grid: `CdsGrid` with `CdsColumn` children (or the attached `CdsGrid.Span`
 - Fixed boxes come from the size scale (8, 16, 24, 32, 48, 64, 80) and aspect ratios 1:1, 2:1, 2:3, 3:2, 4:3, 16:9 (`CdsAspectRatio`).
 - `CdsBreakpointExtensions.FromWidth(width)` gives the breakpoint for custom adaptive layout. On phones, design for Sm first: one column, full-width controls, the primary action reachable.
 
-Gallery: [Layout](../../../samples/Maui.Carbon.Gallery/Pages/Layout/).
+Examples: the gallery's `Pages/Layout/` in the repository.
 
 ## Shape and borders
 
@@ -130,4 +130,4 @@ Flat fills from the layer tokens. No gradients (except AI presence), textures, d
 - The AI treatment (soft gradient and glow, `CdsAISkeleton*` loading) identifies AI; never use it as decoration. An AI component behaves like its standard version.
 - When the person edits AI content, it drops the AI styling and offers revert (`IsRevertActive`). Use `CdsChatButton` for prompts and quick actions in assistant surfaces.
 
-Gallery: [AI](../../../samples/Maui.Carbon.Gallery/Pages/AI/).
+Examples: the gallery's `Pages/AI/` in the repository.

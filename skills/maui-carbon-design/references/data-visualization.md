@@ -1,6 +1,6 @@
 # Data visualization
 
-Design guidance for Maui.Carbon's charts (native ports of Carbon Charts 1.27). For the data and axis API, see the maui-carbon skill's "Plot a chart" section and catalog.
+Design guidance for Maui.Carbon's charts (native ports of Carbon Charts 1.27). For the data and axis API, see the maui-carbon skill's `references/charts.md` and catalog.
 
 ## Start from the question
 
@@ -46,10 +46,7 @@ Prefer the simplest chart that answers the question; bars and lines beat novel f
 
 ## Dashboards
 
-- The most important chart or figure top left with the most space; headline numbers first, then trends, then breakdowns.
-- Group related charts in tiles on the grid with consistent heights; one unit system and one color per dataset throughout.
-- Strip what does not help interpretation: gridlines are already subtle; avoid extra borders, backgrounds and decorative icons.
-- Each tile links to the detail behind it when there is one.
+Layout rules are in [patterns](patterns.md#dashboards). For the charts themselves: one unit system and one color per dataset throughout, and strip what does not help interpretation (gridlines are already subtle; avoid extra borders, backgrounds and decorative icons).
 
 ## Accessibility
 

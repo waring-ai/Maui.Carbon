@@ -363,3 +363,10 @@ property, a new required setup step), update Relay too.
     in every theme and window size and writes `exercise-report.md`: logged warnings and errors with the step and stack
     that caused them, layout overflow, low contrast, collapsed or unsettled layout, leaked element types (with what
     holds them), UI-thread hangs, and the crash stack if the app dies. Run it after changing a component Relay uses.
+
+## 15. Agent skills (`skills/`)
+
+The skills are for consumers of the NuGet package, not for work in this repository: no repository-relative links, no
+maintainer tooling. When public controls change, update `skills/maui-carbon/references/components.md` from the public
+classes in `src/Maui.Carbon/Components` and the gallery pages. List concrete controls and companion types only, and do
+not turn gallery Patterns into invented package controls.

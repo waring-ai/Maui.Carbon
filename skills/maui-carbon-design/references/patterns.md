@@ -1,6 +1,9 @@
 # Patterns
 
-Carbon's answers to recurring product problems, composed from Cds controls. Each section names a gallery page that implements it (paths relative to this file in a library checkout); copy its structure, then adjust the content. Relay (`samples/Maui.Carbon.Relay`) shows the same patterns inside a full MVVM app.
+Carbon's answers to recurring product problems, composed from Cds controls. Each section names a page that implements it in the library's public repository; read it at the tag of the installed package version and copy its structure:
+
+- Gallery: `https://raw.githubusercontent.com/waring-ai/Maui.Carbon/v<version>/samples/Maui.Carbon.Gallery/Pages/Patterns/<Name>.xaml`
+- Relay (the same patterns inside a full MVVM app): `…/samples/Maui.Carbon.Relay/Views/<Name>.xaml`
 
 ## Page anatomy
 
@@ -11,7 +14,7 @@ Carbon's answers to recurring product problems, composed from Cds controls. Each
 
 ## Create and edit forms
 
-Gallery: [PatternCreateFormPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternCreateFormPage.xaml). Relay: [CreateIssueView](../../../samples/Maui.Carbon.Relay/Views/CreateIssueView.xaml).
+Gallery: `PatternCreateFormPage`. Relay: `CreateIssueView`.
 
 - One column by default, about 576 to 672 wide (or 8 of 16 grid columns). Put two fields side by side only when they belong together (city and postal code, start and end date).
 - A form heading, then `CdsFormGroup`s with a legend or section heading for related fields. Order fields as people think about the task, the required and important ones first.
@@ -24,7 +27,7 @@ Gallery: [PatternCreateFormPage](../../../samples/Maui.Carbon.Gallery/Pages/Patt
 
 ## Resource lists
 
-Gallery: [PatternResourceListPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternResourceListPage.xaml). Relay: [IssuesView](../../../samples/Maui.Carbon.Relay/Views/IssuesView.xaml), [ProjectsView](../../../samples/Maui.Carbon.Relay/Views/ProjectsView.xaml).
+Gallery: `PatternResourceListPage`. Relay: `IssuesView`, `ProjectsView`.
 
 - Page header with breadcrumb and description, then a `CdsDataTable`: title, toolbar search, the primary "Create …" action at the toolbar end, batch actions on selection, a row `CdsOverflowMenu` for per-row actions, `CdsPagination` (or virtualized scrolling) for large sets.
 - The name column links to the resource's details page. Status columns use `CdsIconIndicator` with a word. Dates, sizes and counts are right-aligned when they are compared down the column.
@@ -39,7 +42,7 @@ Gallery: [PatternResourceListPage](../../../samples/Maui.Carbon.Gallery/Pages/Pa
 
 ## Settings
 
-Gallery: [PatternSettingsPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternSettingsPage.xaml). Relay: [SettingsView](../../../samples/Maui.Carbon.Relay/Views/SettingsView.xaml).
+Gallery: `PatternSettingsPage`. Relay: `SettingsView`.
 
 - Group settings with `CdsTabs` or side-nav sections.
 - Either a form with Save for related fields that apply together, or `CdsToggle`s that apply immediately (with saving feedback) for independent switches. Never mix the two in one group.
@@ -47,14 +50,14 @@ Gallery: [PatternSettingsPage](../../../samples/Maui.Carbon.Gallery/Pages/Patter
 
 ## Filtering and search
 
-Gallery: [PatternFilteringPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternFilteringPage.xaml).
+Gallery: `PatternFilteringPage`.
 
 - Search narrows by text; filters narrow by attributes. Instant filters (checkboxes in a side panel) update results at once; batch filters (a popover or panel with Apply and Reset) apply together.
 - Show the result count (announce it with `CdsAnnouncer`), applied filters as `CdsDismissibleTag`s with "Clear filters", and an empty state with a way back when nothing matches.
 
 ## Empty states
 
-Gallery: [PatternEmptyStatesPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternEmptyStatesPage.xaml).
+Gallery: `PatternEmptyStatesPage`.
 
 Say why the area is empty and what to do next:
 
@@ -67,7 +70,7 @@ Keep the surrounding layout (and a table's headers once it has had data) so the 
 
 ## Loading
 
-Gallery: [PatternLoadingPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternLoadingPage.xaml).
+Gallery: `PatternLoadingPage`.
 
 - First load: skeletons in the shape of the content (`CdsSkeletonText`, `CdsSkeletonPlaceholder`, `CdsDataTableSkeleton`, chart `IsLoading`).
 - An action from a button: `CdsInlineLoading` in the button's place, going Active, then Finished or Error.
@@ -77,7 +80,7 @@ Gallery: [PatternLoadingPage](../../../samples/Maui.Carbon.Gallery/Pages/Pattern
 
 ## Notifications
 
-Gallery: [PatternNotificationsPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternNotificationsPage.xaml).
+Gallery: `PatternNotificationsPage`.
 
 - Inline next to what it is about; toast for events away from the person's focus; actionable when there is one follow-up; callout for persistent information in content; modal only when the person must decide before continuing.
 - Title states the outcome, subtitle gives the reason and next step. High-severity messages stay until dismissed; only low-severity success toasts time out.
@@ -85,7 +88,7 @@ Gallery: [PatternNotificationsPage](../../../samples/Maui.Carbon.Gallery/Pages/P
 
 ## Dialogs and confirmation
 
-Gallery: [PatternConfirmationPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternConfirmationPage.xaml).
+Gallery: `PatternConfirmationPage`.
 
 - Match the friction to the impact. Low (reversible): act at once and offer Undo in a toast. Moderate: a danger `CdsModal` (`IsDanger`) whose title and button name the object and the action ("Delete bucket logs-eu", button "Delete bucket"). High (irreversible, wide impact): ask the person to type the resource name to enable the button.
 - Discarding unsaved work uses a transactional modal ("Discard changes?", "Discard" / "Keep editing").
@@ -95,7 +98,7 @@ Gallery: [PatternConfirmationPage](../../../samples/Maui.Carbon.Gallery/Pages/Pa
 
 ## Read-only and disabled
 
-Gallery: [PatternReadOnlyDisabledPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternReadOnlyDisabledPage.xaml).
+Gallery: `PatternReadOnlyDisabledPage`.
 
 - **Read-only:** the value matters but this person cannot change it. It stays focusable, full contrast and copyable (`IsReadOnly`).
 - **Disabled:** the control does not apply right now. It is skipped by Tab and dimmed, so say why nearby (helper text, a notification, a tooltip on the reason).
@@ -103,21 +106,21 @@ Gallery: [PatternReadOnlyDisabledPage](../../../samples/Maui.Carbon.Gallery/Page
 
 ## Overflow content
 
-Gallery: [PatternOverflowContentPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternOverflowContentPage.xaml).
+Gallery: `PatternOverflowContentPage`.
 
 - Truncate at the end by default (the front for paths, the middle for IDs), always with the full text reachable through a `CdsTooltip` or the details page. Never truncate button labels.
 - Extra actions go into a `CdsOverflowMenu`, extra tags into a "+n" `CdsOperationalTag`, long text behind "Show more", long lists behind "Load more" or `CdsPagination`.
 
 ## Login
 
-Gallery: [PatternLoginPage](../../../samples/Maui.Carbon.Gallery/Pages/Patterns/PatternLoginPage.xaml).
+Gallery: `PatternLoginPage`.
 
 - Two steps: user ID (with "Remember ID" and alternative login), then password.
 - Validate inline on blur; after a failed attempt show one generic error that does not reveal which part was wrong. Put recovery and create-account links next to the step they belong to.
 
 ## Dashboards
 
-Relay: [DashboardView](../../../samples/Maui.Carbon.Relay/Views/DashboardView.xaml), [ReportsView](../../../samples/Maui.Carbon.Relay/Views/ReportsView.xaml). See also [data visualization](data-visualization.md).
+Relay: `DashboardView`, `ReportsView`. See also [data visualization](data-visualization.md).
 
 - The most important figure or chart top left with the most space; key numbers first as large figures in tiles, then trends, then detail.
 - Tiles on a `CdsGrid` (`Condensed` mode for tiles that read as one unit), equal heights per row, one unit system and one color per dataset across every chart.

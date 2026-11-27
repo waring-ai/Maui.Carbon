@@ -145,13 +145,13 @@ After updating `design/carbon/tokens.json` or the icons, regenerate with
 Two skills ship with the repository:
 
 - [Maui.Carbon](skills/maui-carbon/SKILL.md) (`maui-carbon`) covers using the library: setup, the
-  [component catalog](skills/maui-carbon/references/components.md) with links to source and gallery examples,
+  [component catalog](skills/maui-carbon/references/components.md) with source and gallery paths,
   bindings, themes, layers, tables, charts and overlays.
 - [Maui.Carbon design](skills/maui-carbon-design/SKILL.md) (`maui-carbon-design`) covers designing with Carbon:
   a workflow for new screens, foundations (layers, color, type, spacing, grid, motion) in Maui.Carbon terms, choosing
   components by need, patterns, content, accessibility, data visualization and a review checklist.
 
 To use them with Codex, copy `skills/maui-carbon` and `skills/maui-carbon-design` into `.agents/skills/` in your
-consuming project (or your user-level skills directory). Copy the whole folders, including `references`. Source and
-gallery links target this repository; keep a matching checkout available when using the skills in another project.
+consuming project (or your user-level skills directory). Copy the whole folders, including `references`. The skills are written for apps that reference the NuGet package:
+they look members up in the package's XML documentation and read examples from this repository at the matching tag.
 You can also read the skills directly here.

@@ -5,19 +5,18 @@ description: Design .NET MAUI screens that follow the Carbon Design System's pri
 
 # Designing with Carbon in Maui.Carbon
 
-Carbon is a productive, enterprise design language: the interface is a tool, so it is flat, square, gray with one interactive blue, dense but calm, and written in plain words. This skill covers how to decide what a screen should look like and say. The **maui-carbon** skill covers how to use each control (its properties, bindings, setup); load it as well when you write the XAML or C#.
+Carbon is a productive, enterprise design language: the interface is a tool, so it is flat, square, gray with one interactive blue, dense but calm, and written in plain words. This skill covers what a screen should look like and say; the **maui-carbon** skill covers each control's properties, bindings and setup, so load it as well when you write the XAML or C#.
 
 ## Workflow for a new screen
 
-1. **Name the job.** What does the person come here to do, and what is the one main action? Find the matching pattern in [patterns](references/patterns.md) (create form, resource list, settings, filtering, empty state, loading, notifications, confirmation, read-only, overflow, login, dashboard) and copy its structure. In a library checkout, open the gallery page it names.
-2. **Frame it.** An app uses `CdsUIShell` (header, side nav) for global navigation. A page starts with its title (`CdsPageHeader`, or a level-1 heading) and breadcrumb when it is deep in a hierarchy, then the content. Lay out on the 2x grid (`CdsGrid`/`CdsColumn`) or a bounded single column; stack content with `CdsStack` and spacing-scale gaps.
-3. **Set the hierarchy.** One primary button per view. Heading levels follow the outline, not the size you want (`CdsHeading` inside `CdsSection` keeps them right). Secondary detail goes behind disclosure (`CdsAccordion`, `CdsExpandableTile`, "Show more"), extra actions into a `CdsOverflowMenu`.
-4. **Pick components by need.** Use [choosing components](references/choosing-components.md): it maps each need to a Cds control and says what not to use. Never restyle a control to look like another one.
-5. **Build surfaces with layers, not shadows.** The page is `CdsBackground`; a container on it is `CdsLayer01`, inside that `CdsLayer02`, then `CdsLayer03`. Wrap nested surfaces in `CdsLayer` so controls inside pick the right field and border tokens. Use `CdsTheme` to make a region dark or light (it resets layering). See [foundations](references/foundations.md).
-6. **Write the words.** Sentence case, verb-first buttons, labels of one to three words, two-part notifications, errors that name the fix. See [content](references/content.md).
-7. **Design every state,** not only the happy path: first use (empty), loading, no results, error, partial failure, read-only, disabled with a reason, long text, many items, narrow width, both light and dark themes.
-8. **Make it accessible** from the start: visible labels, names for icon-only controls, a heading outline, reading-order focus, nothing conveyed by color alone, announcements for changes. See [accessibility](references/accessibility.md).
-9. **Review** against the checklist below before calling the screen done.
+1. **Name the job.** What does the person come here to do, and what is the one main action? Find the matching pattern in [patterns](references/patterns.md) and copy its structure; it names a gallery page in the library's repository to read.
+2. **Frame it.** `CdsUIShell` (header, side nav) for global navigation; each page starts with its title (`CdsPageHeader`, or a level-1 heading) and a breadcrumb when it is deep in a hierarchy. Lay out on the 2x grid (`CdsGrid`/`CdsColumn`) or a bounded single column; stack content with `CdsStack` and spacing-scale gaps.
+3. **Set the hierarchy.** Heading levels follow the outline, not the size you want (`CdsHeading` inside `CdsSection` keeps them right). Secondary detail goes behind disclosure (`CdsAccordion`, `CdsExpandableTile`, "Show more"), extra actions into a `CdsOverflowMenu`.
+4. **Pick components by need** with [choosing components](references/choosing-components.md). Never restyle a control to look like another one.
+5. **Build surfaces with layers, not shadows.** The page is `CdsBackground` and a container on it `CdsLayer01`; wrap what sits on that container in `CdsLayer` so its fields and borders take the next level. `CdsTheme` makes a region dark or light. See [foundations](references/foundations.md).
+6. **Write the words** with [content](references/content.md).
+7. **Design every state,** not only the happy path: first use (empty), loading, no results, error, partial failure, read-only, disabled with a reason, long text, many items, narrow width, light and dark themes.
+8. **Make it accessible** from the start with [accessibility](references/accessibility.md), then review against the checklist below.
 
 For charts and dashboards, also read [data visualization](references/data-visualization.md).
 
@@ -69,7 +68,7 @@ A resource list page; bind the names to your view model. It shows the frame, the
 </cds:CdsStack>
 ```
 
-The table's toolbar holds search and the one primary action ("Create cluster"); selection shows batch actions; each row has an overflow menu; status cells use `CdsIconIndicator` with a word; an empty table explains why and offers the create action (`EmptyState`/`EmptyContent`). Compare `samples/Maui.Carbon.Gallery/Pages/Patterns/PatternResourceListPage.xaml`.
+The table's toolbar holds search and the one primary action ("Create cluster"); selection shows batch actions; each row has an overflow menu; status cells use `CdsIconIndicator` with a word; an empty table explains why and offers the create action (`EmptyState`/`EmptyContent`). Compare the gallery's `PatternResourceListPage.xaml` ([patterns](references/patterns.md) says where to read it).
 
 ## Review checklist
 
@@ -95,4 +94,4 @@ Look at the screen in White and G100 at a narrow and a wide width, and with the 
 - [Accessibility](references/accessibility.md): contrast, keyboard, names, announcements, and the MAUI-specific traps.
 - [Data visualization](references/data-visualization.md): choosing a chart, color, anatomy, axes, legends, dashboards.
 
-These references are self-contained distillations of Carbon v11 guidance; the Carbon source snapshot (`design/carbon`) is not checked in. When a rule here and the library's behavior disagree, the C# implementation is the authority for what a control does; raise the difference rather than working around it with custom styling.
+These distill Carbon v11 guidance and are self-contained. Where a rule here and the library's behavior disagree, the C# implementation is the authority for what a control does; raise the difference rather than working around it with custom styling.
