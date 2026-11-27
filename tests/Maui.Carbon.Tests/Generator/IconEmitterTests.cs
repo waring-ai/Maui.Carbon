@@ -342,10 +342,10 @@ public sealed partial class RealIconTests
     static double[] Numbers(string data) =>
         Regex.Matches(data, @"-?\d+(?:\.\d+)?").Select(m => double.Parse(m.Value, CultureInfo.InvariantCulture)).ToArray();
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Every_svg_converts() => Assert.Equal(Directory.GetFiles(IconsDir, "*.svg").Length, All.Value.Count);
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Every_glyph_has_a_non_empty_path() =>
         Assert.All(All.Value, g =>
         {
@@ -353,12 +353,12 @@ public sealed partial class RealIconTests
             Assert.All(g.Paths, p => Assert.Matches("[LC]", p.Data));
         });
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Path_data_uses_only_absolute_mlcz_and_plain_numbers() =>
         Assert.All(All.Value.SelectMany(g => g.Paths.Concat(g.InnerPaths).Select(p => (g.Stem, p.Data))),
             x => Assert.True(Grammar().IsMatch(x.Data), $"{x.Stem}: {x.Data}"));
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void No_path_is_a_full_artboard_rectangle() =>
         Assert.All(All.Value, g => Assert.All(g.Paths, p =>
         {
@@ -372,7 +372,7 @@ public sealed partial class RealIconTests
             Assert.False(full, $"{g.Stem}-{g.ArtboardSize} has a full-artboard path: {p.Data}");
         }));
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Points_lie_inside_the_artboard()
     {
         // On-curve points must be inside; Bézier control points of curves hugging the edge may overshoot a little.
@@ -387,7 +387,7 @@ public sealed partial class RealIconTests
         }));
     }
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Only_32px_glyphs_are_cropped_to_the_centre() =>
         Assert.All(All.Value, g =>
         {
@@ -399,7 +399,7 @@ public sealed partial class RealIconTests
 
     // Icon/README.md: close is drawn from its full 32 box (an 8px cross at 16px, as Carbon's 16px glyph), add from its
     // centre 26x26; the checkbox glyphs, whose 16px versions are the 32 art at half scale, are not cropped either.
-    [Theory]
+    [Theory(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     [InlineData("close", 0f, 32f)]
     [InlineData("checkbox", 0f, 32f)]
     [InlineData("checkbox--checked", 0f, 32f)]
@@ -414,7 +414,7 @@ public sealed partial class RealIconTests
         Assert.Equal((origin, origin, size, size), (g.ViewBoxX, g.ViewBoxY, g.ViewBoxWidth, g.ViewBoxHeight));
     }
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Close_draws_an_8px_cross_at_16px()
     {
         var g = All.Value.Single(x => x.Stem == "close" && x.ArtboardSize == 32);
@@ -423,7 +423,7 @@ public sealed partial class RealIconTests
         Assert.InRange(drawn, 7.9, 8.1);
     }
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Filled_status_icons_have_inner_paths()
     {
         Assert.NotEmpty(All.Value.Single(g => g.Stem == "warning--filled" && g.ArtboardSize == 32).InnerPaths);
@@ -431,7 +431,7 @@ public sealed partial class RealIconTests
         Assert.NotEmpty(All.Value.Single(g => g.Stem == "checkmark--filled" && g.ArtboardSize == 16).InnerPaths);
     }
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Generated_file_is_up_to_date()
     {
         var generated = CarbonGenerator.Generate(Path.Combine(Repo, "design", "carbon"))["CdsIcons.g.cs"];

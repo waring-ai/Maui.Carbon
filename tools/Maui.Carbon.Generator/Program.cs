@@ -24,6 +24,14 @@ var root = RepoPaths.FindRoot(Directory.GetCurrentDirectory());
 design ??= Path.Combine(root, "design", "carbon");
 output ??= Path.Combine(root, "src", "Maui.Carbon", "Generated");
 
+if (check && !Directory.Exists(design))
+{
+    // design/carbon is gitignored, so a fresh clone (CI) has no snapshot to check against. The check runs wherever the
+    // snapshot has been put in place (tools/verify.sh on a maintainer's machine).
+    Console.WriteLine($"No design snapshot at {design}; skipping the drift check.");
+    return 0;
+}
+
 var files = CarbonGenerator.Generate(design);
 
 if (check)

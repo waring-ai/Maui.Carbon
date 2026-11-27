@@ -6,7 +6,7 @@ public class TokenGeneratorTests
 {
     static string Root => RepoPaths.FindRoot(AppContext.BaseDirectory);
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Committed_token_code_matches_the_design_snapshot()
     {
         var files = CarbonGenerator.Generate(Path.Combine(Root, "design", "carbon"));
@@ -16,7 +16,7 @@ public class TokenGeneratorTests
         Assert.Empty(drift);
     }
 
-    [Fact]
+    [Fact(Skip = DesignSnapshot.Missing, SkipUnless = nameof(DesignSnapshot.Present), SkipType = typeof(DesignSnapshot))]
     public void Generated_code_uses_LF_line_endings_on_every_OS()
     {
         var files = CarbonGenerator.Generate(Path.Combine(Root, "design", "carbon"));
