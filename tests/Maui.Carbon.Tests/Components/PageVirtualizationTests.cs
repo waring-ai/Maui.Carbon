@@ -14,13 +14,23 @@ public class PageVirtualizationTests
         return table;
     }
 
+    // An element holds its parent weakly: keep the page alive for the whole test, or a collection can take the scroll view
+    // the table virtualizes against.
+    static GcRoot KeepAlive(object root) => new(root);
+
+    sealed class GcRoot(object root) : IDisposable
+    {
+        public void Dispose() => GC.KeepAlive(root);
+    }
+
     static ScrollView InPage(View view) => new() { Content = new VerticalStackLayout { new CdsText { Text = "Above" }, view } };
 
     [Fact]
     public void In_a_scroll_view_only_rows_near_the_viewport_are_built()
     {
         var table = CreateTable();
-        _ = InPage(table);
+        var page = InPage(table);
+        using var alive = KeepAlive(page);
         table.ItemsSource = Items(200);
 
         Assert.True(table.Table.IsVirtual);
@@ -34,7 +44,8 @@ public class PageVirtualizationTests
     public void Scrolling_the_page_re_binds_the_pooled_rows_to_the_rows_in_view()
     {
         var table = CreateTable();
-        _ = InPage(table);
+        var page = InPage(table);
+        using var alive = KeepAlive(page);
         table.ItemsSource = Items(200);
         table.Table.RealizeAt(table.Table.RowTop(60));
         var pool = table.Table.RealizedRowCount; // the viewport plus overscan on both sides
@@ -55,7 +66,8 @@ public class PageVirtualizationTests
     public void Selection_and_expansion_work_on_rows_out_of_view()
     {
         var table = CreateTable();
-        _ = InPage(table);
+        var page = InPage(table);
+        using var alive = KeepAlive(page);
         var items = Items(200);
         table.ItemsSource = items;
         table.SelectedRows = new List<object> { items[180] };
@@ -69,7 +81,8 @@ public class PageVirtualizationTests
     public void Clearing_the_selection_or_new_rows_with_the_same_keys_update_the_realized_rows()
     {
         var table = CreateTable();
-        _ = InPage(table);
+        var page = InPage(table);
+        using var alive = KeepAlive(page);
         var items = Items(40);
         table.ItemsSource = items;
         table.SelectedRows = new List<object> { items[0], items[1] };
@@ -98,13 +111,15 @@ public class PageVirtualizationTests
     {
         var off = CreateTable();
         off.VirtualizeInScrollView = false;
-        _ = InPage(off);
+        var page = InPage(off);
+        using var alive = KeepAlive(page);
         off.ItemsSource = Items(50);
         Assert.False(off.Table.IsVirtual);
         Assert.Equal(50, off.Table.Rows.Count);
 
         var auto = CreateTable(GridLength.Auto);
-        _ = InPage(auto);
+        var autoPage = InPage(auto);
+        using var autoAlive = KeepAlive(autoPage);
         auto.ItemsSource = Items(50);
         Assert.False(auto.Table.IsVirtual);
         Assert.Equal(50, auto.Table.Rows.Count);
@@ -119,7 +134,8 @@ public class PageVirtualizationTests
         Assert.False(table.Table.IsVirtual);
         Assert.Equal(100, table.Table.Rows.Count);
 
-        _ = new ScrollView { Content = stack };
+        var page = new ScrollView { Content = stack };
+        using var alive = KeepAlive(page);
         table.ItemsSource = Items(100); // the next refresh notices the new ancestor
 
         Assert.True(table.Table.IsVirtual);
