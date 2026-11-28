@@ -133,7 +133,7 @@ Run Relay: `dotnet build samples/Maui.Carbon.Relay -t:Run -f net11.0-maccatalyst
 Screenshot every gallery page: `tools/snapshots.sh out/shots white,g10,g90,g100 Release` (after a `-c Release` build);
 every Relay screen: `APP=relay tools/snapshots.sh out/relay white,g100`.
 Profile every gallery page: `tools/profile-gallery.sh` walks the sidebar under dotTrace's Timeline mode and writes
-`out/profile/<time>/walk-report.md` (slowest pages, longest main-thread stalls, allocations) and `trace/gallery-walk.dtt`;
+`out/profile/<time>/walk-report.md` (slowest pages, longest main-thread stalls, allocations, native views per Carbon control) and `trace/gallery-walk.dtt`;
 `--profiler none` for unprofiled timings, `--profiler memory` for dotMemory, `--help` for filters and passes.
 Exercise Relay to catch framework faults (every screen, state, theme and window size; layout overflow, contrast, leaks,
 UI hangs, crashes, every logged warning attributed to the step that caused it, and a "Carbon metrics" section naming the

@@ -3,7 +3,8 @@
 # Usage: tools/profile-gallery.sh [options]
 #   --profiler timeline|sampling|memory|none
 #                      timeline (default) and sampling use dotTrace; memory uses dotMemory
-#                      (dotnet tool install -g JetBrains.dotMemory.Console); none only measures.
+#                      (not a dotnet tool: the script prints how to install it; or set DOTMEMORY=/path/to/dotmemory);
+#                      none only measures.
 #                      As of dotTrace 2026.1, sampling loads into the Mac Catalyst app but collects nothing
 #                      ("No snapshots have been collected"); timeline works.
 #   --config Release|Debug   default Release (Debug is much slower and not representative)
@@ -14,11 +15,12 @@
 #   --scroll           also scroll each page to the bottom
 #   --timeout 30m      stop profiling after this long
 #   --no-build         use the existing build
-# Writes to DIR: walk-report.md (slowest pages), walk.csv (every visit), app.log, and the profiler's snapshot
+# Writes to DIR: walk-report.md (slowest pages, native views per Carbon control), walk.csv (every visit),
+# walk-controls.csv (native views each Carbon control type builds, and how many are hidden), app.log, and the profiler's snapshot
 # (trace/*.dtt for timeline, trace/*.dtp for sampling, memory/*.dmw for dotMemory; open them in Rider or dotTrace/dotMemory).
 # dotTrace records the whole run (startup too) and saves when the app quits; walk-report.md gives each page's start in
-# seconds since launch, the snapshot's time axis. dotMemory snapshots are taken by the walk itself through
-# JetBrains.Profiler.Api: one before the walk and one after each pass (see WalkRunner.cs).
+# seconds since launch, the snapshot's time axis. dotMemory snapshots are requested by the walk itself, one before the walk
+# and one after each pass, through dotMemory's service messages (memory/requests.svc; see WalkRunner.cs).
 # Needs window-server access: run it from a logged-in terminal, not over SSH or in a sandbox.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -35,14 +37,21 @@ while [[ $# -gt 0 ]]; do
     --scroll) SCROLL=1; shift ;;
     --timeout) TIMEOUT="$2"; shift 2 ;;
     --no-build) BUILD=0; shift ;;
-    -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option $1 (see --help)" >&2; exit 2 ;;
   esac
 done
 
 case "$PROFILER" in
   sampling|timeline) TOOL=dottrace; INSTALL="dotnet tool install -g JetBrains.dotTrace.GlobalTools" ;;
-  memory) TOOL=dotmemory; INSTALL="dotnet tool install -g JetBrains.dotMemory.Console" ;;
+  memory) TOOL="${DOTMEMORY:-dotmemory}"
+    # JetBrains ships the dotMemory console as a plain NuGet package per platform, not as a dotnet tool.
+    INSTALL="
+  curl -sL https://www.nuget.org/api/v2/package/JetBrains.dotMemory.Console.macos-arm64 -o /tmp/dotmemory.zip
+  unzip -qo /tmp/dotmemory.zip 'tools/*' -d ~/.dotmemory
+  chmod +x ~/.dotmemory/tools/dotmemory ~/.dotmemory/tools/*.sh
+  find ~/.dotmemory/tools/macos-arm64 -type f \( ! -name '*.*' -o -name '*.dylib' \) -exec chmod +x {} +
+then put ~/.dotmemory/tools on PATH, or set DOTMEMORY=~/.dotmemory/tools/dotmemory" ;;
   none) TOOL="" ;;
   *) echo "--profiler must be sampling, timeline, memory or none" >&2; exit 2 ;;
 esac
@@ -70,6 +79,7 @@ export CARBON_WALK_DIR="$OUT" CARBON_WALK_PASSES="$PASSES" CARBON_WALK_SCROLL="$
 [[ -n "$CATEGORY" ]] && export CARBON_WALK_CATEGORY="$CATEGORY"
 [[ -n "$PAGES" ]] && export CARBON_WALK_PAGES="$PAGES"
 rm -f "$OUT/walk-done" "$OUT/walk-error.txt"
+PRIOR="$(pgrep -f "$EXE" || true)"   # copies already open, which the clean-up below leaves alone
 
 # The executable is started directly (not with open) so the profiler launches it as its own child process.
 echo "== walking the gallery (profiler: $PROFILER) -> $OUT"
@@ -88,8 +98,24 @@ case "$PROFILER" in
       --timeout="$TIMEOUT" --no-check-for-updates "$EXE" >"$OUT/app.log" 2>&1 || true ;;
   memory)
     mkdir -p "$OUT/memory"
-    dotmemory start --use-api --save-to-dir="$OUT/memory" --overwrite --timeout="$TIMEOUT" "$EXE" >"$OUT/app.log" 2>&1 || true ;;
+    # Not --use-api: in that mode the profiler disconnects from the Mac Catalyst app about a second after start-up and takes
+    # no snapshot. The walk appends its requests to requests.svc and waits for dotMemory's replies (--service-output) in app.log.
+    : >"$OUT/memory/requests.svc"
+    export CARBON_WALK_DOTMEMORY_REQUESTS="$OUT/memory/requests.svc" CARBON_WALK_DOTMEMORY_LOG="$OUT/app.log"
+    "$TOOL" start --service-input="$OUT/memory/requests.svc" --service-output --save-to-file="$OUT/memory/gallery-walk.dmw" \
+      --overwrite --timeout="$TIMEOUT" "$EXE" >"$OUT/app.log" 2>&1 || true ;;
 esac
+
+# A profiler can end its session before the app quits (dotMemory did when it lost the app). Give the walk time to finish,
+# then stop any copy this run started that is still open.
+new_apps() { pgrep -f "$EXE" | grep -vxF "${PRIOR:-none}" || true; }
+for _ in $(seq 1 900); do
+  [[ -z "$(new_apps)" ]] && break
+  if [[ -f "$OUT/walk-done" ]]; then sleep 5; break; fi
+  sleep 1
+done
+leftover="$(new_apps)"
+if [[ -n "$leftover" ]]; then kill $leftover 2>/dev/null || true; fi
 
 if [[ -f "$OUT/walk-error.txt" ]]; then echo "the walk failed:"; cat "$OUT/walk-error.txt"; fi
 if [[ ! -f "$OUT/walk-done" ]]; then

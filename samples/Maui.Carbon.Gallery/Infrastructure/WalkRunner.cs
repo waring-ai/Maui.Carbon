@@ -1,7 +1,8 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Text;
-using JetBrains.Profiler.Api;
 
 namespace Maui.Carbon.Gallery.Infrastructure;
 
@@ -18,9 +19,15 @@ namespace Maui.Carbon.Gallery.Infrastructure;
 /// CARBON_WALK_CATEGORY (a <see cref="GalleryCategory"/> name), CARBON_WALK_PAGES (titles without spaces or routes, comma
 /// separated), CARBON_WALK_PASSES (default 1; a second pass revisits the pages Shell has cached), CARBON_WALK_SCROLL=1
 /// (also scroll each page to the bottom) and CARBON_WALK_SETTLE_MS (extra time on each page once quiet, default 300).</para>
+/// <para>Once a page has settled the walk counts its visual tree: elements, native views (hidden ones too) and, per Carbon
+/// control type, the native views the control builds itself (walk-controls.csv and the report's "Native views by Carbon
+/// control"). It also totals the Maui.Carbon meter per page (draws, visuals, measures, arranges, rebuilds). On Mac Catalyst a
+/// page's stall time and allocations grow with its native views (about 0.9 ms and 35 KB each), and dotTrace's Timeline stacks
+/// stop at the UIKit-to-managed transitions, so these counts are what attribute a slow page to the controls on it.</para>
 /// <para>Each row records when the page started, in seconds since the process started, to find it on a dotTrace Timeline.
-/// Under dotMemory started with <c>--use-api</c>, the walk takes a memory snapshot before it starts and after each pass;
-/// without dotMemory those calls do nothing. dotTrace needs no API calls: it records the whole run and saves on exit.</para>
+/// Under dotMemory (CARBON_WALK_DOTMEMORY_REQUESTS and CARBON_WALK_DOTMEMORY_LOG, set by tools/profile-gallery.sh), the walk
+/// turns on allocation collection and takes a memory snapshot before it starts and after each pass. dotTrace needs nothing
+/// from the walk: it records the whole run and saves on exit.</para>
 /// </remarks>
 public static class WalkRunner
 {
@@ -79,20 +86,21 @@ public static class WalkRunner
 
         var exceptions = 0;
         AppDomain.CurrentDomain.FirstChanceException += (_, _) => Interlocked.Increment(ref exceptions);
-        var memory = (MemoryProfiler.GetFeatures() & MemoryFeatures.Ready) != 0;
+        var dotMemory = DotMemoryControl.FromEnvironment();
         // tools/profile-gallery.sh says which profiler it started (dotTrace's timeline mode leaves no trace in the process).
-        var profiler = Environment.GetEnvironmentVariable("CARBON_WALK_PROFILER") is { Length: > 0 } named ? named : memory ? "dotMemory" : "none";
+        var profiler = Environment.GetEnvironmentVariable("CARBON_WALK_PROFILER") is { Length: > 0 } named ? named : "none";
         var processStart = Process.GetCurrentProcess().StartTime;
         var beat = new Heartbeat(dispatcher);
+        using var metrics = new VisitMetrics();
         var rows = new List<WalkRow>();
 
         // Let startup finish so the first page is not charged for it.
         await Task.Delay(1500);
         await WaitForQuietAsync(beat, beat.Now);
-        if (memory)
+        if (dotMemory is not null && await dotMemory.WaitConnectedAsync())
         {
-            MemoryProfiler.CollectAllocations(true);
-            MemoryProfiler.GetSnapshot("Before walk");
+            dotMemory.CollectAllocations();
+            await dotMemory.SnapshotAsync("Before walk");
         }
 
         var walkClock = Stopwatch.StartNew();
@@ -101,19 +109,24 @@ public static class WalkRunner
             for (var i = 0; i < entries.Count; i++)
             {
                 var entry = entries[i];
-                rows.Add(await VisitAsync(entry, i + 1, pass, beat, o, () => exceptions, (DateTime.Now - processStart).TotalSeconds));
+                rows.Add(await VisitAsync(entry, i + 1, pass, beat, metrics, o, () => exceptions, (DateTime.Now - processStart).TotalSeconds));
             }
-            if (memory) MemoryProfiler.GetSnapshot($"After pass {pass}");
+            if (dotMemory is { Connected: true }) await dotMemory.SnapshotAsync($"After pass {pass}");
         }
         walkClock.Stop();
         beat.Stop();
+        if (dotMemory is not null)
+            profiler += dotMemory.Connected ? $" ({dotMemory.Saved} of {dotMemory.Requested} snapshots saved)" : " (dotMemory never connected: no snapshots)";
 
         await File.WriteAllTextAsync(Path.Combine(o.Dir, "walk.csv"), WalkRow.ToCsv(rows));
-        await File.WriteAllTextAsync(Path.Combine(o.Dir, "walk-report.md"), Report(rows, o, walkClock.Elapsed, profiler));
+        await File.WriteAllTextAsync(Path.Combine(o.Dir, "walk-controls.csv"),
+            "control,instances,own_native_views,own_hidden_native_views,pages\n" + string.Concat(ControlTotals(rows).Select(c =>
+                FormattableString.Invariant($"{c.Control},{c.Instances},{c.OwnNative},{c.OwnHidden},{c.Pages}\n"))));
+        await File.WriteAllTextAsync(Path.Combine(o.Dir, "walk-report.md"), Report(rows, o, walkClock.Elapsed, profiler, metrics.Seen));
         await File.WriteAllTextAsync(Path.Combine(o.Dir, "walk-done"), $"{rows.Count} visits\n");
     }
 
-    static async Task<WalkRow> VisitAsync(GalleryEntry entry, int index, int pass, Heartbeat beat, WalkOptions o, Func<int> exceptions, double atSeconds)
+    static async Task<WalkRow> VisitAsync(GalleryEntry entry, int index, int pass, Heartbeat beat, VisitMetrics metrics, WalkOptions o, Func<int> exceptions, double atSeconds)
     {
         var shell = Shell.Current;
         var alreadyOpen = shell.CurrentState.Location.OriginalString.EndsWith("/" + entry.Info.Route, StringComparison.Ordinal);
@@ -126,6 +139,8 @@ public static class WalkRunner
         var start = beat.Now;
         double navigated = 0, loaded = 0, quiet = 0, scrollStall = 0;
         string? error = null;
+        var census = TreeCensus.Empty;
+        metrics.Begin();
         try
         {
             await shell.GoToAsync("//" + entry.Info.Route);
@@ -139,6 +154,7 @@ public static class WalkRunner
             quiet = await WaitForQuietAsync(beat, start) - start;
             if (o.Scroll) scrollStall = await ScrollThroughAsync(page, beat);
             if (o.SettleMs > 0) await Task.Delay(o.SettleMs);
+            census = TreeCensus.Of(page);
         }
         catch (Exception ex)
         {
@@ -146,6 +162,7 @@ public static class WalkRunner
             File.AppendAllText(Path.Combine(o.Dir, "walk-exceptions.txt"), $"{entry.Info.Route} (pass {pass}): {ex}\n\n");
         }
         beat.End(meter);
+        var work = metrics.End();
         return new WalkRow(
             pass, index, entry.Info.Category.ToString(), entry.Info.Title, entry.Info.Route, atSeconds,
             navigated, loaded, quiet, meter.MaxGapMs, meter.StalledMs, scrollStall,
@@ -155,7 +172,9 @@ public static class WalkRunner
             GC.GetTotalMemory(forceFullCollection: false) / 1048576.0,
             Environment.WorkingSet / 1048576.0,
             alreadyOpen ? "already open" : null,
-            error);
+            error,
+            census,
+            work);
     }
 
     /// <summary>Waits until the main thread has had no stall for <paramref name="quietMs"/> and returns when the last stall ended (or <paramref name="from"/>).</summary>
@@ -190,7 +209,7 @@ public static class WalkRunner
         return meter.MaxGapMs;
     }
 
-    static string Report(List<WalkRow> rows, WalkOptions o, TimeSpan elapsed, string profiler)
+    static string Report(List<WalkRow> rows, WalkOptions o, TimeSpan elapsed, string profiler, bool metricsSeen)
     {
         var config =
 #if DEBUG
@@ -220,6 +239,20 @@ public static class WalkRunner
         Table(sb, "Most allocated", rows.OrderByDescending(r => r.AllocMB), r => $"{r.AllocMB:0.0} MB, GC {r.Gen0}/{r.Gen1}/{r.Gen2}");
         if (o.Scroll) Table(sb, "Longest stall while scrolling", rows.OrderByDescending(r => r.ScrollStallMs), r => $"{r.ScrollStallMs:0} ms");
         Table(sb, "Most first-chance exceptions", rows.Where(r => r.Exceptions > 0).OrderByDescending(r => r.Exceptions), r => $"{r.Exceptions}");
+        Table(sb, "Largest visual trees", rows.OrderByDescending(r => r.Tree.Elements),
+            r => $"{r.Tree.Elements} elements, {r.Tree.NativeViews} native views ({r.Tree.TopTypes})");
+        ControlTable(sb, rows);
+        if (metricsSeen)
+        {
+            Table(sb, "Most Carbon layout passes", rows.OrderByDescending(r => r.Work.Measures + r.Work.Arranges),
+                r => $"{r.Work.Measures} measures, {r.Work.Arranges} arranges (most measured: {r.Work.MostMeasured})");
+            Table(sb, "Most Carbon draw, visuals and rebuild time", rows.OrderByDescending(r => r.Work.ExclusiveMs),
+                r => $"{r.Work.ExclusiveMs:0} ms: {r.Work.Draws} draws, {r.Work.Visuals} visuals, {r.Work.Rebuilds} rebuilds ({r.Work.Busiest})");
+        }
+        else
+        {
+            sb.AppendLine().AppendLine("No Maui.Carbon metrics arrived: the build trimmed them (set MetricsSupport=true).");
+        }
         var growth = rows.Zip(rows.Skip(1), (a, b) => (Row: b, Growth: b.HeapMB - a.HeapMB));
         Table(sb, "Largest managed heap growth", growth.OrderByDescending(g => g.Growth).Select(g => g.Row),
             r => $"+{growth.First(g => g.Row == r).Growth:0.0} MB (heap {r.HeapMB:0} MB)");
@@ -229,6 +262,35 @@ public static class WalkRunner
             sb.AppendLine(CultureInfo.InvariantCulture, $"End of walk: managed heap {rows[^1].HeapMB:0} MB, working set {rows[^1].WorkingSetMB:0} MB.");
         }
         return sb.ToString();
+    }
+
+    /// <summary>Carbon controls ranked by the native views they build across the walk's first pass.</summary>
+    static IEnumerable<(string Control, int Instances, int OwnNative, int OwnHidden, int Pages)> ControlTotals(IEnumerable<WalkRow> rows) =>
+        rows.Where(r => r.Pass == 1)
+            .SelectMany(r => r.Tree.Controls.Select(c => (Control: c.Key, c.Value.Instances, c.Value.OwnNative, c.Value.OwnHidden)))
+            .GroupBy(c => c.Control)
+            .Select(g => (g.Key, g.Sum(c => c.Instances), g.Sum(c => c.OwnNative), g.Sum(c => c.OwnHidden), g.Count()))
+            .OrderByDescending(c => c.Item3);
+
+    static void ControlTable(StringBuilder sb, List<WalkRow> rows)
+    {
+        var totals = ControlTotals(rows).Take(25).ToList();
+        if (totals.Count == 0) return;
+        var all = rows.Where(r => r.Pass == 1).Sum(r => r.Tree.NativeViews);
+        var hidden = rows.Where(r => r.Pass == 1).Sum(r => r.Tree.HiddenNative);
+        sb.AppendLine().AppendLine("## Native views by Carbon control").AppendLine();
+        sb.AppendLine(CultureInfo.InvariantCulture, $"Each native view costs layout, memory and creation time on the main thread. {all} native views across the pages, {hidden} of them hidden (IsVisible false here or above); " +
+            $"*own* counts the views a control builds itself, not those of Carbon controls nested in it.").AppendLine();
+        sb.AppendLine("| Control | Instances | Own native views | Per instance | Of them hidden | Share | Pages |").AppendLine("|---|---:|---:|---:|---:|---:|---:|");
+        foreach (var c in totals)
+            sb.AppendLine(CultureInfo.InvariantCulture, $"| {c.Control} | {c.Instances} | {c.OwnNative} | {(double)c.OwnNative / c.Instances:0.0} | {c.OwnHidden} | {100.0 * c.OwnNative / Math.Max(1, all):0.0}% | {c.Pages} |");
+        var hiddenTop = ControlTotals(rows).OrderByDescending(c => c.OwnHidden).Take(12).Where(c => c.OwnHidden > 0).ToList();
+        if (hiddenTop.Count > 0)
+        {
+            sb.AppendLine().AppendLine("Most hidden native views (built but not shown; candidates for creating on demand):").AppendLine();
+            foreach (var c in hiddenTop)
+                sb.AppendLine(CultureInfo.InvariantCulture, $"- {c.Control}: {c.OwnHidden} hidden of {c.OwnNative} ({(double)c.OwnHidden / c.Instances:0.0} per instance)");
+        }
     }
 
     static void Table(StringBuilder sb, string title, IEnumerable<WalkRow> ordered, Func<WalkRow, string> value)
@@ -244,16 +306,85 @@ public static class WalkRunner
             sb.AppendLine(CultureInfo.InvariantCulture, $"| {r.Title}{(r.Note is null ? "" : $" ({r.Note})")} | {r.Category} | {r.Pass} | {r.AtSeconds:0.0} s | {value(r)} |");
     }
 
+    /// <summary>
+    /// Asks dotMemory for snapshots through its service messages: tools/profile-gallery.sh starts dotmemory with
+    /// <c>--service-input</c> on the requests file and <c>--service-output</c> into app.log, where dotMemory confirms each one.
+    /// </summary>
+    /// <remarks>
+    /// Not JetBrains.Profiler.Api: under <c>dotmemory start --use-api</c> the profiler disconnects from the Mac Catalyst app
+    /// about a second after start-up and takes no snapshot (as dotTrace's Sampling mode does), while the same session
+    /// controlled by messages works.
+    /// </remarks>
+    sealed class DotMemoryControl(string requests, string log)
+    {
+        public bool Connected { get; private set; }
+        public int Requested { get; private set; }
+        public int Saved { get; private set; }
+
+        public static DotMemoryControl? FromEnvironment() =>
+            Environment.GetEnvironmentVariable("CARBON_WALK_DOTMEMORY_REQUESTS") is { Length: > 0 } requests &&
+            Environment.GetEnvironmentVariable("CARBON_WALK_DOTMEMORY_LOG") is { Length: > 0 } log
+                ? new DotMemoryControl(requests, log)
+                : null;
+
+        public async Task<bool> WaitConnectedAsync() => Connected = await WaitForAsync("connected", 0, TimeSpan.FromSeconds(30));
+
+        public void CollectAllocations() => Send("collect-allocations-on");
+
+        /// <summary>Requests a snapshot and waits for dotMemory to confirm it, so taking it is not charged to the next page.</summary>
+        public async Task SnapshotAsync(string name)
+        {
+            var before = Count("snapshot-saved");
+            Requested++;
+            Send("get-snapshot", $"{{\"name\": \"{name}\"}}");
+            if (await WaitForAsync("snapshot-saved", before, TimeSpan.FromMinutes(3))) Saved++;
+        }
+
+        async Task<bool> WaitForAsync(string message, int seen, TimeSpan timeout)
+        {
+            var clock = Stopwatch.StartNew();
+            while (Count(message) <= seen)
+            {
+                if (clock.Elapsed > timeout) return false;
+                await Task.Delay(250);
+            }
+            return true;
+        }
+
+        // A message is '##dotMemory' and a JSON array, on a line of its own.
+        void Send(string message, string? properties = null) =>
+            File.AppendAllText(requests, $"##dotMemory[\"{message}\"{(properties is null ? "" : ", " + properties)}]\n");
+
+        int Count(string message)
+        {
+            try
+            {
+                using var stream = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                var text = new StreamReader(stream).ReadToEnd();
+                var needle = $"##dotMemory[\"{message}\"";
+                var n = 0;
+                for (var i = text.IndexOf(needle, StringComparison.Ordinal); i >= 0; i = text.IndexOf(needle, i + needle.Length, StringComparison.Ordinal)) n++;
+                return n;
+            }
+            catch (IOException)
+            {
+                return 0;
+            }
+        }
+    }
+
     sealed record WalkOptions(string Dir, string? Category, string[]? Pages, int Passes, bool Scroll, int SettleMs);
 
     sealed record WalkRow(
         int Pass, int Index, string Category, string Title, string Route, double AtSeconds,
         double NavigateMs, double LoadedMs, double QuietMs, double MaxStallMs, double StalledMs, double ScrollStallMs,
-        double AllocMB, int Gen0, int Gen1, int Gen2, int Exceptions, double HeapMB, double WorkingSetMB, string? Note, string? Error)
+        double AllocMB, int Gen0, int Gen1, int Gen2, int Exceptions, double HeapMB, double WorkingSetMB, string? Note, string? Error,
+        TreeCensus Tree, WorkSummary Work)
     {
         public static string ToCsv(IEnumerable<WalkRow> rows)
         {
-            var sb = new StringBuilder("pass,index,category,title,route,at_s,navigate_ms,loaded_ms,quiet_ms,max_stall_ms,stalled_ms,scroll_stall_ms,alloc_mb,gen0,gen1,gen2,exceptions,heap_mb,working_set_mb,note,error\n");
+            var sb = new StringBuilder("pass,index,category,title,route,at_s,navigate_ms,loaded_ms,quiet_ms,max_stall_ms,stalled_ms,scroll_stall_ms,alloc_mb,gen0,gen1,gen2,exceptions,heap_mb,working_set_mb,note,error," +
+                "elements,native_views,hidden_native_views,top_types,draws,draw_ms,visuals,visuals_ms,measures,arranges,rebuilds,rebuild_ms,busiest,most_measured\n");
             foreach (var r in rows)
             {
                 sb.AppendLine(string.Join(',',
@@ -263,14 +394,157 @@ public static class WalkRunner
                     r.Gen0.ToString(CultureInfo.InvariantCulture), r.Gen1.ToString(CultureInfo.InvariantCulture), r.Gen2.ToString(CultureInfo.InvariantCulture),
                     r.Exceptions.ToString(CultureInfo.InvariantCulture),
                     r.HeapMB.ToString("0.0", CultureInfo.InvariantCulture), r.WorkingSetMB.ToString("0.0", CultureInfo.InvariantCulture),
-                    Quote(r.Note), Quote(r.Error)));
+                    Quote(r.Note), Quote(r.Error),
+                    I(r.Tree.Elements), I(r.Tree.NativeViews), I(r.Tree.HiddenNative), Quote(r.Tree.TopTypes),
+                    I(r.Work.Draws), F(r.Work.DrawMs), I(r.Work.Visuals), F(r.Work.VisualsMs), I(r.Work.Measures), I(r.Work.Arranges),
+                    I(r.Work.Rebuilds), F(r.Work.RebuildMs), Quote(r.Work.Busiest), Quote(r.Work.MostMeasured)));
             }
             return sb.ToString();
         }
 
         static string F(double ms) => ms.ToString("0", CultureInfo.InvariantCulture);
 
+        static string I(long n) => n.ToString(CultureInfo.InvariantCulture);
+
         static string Quote(string? s) => s is null ? "" : "\"" + s.Replace("\"", "\"\"", StringComparison.Ordinal) + "\"";
+    }
+
+    /// <summary>The shown page's visual tree once it has settled: every element, those with a native view, and the commonest types.</summary>
+    /// <remarks>
+    /// <see cref="Controls"/> holds, per Carbon control type on the page, its instances and the native views they build
+    /// themselves: their subtree's native views minus those of nested Carbon controls (and of a content view's content).
+    /// </remarks>
+    sealed record TreeCensus(int Elements, int NativeViews, int HiddenNative, string TopTypes, IReadOnlyDictionary<string, (int Instances, int OwnNative, int OwnHidden)> Controls)
+    {
+        public static readonly TreeCensus Empty = new(0, 0, 0, "", new Dictionary<string, (int, int, int)>());
+
+        public static TreeCensus Of(Page page)
+        {
+            var elements = 0;
+            var native = 0;
+            var types = new Dictionary<string, int>(StringComparer.Ordinal);
+            var hiddenNative = 0;
+            var controls = new Dictionary<string, (int Instances, int OwnNative, int OwnHidden)>(StringComparer.Ordinal);
+
+            // Returns the native views (all, and those hidden by IsVisible here or above) of e's subtree that belong to no
+            // nested Carbon control. A hidden view still has its native view: these are the ones lazy creation would save.
+            (int All, int Hidden) Visit(IVisualTreeElement e, bool hiddenAbove)
+            {
+                elements++;
+                var hidden = hiddenAbove || e is VisualElement { IsVisible: false };
+                var isNative = e is IElement { Handler.PlatformView: not null };
+                var mine = isNative ? 1 : 0;
+                var mineHidden = isNative && hidden ? 1 : 0;
+                native += mine;
+                hiddenNative += mineHidden;
+                var type = e.GetType();
+                types[type.Name] = types.GetValueOrDefault(type.Name) + 1;
+                foreach (var child in e.GetVisualChildren())
+                {
+                    var below = Visit(child, hidden);
+                    if (!IsCarbon(child))
+                    {
+                        mine += below.All;
+                        mineHidden += below.Hidden;
+                    }
+                }
+                if (IsCarbon(e))
+                {
+                    var c = controls.GetValueOrDefault(type.Name);
+                    controls[type.Name] = (c.Instances + 1, c.OwnNative + mine, c.OwnHidden + mineHidden);
+                }
+                return (mine, mineHidden);
+            }
+
+            // A Carbon control's own native views; not the gallery's or MAUI's, and not a page-level Carbon container
+            // whose content is the app's (its subtree still counts, through the controls inside it).
+            static bool IsCarbon(IVisualTreeElement e) =>
+                e.GetType().Namespace?.StartsWith("Maui.Carbon", StringComparison.Ordinal) == true &&
+                e.GetType().Namespace?.StartsWith("Maui.Carbon.Gallery", StringComparison.Ordinal) != true;
+
+            Visit(page, false);
+            var top = string.Join(", ", types.OrderByDescending(t => t.Value).Take(4).Select(t => $"{t.Key} {t.Value}"));
+            return new TreeCensus(elements, native, hiddenNative, top, controls);
+        }
+    }
+
+    /// <summary>Totals of the Maui.Carbon meter (<see cref="CdsMetrics"/>) for one visit.</summary>
+    sealed record WorkSummary(
+        long Draws, double DrawMs, long Visuals, double VisualsMs, long Measures, long Arranges, long Rebuilds, double RebuildMs,
+        string Busiest, string MostMeasured)
+    {
+        public static readonly WorkSummary Empty = new(0, 0, 0, 0, 0, 0, 0, 0, "", "");
+
+        /// <summary>Draws, visuals and rebuilds: work that is not counted again in an ancestor.</summary>
+        public double ExclusiveMs => DrawMs + VisualsMs + RebuildMs;
+    }
+
+    /// <summary>
+    /// Listens to the Maui.Carbon meter and totals it per visit and component, as Relay's ExerciseMetrics does per step. The
+    /// gallery sets MetricsSupport so optimized builds keep the instruments; with no listener they cost one flag check.
+    /// </summary>
+    sealed class VisitMetrics : IDisposable
+    {
+        sealed class Total
+        {
+            public long Count;
+            public double Seconds;
+        }
+
+        readonly MeterListener _listener = new();
+        volatile ConcurrentDictionary<(string Instrument, string Component), Total>? _visit;
+
+        public VisitMetrics()
+        {
+            _listener.InstrumentPublished = (instrument, listener) =>
+            {
+                if (instrument.Meter.Name == CdsMetrics.MeterName) listener.EnableMeasurementEvents(instrument);
+            };
+            _listener.SetMeasurementEventCallback<double>(OnMeasurement);
+            _listener.Start();
+        }
+
+        /// <summary>Whether any Carbon measurement arrived (none means the instruments were trimmed away).</summary>
+        public bool Seen { get; private set; }
+
+        void OnMeasurement(Instrument instrument, double seconds, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
+        {
+            Seen = true;
+            if (_visit is not { } visit) return;
+            var component = "";
+            foreach (var tag in tags)
+                if (tag.Key == CdsMetrics.ComponentTag) component = tag.Value as string ?? "";
+            var total = visit.GetOrAdd((instrument.Name, component), static _ => new Total());
+            lock (total)
+            {
+                total.Count++;
+                total.Seconds += seconds;
+            }
+        }
+
+        public void Begin() => _visit = new();
+
+        public WorkSummary End()
+        {
+            var visit = _visit;
+            _visit = null;
+            if (visit is null || visit.IsEmpty) return WorkSummary.Empty;
+            var rows = visit.Select(kv => (kv.Key.Instrument, kv.Key.Component, kv.Value.Count, Ms: kv.Value.Seconds * 1000)).ToList();
+            long Count(string instrument) => rows.Where(r => r.Instrument == instrument).Sum(r => r.Count);
+            double Ms(string instrument) => rows.Where(r => r.Instrument == instrument).Sum(r => r.Ms);
+            string[] exclusive = [CdsMetrics.DrawDuration, CdsMetrics.VisualsDuration, CdsMetrics.RebuildDuration];
+            var busiest = string.Join(", ", rows.Where(r => exclusive.Contains(r.Instrument) && r.Component.Length > 0)
+                .GroupBy(r => r.Component).Select(g => (g.Key, Ms: g.Sum(r => r.Ms), Count: g.Sum(r => r.Count)))
+                .OrderByDescending(g => g.Ms).Take(3).Select(g => $"{g.Key} {g.Ms:0} ms/{g.Count}"));
+            var measured = string.Join(", ", rows.Where(r => r.Instrument == CdsMetrics.MeasureDuration && r.Component.Length > 0)
+                .OrderByDescending(r => r.Count).Take(3).Select(r => $"{r.Component} {r.Count}"));
+            return new WorkSummary(
+                Count(CdsMetrics.DrawDuration), Ms(CdsMetrics.DrawDuration), Count(CdsMetrics.VisualsDuration), Ms(CdsMetrics.VisualsDuration),
+                Count(CdsMetrics.MeasureDuration), Count(CdsMetrics.ArrangeDuration), Count(CdsMetrics.RebuildDuration), Ms(CdsMetrics.RebuildDuration),
+                busiest, measured);
+        }
+
+        public void Dispose() => _listener.Dispose();
     }
 
     /// <summary>

@@ -9,6 +9,9 @@
     <IsPackable>false</IsPackable>
     <MauiXamlInflator>SourceGen</MauiXamlInflator>
     <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+    <!-- Optimized Apple and Android builds trim System.Diagnostics.Metrics away (MetricsSupport=false); the walk
+         (tools/profile-gallery.sh) reads the Maui.Carbon meter per page. Unobserved, each instrument costs a flag check. -->
+    <MetricsSupport>true</MetricsSupport>
 
     <ApplicationTitle>Carbon Gallery</ApplicationTitle>
     <ApplicationId>ai.waring.mauicarbon.gallery</ApplicationId>
@@ -36,8 +39,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
-    <!-- Walk mode (tools/profile-gallery.sh) scopes dotTrace/dotMemory data to the walk; a no-op when not profiled. -->
-    <PackageReference Include="JetBrains.Profiler.Api" />
   </ItemGroup>
 
   <ItemGroup>
