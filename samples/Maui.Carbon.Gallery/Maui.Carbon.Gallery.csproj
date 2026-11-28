@@ -36,6 +36,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+    <!-- Walk mode (tools/profile-gallery.sh) scopes dotTrace/dotMemory data to the walk; a no-op when not profiled. -->
+    <PackageReference Include="JetBrains.Profiler.Api" />
   </ItemGroup>
 
   <ItemGroup>

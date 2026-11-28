@@ -19,6 +19,7 @@ public partial class App : Application
             window.Height = 900;
         }
         SnapshotRunner.AttachIfRequested(window);
+        WalkRunner.AttachIfRequested(window);
         return window;
     }
 }

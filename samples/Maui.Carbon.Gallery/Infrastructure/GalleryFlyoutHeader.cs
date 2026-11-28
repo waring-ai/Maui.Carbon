@@ -37,5 +37,7 @@ public sealed class GalleryFlyoutHeader : ContentView
         motion.Clicked += (_, _) => CdsMotion.ReducedMotionOverride = motion.IsSelected == true ? true : null;
         stack.Add(motion);
         Content = stack;
+        // Shell keeps the header fixed and scrolls the page list underneath it, so the header needs its own fill.
+        this.SetDynamicResource(BackgroundColorProperty, CdsColorKeys.Layer01);
     }
 }
